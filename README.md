@@ -7,18 +7,17 @@
 
 [![github release version](https://img.shields.io/github/v/release/brundindev/ImpulseData.svg?include_prereleases)](https://github.com/brundindev/ImpulseData/releases/latest) [![npm version](https://img.shields.io/npm/v/@toast-ui/editor.svg)](https://www.npmjs.com/package/@toast-ui/editor) [![license](https://img.shields.io/github/license/brundindev/tui.editor.svg)](https://github.com/nhn/tui.editor/blob/master/LICENSE) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-ff69b4.svg)](https://github.com/nhn/tui.editor/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) [![code with hearth by ImpulseData](https://img.shields.io/badge/%3C%2F%3E%20with%20%E2%99%A5%20by-ImpulseData-ff1414.svg)](https://github.com/nhn)
 
-<img src="https://user-images.githubusercontent.com/37766175/121809054-446bac80-cc96-11eb-9139-08c6d9ad2d88.png" />
-
+[Imagen del proyecto próximamente...]
 
 ## 🚩 Table of Contents
 
-- [Packages](#-packages)
-- [Features](#-features)
-- [Examples](#-examples)
-- [Browser Support](#-browser-support)
-- [Pull Request Steps](#-pull-request-steps)
+- [Descripción](#-📌01.-descripcion-del-proyecto)
+- [Información Relevante](#-features)
+- [Finalidad](#-examples)
+- [Requisitos Técnicos  ](#-browser-support)
+- [Despliegue y evaluación](#-pull-request-steps)
 - [Contributing](#-contributing)
-- [Used By](#-used-by)
+- [Used](#-used)
 - [Licencia](#-licencia)
 
 ## 📌 01. Descripción del Proyecto  
@@ -101,10 +100,15 @@ Este documento define los requisitos técnicos para la automatización y estruct
 
 📌 **Las optimizaciones que demuestren creatividad, eficiencia e impacto positivo** en la usabilidad y escalabilidad del proyecto será nuestro objetivo.  
 
-## 🚀 Used By
+## 🚀 Used
 
-* [NHN Dooray! - Collaboration Service (Project, Messenger, Mail, Calendar, Drive, Wiki, Contacts)](https://dooray.com)
-* [UNOTES - Visual Studio Code Extension](https://marketplace.visualstudio.com/items?itemName=ryanmcalister.Unotes)
+* [Java](https://java.com)
+* [Bootstrap](https://bootstrap.com)
+* [Vue.js](https://vuejs.org)
+* [Firebase Authentication](https://firebase.com)
+* [Firebase Database](https://firebase.com)
+* [Javascript](https://developer.mozilla.org/es/docs/Web/JavaScript)
+* [Springboot](https://spring.io/projects/spring-boot)
 
 
 ## 📜 Licencia
