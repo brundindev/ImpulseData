@@ -113,4 +113,4 @@ Este documento define los requisitos técnicos para la automatización y estruct
 
 ## 📜 Licencia
 
-This software is licensed under the [MIT](https://github.com/brundindev/ImpulseData/LICENSE) © [ImpulseData](https://github.com/brundindev/ImpulseData).
+This software is licensed under the [MIT](https://github.com/brundindev/ImpulseData/blob/main/LICENSE) © [ImpulseData](https://github.com/brundindev/ImpulseData).
