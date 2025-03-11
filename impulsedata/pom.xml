@@ -48,7 +48,11 @@
             </dependency>
 
             <!-- 🗄️ Base de Datos -->
-
+             <dependency>
+                <groupId>com.google.firebase</groupId>
+                <artifactId>firebase-admin</artifactId>
+                <version>9.2.0</version>
+            </dependency>
 
             <!-- 📊 Spring Data JPA -->
             <dependency>
