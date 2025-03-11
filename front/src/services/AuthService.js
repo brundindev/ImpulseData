@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Configuración de base URL para todas las peticiones
-const API_URL = '/api/auth';
+// Si el backend está en un puerto distinto al frontend, hay que especificar la URL completa
+const API_URL = 'http://localhost:8080/api/auth';
 
 // Añadir interceptor para incluir el token en cada solicitud
 axios.interceptors.request.use(
@@ -21,9 +22,11 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   response => response,
   error => {
+    console.error('Error en respuesta HTTP:', error);
     if (error.response && error.response.status === 401) {
       // Si recibimos un 401 Unauthorized, cerramos la sesión
       localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -37,27 +40,18 @@ class AuthService {
    * @returns {Promise} - Token JWT
    */
   login(credentials) {
-    // Simulación de respuesta para desarrollo - En producción, usar el comentado
-    // return axios.post(`${API_URL}/login`, credentials)
-    //   .then(response => {
-    //     if (response.data) {
-    //       localStorage.setItem('authToken', response.data);
-    //     }
-    //     return response.data;
-    //   });
-    
-    // SIMULACIÓN - QUITAR EN PRODUCCIÓN
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockToken = 'mock-jwt-token-' + Math.random().toString(36).substring(2);
-        localStorage.setItem('authToken', mockToken);
-        localStorage.setItem('userData', JSON.stringify({
-          nombre: credentials.email.split('@')[0],
-          email: credentials.email
-        }));
-        resolve(mockToken);
-      }, 500);
-    });
+    return axios.post(`${API_URL}/login`, credentials)
+      .then(response => {
+        if (response.data) {
+          // Guardar el token
+          localStorage.setItem('authToken', response.data);
+          
+          // Decodificar el token JWT para extraer información del usuario
+          // En una implementación real, es mejor hacer una petición separada para obtener los datos completos
+          this.storeUserDataFromToken(response.data);
+        }
+        return response.data;
+      });
   }
 
   /**
@@ -66,27 +60,17 @@ class AuthService {
    * @returns {Promise} - Token JWT
    */
   register(user) {
-    // Simulación de respuesta para desarrollo - En producción, usar el comentado
-    // return axios.post(`${API_URL}/registro`, user)
-    //   .then(response => {
-    //     if (response.data) {
-    //       localStorage.setItem('authToken', response.data);
-    //     }
-    //     return response.data;
-    //   });
-    
-    // SIMULACIÓN - QUITAR EN PRODUCCIÓN
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockToken = 'mock-jwt-token-' + Math.random().toString(36).substring(2);
-        localStorage.setItem('authToken', mockToken);
-        localStorage.setItem('userData', JSON.stringify({
-          nombre: user.nombre,
-          email: user.email
-        }));
-        resolve(mockToken);
-      }, 500);
-    });
+    return axios.post(`${API_URL}/registro`, user)
+      .then(response => {
+        if (response.data) {
+          // Guardar el token
+          localStorage.setItem('authToken', response.data);
+          
+          // Decodificar el token JWT para extraer información del usuario
+          this.storeUserDataFromToken(response.data);
+        }
+        return response.data;
+      });
   }
 
   /**
@@ -120,6 +104,35 @@ class AuthService {
   getCurrentUser() {
     const userData = localStorage.getItem('userData');
     return userData ? JSON.parse(userData) : null;
+  }
+
+  /**
+   * Almacena los datos del usuario extrayéndolos del token JWT
+   * @param {string} token - Token JWT
+   */
+  storeUserDataFromToken(token) {
+    try {
+      // Extraer la parte del payload del JWT (segunda parte)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+
+      // Convertir el payload a un objeto JSON
+      const payload = JSON.parse(jsonPayload);
+      
+      // Almacenar la información del usuario
+      localStorage.setItem('userData', JSON.stringify({
+        nombre: payload.nombre || payload.sub.split('@')[0], // Usar el nombre si está disponible, o extraerlo del email
+        email: payload.sub
+      }));
+    } catch (error) {
+      console.error('Error al decodificar el token JWT', error);
+    }
   }
 }
 

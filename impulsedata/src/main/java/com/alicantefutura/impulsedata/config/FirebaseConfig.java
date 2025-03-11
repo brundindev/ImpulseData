@@ -20,9 +20,6 @@ public class FirebaseConfig {
     @Value("${firebase.credentials.path}")
     private String firebaseCredentialsPath;
 
-    @Value("${firebase.database.url}")
-    private String firebaseDatabaseUrl;
-
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
         if (FirebaseApp.getApps().isEmpty()) {
@@ -35,7 +32,6 @@ public class FirebaseConfig {
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .setDatabaseUrl(firebaseDatabaseUrl)
                     .build();
 
             return FirebaseApp.initializeApp(options);
