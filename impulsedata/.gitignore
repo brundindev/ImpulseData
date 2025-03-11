@@ -3,7 +3,12 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-/src/main/resources/firebase-service-account.json
+
+### Archivos de credenciales ###
+src/main/resources/*.json
+*.properties
+application*.yml
+application*.yaml
 
 ### STS ###
 .apt_generated
@@ -32,3 +37,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+*.log
+
+### Environment Variables ###
+.env
