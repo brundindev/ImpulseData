@@ -173,21 +173,29 @@ const enviarVerificacion = async () => {
   align-items: center;
   min-height: 100vh;
   background-color: #f5f5f5;
+  background-image: linear-gradient(to bottom right, #f5f5f5, #e0e9f5);
 }
 
 .register-card {
   width: 100%;
-  max-width: 450px;
-  padding: 2rem;
+  max-width: 500px;
+  padding: 2.5rem;
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 70, 152, 0.1);
+  transition: transform 0.3s ease;
+  margin: 2rem 1rem;
+}
+
+.register-card:hover {
+  transform: translateY(-5px);
 }
 
 h1 {
   margin-bottom: 1.5rem;
-  color: #2c3e50;
+  color: #004698;
   text-align: center;
+  font-weight: 700;
 }
 
 .form-group {
@@ -197,42 +205,60 @@ h1 {
 label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #2c3e50;
+  color: #333;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .form-control {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
+  padding: 0.85rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus {
+  border-color: #749BD0;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(116, 155, 208, 0.25);
 }
 
 .form-control.is-invalid {
   border-color: #dc3545;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(0.375em + 0.1875rem) center;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
 }
 
 .btn {
   display: inline-block;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
 
 .btn-primary {
-  background-color: #4CAF50;
+  background-color: #004698;
   color: white;
 }
 
 .btn-primary:hover:not([disabled]) {
-  background-color: #3e8e41;
+  background-color: #003a7e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 70, 152, 0.2);
+}
+
+.btn-primary:active:not([disabled]) {
+  transform: translateY(0);
 }
 
 .btn-primary[disabled] {
@@ -241,17 +267,33 @@ label {
 }
 
 .alert {
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+}
+
+.alert-danger {
   color: #721c24;
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
 }
 
 .login-link {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   text-align: center;
+  font-size: 0.95rem;
+}
+
+.login-link a {
+  color: #004698;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.login-link a:hover {
+  color: #749BD0;
+  text-decoration: underline;
 }
 
 .actions {
@@ -259,19 +301,25 @@ label {
 }
 
 .alert-success {
-  color: #155724;
-  background-color: #d4edda;
-  border-color: #c3e6cb;
+  color: #0f5132;
+  background-color: #d1e7dd;
+  border-color: #badbcc;
 }
 
 .btn-link {
-  color: #4CAF50;
+  color: #004698;
   text-decoration: underline;
   background-color: transparent;
   border: none;
-  padding: 0;
+  padding: 0.75rem 1.5rem;
   margin-top: 1rem;
   display: inline-block;
+  width: auto;
+  transition: color 0.3s;
+}
+
+.btn-link:hover {
+  color: #749BD0;
 }
 
 .mt-3 {
@@ -284,20 +332,44 @@ label {
 }
 
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: #749BD0;
   color: white;
   width: auto;
   margin: 0 auto;
   display: block;
+  padding: 0.6rem 1.2rem;
 }
 
 .btn-secondary:hover:not([disabled]) {
-  background-color: #5a6268;
+  background-color: #5a87c5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(116, 155, 208, 0.3);
+}
+
+.btn-secondary:active:not([disabled]) {
+  transform: translateY(0);
 }
 
 .verification-message {
   margin-top: 1rem;
-  color: #155724;
+  color: #0f5132;
   font-weight: 500;
 }
-</style> 
+
+/* Responsive adjustments */
+@media screen and (max-width: 576px) {
+  .register-card {
+    max-width: 90%;
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  .btn {
+    padding: 0.75rem;
+  }
+}
+</style>

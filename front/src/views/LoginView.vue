@@ -106,21 +106,28 @@ const reenviarVerificacion = async () => {
   align-items: center;
   min-height: 100vh;
   background-color: #f5f5f5;
+  background-image: linear-gradient(to bottom right, #f5f5f5, #e0e9f5);
 }
 
 .login-card {
   width: 100%;
   max-width: 450px;
-  padding: 2rem;
+  padding: 2.5rem;
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 70, 152, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.login-card:hover {
+  transform: translateY(-5px);
 }
 
 h1 {
   margin-bottom: 1.5rem;
-  color: #2c3e50;
+  color: #004698;
   text-align: center;
+  font-weight: 700;
 }
 
 .form-group {
@@ -130,38 +137,52 @@ h1 {
 label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #2c3e50;
+  color: #333;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .form-control {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
+  padding: 0.85rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus {
+  border-color: #749BD0;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(116, 155, 208, 0.25);
 }
 
 .btn {
   display: inline-block;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
 
 .btn-primary {
-  background-color: #4CAF50;
+  background-color: #004698;
   color: white;
 }
 
 .btn-primary:hover:not([disabled]) {
-  background-color: #3e8e41;
+  background-color: #003a7e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 70, 152, 0.2);
+}
+
+.btn-primary:active:not([disabled]) {
+  transform: translateY(0);
 }
 
 .btn-primary[disabled] {
@@ -170,17 +191,30 @@ label {
 }
 
 .alert {
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
   color: #721c24;
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
 }
 
 .register-link {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   text-align: center;
+  font-size: 0.95rem;
+}
+
+.register-link a {
+  color: #004698;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.register-link a:hover {
+  color: #749BD0;
+  text-decoration: underline;
 }
 
 .actions {
@@ -188,21 +222,38 @@ label {
 }
 
 .email-verification {
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   font-size: 0.9rem;
 }
 
 .btn-link {
-  color: #007bff;
+  color: #004698;
   text-decoration: underline;
   background-color: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
   font-size: 0.9rem;
+  transition: color 0.3s;
 }
 
 .btn-link:hover {
-  color: #0056b3;
+  color: #749BD0;
 }
-</style> 
+
+/* Responsive adjustments */
+@media screen and (max-width: 576px) {
+  .login-card {
+    max-width: 90%;
+    padding: 1.5rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  .btn {
+    padding: 0.75rem;
+  }
+}
+</style>
