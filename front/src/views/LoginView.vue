@@ -2,7 +2,15 @@
   <div class="login-container">
     <div class="login-card">
       <h1>Iniciar Sesión</h1>
-      <div v-if="error" class="alert alert-danger">{{ error }}</div>
+      <div v-if="error" class="alert alert-danger">
+        <p>{{ error }}</p>
+        <div v-if="emailNoVerificado" class="email-verification">
+          <p>Por favor, verifica tu dirección de correo electrónico antes de iniciar sesión.</p>
+          <button @click="reenviarVerificacion" class="btn-link">
+            Reenviar correo de verificación
+          </button>
+        </div>
+      </div>
       <form @submit.prevent="login">
         <div class="form-group">
           <label for="email">Email</label>
@@ -40,15 +48,19 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from '../services/AuthService';
+import axios from 'axios';
 
 const router = useRouter();
 const email = ref('');
 const password = ref('');
 const error = ref('');
 const loading = ref(false);
+const emailNoVerificado = computed(() => {
+  return error.value && error.value.toLowerCase().includes('verifica') && email.value;
+});
 
 const login = async () => {
   try {
@@ -65,6 +77,22 @@ const login = async () => {
   } catch (err) {
     console.error('Error de inicio de sesión:', err);
     error.value = err.response?.data || 'Error al iniciar sesión';
+  } finally {
+    loading.value = false;
+  }
+};
+
+const reenviarVerificacion = async () => {
+  try {
+    loading.value = true;
+    
+    // Llamar al backend para reenviar el correo de verificación
+    await axios.post(`http://localhost:8080/api/auth/reenviar-verificacion?email=${encodeURIComponent(email.value)}`);
+    
+    error.value = 'Se ha enviado un nuevo correo de verificación a tu dirección de email.';
+  } catch (err) {
+    console.error('Error al reenviar verificación:', err);
+    error.value = err.response?.data || 'No se pudo reenviar el correo de verificación.';
   } finally {
     loading.value = false;
   }
@@ -157,5 +185,24 @@ label {
 
 .actions {
   margin-top: 1.5rem;
+}
+
+.email-verification {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.btn-link {
+  color: #007bff;
+  text-decoration: underline;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-link:hover {
+  color: #0056b3;
 }
 </style> 

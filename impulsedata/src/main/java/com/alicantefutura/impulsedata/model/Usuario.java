@@ -13,14 +13,18 @@ public class Usuario implements UserDetails {
     private String password;
     private String nombre;
     private String rol;
+    private boolean emailVerificado;
 
-    public Usuario() {}
+    public Usuario() {
+        this.emailVerificado = false; // Por defecto, el email no está verificado
+    }
 
     public Usuario(String email, String password, String nombre, String rol) {
         this.email = email;
         this.password = password;
         this.nombre = nombre;
         this.rol = rol;
+        this.emailVerificado = false; // Por defecto, el email no está verificado
     }
 
     // Getters y setters
@@ -59,6 +63,14 @@ public class Usuario implements UserDetails {
     public void setRol(String rol) {
         this.rol = rol;
     }
+    
+    public boolean isEmailVerificado() {
+        return emailVerificado;
+    }
+    
+    public void setEmailVerificado(boolean emailVerificado) {
+        this.emailVerificado = emailVerificado;
+    }
 
     // Implementación de UserDetails
     @Override
@@ -93,6 +105,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        // Solo se habilita la cuenta si el email está verificado
+        return emailVerificado;
     }
 } 
