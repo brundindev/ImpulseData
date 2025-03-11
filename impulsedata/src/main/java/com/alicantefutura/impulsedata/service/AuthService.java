@@ -1,7 +1,10 @@
 package com.alicantefutura.impulsedata.service;
 
+import java.util.concurrent.ExecutionException;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -79,8 +82,10 @@ public class AuthService {
 
             // Generar token
             return jwtService.generateToken(usuario);
-        } catch (Exception e) {
-            throw new RuntimeException("Error en la autenticación: " + e.getMessage());
+        } catch (AuthenticationException e) {
+            throw new RuntimeException("Credenciales inválidas", e);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Error al acceder a Firestore", e);
         }
     }
 } 
