@@ -81,6 +81,11 @@
       </div>
     </div>
     
+    <!-- Botón flotante para crear nueva empresa -->
+    <button class="btn-floating" @click="showFormModal = true; modoEdicion = false;">
+      <span class="icon">+</span>
+    </button>
+    
     <!-- Modal para crear/editar empresa -->
     <div class="modal-overlay" v-if="showFormModal" @click.self="showFormModal = false">
       <div class="modal-container">
@@ -1480,5 +1485,36 @@ const descargarPDF = () => {
   .forms-list {
     grid-template-columns: 1fr;
   }
+}
+
+/* Estilos para el botón flotante */
+.btn-floating {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 70, 152, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 99;
+}
+
+.btn-floating .icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.btn-floating:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 70, 152, 0.4);
+  background-color: var(--primary-hover);
 }
 </style>
