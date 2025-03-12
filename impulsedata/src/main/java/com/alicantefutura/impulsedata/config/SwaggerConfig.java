@@ -20,7 +20,7 @@ public class SwaggerConfig {
                 .name("Authorization")
                 .in(SecurityScheme.In.HEADER);
 
-        // Definir los requisitos de seguridad globales (todos los endpoints requieren autenticación)
+        // Aquí es donde estamos diciendo que los endpoints requerirán autenticación
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
 
         return new OpenAPI()
