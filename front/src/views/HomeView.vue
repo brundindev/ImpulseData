@@ -107,7 +107,7 @@
                 id="ciudadEmpresa" 
                 v-model="nuevaEmpresa.ciudad" 
                 required 
-                placeholder="Ej: Madrid"
+                placeholder="Ej: Alicante"
               >
             </div>
             
@@ -131,7 +131,7 @@
                     :id="'nombreDep'+index" 
                     v-model="departamento.nombre" 
                     required 
-                    placeholder="Ej: Recursos Humanos"
+                    placeholder="Ej: Empleo y Formación"
                   >
                 </div>
               </div>
