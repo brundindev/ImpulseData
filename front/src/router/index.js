@@ -12,7 +12,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { requiresAuth: false } //para que no pida iniciar sesion (por mientras)
+      meta: { requiresAuth: true }
     },
     {
       path: '/login',

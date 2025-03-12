@@ -58,7 +58,7 @@
         
         <div v-else class="forms-list">
           <div v-for="empresa in empresas" :key="empresa.id" class="form-card">
-            <div class="form-info">
+            <div class="form-info" @click="verEmpresa(empresa)">
               <h3>{{ empresa.nombre }}</h3>
               <p>{{ empresa.descripcion }}</p>
               <div class="form-meta">
@@ -455,28 +455,21 @@ onMounted(() => {
 // Cargar datos desde Firestore
 const cargarDatos = async () => {
   try {
-    console.log("====== INICIO cargarDatos en HomeView ======");
     cargando.value = true;
     error.value = null;
     
-    console.log("Obteniendo usuario actual:", auth.currentUser?.uid);
     
     // Obtener contadores
-    console.log("Solicitando contadores...");
     const contadores = await FirestoreService.obtenerContadores();
-    console.log("Contadores recibidos:", contadores);
     empresasCount.value = contadores.empresasCount;
     departamentosCount.value = contadores.departamentosCount;
     centrosCount.value = contadores.centrosCount;
     formacionesCount.value = contadores.formacionesCount;
     
     // Obtener empresas
-    console.log("Solicitando lista de empresas...");
     const empresasRecibidas = await FirestoreService.obtenerEmpresas();
-    console.log(`Recibidas ${empresasRecibidas.length} empresas:`, empresasRecibidas);
     empresas.value = empresasRecibidas;
     
-    console.log("====== FIN cargarDatos en HomeView ======");
   } catch (err) {
     console.error("Error al cargar datos en HomeView:", err);
     error.value = 'No se pudieron cargar los datos. Por favor, inténtalo de nuevo.';
@@ -584,13 +577,11 @@ const actualizarEmpresaExistente = async () => {
       fechaActualizacion: new Date().toISOString()
     };
     
-    console.log(`Actualizando empresa ${empresaEditandoId.value} con datos:`, empresaData);
     
     // Actualizar empresa principal
     await FirestoreService.actualizarEmpresa(empresaEditandoId.value, empresaData);
     
     // Actualizar subcolecciones
-    console.log("Actualizando subcolecciones...");
     await FirestoreService.actualizarSubcolecciones(
       empresaEditandoId.value,
       nuevaEmpresa.departamentos,
@@ -713,8 +704,23 @@ const eliminarEmpresa = async () => {
   }
 };
 
+// Logout function
 const logout = () => {
+  console.log("Cerrando sesión desde HomeView...");
+  // Llamamos al método logout de AuthService
   AuthService.logout();
+  
+  // Limpiamos cualquier estado de la aplicación
+  usuario.value = null;
+  empresas.value = [];
+  
+  // Eliminamos cualquier otro dato de la sesión 
+  localStorage.clear();
+  
+  // Disparar evento para actualizar la navegación
+  window.dispatchEvent(new CustomEvent('auth-state-changed'));
+  
+  // Forzamos la redirección
   router.push('/login');
 };
 
@@ -1154,6 +1160,16 @@ const descargarPDF = () => {
 .form-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.form-info {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-info:hover {
+  /* Se elimina el cambio de color de fondo */
+  border-radius: 8px 8px 0 0;
 }
 
 .form-info h3 {

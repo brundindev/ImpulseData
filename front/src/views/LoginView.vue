@@ -67,64 +67,46 @@ const emailNoVerificado = computed(() => {
 });
 
 const login = async () => {
+  // Validar formulario
+  if (!email.value || !password.value) {
+    error.value = 'Por favor, completa todos los campos.';
+    return;
+  }
+  
+  loading.value = true;
+  error.value = '';
+  
   try {
-    loading.value = true;
-    error.value = '';
+    // Intentar inicio de sesión
+    await AuthService.login({
+      email: email.value,
+      password: password.value
+    });
     
-    // Primero intentamos iniciar sesión con Firebase
-    try {
-      const user = await FirebaseAuthService.login(email.value, password.value);
-      
-      // Verificar si el email está verificado
-      if (!user.emailVerified) {
-        throw new Error('EMAIL_NOT_VERIFIED');
-      }
-      
-      // Si el login con Firebase es exitoso, autenticamos con el backend
-      await AuthService.login({
-        email: email.value,
-        password: password.value
-      });
-      
-      // Redirigir al usuario a la página principal
-      router.push('/');
-    } catch (firebaseError) {
-      console.error('Error con Firebase:', firebaseError);
-      
-      if (firebaseError.message === 'EMAIL_NOT_VERIFIED') {
-        error.value = 'Tu email no ha sido verificado. Por favor, verifica tu correo antes de iniciar sesión.';
-        return;
-      }
-      
-      // Si falla con Firebase, intentamos solo con el backend
-      await AuthService.login({
-        email: email.value,
-        password: password.value
-      });
-      
-      // Redirigir al usuario a la página principal
-      router.push('/');
-    }
+    // Emitir un evento personalizado para notificar que el estado de autenticación ha cambiado
+    window.dispatchEvent(new CustomEvent('auth-state-changed'));
+    
+    // Redirigir a la página de inicio
+    router.push('/');
   } catch (err) {
     console.error('Error de inicio de sesión:', err);
     
-    if (err.code) {
-      // Errores específicos de Firebase
-      switch (err.code) {
-        case 'auth/user-not-found':
-          error.value = 'No se encontró ningún usuario con este correo electrónico.';
-          break;
-        case 'auth/wrong-password':
-          error.value = 'La contraseña es incorrecta.';
-          break;
-        case 'auth/too-many-requests':
-          error.value = 'Se han realizado demasiados intentos. Por favor, espera unos minutos antes de intentarlo nuevamente.';
-          break;
-        default:
-          error.value = 'Error al iniciar sesión. Por favor, inténtalo de nuevo.';
+    // Manejar diferentes tipos de errores
+    if (err.response) {
+      // El servidor respondió con un estado diferente de 2xx
+      if (err.response.status === 401) {
+        error.value = 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
+      } else if (err.response.data && err.response.data.message) {
+        error.value = err.response.data.message;
+      } else {
+        error.value = 'Error al iniciar sesión. Por favor, inténtalo de nuevo.';
       }
+    } else if (err.request) {
+      // La solicitud se realizó pero no se recibió respuesta
+      error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
     } else {
-      error.value = err.response?.data || 'Error al iniciar sesión';
+      // Ocurrió un error al configurar la solicitud
+      error.value = 'Error al procesar la solicitud. Por favor, inténtalo de nuevo.';
     }
   } finally {
     loading.value = false;

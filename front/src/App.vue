@@ -1,18 +1,51 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import AuthService from './services/AuthService';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
+const router = useRouter();
+const auth = getAuth();
 const usuario = ref(null);
+
+// Función para actualizar el estado del usuario
+const actualizarEstadoUsuario = () => {
+  usuario.value = AuthService.getCurrentUser();
+  console.log("Estado de usuario actualizado:", usuario.value);
+};
 
 onMounted(() => {
   // Verificar si hay un usuario autenticado
-  usuario.value = AuthService.getCurrentUser();
+  actualizarEstadoUsuario();
+  
+  // Escuchar cambios en la autenticación de Firebase
+  onAuthStateChanged(auth, (user) => {
+    console.log("Cambio de autenticación detectado:", user ? "Usuario autenticado" : "No hay usuario");
+    actualizarEstadoUsuario();
+  });
+  
+  // Escuchar el evento personalizado de cambio de estado de autenticación
+  window.addEventListener('auth-state-changed', () => {
+    console.log("Evento auth-state-changed recibido");
+    actualizarEstadoUsuario();
+  });
+});
+
+// Limpiar los oyentes cuando el componente se desmonta
+onUnmounted(() => {
+  window.removeEventListener('auth-state-changed', actualizarEstadoUsuario);
 });
 
 const logout = () => {
+  console.log("Cerrando sesión desde App.vue");
   AuthService.logout();
-  window.location.href = '/login';
+  
+  // Limpiar el estado local
+  usuario.value = null;
+  
+  // Redirigir al login
+  router.push('/login');
 };
 </script>
 

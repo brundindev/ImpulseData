@@ -77,8 +77,20 @@ class AuthService {
    * Cerrar sesión
    */
   logout() {
+    // Eliminar todos los datos de autenticación
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
+    
+    // Limpiar cualquier otra información de sesión que pueda existir
+    localStorage.clear();
+    
+    // Limpiar cookies de sesión si existieran
+    document.cookie.split(";").forEach(function(c) {
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    
+    // También podríamos realizar una llamada al backend para invalidar el token JWT en el servidor
+    // axios.post(`${API_URL}/logout`).catch(err => console.error('Error al cerrar sesión en servidor:', err));
   }
 
   /**

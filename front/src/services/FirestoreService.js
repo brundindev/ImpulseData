@@ -127,17 +127,14 @@ class FirestoreService {
    */
   static async obtenerEmpresas() {
     try {
-      console.log("====== INICIO obtenerEmpresas ======");
       const user = auth.currentUser;
       if (!user) {
         console.error("No hay usuario autenticado en obtenerEmpresas");
         throw new Error("Usuario no autenticado");
       }
-      console.log("Usuario autenticado:", user.uid, user.email);
       
       try {
         // Primero verificamos si podemos obtener algún documento de la colección
-        console.log("Intentando obtener empresas del usuario actual");
         const empresasRef = collection(db, "empresas");
         const q = query(
           empresasRef, 
@@ -145,16 +142,13 @@ class FirestoreService {
           orderBy("fechaCreacionSistema", "desc")
         );
         
-        console.log("Ejecutando consulta filtrada...");
         const querySnapshot = await getDocs(q);
-        console.log(`Resultado de la consulta filtrada: ${querySnapshot.size} empresas encontradas`);
         
         const empresas = [];
         
         // Para cada empresa, obtener también el número de departamentos, centros y formaciones
         for (const empresaDoc of querySnapshot.docs) {
           const data = empresaDoc.data();
-          console.log(`Procesando empresa: ID=${empresaDoc.id}, nombre=${data.nombre}`);
           
           // Contar departamentos
           const depSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/departamentos`));
@@ -168,7 +162,6 @@ class FirestoreService {
           const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/formaciones`));
           const numFormaciones = formacionesSnapshot.size;
           
-          console.log(`Empresa ${data.nombre}: ${numDepartamentos} departamentos, ${numCentros} centros, ${numFormaciones} formaciones`);
           
           empresas.push({
             id: empresaDoc.id,
@@ -180,8 +173,7 @@ class FirestoreService {
           });
         }
         
-        console.log(`Total de empresas procesadas: ${empresas.length}`);
-        console.log("====== FIN obtenerEmpresas ======");
+
         return empresas;
       } catch (error) {
         console.error("Error específico al obtener empresas:", error);
@@ -203,10 +195,8 @@ class FirestoreService {
    */
   static async obtenerContadores() {
     try {
-      console.log("====== INICIO obtenerContadores (Subcolecciones) ======");
       const user = auth.currentUser;
       if (!user) throw new Error("Usuario no autenticado");
-      console.log("Usuario autenticado:", user.uid);
       
       let empresasCount = 0;
       let departamentosCount = 0;
@@ -219,7 +209,6 @@ class FirestoreService {
         const empresasQuery = query(empresasRef, where("creadoPor", "==", user.uid));
         const empresasSnapshot = await getDocs(empresasQuery);
         empresasCount = empresasSnapshot.size;
-        console.log(`Encontradas ${empresasCount} empresas`);
         
         // Para cada empresa, contar sus subcolecciones
         for (const empresaDoc of empresasSnapshot.docs) {
@@ -238,13 +227,11 @@ class FirestoreService {
           formacionesCount += formacionesSnapshot.size;
         }
         
-        console.log(`Total: ${empresasCount} empresas, ${departamentosCount} departamentos, ${centrosCount} centros, ${formacionesCount} formaciones`);
       } catch (error) {
         console.error("Error al contar elementos:", error);
         // No lanzamos error, simplemente dejamos los contadores en 0
       }
       
-      console.log("====== FIN obtenerContadores (Subcolecciones) ======");
       return {
         empresasCount,
         departamentosCount,
@@ -270,7 +257,6 @@ class FirestoreService {
    */
   static async eliminarEmpresa(empresaId) {
     try {
-      console.log(`====== INICIO eliminarEmpresa: ${empresaId} ======`);
       const user = auth.currentUser;
       if (!user) throw new Error("Usuario no autenticado");
       
@@ -325,7 +311,6 @@ class FirestoreService {
    */
   static async actualizarEmpresa(empresaId, empresaData) {
     try {
-      console.log(`====== INICIO actualizarEmpresa: ${empresaId} ======`);
       const user = auth.currentUser;
       if (!user) throw new Error("Usuario no autenticado");
       
@@ -352,7 +337,6 @@ class FirestoreService {
       await updateDoc(empresaRef, datosActualizados);
       console.log(`Empresa ${empresaId} actualizada correctamente`);
       
-      console.log(`====== FIN actualizarEmpresa: ${empresaId} ======`);
       return true;
     } catch (error) {
       console.error("Error al actualizar empresa:", error);
@@ -370,7 +354,6 @@ class FirestoreService {
    */
   static async actualizarSubcolecciones(empresaId, departamentos, centros, formaciones) {
     try {
-      console.log(`====== INICIO actualizarSubcolecciones: ${empresaId} ======`);
       const user = auth.currentUser;
       if (!user) throw new Error("Usuario no autenticado");
       
@@ -477,7 +460,6 @@ class FirestoreService {
         }
       }
       
-      console.log(`====== FIN actualizarSubcolecciones: ${empresaId} ======`);
       return true;
     } catch (error) {
       console.error("Error al actualizar subcolecciones:", error);
