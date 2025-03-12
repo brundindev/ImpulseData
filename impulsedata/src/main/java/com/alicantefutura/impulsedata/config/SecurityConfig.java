@@ -46,13 +46,18 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", // Permitir autenticación pública
-                                "/swagger-ui/**", // Permitir acceso a Swagger UI
-                                "/v3/api-docs/**", // Permitir acceso a la documentación OpenAPI
+                        .requestMatchers(
+                                "/api/auth/registro", // Permitir registro sin autenticación
+                                "/api/auth/login", // Permitir login sin autenticación
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**")
                         .permitAll()
+                        .requestMatchers("/api/auth/**") // Proteger otros endpoints de autenticación
+                        .authenticated()
                         .anyRequest().authenticated())
+
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
                             Map<String, Object> responseMap = new HashMap<>();
