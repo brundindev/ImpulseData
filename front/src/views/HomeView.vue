@@ -73,7 +73,7 @@
             </div>
             <div class="form-actions">
               <button class="btn btn-icon btn-edit" @click="editarEmpresa(empresa)">Editar</button>
-              <button class="btn btn-icon btn-view">Ver</button>
+              <button class="btn btn-icon btn-view" @click="verEmpresa(empresa)">Ver</button>
               <button class="btn btn-icon btn-delete" @click="confirmarEliminar(empresa)">Eliminar</button>
             </div>
           </div>
@@ -283,6 +283,93 @@
         </div>
       </div>
     </div>
+    
+    <!-- Modal para ver detalles de empresa -->
+    <div class="modal-overlay" v-if="showViewModal" @click.self="showViewModal = false">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2>Detalles de empresa</h2>
+          <button class="btn-close" @click="showViewModal = false">×</button>
+        </div>
+        <div class="modal-body">
+          <div v-if="cargando" class="saving-overlay">
+            <div class="loader"></div>
+            <p>Cargando datos...</p>
+          </div>
+          <div class="view-content">
+            <div class="form-group">
+              <label>Nombre de la empresa</label>
+              <div class="view-field">{{ empresaActual.nombre }}</div>
+            </div>
+            
+            <div class="form-group">
+              <label>Fecha de creación</label>
+              <div class="view-field">{{ formatDate(empresaActual.fechaCreacion) }}</div>
+            </div>
+            
+            <div class="form-group">
+              <label>Descripción</label>
+              <div class="view-field description">{{ empresaActual.descripcion || 'Sin descripción' }}</div>
+            </div>
+            
+            <div class="form-group">
+              <label>Ciudad</label>
+              <div class="view-field">{{ empresaActual.ciudad || 'No especificada' }}</div>
+            </div>
+            
+            <h3 class="section-title">Departamentos</h3>
+            <div class="view-list">
+              <div v-if="!empresaActual.departamentos || empresaActual.departamentos.length === 0" class="empty-message">
+                No hay departamentos registrados.
+              </div>
+              <div v-for="(departamento, index) in empresaActual.departamentos" :key="index" class="view-item">
+                <div class="view-item-title">Departamento {{ index + 1 }}</div>
+                <div class="view-item-content">{{ departamento.nombre }}</div>
+              </div>
+            </div>
+            
+            <h3 class="section-title">Centros</h3>
+            <div class="view-list">
+              <div v-if="!empresaActual.centros || empresaActual.centros.length === 0" class="empty-message">
+                No hay centros registrados.
+              </div>
+              <div v-for="(centro, index) in empresaActual.centros" :key="index" class="view-item">
+                <div class="view-item-title">Centro {{ index + 1 }}</div>
+                <div class="view-item-content">
+                  <div><strong>Nombre:</strong> {{ centro.nombre }}</div>
+                  <div><strong>Dirección:</strong> {{ centro.direccion || 'No especificada' }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <h3 class="section-title">Formaciones</h3>
+            <div class="view-list">
+              <div v-if="!empresaActual.formaciones || empresaActual.formaciones.length === 0" class="empty-message">
+                No hay formaciones registradas.
+              </div>
+              <div v-for="(formacion, index) in empresaActual.formaciones" :key="index" class="view-item">
+                <div class="view-item-title">Formación {{ index + 1 }}</div>
+                <div class="view-item-content">
+                  <div><strong>Nombre:</strong> {{ formacion.nombre }}</div>
+                  <div><strong>Tipo:</strong> {{ formatTipoFormacion(formacion.tipo) }}</div>
+                  <div><strong>Duración:</strong> {{ formacion.duracion }} horas</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-actions modal-actions">
+              <button type="button" class="btn btn-cancel" @click="showViewModal = false">Cancelar</button>
+              <button type="button" class="btn btn-secondary" @click="editarEmpresaDesdeVista()">
+                Editar
+              </button>
+              <button type="button" class="btn btn-primary" @click="descargarPDF()">
+                <span class="icon">↓</span> Descargar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -292,11 +379,14 @@ import { useRouter } from 'vue-router';
 import AuthService from '../services/AuthService';
 import FirestoreService from '../services/FirestoreService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const router = useRouter();
 const auth = getAuth();
 const usuario = ref(null);
 const showFormModal = ref(false);
+const showViewModal = ref(false);
 const empresasCount = ref(0);
 const departamentosCount = ref(0);
 const centrosCount = ref(0);
@@ -309,6 +399,16 @@ const empresaAEliminar = ref(null);
 const eliminando = ref(false);
 const modoEdicion = ref(false);
 const empresaEditandoId = ref(null);
+const empresaActual = reactive({
+  id: '',
+  nombre: '',
+  fechaCreacion: '',
+  descripcion: '',
+  ciudad: '',
+  departamentos: [],
+  centros: [],
+  formaciones: []
+});
 
 // Lista de empresas
 const empresas = ref([]);
@@ -617,6 +717,217 @@ const logout = () => {
   AuthService.logout();
   router.push('/login');
 };
+
+// Ver detalles de empresa
+const verEmpresa = async (empresa) => {
+  console.log("Viendo detalles de empresa:", empresa);
+  
+  // Limpiar datos previos
+  Object.keys(empresaActual).forEach(key => {
+    if (Array.isArray(empresaActual[key])) {
+      empresaActual[key] = [];
+    } else {
+      empresaActual[key] = '';
+    }
+  });
+  
+  // Cargar datos básicos de la empresa
+  empresaActual.id = empresa.id;
+  empresaActual.nombre = empresa.nombre || '';
+  empresaActual.fechaCreacion = empresa.fechaCreacion || '';
+  empresaActual.descripcion = empresa.descripcion || '';
+  empresaActual.ciudad = empresa.ciudad || '';
+  
+  // Mostrar el modal y cargar subcolecciones
+  showViewModal.value = true;
+  cargando.value = true;
+  
+  try {
+    // Cargar subcolecciones
+    await cargarSubcoleccionesParaVista(empresa.id);
+  } catch (error) {
+    console.error("Error al cargar datos para vista:", error);
+  } finally {
+    cargando.value = false;
+  }
+};
+
+// Cargar subcolecciones para la vista de detalles
+const cargarSubcoleccionesParaVista = async (empresaId) => {
+  try {
+    // Cargar departamentos
+    const departamentos = await FirestoreService.obtenerDepartamentos(empresaId);
+    empresaActual.departamentos = departamentos || [];
+    
+    // Cargar centros
+    const centros = await FirestoreService.obtenerCentros(empresaId);
+    empresaActual.centros = centros || [];
+    
+    // Cargar formaciones
+    const formaciones = await FirestoreService.obtenerFormaciones(empresaId);
+    empresaActual.formaciones = formaciones || [];
+  } catch (error) {
+    console.error("Error al cargar subcolecciones para vista:", error);
+    throw error;
+  }
+};
+
+// Editar desde la vista de detalles
+const editarEmpresaDesdeVista = () => {
+  // Cerrar modal de vista
+  showViewModal.value = false;
+  
+  // Buscar la empresa completa en la lista
+  const empresa = empresas.value.find(e => e.id === empresaActual.id);
+  if (empresa) {
+    // Abrir modal de edición con los datos de la empresa
+    editarEmpresa(empresa);
+  } else {
+    console.error("No se encontró la empresa para editar");
+  }
+};
+
+// Formatear tipo de formación
+const formatTipoFormacion = (tipo) => {
+  const tipos = {
+    presencial: 'Presencial',
+    virtual: 'Virtual',
+    hibrida: 'Híbrida'
+  };
+  return tipos[tipo] || tipo;
+};
+
+// Descargar PDF con detalles de la empresa
+const descargarPDF = () => {
+  try {
+    // Crear nuevo documento PDF
+    const doc = new jsPDF();
+    const title = `Detalles de Empresa: ${empresaActual.nombre}`;
+    
+    // Configurar estilo del documento
+    doc.setFontSize(18);
+    doc.setTextColor(40, 40, 40);
+    doc.text(title, 14, 22);
+    
+    // Información básica
+    doc.setFontSize(12);
+    doc.text('Información de la empresa', 14, 35);
+    
+    const infoEmpresa = [
+      ['Nombre', empresaActual.nombre],
+      ['Fecha de creación', formatDate(empresaActual.fechaCreacion)],
+      ['Ciudad', empresaActual.ciudad || 'No especificada'],
+      ['Descripción', empresaActual.descripcion || 'Sin descripción']
+    ];
+    
+    // Usar autoTable como plugin
+    autoTable(doc, {
+      startY: 40,
+      head: [['Campo', 'Valor']],
+      body: infoEmpresa,
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      styles: { fontSize: 10 },
+      columnStyles: { 0: { cellWidth: 40 } }
+    });
+    
+    // Departamentos
+    let currentY = doc.lastAutoTable.finalY + 15;
+    doc.setFontSize(12);
+    doc.text('Departamentos', 14, currentY);
+    
+    if (empresaActual.departamentos.length > 0) {
+      const departamentosData = empresaActual.departamentos.map((dep, index) => [
+        `Departamento ${index + 1}`, dep.nombre
+      ]);
+      
+      autoTable(doc, {
+        startY: currentY + 5,
+        head: [['#', 'Nombre']],
+        body: departamentosData,
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        styles: { fontSize: 10 }
+      });
+      
+      currentY = doc.lastAutoTable.finalY + 15;
+    } else {
+      doc.setFontSize(10);
+      doc.text('No hay departamentos registrados.', 14, currentY + 10);
+      currentY += 20;
+    }
+    
+    // Centros
+    doc.setFontSize(12);
+    doc.text('Centros', 14, currentY);
+    
+    if (empresaActual.centros.length > 0) {
+      const centrosData = empresaActual.centros.map((centro, index) => [
+        `Centro ${index + 1}`, centro.nombre, centro.direccion || 'No especificada'
+      ]);
+      
+      autoTable(doc, {
+        startY: currentY + 5,
+        head: [['#', 'Nombre', 'Dirección']],
+        body: centrosData,
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        styles: { fontSize: 10 }
+      });
+      
+      currentY = doc.lastAutoTable.finalY + 15;
+    } else {
+      doc.setFontSize(10);
+      doc.text('No hay centros registrados.', 14, currentY + 10);
+      currentY += 20;
+    }
+    
+    // Formaciones
+    // Verificar si necesitamos una nueva página
+    if (currentY > 240) {
+      doc.addPage();
+      currentY = 20;
+    }
+    
+    doc.setFontSize(12);
+    doc.text('Formaciones', 14, currentY);
+    
+    if (empresaActual.formaciones.length > 0) {
+      const formacionesData = empresaActual.formaciones.map((formacion, index) => [
+        `Formación ${index + 1}`, formacion.nombre, formatTipoFormacion(formacion.tipo), `${formacion.duracion} horas`
+      ]);
+      
+      autoTable(doc, {
+        startY: currentY + 5,
+        head: [['#', 'Nombre', 'Tipo', 'Duración']],
+        body: formacionesData,
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        styles: { fontSize: 10 }
+      });
+    } else {
+      doc.setFontSize(10);
+      doc.text('No hay formaciones registradas.', 14, currentY + 10);
+    }
+    
+    // Añadir fecha y hora de generación
+    const now = new Date();
+    const fechaGeneracion = `Documento generado el ${now.toLocaleDateString('es-ES')} a las ${now.toLocaleTimeString('es-ES')}`;
+    const pageCount = doc.internal.getNumberOfPages();
+    
+    // Añadir pie de página en todas las páginas
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(fechaGeneracion, 14, doc.internal.pageSize.height - 10);
+      doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+    }
+    
+    // Guardar el PDF
+    doc.save(`empresa_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+    
+  } catch (error) {
+    console.error("Error al generar PDF:", error);
+    alert("Error al generar el PDF. Por favor, inténtelo de nuevo.");
+  }
+};
 </script>
 
 <style scoped>
@@ -635,6 +946,60 @@ const logout = () => {
   font-size: 0.8rem;
   font-weight: 500;
 }
+
+/* Estilos para la vista de detalles */
+.view-field {
+  padding: 0.75rem;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  min-height: 2.5rem;
+  line-height: 1.5;
+}
+
+.view-field.description {
+  min-height: 5rem;
+  white-space: pre-line;
+}
+
+.view-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.view-item {
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.view-item-title {
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.view-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.empty-message {
+  color: var(--light-text);
+  font-style: italic;
+  padding: 1rem;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px dashed var(--border-color);
+}
+
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
