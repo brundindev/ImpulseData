@@ -731,8 +731,6 @@ const logout = () => {
 
 // Ver detalles de empresa
 const verEmpresa = async (empresa) => {
-  console.log("Viendo detalles de empresa:", empresa);
-  
   // Limpiar datos previos
   Object.keys(empresaActual).forEach(key => {
     if (Array.isArray(empresaActual[key])) {
@@ -1160,6 +1158,9 @@ const descargarPDF = () => {
   box-shadow: var(--shadow);
   padding: 1.5rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .form-card:hover {
@@ -1170,6 +1171,7 @@ const descargarPDF = () => {
 .form-info {
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-grow: 1;
 }
 
 .form-info:hover {
@@ -1200,6 +1202,9 @@ const descargarPDF = () => {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
 }
 
 .btn-icon {
@@ -1211,7 +1216,19 @@ const descargarPDF = () => {
   transition: all 0.2s ease;
   background-color: #f5f5f5;
   color: var(--text-color);
-  border: none;
+  border: 1px solid transparent;
+}
+
+.btn-edit {
+  border-color: var(--secondary-color);
+}
+
+.btn-view {
+  border-color: var(--primary-color);
+}
+
+.btn-delete {
+  border-color: var(--danger-color);
 }
 
 .btn-edit:hover {
