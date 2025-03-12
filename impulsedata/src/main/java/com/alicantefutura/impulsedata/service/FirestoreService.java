@@ -44,4 +44,36 @@ public class FirestoreService {
             return null;
         }
     }
+
+    /**
+     * Guarda un usuario en Firestore con el ID especificado
+     * 
+     * @param usuario Usuario a guardar
+     * @param uid ID con el que guardar el usuario
+     * @return true si se guardó correctamente, false si no
+     */
+    public boolean guardarUsuario(Usuario usuario, String uid) {
+        try {
+            logger.info("Intentando guardar usuario en Firestore. Email: {}, UID: {}", usuario.getEmail(), uid);
+            
+            // Asegurarnos que el ID está establecido correctamente
+            usuario.setId(uid);
+            
+            // Guardar el usuario en Firestore
+            firestore.collection("usuarios").document(uid).set(usuario).get();
+            
+            // Verificar que se haya guardado correctamente
+            var doc = firestore.collection("usuarios").document(uid).get().get();
+            if (doc.exists()) {
+                logger.info("Usuario guardado correctamente en Firestore. UID: {}", uid);
+                return true;
+            } else {
+                logger.error("Error: El documento no existe después de intentar guardarlo. UID: {}", uid);
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Error al guardar usuario en Firestore: {}", e.getMessage(), e);
+            return false;
+        }
+    }
 } 

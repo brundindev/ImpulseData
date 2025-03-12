@@ -6,9 +6,12 @@
         <p>{{ error }}</p>
         <div v-if="emailNoVerificado" class="email-verification">
           <p>Por favor, verifica tu dirección de correo electrónico antes de iniciar sesión.</p>
-          <button @click="reenviarVerificacion" class="btn-link">
-            Reenviar correo de verificación
-          </button>
+          <div class="verification-section">
+            <p class="small-text">¿No has recibido el correo de verificación?</p>
+            <button @click="reenviarVerificacion" class="btn btn-secondary" :disabled="loading">
+              {{ loading ? 'Enviando...' : 'Reenviar correo de verificación' }}
+            </button>
+          </div>
         </div>
       </div>
       <form @submit.prevent="login">
@@ -52,6 +55,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from '../services/AuthService';
 import axios from 'axios';
+import FirebaseAuthService from '../services/FirebaseAuthService';
 
 const router = useRouter();
 const email = ref('');
@@ -67,16 +71,61 @@ const login = async () => {
     loading.value = true;
     error.value = '';
     
-    await AuthService.login({
-      email: email.value,
-      password: password.value
-    });
-    
-    // Redirigir al usuario a la página principal
-    router.push('/');
+    // Primero intentamos iniciar sesión con Firebase
+    try {
+      const user = await FirebaseAuthService.login(email.value, password.value);
+      
+      // Verificar si el email está verificado
+      if (!user.emailVerified) {
+        throw new Error('EMAIL_NOT_VERIFIED');
+      }
+      
+      // Si el login con Firebase es exitoso, autenticamos con el backend
+      await AuthService.login({
+        email: email.value,
+        password: password.value
+      });
+      
+      // Redirigir al usuario a la página principal
+      router.push('/');
+    } catch (firebaseError) {
+      console.error('Error con Firebase:', firebaseError);
+      
+      if (firebaseError.message === 'EMAIL_NOT_VERIFIED') {
+        error.value = 'Tu email no ha sido verificado. Por favor, verifica tu correo antes de iniciar sesión.';
+        return;
+      }
+      
+      // Si falla con Firebase, intentamos solo con el backend
+      await AuthService.login({
+        email: email.value,
+        password: password.value
+      });
+      
+      // Redirigir al usuario a la página principal
+      router.push('/');
+    }
   } catch (err) {
     console.error('Error de inicio de sesión:', err);
-    error.value = err.response?.data || 'Error al iniciar sesión';
+    
+    if (err.code) {
+      // Errores específicos de Firebase
+      switch (err.code) {
+        case 'auth/user-not-found':
+          error.value = 'No se encontró ningún usuario con este correo electrónico.';
+          break;
+        case 'auth/wrong-password':
+          error.value = 'La contraseña es incorrecta.';
+          break;
+        case 'auth/too-many-requests':
+          error.value = 'Se han realizado demasiados intentos. Por favor, espera unos minutos antes de intentarlo nuevamente.';
+          break;
+        default:
+          error.value = 'Error al iniciar sesión. Por favor, inténtalo de nuevo.';
+      }
+    } else {
+      error.value = err.response?.data || 'Error al iniciar sesión';
+    }
   } finally {
     loading.value = false;
   }
@@ -86,13 +135,46 @@ const reenviarVerificacion = async () => {
   try {
     loading.value = true;
     
-    // Llamar al backend para reenviar el correo de verificación
-    await axios.post(`http://localhost:8080/api/auth/reenviar-verificacion?email=${encodeURIComponent(email.value)}`);
-    
-    error.value = 'Se ha enviado un nuevo correo de verificación a tu dirección de email.';
+    // Primero intentamos con Firebase
+    try {
+      // Iniciar sesión con Firebase para obtener el usuario
+      const user = await FirebaseAuthService.login(email.value, password.value);
+      
+      // Enviar email de verificación
+      await FirebaseAuthService.sendVerificationEmail(user);
+      
+      error.value = 'Se ha enviado un nuevo correo de verificación a tu dirección de email.';
+    } catch (firebaseError) {
+      console.error('Error con Firebase:', firebaseError);
+      
+      // Si falla Firebase, llamamos al backend
+      const response = await axios.get(
+        `http://localhost:8080/api/auth/enviar-verificacion?email=${encodeURIComponent(email.value)}`
+      );
+      
+      error.value = 'Se ha enviado un nuevo correo de verificación a tu dirección de email.';
+    }
   } catch (err) {
     console.error('Error al reenviar verificación:', err);
-    error.value = err.response?.data || 'No se pudo reenviar el correo de verificación.';
+    
+    if (err.code) {
+      // Errores específicos de Firebase
+      switch (err.code) {
+        case 'auth/user-not-found':
+          error.value = 'No se encontró ningún usuario con este correo electrónico.';
+          break;
+        case 'auth/wrong-password':
+          error.value = 'La contraseña es incorrecta.';
+          break;
+        case 'auth/too-many-requests':
+          error.value = 'Se han realizado demasiados intentos. Por favor, espera unos minutos antes de intentarlo nuevamente.';
+          break;
+        default:
+          error.value = 'No se pudo reenviar el correo de verificación.';
+      }
+    } else {
+      error.value = err.response?.data || 'No se pudo reenviar el correo de verificación.';
+    }
   } finally {
     loading.value = false;
   }
@@ -224,21 +306,54 @@ label {
 .email-verification {
   margin-top: 0.75rem;
   font-size: 0.9rem;
+  background-color: rgba(255, 255, 255, 0.6);
+  padding: 10px;
+  border-radius: 8px;
+  border-left: 3px solid #749BD0;
+  margin-bottom: 5px;
 }
 
-.btn-link {
-  color: #004698;
-  text-decoration: underline;
-  background-color: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+.verification-section {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  text-align: center;
+  border: 1px dashed #f5c6cb;
+}
+
+.small-text {
   font-size: 0.9rem;
-  transition: color 0.3s;
+  margin-bottom: 0.5rem;
 }
 
-.btn-link:hover {
-  color: #749BD0;
+.btn-secondary {
+  background-color: #749BD0;
+  color: white;
+  width: auto;
+  margin: 0 auto;
+  display: block;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover:not([disabled]) {
+  background-color: #5a87c5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(116, 155, 208, 0.3);
+}
+
+.btn-secondary:active:not([disabled]) {
+  transform: translateY(0);
+}
+
+.btn-secondary[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* Responsive adjustments */

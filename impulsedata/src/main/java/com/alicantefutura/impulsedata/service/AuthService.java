@@ -12,7 +12,10 @@ import com.alicantefutura.impulsedata.dto.LoginRequest;
 import com.alicantefutura.impulsedata.dto.RegistroRequest;
 import com.alicantefutura.impulsedata.model.Usuario;
 import com.google.cloud.firestore.Firestore;
+import com.google.firebase.auth.ActionCodeSettings;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.UserRecord;
 
 @Service
 public class AuthService {
@@ -37,63 +40,136 @@ public class AuthService {
 
     public String registro(RegistroRequest request) {
         try {
-            // Verificar si el usuario ya existe
+            System.out.println("Iniciando registro para: " + request.getEmail());
+            String email = request.getEmail();
+            
+            // 1. Comprobar si el email existe en Firebase Auth
+            boolean existeEnAuth = false;
+            try {
+                // Intentamos obtener el usuario por email para ver si ya existe en Firebase Auth
+                firebaseAuthService.getUserByEmail(email);
+                existeEnAuth = true;
+                System.out.println("El usuario ya existe en Firebase Auth: " + email);
+            } catch (FirebaseAuthException e) {
+                // Si el error es USER_NOT_FOUND, significa que el usuario no existe (lo que queremos)
+                if (e.getMessage().contains("USER_NOT_FOUND")) {
+                    existeEnAuth = false;
+                } else {
+                    // Para otros errores, propagamos la excepción
+                    throw e;
+                }
+            }
+            
+            // 2. Verificar si el usuario ya existe en Firestore
             var usuarioExistente = firestore.collection("usuarios")
-                    .whereEqualTo("email", request.getEmail())
+                    .whereEqualTo("email", email)
                     .get()
                     .get()
                     .getDocuments();
 
-            if (!usuarioExistente.isEmpty()) {
-                throw new RuntimeException("El email ya está registrado");
-            }
+            boolean existeEnFirestore = !usuarioExistente.isEmpty();
+            System.out.println("Usuario existente en Firestore: " + existeEnFirestore);
 
+            // 3. Manejar diferentes casos de existencia
             String uid = null;
-            try {
-                // Crear usuario en Firebase Authentication
-                uid = firebaseAuthService.crearUsuario(
-                    request.getEmail(), 
-                    request.getPassword(), 
-                    request.getNombre()
-                );
-            } catch (FirebaseAuthException e) {
-                // Comprobar si es el error de demasiados intentos
-                if (e.getMessage().contains("TOO_MANY_ATTEMPTS_TRY_LATER")) {
-                    throw new RuntimeException("Se han realizado demasiados intentos de registro. Por favor, inténtalo de nuevo más tarde (15-30 minutos).");
+            
+            if (existeEnAuth && existeEnFirestore) {
+                throw new RuntimeException("El email ya está registrado");
+            } else if (existeEnAuth && !existeEnFirestore) {
+                // Usuario existe en Auth pero no en Firestore
+                // Obtenemos el UID del usuario existente
+                try {
+                    uid = firebaseAuthService.getUserByEmail(email).getUid();
+                    System.out.println("Recuperando UID de usuario existente en Auth: " + uid);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error al recuperar usuario existente: " + e.getMessage());
                 }
-                throw e;
+            } else if (!existeEnAuth) {
+                // El usuario no existe en Auth, procedemos a crearlo
+                try {
+                    uid = firebaseAuthService.crearUsuario(
+                        request.getEmail(), 
+                        request.getPassword(), 
+                        request.getNombre()
+                    );
+                    System.out.println("Usuario creado en Firebase Auth con UID: " + uid);
+                } catch (FirebaseAuthException e) {
+                    // Comprobar si es el error de demasiados intentos
+                    if (e.getMessage().contains("TOO_MANY_ATTEMPTS_TRY_LATER")) {
+                        throw new RuntimeException("Se han realizado demasiados intentos de registro. Por favor, inténtalo de nuevo más tarde (15-30 minutos).");
+                    } else if (e.getMessage().contains("EMAIL_EXISTS")) {
+                        // Si por alguna razón llegamos aquí, intentamos recuperar el UID
+                        try {
+                            uid = firebaseAuthService.getUserByEmail(email).getUid();
+                            System.out.println("Recuperando UID después de error EMAIL_EXISTS: " + uid);
+                        } catch (Exception innerEx) {
+                            System.err.println("Error al recuperar usuario después de EMAIL_EXISTS: " + innerEx.getMessage());
+                            throw new RuntimeException("Este email ya está registrado. Si es tuyo, intenta iniciar sesión.");
+                        }
+                    } else {
+                        throw e;
+                    }
+                }
             }
 
-            // Crear nuevo usuario en Firestore
-            var usuario = new Usuario(
-                    request.getEmail(),
-                    passwordEncoder.encode(request.getPassword()),
-                    request.getNombre(),
-                    "USER");
-                    
-            usuario.setEmailVerificado(false); // Por defecto, el email no está verificado
-
-            // Guardar en Firestore
-            var docRef = firestore.collection("usuarios").document(uid); // Usamos el UID de Firebase Auth
-            usuario.setId(docRef.getId());
-            docRef.set(usuario).get();
-
-            // Intenta enviar correo de verificación, pero no falla si no puede
-            try {
-                firebaseAuthService.enviarEmailVerificacion(uid);
-            } catch (FirebaseAuthException e) {
-                // Solo registramos el error pero no interrumpimos el proceso
-                if (e.getMessage().contains("TOO_MANY_ATTEMPTS_TRY_LATER")) {
-                    System.err.println("Demasiados intentos de envío de verificación. El usuario deberá solicitar un nuevo correo más tarde.");
-                } else {
-                    System.err.println("No se pudo enviar el correo de verificación: " + e.getMessage());
-                }
-                // El registro sigue siendo exitoso, el usuario puede solicitar el reenvío después
+            if (uid == null) {
+                throw new RuntimeException("No se pudo obtener un UID válido para el usuario");
             }
 
-            // Generar token (aunque el usuario no podrá acceder hasta verificar su email)
-            return jwtService.generateToken(usuario);
+            try {
+                // Crear nuevo usuario en Firestore
+                var usuario = new Usuario(
+                        request.getEmail(),
+                        passwordEncoder.encode(request.getPassword()),
+                        request.getNombre(),
+                        "USER");
+                        
+                usuario.setEmailVerificado(false); // Por defecto, el email no está verificado
+                
+                // Guardar en Firestore usando el nuevo método
+                boolean guardadoExitoso = firestoreService.guardarUsuario(usuario, uid);
+                
+                if (!guardadoExitoso) {
+                    throw new RuntimeException("No se pudo guardar el usuario en la base de datos");
+                }
+                
+                // Intenta enviar correo de verificación, pero no falla si no puede
+                try {
+                    System.out.println("Enviando email de verificación...");
+                    firebaseAuthService.enviarEmailVerificacion(uid);
+                    System.out.println("Email de verificación enviado correctamente");
+                } catch (FirebaseAuthException e) {
+                    // Solo registramos el error pero no interrumpimos el proceso
+                    if (e.getMessage().contains("TOO_MANY_ATTEMPTS_TRY_LATER")) {
+                        System.err.println("Demasiados intentos de envío de verificación. El usuario deberá solicitar un nuevo correo más tarde.");
+                    } else {
+                        System.err.println("No se pudo enviar el correo de verificación: " + e.getMessage());
+                    }
+                    // El registro sigue siendo exitoso, el usuario puede solicitar el reenvío después
+                }
+    
+                // Generar token (aunque el usuario no podrá acceder hasta verificar su email)
+                return jwtService.generateToken(usuario);
+            } catch (Exception e) {
+                System.err.println("Error al guardar el usuario en Firestore: " + e.getMessage());
+                e.printStackTrace();
+                
+                // Si falla la creación en Firestore pero acabamos de crear el usuario en Auth,
+                // intentamos eliminar el usuario de Firebase Auth para mantener consistencia
+                try {
+                    if (uid != null && !existeEnAuth) {
+                        System.out.println("Eliminando usuario de Firebase Auth debido a error en Firestore");
+                        FirebaseAuth.getInstance().deleteUser(uid);
+                    }
+                } catch (Exception deleteError) {
+                    System.err.println("No se pudo eliminar el usuario de Firebase Auth: " + deleteError.getMessage());
+                }
+                
+                throw new RuntimeException("Error al crear el usuario en la base de datos: " + e.getMessage());
+            }
         } catch (Exception e) {
+            System.err.println("Error general en el registro: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Error al registrar el usuario: " + e.getMessage());
         }
     }
@@ -104,13 +180,18 @@ public class AuthService {
             boolean emailVerificadoFirebase = firebaseAuthService.isEmailVerificado(request.getEmail());
             
             // Buscar usuario en Firestore primero para evitar múltiples consultas
-            var usuarioDoc = firestore.collection("usuarios")
+            var documentos = firestore.collection("usuarios")
                     .whereEqualTo("email", request.getEmail())
                     .get()
                     .get()
-                    .getDocuments()
-                    .get(0);
-
+                    .getDocuments();
+            
+            // Verificar si se encontró algún usuario
+            if (documentos.isEmpty()) {
+                throw new RuntimeException("Usuario no encontrado");
+            }
+            
+            var usuarioDoc = documentos.get(0);
             var usuario = usuarioDoc.toObject(Usuario.class);
             if (usuario == null) {
                 throw new RuntimeException("Usuario no encontrado");
@@ -194,8 +275,47 @@ public class AuthService {
      * @return Mensaje de confirmación
      */
     public String enviarVerificacion(String email) {
-        // Buscar el UID del usuario por email
+        // 1. Primero comprobar si el usuario existe en Firebase Auth
+        UserRecord userRecord = null;
+        try {
+            userRecord = firebaseAuthService.getUserByEmail(email);
+            System.out.println("Usuario encontrado en Firebase Auth: " + email + " con UID: " + userRecord.getUid());
+        } catch (FirebaseAuthException e) {
+            if (e.getMessage().contains("USER_NOT_FOUND")) {
+                throw new RuntimeException("No se encontró ningún usuario con el email proporcionado: " + email);
+            }
+            throw new RuntimeException("Error al verificar el usuario en Firebase: " + e.getMessage());
+        }
+        
+        // 2. Luego, verificar si existe en Firestore
         String uid = firestoreService.buscarUsuarioPorEmail(email);
+        
+        // 3. Si existe en Auth pero no en Firestore, intentamos recuperar automáticamente
+        if (uid == null && userRecord != null) {
+            System.out.println("Usuario existe en Auth pero no en Firestore. Intentando recuperación automática.");
+            try {
+                // Crear el documento en Firestore usando el UID de Auth
+                var usuario = new Usuario(
+                    email,
+                    "*RECUPERADO*", // Contraseña temporal, requerirá cambio
+                    userRecord.getDisplayName() != null ? userRecord.getDisplayName() : "Usuario",
+                    "USER"
+                );
+                usuario.setEmailVerificado(userRecord.isEmailVerified());
+                
+                boolean guardadoExitoso = firestoreService.guardarUsuario(usuario, userRecord.getUid());
+                if (guardadoExitoso) {
+                    System.out.println("Usuario recuperado exitosamente en Firestore.");
+                    uid = userRecord.getUid();
+                } else {
+                    throw new RuntimeException("No se pudo recuperar la cuenta del usuario. Por favor, contacte al soporte.");
+                }
+            } catch (Exception ex) {
+                System.err.println("Error al recuperar usuario: " + ex.getMessage());
+                throw new RuntimeException("Error al recuperar la cuenta. Por favor, contacte al soporte.");
+            }
+        }
+        
         if (uid == null) {
             throw new RuntimeException("No se encontró ningún usuario con el email proporcionado.");
         }
@@ -238,6 +358,42 @@ public class AuthService {
             System.out.println("Email verificado manualmente para usuario: " + email);
         } catch (Exception e) {
             throw new RuntimeException("Error al forzar la verificación del email: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtiene el enlace de verificación para un usuario sin enviarlo por correo
+     * (solo para desarrollo)
+     * 
+     * @param email Email del usuario
+     * @return El enlace de verificación
+     */
+    public String obtenerEnlaceVerificacion(String email) {
+        // Buscar el UID del usuario por email
+        String uid = firestoreService.buscarUsuarioPorEmail(email);
+        if (uid == null) {
+            throw new RuntimeException("No se encontró ningún usuario con el email proporcionado.");
+        }
+        
+        try {
+            // Configurar las opciones del enlace de correo
+            ActionCodeSettings actionCodeSettings = ActionCodeSettings.builder()
+                    .setUrl("http://localhost:5173/login") // URL a donde redirigir después de verificar
+                    .setHandleCodeInApp(true)              // Manejar el código en la app
+                    .build();
+            
+            // Obtener el correo del usuario
+            String userEmail = FirebaseAuth.getInstance().getUser(uid).getEmail();
+            
+            // Generar el enlace de verificación
+            String link = FirebaseAuth.getInstance().generateEmailVerificationLink(
+                    userEmail, 
+                    actionCodeSettings
+            );
+            
+            return link;
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException("Error al generar el enlace de verificación: " + e.getMessage());
         }
     }
 } 
