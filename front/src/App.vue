@@ -56,8 +56,8 @@ const logout = () => {
         <span class="app-logo">IMPULSEDATA</span>
       </div>
       <nav class="main-nav">
-        <RouterLink to="/" class="nav-link">Inicio</RouterLink>
         <template v-if="usuario">
+          <RouterLink to="/" class="nav-link">Inicio</RouterLink>
           <button @click="logout" class="nav-button nav-button-logout">Cerrar sesión</button>
         </template>
         <template v-else>
