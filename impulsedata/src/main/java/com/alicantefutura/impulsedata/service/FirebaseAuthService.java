@@ -73,15 +73,11 @@ public class FirebaseAuthService {
             // Obtener el usuario y su email
             String email = getUserEmail(uid);
             
-            // Generar el enlace de verificación
-            String link = FirebaseAuth.getInstance().generateEmailVerificationLink(
-                    email, 
-                    actionCodeSettings
-            );
+
             
             // NOTA: Firebase NO envía el correo automáticamente, solo genera el enlace
             // En producción deberías conectar esto con un servicio de correo electrónico
-            logger.info("Enlace de verificación generado para usuario {}: {}", uid, link);
+            logger.info("Enlace de verificación generado para usuario {}: {}", uid);
         } catch (FirebaseAuthException e) {
             logger.error("Error al generar enlace de verificación: {}", e.getMessage());
             throw e;

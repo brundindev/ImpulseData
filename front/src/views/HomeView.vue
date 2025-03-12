@@ -7,8 +7,8 @@
         <p class="welcome-subtitle" v-if="usuario">Bienvenido, <span class="user-name">{{ usuario.nombre }}</span></p>
       </div>
       <div class="action-buttons">
-        <button class="btn btn-primary btn-create" @click="showFormModal = true">
-          <span class="icon">+</span> Crear nuevo fromulario
+        <button class="btn btn-primary btn-create" @click="showFormModal = true; modoEdicion = false;">
+          <span class="icon">+</span> Crear nueva empresa
         </button>
       </div>
     </div>
@@ -29,10 +29,26 @@
           <h3>Centros</h3>
           <div class="stat-value">{{ centrosCount }}</div>
         </div>
+        <div class="stat-card">
+          <h3>Formaciones</h3>
+          <div class="stat-value">{{ formacionesCount }}</div>
+        </div>
+      </div>
+      
+      <!-- Loader para estados de carga -->
+      <div v-if="cargando" class="loading-container">
+        <div class="loader"></div>
+        <p>Cargando datos...</p>
+      </div>
+      
+      <!-- Mensaje de error si algo falla -->
+      <div v-else-if="error" class="error-container">
+        <p>{{ error }}</p>
+        <button @click="cargarDatos" class="btn btn-primary">Reintentar</button>
       </div>
       
       <!-- Lista de empresas -->
-      <div class="forms-section">
+      <div v-else class="forms-section">
         <h2>Mis empresas</h2>
         
         <div v-if="empresas.length === 0" class="empty-state">
@@ -49,25 +65,34 @@
                 <span>Ciudad: {{ empresa.ciudad }}</span>
                 <span>Creada: {{ formatDate(empresa.fechaCreacion) }}</span>
               </div>
+              <div class="form-stats">
+                <span class="stat-pill">{{ empresa.numDepartamentos }} departamentos</span>
+                <span class="stat-pill">{{ empresa.numCentros }} centros</span>
+                <span class="stat-pill">{{ empresa.numFormaciones }} formaciones</span>
+              </div>
             </div>
             <div class="form-actions">
-              <button class="btn btn-icon btn-edit">Editar</button>
+              <button class="btn btn-icon btn-edit" @click="editarEmpresa(empresa)">Editar</button>
               <button class="btn btn-icon btn-view">Ver</button>
-              <button class="btn btn-icon btn-delete">Eliminar</button>
+              <button class="btn btn-icon btn-delete" @click="confirmarEliminar(empresa)">Eliminar</button>
             </div>
           </div>
         </div>
       </div>
     </div>
     
-    <!-- Modal para crear empresa -->
+    <!-- Modal para crear/editar empresa -->
     <div class="modal-overlay" v-if="showFormModal" @click.self="showFormModal = false">
       <div class="modal-container">
         <div class="modal-header">
-          <h2>Crear nueva empresa</h2>
+          <h2>{{ modoEdicion ? 'Editar empresa' : 'Crear nueva empresa' }}</h2>
           <button class="btn-close" @click="showFormModal = false">×</button>
         </div>
         <div class="modal-body">
+          <div v-if="guardando" class="saving-overlay">
+            <div class="loader"></div>
+            <p>Guardando datos...</p>
+          </div>
           <form @submit.prevent="guardarEmpresa">
             <div class="form-group">
               <label for="nombreEmpresa">Nombre de la empresa</label>
@@ -231,9 +256,30 @@
             
             <div class="form-actions modal-actions">
               <button type="button" class="btn btn-cancel" @click="showFormModal = false">Cancelar</button>
-              <button type="submit" class="btn btn-save">Guardar empresa</button>
+              <button type="submit" class="btn btn-save" :disabled="guardando">Guardar empresa</button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal de confirmación para eliminar -->
+    <div class="modal-overlay" v-if="mostrarConfirmacion" @click.self="mostrarConfirmacion = false">
+      <div class="modal-container modal-small">
+        <div class="modal-header">
+          <h2>Confirmar eliminación</h2>
+          <button class="btn-close" @click="mostrarConfirmacion = false">×</button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas eliminar la empresa <strong>{{ empresaAEliminar?.nombre }}</strong>?</p>
+          <p class="warning-text">Esta acción no se puede deshacer y eliminará todos los departamentos, centros y formaciones asociados.</p>
+          
+          <div class="form-actions modal-actions">
+            <button type="button" class="btn btn-cancel" @click="mostrarConfirmacion = false">Cancelar</button>
+            <button type="button" class="btn btn-danger" @click="eliminarEmpresa" :disabled="eliminando">
+              {{ eliminando ? 'Eliminando...' : 'Eliminar' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -244,15 +290,27 @@
 import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from '../services/AuthService';
+import FirestoreService from '../services/FirestoreService';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const router = useRouter();
+const auth = getAuth();
 const usuario = ref(null);
 const showFormModal = ref(false);
 const empresasCount = ref(0);
 const departamentosCount = ref(0);
 const centrosCount = ref(0);
+const formacionesCount = ref(0);
+const cargando = ref(true);
+const guardando = ref(false);
+const error = ref(null);
+const mostrarConfirmacion = ref(false);
+const empresaAEliminar = ref(null);
+const eliminando = ref(false);
+const modoEdicion = ref(false);
+const empresaEditandoId = ref(null);
 
-// Mock data para empresas
+// Lista de empresas
 const empresas = ref([]);
 
 // Datos para nueva empresa
@@ -282,45 +340,59 @@ const nuevaEmpresa = reactive({
 });
 
 onMounted(() => {
-  // Obtener información del usuario desde localStorage
-  usuario.value = AuthService.getCurrentUser();
-  
-  // Si no hay usuario, redirigir al login (por mientras COMENTADO)
-  //if (!usuario.value) {
-  //  router.push('/login');
-  //} else {
-    // Cargar datos de ejemplo (en una aplicación real, estos datos vendrían del backend)
-    cargarDatosEjemplo();
-  //}
+  // Verificar estado de autenticación
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      usuario.value = AuthService.getCurrentUser();
+      cargarDatos();
+    } else {
+      // Si no hay usuario, redirigir al login
+      router.push('/login');
+    }
+  });
 });
 
-// Función para cargar datos de ejemplo
-const cargarDatosEjemplo = () => {
-  empresasCount.value = 2;
-  departamentosCount.value = 12;
-  centrosCount.value = 5;
-  
-  empresas.value = [
-    /*{
-      id: 1,
-      nombre: 'Tecnología Innovadora S.A.',
-      descripcion: 'Empresa dedicada al desarrollo de soluciones tecnológicas para diversos sectores',
-      fechaCreacion: new Date(2022, 5, 12),
-      ciudad: 'Alicante'
-    },
-    {
-      id: 2,
-      nombre: 'Consultores Asociados',
-      descripcion: 'Servicios de consultoría empresarial y formación profesional',
-      fechaCreacion: new Date(2023, 2, 5),
-      ciudad: 'Alicante'
-    }*/
-  ];
+// Cargar datos desde Firestore
+const cargarDatos = async () => {
+  try {
+    console.log("====== INICIO cargarDatos en HomeView ======");
+    cargando.value = true;
+    error.value = null;
+    
+    console.log("Obteniendo usuario actual:", auth.currentUser?.uid);
+    
+    // Obtener contadores
+    console.log("Solicitando contadores...");
+    const contadores = await FirestoreService.obtenerContadores();
+    console.log("Contadores recibidos:", contadores);
+    empresasCount.value = contadores.empresasCount;
+    departamentosCount.value = contadores.departamentosCount;
+    centrosCount.value = contadores.centrosCount;
+    formacionesCount.value = contadores.formacionesCount;
+    
+    // Obtener empresas
+    console.log("Solicitando lista de empresas...");
+    const empresasRecibidas = await FirestoreService.obtenerEmpresas();
+    console.log(`Recibidas ${empresasRecibidas.length} empresas:`, empresasRecibidas);
+    empresas.value = empresasRecibidas;
+    
+    console.log("====== FIN cargarDatos en HomeView ======");
+  } catch (err) {
+    console.error("Error al cargar datos en HomeView:", err);
+    error.value = 'No se pudieron cargar los datos. Por favor, inténtalo de nuevo.';
+  } finally {
+    cargando.value = false;
+  }
 };
 
 // Formatear fecha
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('es-ES', {
+  if (!date) return 'N/A';
+  
+  // Si date es un string ISO, convertirlo a objeto Date
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  return dateObj.toLocaleDateString('es-ES', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
@@ -363,31 +435,132 @@ const eliminarFormacion = (index) => {
   nuevaEmpresa.formaciones.splice(index, 1);
 };
 
-const guardarEmpresa = () => {
-  // Aquí iría la lógica para guardar la empresa en el backend
-  console.log('Guardando empresa:', nuevaEmpresa);
+// Guardar empresa en Firestore
+const guardarEmpresa = async () => {
+  try {
+    guardando.value = true;
+    
+    if (modoEdicion.value && empresaEditandoId.value) {
+      // Actualizar empresa existente
+      await actualizarEmpresaExistente();
+    } else {
+      // Crear nueva empresa
+      await FirestoreService.guardarEmpresa(nuevaEmpresa);
+    }
+    
+    // Recargar datos
+    await cargarDatos();
+    
+    // Cerrar el modal y limpiar el formulario
+    showFormModal.value = false;
+    resetearFormulario();
+    
+    // Mostrar mensaje de éxito
+    // Aquí se podría añadir un toast o notificación
+    
+  } catch (err) {
+    console.error('Error al guardar empresa:', err);
+    error.value = modoEdicion.value ? 
+      'No se pudo actualizar la empresa. Por favor, inténtalo de nuevo.' : 
+      'No se pudo guardar la empresa. Por favor, inténtalo de nuevo.';
+  } finally {
+    guardando.value = false;
+  }
+};
+
+// Actualizar empresa existente
+const actualizarEmpresaExistente = async () => {
+  try {
+    // Implementar la lógica para actualizar la empresa
+    // Por ahora, una versión simple para actualizar solo los datos principales
+    // En una implementación completa, se debería manejar también las subcolecciones
+    
+    const empresaData = {
+      id: empresaEditandoId.value,
+      nombre: nuevaEmpresa.nombre,
+      descripcion: nuevaEmpresa.descripcion || "",
+      fechaCreacion: nuevaEmpresa.fechaCreacion,
+      ciudad: nuevaEmpresa.ciudad || "",
+      fechaActualizacion: new Date().toISOString()
+    };
+    
+    console.log(`Actualizando empresa ${empresaEditandoId.value} con datos:`, empresaData);
+    
+    // Actualizar empresa principal
+    await FirestoreService.actualizarEmpresa(empresaEditandoId.value, empresaData);
+    
+    // Actualizar subcolecciones
+    console.log("Actualizando subcolecciones...");
+    await FirestoreService.actualizarSubcolecciones(
+      empresaEditandoId.value,
+      nuevaEmpresa.departamentos,
+      nuevaEmpresa.centros,
+      nuevaEmpresa.formaciones
+    );
+    
+    modoEdicion.value = false;
+    empresaEditandoId.value = null;
+    
+    return true;
+  } catch (error) {
+    console.error("Error al actualizar empresa:", error);
+    throw error;
+  }
+};
+
+// Editar empresa
+const editarEmpresa = (empresa) => {
+  console.log("Editando empresa:", empresa);
+  modoEdicion.value = true;
+  empresaEditandoId.value = empresa.id;
   
-  // Crear una copia de la empresa para añadirla a la lista
-  const nuevaEmpresaGuardada = {
-    id: empresas.value.length + 1,
-    nombre: nuevaEmpresa.nombre,
-    descripcion: nuevaEmpresa.descripcion,
-    fechaCreacion: new Date(nuevaEmpresa.fechaCreacion),
-    ciudad: nuevaEmpresa.ciudad
-  };
+  // Cargar datos de la empresa en el formulario
+  nuevaEmpresa.nombre = empresa.nombre || '';
+  nuevaEmpresa.fechaCreacion = empresa.fechaCreacion || '';
+  nuevaEmpresa.descripcion = empresa.descripcion || '';
+  nuevaEmpresa.ciudad = empresa.ciudad || '';
   
-  // Añadir la empresa a la lista
-  empresas.value.push(nuevaEmpresaGuardada);
+  // Cargar departamentos, centros y formaciones
+  cargarSubcolecciones(empresa.id);
   
-  // Actualizar contadores
-  empresasCount.value++;
-  departamentosCount.value += nuevaEmpresa.departamentos.length;
-  centrosCount.value += nuevaEmpresa.centros.length;
-  
-  // Cerrar el modal
-  showFormModal.value = false;
-  
-  // Limpiar el formulario
+  // Mostrar el modal
+  showFormModal.value = true;
+};
+
+// Cargar subcolecciones para edición
+const cargarSubcolecciones = async (empresaId) => {
+  try {
+    // Cargar departamentos
+    const departamentos = await FirestoreService.obtenerDepartamentos(empresaId);
+    if (departamentos && departamentos.length > 0) {
+      nuevaEmpresa.departamentos = departamentos;
+    } else {
+      nuevaEmpresa.departamentos = [{ nombre: '' }];
+    }
+    
+    // Cargar centros
+    const centros = await FirestoreService.obtenerCentros(empresaId);
+    if (centros && centros.length > 0) {
+      nuevaEmpresa.centros = centros;
+    } else {
+      nuevaEmpresa.centros = [{ nombre: '', direccion: '' }];
+    }
+    
+    // Cargar formaciones
+    const formaciones = await FirestoreService.obtenerFormaciones(empresaId);
+    if (formaciones && formaciones.length > 0) {
+      nuevaEmpresa.formaciones = formaciones;
+    } else {
+      nuevaEmpresa.formaciones = [{ nombre: '', tipo: 'presencial', duracion: 8 }];
+    }
+  } catch (error) {
+    console.error("Error al cargar subcolecciones:", error);
+    error.value = "No se pudieron cargar los datos para edición. Por favor, inténtalo de nuevo.";
+  }
+};
+
+// Resetear formulario
+const resetearFormulario = () => {
   nuevaEmpresa.nombre = '';
   nuevaEmpresa.fechaCreacion = '';
   nuevaEmpresa.descripcion = '';
@@ -406,6 +579,40 @@ const guardarEmpresa = () => {
   }];
 };
 
+// Confirmar eliminación
+const confirmarEliminar = (empresa) => {
+  empresaAEliminar.value = empresa;
+  mostrarConfirmacion.value = true;
+};
+
+// Eliminar empresa
+const eliminarEmpresa = async () => {
+  if (!empresaAEliminar.value) return;
+  
+  try {
+    eliminando.value = true;
+    
+    // Eliminar la empresa y todas sus relaciones
+    await FirestoreService.eliminarEmpresa(empresaAEliminar.value.id);
+    
+    // Recargar datos
+    await cargarDatos();
+    
+    // Cerrar modal de confirmación
+    mostrarConfirmacion.value = false;
+    empresaAEliminar.value = null;
+    
+    // Mostrar mensaje de éxito
+    // Aquí se podría añadir un toast o notificación
+    
+  } catch (err) {
+    console.error('Error al eliminar empresa:', err);
+    error.value = 'No se pudo eliminar la empresa. Por favor, inténtalo de nuevo.';
+  } finally {
+    eliminando.value = false;
+  }
+};
+
 const logout = () => {
   AuthService.logout();
   router.push('/login');
@@ -413,6 +620,21 @@ const logout = () => {
 </script>
 
 <style scoped>
+.form-stats {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.stat-pill {
+  background-color: var(--pale-blue);
+  color: var(--primary-color);
+  border-radius: 12px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -478,6 +700,16 @@ const logout = () => {
   transform: translateY(-2px);
 }
 
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.btn-danger:hover:not([disabled]) {
+  background-color: #d32f2f;
+  transform: translateY(-2px);
+}
+
 .btn-create {
   display: flex;
   align-items: center;
@@ -529,10 +761,10 @@ const logout = () => {
 
 .empty-state {
   text-align: center;
-  padding: 4rem 2rem;
-  background-color: var(--card-background);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
+  padding: 3rem;
+  background-color: var(--bg-light);
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .empty-state p {
@@ -635,6 +867,10 @@ const logout = () => {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
+.modal-small {
+  max-width: 500px;
+}
+
 .modal-header {
   padding: 1.5rem;
   border-bottom: 1px solid var(--border-color);
@@ -667,6 +903,21 @@ const logout = () => {
 
 .modal-body {
   padding: 1.5rem;
+  position: relative;
+}
+
+.saving-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
 }
 
 .form-group {
@@ -772,10 +1023,60 @@ const logout = () => {
   color: white;
 }
 
-.btn-save:hover {
+.btn-save:hover:not([disabled]) {
   background-color: #3d9a40;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.loading-container, 
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  margin-top: 2rem;
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 70, 152, 0.2);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.error-container {
+  color: var(--danger-color);
+}
+
+.error-container p {
+  margin-bottom: 1rem;
+}
+
+.warning-text {
+  color: var(--danger-color);
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Responsive styles */
