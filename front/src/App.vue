@@ -29,7 +29,7 @@ const logout = () => {
         </template>
         <template v-else>
           <RouterLink to="/login" class="nav-link">Iniciar Sesión</RouterLink>
-          <RouterLink to="/registro" class="nav-link nav-button">Regístrate</RouterLink>
+          <RouterLink to="/registro" class="nav-button">Regístrate</RouterLink>
         </template>
       </nav>
     </div>
