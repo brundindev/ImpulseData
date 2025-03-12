@@ -301,20 +301,20 @@ const cargarDatosEjemplo = () => {
   centrosCount.value = 5;
   
   empresas.value = [
-    {
+    /*{
       id: 1,
       nombre: 'Tecnología Innovadora S.A.',
       descripcion: 'Empresa dedicada al desarrollo de soluciones tecnológicas para diversos sectores',
       fechaCreacion: new Date(2022, 5, 12),
-      ciudad: 'Barcelona'
+      ciudad: 'Alicante'
     },
     {
       id: 2,
       nombre: 'Consultores Asociados',
       descripcion: 'Servicios de consultoría empresarial y formación profesional',
       fechaCreacion: new Date(2023, 2, 5),
-      ciudad: 'Madrid'
-    }
+      ciudad: 'Alicante'
+    }*/
   ];
 };
 
