@@ -8,6 +8,9 @@ node_modules/
 ### Archivos de credenciales ###
 application*.yml
 application*.yaml
+**/src/main/resources/impulsedata-alicantefutura-firebase-adminsdk-*.json
+impulsedata-alicantefutura-firebase-adminsdk-fbsvc-59e4d618d3.json
+
 
 ### STS ###
 .apt_generated
