@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import { ref, onMounted, watch, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from './services/AuthService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -10,42 +10,102 @@ const auth = getAuth();
 const usuario = ref(null);
 
 // Función para actualizar el estado del usuario
-const actualizarEstadoUsuario = () => {
-  usuario.value = AuthService.getCurrentUser();
-  console.log("Estado de usuario actualizado:", usuario.value);
+const actualizarEstadoUsuario = async () => {
+  // Verificar si hay token JWT y usuario de Firebase
+  const firebaseUser = auth.currentUser;
+  const jwtToken = localStorage.getItem('authToken');
+  const userData = AuthService.getCurrentUser();
+  
+  console.log("Verificando estado de autenticación:");
+  console.log("- Firebase User:", firebaseUser ? firebaseUser.email : "No");
+  console.log("- JWT Token:", jwtToken ? "Presente" : "No");
+  console.log("- User Data:", userData);
+  
+  // Si hay inconsistencia entre Firebase y JWT, intentar resolver
+  if (!firebaseUser && jwtToken && userData) {
+    console.warn("Inconsistencia: JWT presente pero no hay usuario Firebase - Manteniendo sesión con JWT");
+    // En este caso mantenemos la sesión basada en el JWT
+    usuario.value = userData;
+    
+    // Si estamos en una ruta que necesita firebase, redirigir a login
+    const requiresFirebase = router.currentRoute.value.path === '/';
+    if (requiresFirebase) {
+      console.log("Esta ruta requiere Firebase. Redirigiendo a login...");
+      router.push('/login');
+    }
+    return;
+  }
+  
+  if (firebaseUser && !jwtToken) {
+    console.warn("Inconsistencia: Usuario Firebase presente pero no hay JWT");
+    
+    try {
+      console.log("Cerrando sesión para sincronizar...");
+      await AuthService.logout();
+      usuario.value = null;
+      router.push('/login');
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+    return;
+  }
+  
+  // Actualizar estado según lo que tengamos
+  if (firebaseUser && jwtToken && userData) {
+    console.log("Usuario completamente autenticado:", userData.nombre);
+    usuario.value = userData;
+  } else {
+    console.log("No hay usuario autenticado o autenticación incompleta");
+    usuario.value = null;
+    
+    // Verificar si estamos en una ruta protegida
+    const requiresAuth = router.currentRoute.value.meta.requiresAuth;
+    if (requiresAuth) {
+      console.log("Redirigiendo a login desde ruta protegida");
+      router.push('/login');
+    }
+  }
 };
 
+// Configurar listener para cambios de autenticación
 onMounted(() => {
-  // Verificar si hay un usuario autenticado
+  // Verificar estado inicial
   actualizarEstadoUsuario();
   
-  // Escuchar cambios en la autenticación de Firebase
-  onAuthStateChanged(auth, (user) => {
-    console.log("Cambio de autenticación detectado:", user ? "Usuario autenticado" : "No hay usuario");
+  // Configurar listener para cambios de autenticación de Firebase
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    console.log("Cambio en estado de autenticación detectado");
     actualizarEstadoUsuario();
   });
   
-  // Escuchar el evento personalizado de cambio de estado de autenticación
-  window.addEventListener('auth-state-changed', () => {
-    console.log("Evento auth-state-changed recibido");
-    actualizarEstadoUsuario();
+  // Escuchar evento personalizado de cambio de autenticación
+  window.addEventListener('auth-state-changed', actualizarEstadoUsuario);
+  
+  // Limpiar listener cuando el componente se desmonte
+  onUnmounted(() => {
+    unsubscribe();
+    window.removeEventListener('auth-state-changed', actualizarEstadoUsuario);
   });
 });
 
-// Limpiar los oyentes cuando el componente se desmonta
-onUnmounted(() => {
-  window.removeEventListener('auth-state-changed', actualizarEstadoUsuario);
-});
-
-const logout = () => {
-  console.log("Cerrando sesión desde App.vue");
-  AuthService.logout();
-  
-  // Limpiar el estado local
-  usuario.value = null;
-  
-  // Redirigir al login
-  router.push('/login');
+// Logout function
+const logout = async () => {
+  try {
+    console.log("Cerrando sesión...");
+    // Limpiar datos locales
+    usuario.value = null;
+    
+    // Cerrar sesión en Firebase y backend
+    await AuthService.logout();
+    
+    // Disparar evento para actualizar toda la aplicación
+    window.dispatchEvent(new CustomEvent('auth-state-changed'));
+    
+    // Redirigir al login
+    router.push('/login');
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+  }
 };
 </script>
 

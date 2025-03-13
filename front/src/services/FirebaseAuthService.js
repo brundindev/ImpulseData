@@ -85,6 +85,47 @@ class FirebaseAuthService {
   getCurrentUser() {
     return auth.currentUser;
   }
+
+  /**
+   * Intenta recuperar una sesión de Firebase existente o reautenticar silenciosamente
+   * sin interacción del usuario
+   * @returns {Promise<Object|null>} - Usuario recuperado o null
+   */
+  async reautenticar() {
+    try {
+      // Si ya hay usuario, solo lo devolvemos
+      if (auth.currentUser) {
+        console.log("Ya existe un usuario autenticado en Firebase:", auth.currentUser.email);
+        return auth.currentUser;
+      }
+      
+      console.log("Intentando recuperar sesión de Firebase...");
+      
+      // Podríamos intentar restaurar la sesión desde localStorage si guardamos el email
+      const userData = localStorage.getItem('userData');
+      if (!userData) {
+        console.log("No hay datos de usuario para intentar reautenticar");
+        return null;
+      }
+      
+      const userObj = JSON.parse(userData);
+      const email = userObj.email;
+      
+      if (!email) {
+        console.log("No hay email guardado para reautenticar");
+        return null;
+      }
+      
+      // Para una reautenticación completa necesitaríamos la contraseña
+      // Pero no la guardamos por seguridad
+      
+      console.log("No se pudo recuperar la sesión automáticamente. Se requiere inicio de sesión manual.");
+      return null;
+    } catch (error) {
+      console.error("Error al intentar reautenticar:", error);
+      return null;
+    }
+  }
 }
 
 export default new FirebaseAuthService(); 

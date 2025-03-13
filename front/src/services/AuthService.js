@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase';
+import FirebaseAuthService from './FirebaseAuthService';
 
 // Configuración de base URL para todas las peticiones
 // Si el backend está en un puerto distinto al frontend, hay que especificar la URL completa
@@ -39,19 +42,61 @@ class AuthService {
    * @param {object} credentials - Credenciales (email, password)
    * @returns {Promise} - Token JWT
    */
-  login(credentials) {
-    return axios.post(`${API_URL}/login`, credentials)
-      .then(response => {
-        if (response.data) {
-          // Guardar el token
-          localStorage.setItem('authToken', response.data);
-          
-          // Decodificar el token JWT para extraer información del usuario
-          // En una implementación real, es mejor hacer una petición separada para obtener los datos completos
-          this.storeUserDataFromToken(response.data);
+  async login(credentials) {
+    try {
+      console.log("Iniciando proceso de login con credenciales:", credentials.email);
+      
+      // Primero autenticamos con el backend para obtener el JWT
+      const response = await axios.post(`${API_URL}/login`, credentials);
+      
+      if (!response.data) {
+        throw new Error('No se recibió token JWT del servidor');
+      }
+      
+      // Guardar el token JWT y los datos de usuario
+      localStorage.setItem('authToken', response.data);
+      this.storeUserDataFromToken(response.data);
+      
+      // Ahora autenticamos con Firebase (o verificamos si ya está autenticado)
+      if (!auth.currentUser) {
+        console.log("Iniciando sesión en Firebase");
+        const firebaseUser = await FirebaseAuthService.login(credentials.email, credentials.password);
+        console.log("Usuario autenticado en Firebase:", firebaseUser.email);
+      } else {
+        console.log("Ya existe sesión en Firebase:", auth.currentUser.email);
+      }
+      
+      console.log("Login completado exitosamente en ambos sistemas");
+      
+      // Disparar evento para actualizar la interfaz
+      window.dispatchEvent(new CustomEvent('auth-state-changed'));
+      
+      return response.data;
+    } catch (error) {
+      console.error("Error durante el proceso de login:", error);
+      
+      // Limpiar cualquier estado parcial
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      
+      // Si hay error específico de Firebase, manejarlo
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/user-not-found':
+            throw new Error('No se encontró ningún usuario con este correo electrónico');
+          case 'auth/wrong-password':
+            throw new Error('La contraseña es incorrecta');
+          case 'auth/too-many-requests':
+            throw new Error('Se han realizado demasiados intentos. Por favor, espera unos minutos');
+          case 'auth/user-disabled':
+            throw new Error('Esta cuenta ha sido deshabilitada');
+          default:
+            throw error;
         }
-        return response.data;
-      });
+      }
+      
+      throw error;
+    }
   }
 
   /**
@@ -59,38 +104,52 @@ class AuthService {
    * @param {object} user - Datos del usuario (nombre, email, password)
    * @returns {Promise} - Token JWT
    */
-  register(user) {
-    return axios.post(`${API_URL}/registro`, user)
-      .then(response => {
-        if (response.data) {
-          // Guardar el token
-          localStorage.setItem('authToken', response.data);
-          
-          // Decodificar el token JWT para extraer información del usuario
-          this.storeUserDataFromToken(response.data);
-        }
-        return response.data;
-      });
+  async register(user) {
+    try {
+      console.log("Iniciando proceso de registro con datos:", user.email);
+      
+      // Primero registramos en Firebase (esto ya debería estar manejado en RegisterView)
+      // Y luego registramos en el backend
+      const response = await axios.post(`${API_URL}/registro`, user);
+      
+      if (response.data) {
+        // Guardar el token
+        localStorage.setItem('authToken', response.data);
+        
+        // Decodificar el token JWT para extraer información del usuario
+        this.storeUserDataFromToken(response.data);
+        
+        console.log("Registro completado exitosamente");
+      }
+      return response.data;
+    } catch (error) {
+      console.error("Error durante el proceso de registro:", error);
+      throw error;
+    }
   }
 
   /**
    * Cerrar sesión
    */
-  logout() {
-    // Eliminar todos los datos de autenticación
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    
-    // Limpiar cualquier otra información de sesión que pueda existir
-    localStorage.clear();
-    
-    // Limpiar cookies de sesión si existieran
-    document.cookie.split(";").forEach(function(c) {
-      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-    });
-    
-    // También podríamos realizar una llamada al backend para invalidar el token JWT en el servidor
-    // axios.post(`${API_URL}/logout`).catch(err => console.error('Error al cerrar sesión en servidor:', err));
+  async logout() {
+    try {
+      // Cerrar sesión en Firebase
+      await signOut(auth);
+      
+      // Limpiar datos de sesión
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      sessionStorage.clear();
+      
+      // Limpiar caché de autenticación
+      this.currentUser = null;
+      
+      console.log("Sesión cerrada correctamente y datos de usuario eliminados");
+      return true;
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      throw error;
+    }
   }
 
   /**

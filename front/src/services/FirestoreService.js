@@ -131,48 +131,80 @@ class FirestoreService {
         throw new Error("Usuario no autenticado");
       }
       
+      // Limpiar caché local antes de realizar la consulta
+      console.log("Obteniendo empresas para el usuario:", user.uid, user.email);
+      
       try {
-        // Primero verificamos si podemos obtener algún documento de la colección
+        // Primera consulta: verificar y obtener la colección de empresas
         const empresasRef = collection(db, "empresas");
+        
+        // Asegurar que estamos filtrando por el usuario actual
         const q = query(
           empresasRef, 
-          where("creadoPor", "==", user.uid),
-          orderBy("fechaCreacionSistema", "desc")
+          where("creadoPor", "==", user.uid)
         );
         
         const querySnapshot = await getDocs(q);
+        console.log(`Consulta completada. Documentos encontrados: ${querySnapshot.size}`);
         
         const empresas = [];
+        const empresasIds = []; // Para rastrear IDs y detectar duplicados
         
-        // Para cada empresa, obtener también el número de departamentos, centros y formaciones
+        // Filtrar estrictamente los documentos que pertenecen al usuario actual
         for (const empresaDoc of querySnapshot.docs) {
           const data = empresaDoc.data();
           
-          // Contar departamentos
-          const depSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/departamentos`));
-          const numDepartamentos = depSnapshot.size;
-          
-          // Contar centros
-          const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/centros`));
-          const numCentros = centrosSnapshot.size;
-          
-          // Contar formaciones
-          const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/formaciones`));
-          const numFormaciones = formacionesSnapshot.size;
-          
-          
-          empresas.push({
-            id: empresaDoc.id,
-            ...data,
-            fechaCreacion: data.fechaCreacion,
-            numDepartamentos, 
-            numCentros,
-            numFormaciones
-          });
+          if (data.creadoPor === user.uid) {
+            console.log(`Empresa encontrada: ${data.nombre} (ID: ${empresaDoc.id}) - Creada por: ${data.creadoPor}`);
+            
+            // Verificar si ya hemos procesado esta empresa (evitar duplicados)
+            if (empresasIds.includes(empresaDoc.id)) {
+              console.warn(`Empresa duplicada detectada y omitida: ${empresaDoc.id}`);
+              continue;
+            }
+            
+            empresasIds.push(empresaDoc.id);
+            
+            // Contar departamentos
+            const depSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/departamentos`));
+            const numDepartamentos = depSnapshot.size;
+            
+            // Contar centros
+            const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/centros`));
+            const numCentros = centrosSnapshot.size;
+            
+            // Contar formaciones
+            const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/formaciones`));
+            const numFormaciones = formacionesSnapshot.size;
+            
+            // Agregar empresa con verificación adicional
+            if (data.creadoPor === user.uid) {
+              empresas.push({
+                id: empresaDoc.id,
+                ...data,
+                fechaCreacion: data.fechaCreacion,
+                numDepartamentos, 
+                numCentros,
+                numFormaciones,
+                // Marcar explícitamente como propiedad del usuario actual
+                perteneceAlUsuarioActual: true
+              });
+            }
+          } else {
+            console.warn(`⚠️ Se detectó empresa que no pertenece al usuario actual: ${data.nombre} (Creador: ${data.creadoPor}, Usuario actual: ${user.uid})`);
+          }
         }
         
-
-        return empresas;
+        console.log(`Se encontraron ${empresas.length} empresas válidas para el usuario ${user.email} (UID: ${user.uid})`);
+        
+        // Verificación final: solo devolver empresas que pertenecen al usuario actual
+        const empresasFiltradas = empresas.filter(e => e.creadoPor === user.uid);
+        
+        if (empresasFiltradas.length !== empresas.length) {
+          console.warn(`❌ ADVERTENCIA: Se filtraron ${empresas.length - empresasFiltradas.length} empresas que no pertenecen al usuario actual`);
+        }
+        
+        return empresasFiltradas;
       } catch (error) {
         console.error("Error específico al obtener empresas:", error);
         if (error.code) {
@@ -196,6 +228,8 @@ class FirestoreService {
       const user = auth.currentUser;
       if (!user) throw new Error("Usuario no autenticado");
       
+      console.log("Obteniendo contadores para el usuario:", user.uid, user.email);
+      
       let empresasCount = 0;
       let departamentosCount = 0;
       let centrosCount = 0;
@@ -210,20 +244,27 @@ class FirestoreService {
         
         // Para cada empresa, contar sus subcolecciones
         for (const empresaDoc of empresasSnapshot.docs) {
-          const empresaId = empresaDoc.id;
+          const data = empresaDoc.data();
           
-          // Contar departamentos de esta empresa
-          const depSnapshot = await getDocs(collection(db, `empresas/${empresaId}/departamentos`));
-          departamentosCount += depSnapshot.size;
-          
-          // Contar centros de esta empresa
-          const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaId}/centros`));
-          centrosCount += centrosSnapshot.size;
-          
-          // Contar formaciones de esta empresa
-          const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaId}/formaciones`));
-          formacionesCount += formacionesSnapshot.size;
+          // Verificar que la empresa realmente pertenece al usuario actual
+          if (data.creadoPor === user.uid) {
+            const empresaId = empresaDoc.id;
+            
+            // Contar departamentos de esta empresa
+            const depSnapshot = await getDocs(collection(db, `empresas/${empresaId}/departamentos`));
+            departamentosCount += depSnapshot.size;
+            
+            // Contar centros de esta empresa
+            const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaId}/centros`));
+            centrosCount += centrosSnapshot.size;
+            
+            // Contar formaciones de esta empresa
+            const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaId}/formaciones`));
+            formacionesCount += formacionesSnapshot.size;
+          }
         }
+        
+        console.log(`Contadores para ${user.email}: Empresas=${empresasCount}, Departamentos=${departamentosCount}, Centros=${centrosCount}, Formaciones=${formacionesCount}`);
         
       } catch (error) {
         console.error("Error al contar elementos:", error);

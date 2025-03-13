@@ -386,6 +386,7 @@ import FirestoreService from '../services/FirestoreService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import FirebaseAuthService from '../services/FirebaseAuthService';
 
 const router = useRouter();
 const auth = getAuth();
@@ -463,6 +464,60 @@ const cargarDatos = async () => {
     cargando.value = true;
     error.value = null;
     
+    // Limpiar datos previos para evitar mostrar datos de otro usuario
+    empresas.value = [];
+    
+    // Verificar doble autenticación (Firebase y JWT)
+    const user = auth.currentUser;
+    const jwtToken = localStorage.getItem('authToken');
+    const userData = AuthService.getCurrentUser();
+    
+    console.log("HomeView - Verificando autenticación:");
+    console.log("- Firebase User:", user ? user.email : "No");
+    console.log("- JWT Token:", jwtToken ? "Sí" : "No");
+    console.log("- User Data:", userData);
+    
+    // Si hay JWT pero no hay usuario Firebase, intentar iniciar sesión con Firebase
+    if (!user && jwtToken && userData) {
+      console.warn("HomeView - Hay JWT pero no hay sesión en Firebase. Intentando recuperar sesión...");
+      
+      try {
+        // Intentar iniciar sesión silenciosamente usando credenciales guardadas
+        // Esto es solo para sincronizar Firebase, no para mostrar UI
+        await FirebaseAuthService.reautenticar();
+        
+        // Verificar si ahora tenemos usuario Firebase
+        const userAfterReauth = auth.currentUser;
+        
+        if (userAfterReauth) {
+          console.log("HomeView - Sesión Firebase recuperada para:", userAfterReauth.email);
+          // Intentar cargar datos otra vez
+          setTimeout(() => cargarDatos(), 500);
+          return;
+        }
+      } catch (error) {
+        console.error("Error al recuperar sesión Firebase:", error);
+      }
+    }
+    
+    // Si no hay usuario o token, mostrar error
+    if (!user || !jwtToken) {
+      console.error("HomeView - Autenticación incompleta:", 
+                    "Firebase:", user ? "Sí" : "No", 
+                    "JWT:", jwtToken ? "Sí" : "No");
+      
+      error.value = 'No se pudo verificar tu autenticación. Por favor, inicia sesión de nuevo.';
+      cargando.value = false;
+      
+      // Esperar un momento antes de redirigir
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+      
+      return;
+    }
+    
+    console.log(`HomeView está cargando datos para: ${user.email} (UID: ${user.uid})`);
     
     // Obtener contadores
     const contadores = await FirestoreService.obtenerContadores();
@@ -473,7 +528,17 @@ const cargarDatos = async () => {
     
     // Obtener empresas
     const empresasRecibidas = await FirestoreService.obtenerEmpresas();
-    empresas.value = empresasRecibidas;
+    
+    // Triple verificación: solo mostrar empresas del usuario actual
+    empresas.value = empresasRecibidas.filter(empresa => {
+      const perteneceAlUsuario = empresa.creadoPor === user.uid;
+      if (!perteneceAlUsuario) {
+        console.error(`⚠️ ALERTA DE SEGURIDAD: Se detectó empresa que no pertenece al usuario actual: ${empresa.nombre}`);
+      }
+      return perteneceAlUsuario;
+    });
+    
+    console.log(`HomeView: Mostrando ${empresas.value.length} empresas para ${user.email}`);
     
   } catch (err) {
     console.error("Error al cargar datos en HomeView:", err);
@@ -709,18 +774,31 @@ const eliminarEmpresa = async () => {
   }
 };
 
-// Logout function
+// Logout function modificada para limpiar todos los datos
 const logout = () => {
-  console.log("Cerrando sesión desde HomeView...");
+  console.log("Cerrando sesión y limpiando datos...");
+  
+  // Limpiar todos los datos locales
+  empresas.value = [];
+  empresasCount.value = 0;
+  departamentosCount.value = 0;
+  centrosCount.value = 0;
+  formacionesCount.value = 0;
+  
+  // Restablecer formularios y estados
+  resetearFormulario();
+  showFormModal.value = false;
+  showViewModal.value = false;
+  
   // Llamamos al método logout de AuthService
   AuthService.logout();
   
   // Limpiamos cualquier estado de la aplicación
   usuario.value = null;
-  empresas.value = [];
   
   // Eliminamos cualquier otro dato de la sesión 
   localStorage.clear();
+  sessionStorage.clear();
   
   // Disparar evento para actualizar la navegación
   window.dispatchEvent(new CustomEvent('auth-state-changed'));

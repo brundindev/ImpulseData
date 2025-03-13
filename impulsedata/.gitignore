@@ -6,8 +6,6 @@ target/
 node_modules/
 
 ### Archivos de credenciales ###
-src/main/resources/*.json
-*.properties
 application*.yml
 application*.yaml
 
