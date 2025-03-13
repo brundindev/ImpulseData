@@ -39,7 +39,6 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { getAuth, applyActionCode, sendEmailVerification } from 'firebase/auth';
-import FirebaseAuthService from '../services/FirebaseAuthService';
 
 const route = useRoute();
 const loading = ref(true);
