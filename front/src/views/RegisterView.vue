@@ -149,18 +149,26 @@ const register = async () => {
       // 2. Crear usuario en el backend
       guardandoEnBackend.value = true;
       console.log("Registrando en backend...");
-      await AuthService.register({
-        nombre: nombre.value,
-        email: email.value,
-        password: password.value
-      });
-      guardandoEnBackend.value = false;
-      
-      // Guardar el email para posible reenvío de verificación
-      emailRegistrado.value = email.value;
-      
-      // Mostrar mensaje de éxito y pedir verificación
-      registroExitoso.value = true;
+      try {
+        await AuthService.register({
+          nombre: nombre.value,
+          email: email.value,
+          password: password.value
+        });
+        
+        guardandoEnBackend.value = false;
+        
+        // Guardar el email para posible reenvío de verificación
+        emailRegistrado.value = email.value;
+        
+        console.log("Registro exitoso completo, mostrando pantalla de confirmación");
+        // Mostrar mensaje de éxito y pedir verificación
+        registroExitoso.value = true;
+      } catch (backendError) {
+        guardandoEnBackend.value = false;
+        console.error("Error en registro de backend:", backendError);
+        throw backendError; // Relanzar para que sea capturado por el catch externo
+      }
     } catch (firebaseError) {
       console.error('Error al registrar con Firebase:', firebaseError);
       guardandoEnFirebase.value = false;
@@ -184,6 +192,8 @@ const register = async () => {
         
         guardandoEnBackend.value = false;
         emailRegistrado.value = email.value;
+        
+        console.log("Registro con backend exitoso, mostrando pantalla de confirmación");
         registroExitoso.value = true;
       } catch (backendError) {
         guardandoEnBackend.value = false;

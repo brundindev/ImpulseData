@@ -11,18 +11,33 @@ const usuario = ref(null);
 
 // Función para actualizar el estado del usuario
 const actualizarEstadoUsuario = async () => {
-  // Verificar si hay token JWT y usuario de Firebase
-  const firebaseUser = auth.currentUser;
   const jwtToken = localStorage.getItem('authToken');
+  const currentUser = auth.currentUser;
+  
+  // Si hay usuario de Firebase pero no token JWT, es posible que sea un nuevo registro
+  // o un problema de sincronización
+  if (currentUser && !jwtToken) {
+    console.log("Inconsistencia: Usuario Firebase presente pero no hay JWT");
+    // Si estamos en la página de registro, no hacer nada para evitar interrumpir
+    // el flujo de verificación de email
+    if (router.currentRoute.value.path === '/registro') {
+      console.log("En página de registro, no redirigir");
+      return;
+    }
+    
+    console.warn("Inconsistencia: Usuario Firebase presente pero no hay JWT");
+  }
+  
+  // Verificar si hay token JWT y usuario de Firebase
   const userData = AuthService.getCurrentUser();
   
   console.log("Verificando estado de autenticación:");
-  console.log("- Firebase User:", firebaseUser ? firebaseUser.email : "No");
+  console.log("- Firebase User:", currentUser ? currentUser.email : "No");
   console.log("- JWT Token:", jwtToken ? "Presente" : "No");
   console.log("- User Data:", userData);
   
   // Si hay inconsistencia entre Firebase y JWT, intentar resolver
-  if (!firebaseUser && jwtToken && userData) {
+  if (!currentUser && jwtToken && userData) {
     console.warn("Inconsistencia: JWT presente pero no hay usuario Firebase - Manteniendo sesión con JWT");
     // En este caso mantenemos la sesión basada en el JWT
     usuario.value = userData;
@@ -36,7 +51,7 @@ const actualizarEstadoUsuario = async () => {
     return;
   }
   
-  if (firebaseUser && !jwtToken) {
+  if (currentUser && !jwtToken) {
     console.warn("Inconsistencia: Usuario Firebase presente pero no hay JWT");
     
     try {
@@ -51,7 +66,7 @@ const actualizarEstadoUsuario = async () => {
   }
   
   // Actualizar estado según lo que tengamos
-  if (firebaseUser && jwtToken && userData) {
+  if (currentUser && jwtToken && userData) {
     console.log("Usuario completamente autenticado:", userData.nombre);
     usuario.value = userData;
   } else {

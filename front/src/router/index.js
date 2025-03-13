@@ -39,6 +39,13 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const isAuthenticated = localStorage.getItem('authToken');
   
+  // Si estamos yendo a la página de registro o verificación, permitir siempre
+  if (to.path === '/registro' || to.path === '/verify-email') {
+    next();
+    return;
+  }
+  
+  // Para las otras rutas, aplicar las reglas normales
   if (requiresAuth && !isAuthenticated) {
     next('/login');
   } else if (to.path === '/login' && isAuthenticated) {

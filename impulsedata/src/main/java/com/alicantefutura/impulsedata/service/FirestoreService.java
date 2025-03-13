@@ -59,20 +59,36 @@ public class FirestoreService {
             // Asegurarnos que el ID está establecido correctamente
             usuario.setId(uid);
             
+            // Imprimir datos completos del usuario para diagnóstico
+            logger.info("Datos de usuario a guardar: {}", usuario.toString());
+            
             // Guardar el usuario en Firestore
-            firestore.collection("usuarios").document(uid).set(usuario).get();
+            try {
+                firestore.collection("usuarios").document(uid).set(usuario).get();
+                logger.info("Operación set() completada sin errores");
+            } catch (Exception e) {
+                logger.error("Error específico en operación set(): {}", e.getMessage(), e);
+                return false;
+            }
             
             // Verificar que se haya guardado correctamente
-            var doc = firestore.collection("usuarios").document(uid).get().get();
-            if (doc.exists()) {
-                logger.info("Usuario guardado correctamente en Firestore. UID: {}", uid);
-                return true;
-            } else {
-                logger.error("Error: El documento no existe después de intentar guardarlo. UID: {}", uid);
+            try {
+                var doc = firestore.collection("usuarios").document(uid).get().get();
+                if (doc.exists()) {
+                    logger.info("Usuario guardado correctamente en Firestore. UID: {}", uid);
+                    return true;
+                } else {
+                    logger.error("Error: El documento no existe después de intentar guardarlo. UID: {}", uid);
+                    return false;
+                }
+            } catch (Exception e) {
+                logger.error("Error específico al verificar documento: {}", e.getMessage(), e);
                 return false;
             }
         } catch (Exception e) {
             logger.error("Error al guardar usuario en Firestore: {}", e.getMessage(), e);
+            // Incluir la pila completa de llamadas para depuración
+            e.printStackTrace();
             return false;
         }
     }

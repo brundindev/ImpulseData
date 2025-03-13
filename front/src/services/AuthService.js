@@ -113,11 +113,12 @@ class AuthService {
       const response = await axios.post(`${API_URL}/registro`, user);
       
       if (response.data) {
-        // Guardar el token
-        localStorage.setItem('authToken', response.data);
+        // NO guardar el token automáticamente en registro
+        // Lo guardaremos después de que el usuario verifique su email
+        console.log("Token JWT recibido pero no almacenado todavía (pendiente de verificación)");
         
-        // Decodificar el token JWT para extraer información del usuario
-        this.storeUserDataFromToken(response.data);
+        // Guardar temporalmente para recuperación
+        sessionStorage.setItem('tempAuthToken', response.data);
         
         console.log("Registro completado exitosamente");
       }

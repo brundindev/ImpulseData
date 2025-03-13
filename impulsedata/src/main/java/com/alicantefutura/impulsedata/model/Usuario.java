@@ -108,4 +108,15 @@ public class Usuario implements UserDetails {
         // Solo se habilita la cuenta si el email está verificado
         return emailVerificado;
     }
+    
+    @Override
+    public String toString() {
+        return "Usuario{" +
+               "id='" + id + '\'' +
+               ", email='" + email + '\'' +
+               ", nombre='" + nombre + '\'' +
+               ", rol='" + rol + '\'' +
+               ", emailVerificado=" + emailVerificado +
+               '}';
+    }
 } 
