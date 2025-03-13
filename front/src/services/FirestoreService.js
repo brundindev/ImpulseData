@@ -15,7 +15,6 @@ class FirestoreService {
    */
   static async guardarEmpresa(empresa) {
     try {
-      console.log("====== INICIO guardarEmpresa (Subcolecciones) ======");
       const user = auth.currentUser;
       if (!user) {
         console.error("No hay usuario autenticado para guardar empresa");
@@ -110,7 +109,6 @@ class FirestoreService {
         }
       }
       
-      console.log("====== FIN guardarEmpresa (Subcolecciones) ======");
       return empresaId;
     } catch (error) {
       console.error("Error al guardar empresa:", error);
@@ -296,7 +294,6 @@ class FirestoreService {
       console.log(`Eliminando empresa ${empresaId}...`);
       await deleteDoc(doc(db, "empresas", empresaId));
       console.log(`Empresa ${empresaId} eliminada correctamente`);
-      console.log("====== FIN eliminarEmpresa ======");
     } catch (error) {
       console.error("Error al eliminar empresa:", error);
       throw error;

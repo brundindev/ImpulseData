@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
-import VerificarEmailView from '../views/VerificarEmailView.vue'
 import VerifyEmailView from '../views/VerifyEmailView.vue'
 
 const router = createRouter({
@@ -24,12 +23,6 @@ const router = createRouter({
       path: '/registro',
       name: 'registro',
       component: RegisterView,
-      meta: { requiresAuth: false }
-    },
-    {
-      path: '/verificar-email',
-      name: 'verificar-email',
-      component: VerificarEmailView,
       meta: { requiresAuth: false }
     },
     {
