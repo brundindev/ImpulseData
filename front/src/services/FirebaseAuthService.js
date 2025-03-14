@@ -2,7 +2,9 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   sendEmailVerification,
-  signOut
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -37,6 +39,77 @@ class FirebaseAuthService {
       return userCredential.user;
     } catch (error) {
       console.error('Error al iniciar sesión con Firebase:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Iniciar sesión con Google
+   * @returns {Promise} - Datos del usuario
+   */
+  async loginWithGoogle() {
+    try {
+      const provider = new GoogleAuthProvider();
+      // Solicitar acceso al perfil de Google para tener más datos
+      provider.addScope('profile');
+      provider.addScope('email');
+      
+      // Configurar para seleccionar la cuenta (no usar la última seleccionada automáticamente)
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+      
+      
+      // Forzar el estado de verificación para usuarios de Google
+      // ya que los emails de Google ya están verificados
+      if (!user.emailVerified) {
+        console.log("Usuario de Google no está marcado como verificado, forzando actualización...");
+        
+        try {
+          // Forzar actualización del perfil para incluir que está verificado
+          await user.updateProfile({
+            displayName: user.displayName || user.email.split('@')[0]
+          });
+          
+          // Actualizar metadatos - no se puede hacer directamente, sólo a través del backend
+          try {
+            // Intentar marcar como verificado a través del backend
+            const verificationResponse = await fetch(
+              `http://localhost:8080/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`,
+              { method: 'GET' }
+            );
+            
+            if (verificationResponse.ok) {
+              console.log("Verificación forzada exitosamente a través del backend");
+            } else {
+              console.warn("Error al forzar verificación a través del backend:", await verificationResponse.text());
+            }
+          } catch (backendError) {
+            console.warn("Error al comunicarse con el backend para verificación:", backendError);
+          }
+          
+          // Forzar renovación del token
+          await user.getIdToken(true);
+          
+          // Recargar el usuario para obtener el estado actualizado
+          await user.reload();
+          
+          console.log("Usuario recargado, estado actualizado:", {
+            emailVerified: user.emailVerified,
+            displayName: user.displayName
+          });
+        } catch (error) {
+          console.warn("Error al actualizar usuario de Google:", error);
+          // No bloqueamos el flujo
+        }
+      }
+      
+      return user;
+    } catch (error) {
+      console.error('Error al iniciar sesión con Google:', error);
       throw error;
     }
   }
@@ -101,7 +174,36 @@ class FirebaseAuthService {
       
       console.log("Intentando recuperar sesión de Firebase...");
       
-      // Podríamos intentar restaurar la sesión desde localStorage si guardamos el email
+      // Primero intentamos restaurar la sesión mediante el uid almacenado
+      const storedUid = sessionStorage.getItem('firebaseUid');
+      if (storedUid) {
+        console.log("Encontrado UID guardado en sesión:", storedUid);
+        
+        // Podríamos intentar usar signInWithCredential si tuviéramos un token de ID
+        // Pero como no lo tenemos, intentamos con el email/password de Google
+        
+        // Obtener el email desde userData
+        const userData = localStorage.getItem('userData');
+        if (userData) {
+          const userObj = JSON.parse(userData);
+          const email = userObj.email;
+          
+          if (email) {
+            console.log("Intentando reautenticar con email:", email);
+            try {
+              // Intentar iniciar sesión con la contraseña basada en UID
+              const password = `google-auth-${storedUid}`;
+              const userCredential = await this.login(email, password);
+              console.log("Reautenticación exitosa:", userCredential.email);
+              return userCredential;
+            } catch (loginError) {
+              console.warn("No se pudo reautenticar con credenciales:", loginError);
+            }
+          }
+        }
+      }
+      
+      // Si no pudimos recuperar con uid, intentamos el método tradicional
       const userData = localStorage.getItem('userData');
       if (!userData) {
         console.log("No hay datos de usuario para intentar reautenticar");

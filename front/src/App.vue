@@ -4,6 +4,7 @@ import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from './services/AuthService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import FirebaseAuthService from './services/FirebaseAuthService';
 // Mantenemos el componente por si se necesita en otras partes
 import AlicanteBanner from './components/AlicanteBanner.vue';
 
@@ -31,6 +32,25 @@ const actualizarEstadoUsuario = async () => {
     }
     
     console.warn("Inconsistencia: Usuario Firebase presente pero no hay JWT");
+    
+    // Intentar recuperar la sesión si tenemos datos del usuario
+    const storedUid = sessionStorage.getItem('firebaseUid');
+    if (storedUid && storedUid === currentUser.uid) {
+      // Aquí podríamos intentar hacer login con el backend usando el email y password de Google
+      try {
+        const loginData = {
+          email: currentUser.email,
+          password: `google-auth-${currentUser.uid}`
+        };
+        
+        // Intentar iniciar sesión para obtener el JWT
+        await AuthService.login(loginData);
+        usuario.value = AuthService.getCurrentUser();
+        return; // Si se logró recuperar la sesión, salimos
+      } catch (loginError) {
+        console.warn("No se pudo recuperar la sesión automáticamente:", loginError);
+      }
+    }
   }
   
   // Verificar si hay token JWT y usuario de Firebase
@@ -42,20 +62,55 @@ const actualizarEstadoUsuario = async () => {
     // En este caso mantenemos la sesión basada en el JWT
     usuario.value = userData;
     
-    // Si estamos en una ruta que necesita firebase, redirigir a login
+    // Intentar recuperar sesión de Firebase si tenemos el email
+    if (userData.email) {
+      try {
+        // No forzamos cierre de sesión, solo intentamos recuperar
+        await FirebaseAuthService.reautenticar();
+      } catch (reAuthError) {
+        console.warn("No se pudo recuperar sesión de Firebase:", reAuthError);
+      }
+    }
+    
+    // Si estamos en una ruta que necesita firebase, recargar la página para intentar sincronizar
     const requiresFirebase = router.currentRoute.value.path === '/';
     if (requiresFirebase) {
-      console.log("Esta ruta requiere Firebase. Redirigiendo a login...");
-      router.push('/login');
+      // Solo recargamos si no hemos recargado recientemente (evitamos loop infinito)
+      const lastReload = sessionStorage.getItem('lastReload');
+      const now = Date.now();
+      if (!lastReload || (now - parseInt(lastReload)) > 10000) { // 10 segundos
+        sessionStorage.setItem('lastReload', now.toString());
+        window.location.reload();
+      } else {
+        // Si ya hemos recargado recientemente, redirigir al login
+        router.push('/login');
+      }
     }
     return;
   }
   
+  // Si el usuario de Firebase existe pero no hay JWT, intentar una vez más 
+  // recuperar la sesión antes de cerrar
   if (currentUser && !jwtToken) {
     console.warn("Inconsistencia: Usuario Firebase presente pero no hay JWT");
     
+    // Intentar una vez más recuperar la sesión
     try {
-      console.log("Cerrando sesión para sincronizar...");
+      const hasTriedRecovery = sessionStorage.getItem('attemptedRecovery');
+      if (!hasTriedRecovery) {
+        sessionStorage.setItem('attemptedRecovery', 'true');
+        const loginData = {
+          email: currentUser.email,
+          password: `google-auth-${currentUser.uid}`
+        };
+        
+        // Intentar iniciar sesión para obtener el JWT
+        await AuthService.login(loginData);
+        usuario.value = AuthService.getCurrentUser();
+        sessionStorage.removeItem('attemptedRecovery');
+        return;
+      }
+      
       await AuthService.logout();
       usuario.value = null;
       router.push('/login');
@@ -67,7 +122,6 @@ const actualizarEstadoUsuario = async () => {
   
   // Actualizar estado según lo que tengamos
   if (currentUser && jwtToken && userData) {
-    console.log("Usuario completamente autenticado:", userData.nombre);
     usuario.value = userData;
   } else {
     usuario.value = null;
@@ -75,7 +129,6 @@ const actualizarEstadoUsuario = async () => {
     // Verificar si estamos en una ruta protegida
     const requiresAuth = router.currentRoute.value.meta.requiresAuth;
     if (requiresAuth) {
-      console.log("Redirigiendo a login desde ruta protegida");
       router.push('/login');
     }
   }
@@ -104,7 +157,6 @@ onMounted(() => {
 // Logout function
 const logout = async () => {
   try {
-    console.log("Cerrando sesión...");
     // Limpiar datos locales
     usuario.value = null;
     
@@ -124,10 +176,8 @@ const logout = async () => {
 // Función para recargar la página de registro o navegar a ella
 const reloadRegistro = () => {
   if (router.currentRoute.value.path === '/registro') {
-    console.log("Recargando página de registro");
     window.location.reload();
   } else {
-    console.log("Navegando a página de registro");
     router.push('/registro');
   }
 };
@@ -165,5 +215,5 @@ const reloadRegistro = () => {
   </main>
 </template>
 
-<style src="./assets/App.css"></style>
-  
+<style src="./assets/App.css">
+</style>

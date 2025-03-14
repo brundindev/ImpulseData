@@ -125,14 +125,109 @@ class FirestoreService {
    */
   static async obtenerEmpresas() {
     try {
-      const user = auth.currentUser;
+      // Verificar si hay usuario autenticado
+      let user = auth.currentUser;
+      
+      // Si no hay usuario pero hay token JWT y UID almacenado, intentar usar el UID directamente
       if (!user) {
-        console.error("No hay usuario autenticado en obtenerEmpresas");
-        throw new Error("Usuario no autenticado");
+        console.warn("No hay usuario de Firebase en obtenerEmpresas, verificando alternativas");
+        const jwtToken = localStorage.getItem('authToken');
+        const storedUid = sessionStorage.getItem('firebaseUid');
+        
+        if (jwtToken && storedUid) {
+          
+          try {
+            // Primera consulta: verificar y obtener la colección de empresas usando el UID almacenado
+            const empresasRef = collection(db, "empresas");
+            
+            // Asegurar que estamos filtrando por el UID almacenado
+            const q = query(
+              empresasRef, 
+              where("creadoPor", "==", storedUid)
+            );
+            
+            const querySnapshot = await getDocs(q);
+            console.log(`Consulta completada usando UID almacenado. Documentos encontrados: ${querySnapshot.size}`);
+            
+            if (querySnapshot.size > 0) {
+              const empresas = [];
+              const empresasIds = [];
+              
+              // Filtrar estrictamente los documentos que pertenecen al usuario
+              for (const empresaDoc of querySnapshot.docs) {
+                const data = empresaDoc.data();
+                
+                if (data.creadoPor === storedUid) {
+                  console.log(`Empresa encontrada: ${data.nombre} (ID: ${empresaDoc.id}) - Creada por: ${data.creadoPor}`);
+                  
+                  // Verificar si ya hemos procesado esta empresa (evitar duplicados)
+                  if (empresasIds.includes(empresaDoc.id)) {
+                    console.warn(`Empresa duplicada detectada y omitida: ${empresaDoc.id}`);
+                    continue;
+                  }
+                  
+                  empresasIds.push(empresaDoc.id);
+                  
+                  // Contar departamentos
+                  const depSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/departamentos`));
+                  const numDepartamentos = depSnapshot.size;
+                  
+                  // Contar centros
+                  const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/centros`));
+                  const numCentros = centrosSnapshot.size;
+                  
+                  // Contar formaciones
+                  const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/formaciones`));
+                  const numFormaciones = formacionesSnapshot.size;
+                  
+                  // Agregar empresa
+                  empresas.push({
+                    id: empresaDoc.id,
+                    ...data,
+                    fechaCreacion: data.fechaCreacion,
+                    numDepartamentos, 
+                    numCentros,
+                    numFormaciones,
+                    // Marcar explícitamente como propiedad del usuario actual
+                    perteneceAlUsuarioActual: true
+                  });
+                }
+              }
+              
+              return empresas;
+            } else {
+              console.log("No se encontraron empresas usando el UID almacenado");
+            }
+          } catch (error) {
+            console.error("Error al intentar obtener empresas usando UID almacenado:", error);
+          }
+          
+          // Si llegamos aquí, falló el intento con UID almacenado, intentar recuperar la sesión
+          try {
+            // Importar FirebaseAuthService para usar reautenticar
+            const FirebaseAuthService = await import('./FirebaseAuthService').then(module => module.default);
+            await FirebaseAuthService.reautenticar();
+            
+            // Verificar si se recuperó el usuario
+            user = auth.currentUser;
+            if (user) {
+              console.log("Sesión de Firebase recuperada exitosamente:", user.email);
+            } else {
+              console.warn("No se pudo recuperar sesión de Firebase tras reautenticación");
+            }
+          } catch (authError) {
+            console.error("Error al intentar recuperar sesión:", authError);
+          }
+        }
       }
       
-      // Limpiar caché local antes de realizar la consulta
-      console.log("Obteniendo empresas para el usuario:", user.uid, user.email);
+      // Si después de intentar recuperar todavía no hay usuario, intentar usar el UID almacenado
+      if (!user) {
+        console.error("No hay usuario autenticado en obtenerEmpresas");
+        
+        // En lugar de fallar, reportamos el problema y continuamos con un arreglo vacío
+        return [];
+      }
       
       try {
         // Primera consulta: verificar y obtener la colección de empresas
@@ -145,18 +240,15 @@ class FirestoreService {
         );
         
         const querySnapshot = await getDocs(q);
-        console.log(`Consulta completada. Documentos encontrados: ${querySnapshot.size}`);
         
         const empresas = [];
-        const empresasIds = []; // Para rastrear IDs y detectar duplicados
+        const empresasIds = [];
         
         // Filtrar estrictamente los documentos que pertenecen al usuario actual
         for (const empresaDoc of querySnapshot.docs) {
           const data = empresaDoc.data();
           
-          if (data.creadoPor === user.uid) {
-            console.log(`Empresa encontrada: ${data.nombre} (ID: ${empresaDoc.id}) - Creada por: ${data.creadoPor}`);
-            
+          if (data.creadoPor === user.uid) {            
             // Verificar si ya hemos procesado esta empresa (evitar duplicados)
             if (empresasIds.includes(empresaDoc.id)) {
               console.warn(`Empresa duplicada detectada y omitida: ${empresaDoc.id}`);
@@ -194,9 +286,7 @@ class FirestoreService {
             console.warn(`⚠️ Se detectó empresa que no pertenece al usuario actual: ${data.nombre} (Creador: ${data.creadoPor}, Usuario actual: ${user.uid})`);
           }
         }
-        
-        console.log(`Se encontraron ${empresas.length} empresas válidas para el usuario ${user.email} (UID: ${user.uid})`);
-        
+                
         // Verificación final: solo devolver empresas que pertenecen al usuario actual
         const empresasFiltradas = empresas.filter(e => e.creadoPor === user.uid);
         
@@ -210,7 +300,6 @@ class FirestoreService {
         if (error.code) {
           console.error("Código de error Firebase:", error.code);
         }
-        console.log("La colección 'empresas' aún no existe o hay un problema de permisos");
         return []; // Retornar array vacío en lugar de fallar
       }
     } catch (error) {
@@ -227,9 +316,7 @@ class FirestoreService {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error("Usuario no autenticado");
-      
-      console.log("Obteniendo contadores para el usuario:", user.uid, user.email);
-      
+            
       let empresasCount = 0;
       let departamentosCount = 0;
       let centrosCount = 0;
@@ -263,9 +350,7 @@ class FirestoreService {
             formacionesCount += formacionesSnapshot.size;
           }
         }
-        
-        console.log(`Contadores para ${user.email}: Empresas=${empresasCount}, Departamentos=${departamentosCount}, Centros=${centrosCount}, Formaciones=${formacionesCount}`);
-        
+                
       } catch (error) {
         console.error("Error al contar elementos:", error);
         // No lanzamos error, simplemente dejamos los contadores en 0
@@ -306,7 +391,6 @@ class FirestoreService {
       
       // Eliminar departamentos (subcolección)
       const depSnapshot = await getDocs(collection(db, `empresas/${empresaId}/departamentos`));
-      console.log(`Eliminando ${depSnapshot.size} departamentos...`);
       const depPromises = [];
       depSnapshot.forEach((depDoc) => {
         depPromises.push(deleteDoc(doc(db, `empresas/${empresaId}/departamentos/${depDoc.id}`)));
@@ -315,7 +399,6 @@ class FirestoreService {
       
       // Eliminar centros (subcolección)
       const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaId}/centros`));
-      console.log(`Eliminando ${centrosSnapshot.size} centros...`);
       const centrosPromises = [];
       centrosSnapshot.forEach((centroDoc) => {
         centrosPromises.push(deleteDoc(doc(db, `empresas/${empresaId}/centros/${centroDoc.id}`)));
@@ -324,7 +407,6 @@ class FirestoreService {
       
       // Eliminar formaciones (subcolección)
       const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaId}/formaciones`));
-      console.log(`Eliminando ${formacionesSnapshot.size} formaciones...`);
       const formacionesPromises = [];
       formacionesSnapshot.forEach((formacionDoc) => {
         formacionesPromises.push(deleteDoc(doc(db, `empresas/${empresaId}/formaciones/${formacionDoc.id}`)));
@@ -371,9 +453,7 @@ class FirestoreService {
         fechaActualizacion: new Date().toISOString()
       };
       
-      console.log("Actualizando empresa con datos:", datosActualizados);
       await updateDoc(empresaRef, datosActualizados);
-      console.log(`Empresa ${empresaId} actualizada correctamente`);
       
       return true;
     } catch (error) {
@@ -404,7 +484,6 @@ class FirestoreService {
       
       // Actualizar departamentos
       if (departamentos && departamentos.length > 0) {
-        console.log(`Actualizando ${departamentos.length} departamentos...`);
         
         // Primero eliminamos los departamentos existentes
         const depsExistentes = await getDocs(collection(db, `empresas/${empresaId}/departamentos`));
@@ -428,14 +507,12 @@ class FirestoreService {
             };
             
             await setDoc(depRef, depData);
-            console.log(`Departamento guardado/actualizado: ${depData.nombre} con ID: ${depData.id}`);
           }
         }
       }
       
       // Actualizar centros
       if (centros && centros.length > 0) {
-        console.log(`Actualizando ${centros.length} centros...`);
         
         // Primero eliminamos los centros existentes
         const centrosExistentes = await getDocs(collection(db, `empresas/${empresaId}/centros`));
@@ -460,14 +537,12 @@ class FirestoreService {
             };
             
             await setDoc(centroRef, centroData);
-            console.log(`Centro guardado/actualizado: ${centroData.nombre} con ID: ${centroData.id}`);
           }
         }
       }
       
       // Actualizar formaciones
       if (formaciones && formaciones.length > 0) {
-        console.log(`Actualizando ${formaciones.length} formaciones...`);
         
         // Primero eliminamos las formaciones existentes
         const formacionesExistentes = await getDocs(collection(db, `empresas/${empresaId}/formaciones`));
@@ -493,7 +568,6 @@ class FirestoreService {
             };
             
             await setDoc(formacionRef, formacionData);
-            console.log(`Formación guardada/actualizada: ${formacionData.nombre} con ID: ${formacionData.id}`);
           }
         }
       }
@@ -512,7 +586,6 @@ class FirestoreService {
    */
   static async obtenerDepartamentos(empresaId) {
     try {
-      console.log(`Obteniendo departamentos para empresa ${empresaId}`);
       const departamentosRef = collection(db, `empresas/${empresaId}/departamentos`);
       const snapshot = await getDocs(departamentosRef);
       
@@ -524,7 +597,6 @@ class FirestoreService {
         });
       });
       
-      console.log(`Se encontraron ${departamentos.length} departamentos`);
       return departamentos;
     } catch (error) {
       console.error("Error al obtener departamentos:", error);
@@ -539,7 +611,6 @@ class FirestoreService {
    */
   static async obtenerCentros(empresaId) {
     try {
-      console.log(`Obteniendo centros para empresa ${empresaId}`);
       const centrosRef = collection(db, `empresas/${empresaId}/centros`);
       const snapshot = await getDocs(centrosRef);
       
@@ -551,7 +622,6 @@ class FirestoreService {
         });
       });
       
-      console.log(`Se encontraron ${centros.length} centros`);
       return centros;
     } catch (error) {
       console.error("Error al obtener centros:", error);
@@ -566,7 +636,6 @@ class FirestoreService {
    */
   static async obtenerFormaciones(empresaId) {
     try {
-      console.log(`Obteniendo formaciones para empresa ${empresaId}`);
       const formacionesRef = collection(db, `empresas/${empresaId}/formaciones`);
       const snapshot = await getDocs(formacionesRef);
       
@@ -578,7 +647,6 @@ class FirestoreService {
         });
       });
       
-      console.log(`Se encontraron ${formaciones.length} formaciones`);
       return formaciones;
     } catch (error) {
       console.error("Error al obtener formaciones:", error);

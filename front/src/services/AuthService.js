@@ -100,24 +100,60 @@ class AuthService {
     try {
       console.log("Iniciando proceso de login con credenciales:", credentials.email);
       
+      // Detectar si estamos haciendo login con una cuenta de Google
+      const isGoogleAuth = credentials.password && credentials.password.startsWith('google-auth-');
+      if (isGoogleAuth) {
+        console.log("Detectado inicio de sesión para usuario de Google");
+        
+        // Almacenar el UID para posibles recuperaciones de sesión
+        const uid = credentials.password.replace('google-auth-', '');
+        if (uid) {
+          sessionStorage.setItem('firebaseUid', uid);
+          console.log("UID de Google almacenado para recuperación de sesión:", uid);
+        }
+      }
+      
       // Usar la instancia personalizada de axios para el login
+      console.log("Enviando solicitud de login al backend:", `${API_URL}/login`);
       const response = await authAxios.post('/login', credentials);
       
       if (!response.data) {
         throw new Error('No se recibió token JWT del servidor');
       }
       
+      console.log("Login exitoso en el backend, token JWT recibido.");
+      
       // Guardar el token JWT y los datos de usuario
       localStorage.setItem('authToken', response.data);
       this.storeUserDataFromToken(response.data);
       
-      // Ahora autenticamos con Firebase (o verificamos si ya está autenticado)
-      if (!auth.currentUser) {
+      // Para usuarios de Google, verificar si ya están autenticados con Firebase
+      const currentUser = auth.currentUser;
+      if (isGoogleAuth) {
+        if (currentUser) {
+          // Si ya hay sesión de Firebase, verificar si es el mismo usuario
+          if (currentUser.email === credentials.email) {
+            console.log("Ya existe sesión en Firebase con el mismo usuario:", currentUser.email);
+          } else {
+            console.log("Existe sesión en Firebase pero con un usuario diferente. Actualizando...");
+            // Cerrar sesión primero y luego iniciar con el nuevo usuario
+            try {
+              await signOut(auth);
+              // No iniciamos sesión automáticamente, se manejará en el siguiente paso
+            } catch (signOutError) {
+              console.warn("Error al cerrar sesión previa:", signOutError);
+            }
+          }
+        } else {
+          console.log("No hay sesión activa en Firebase para el usuario de Google");
+        }
+      } else if (!isGoogleAuth && !currentUser) {
+        // Para usuarios normales, si no hay sesión en Firebase, iniciarla
         console.log("Iniciando sesión en Firebase");
         const firebaseUser = await FirebaseAuthService.login(credentials.email, credentials.password);
         console.log("Usuario autenticado en Firebase:", firebaseUser.email);
-      } else {
-        console.log("Ya existe sesión en Firebase:", auth.currentUser.email);
+      } else if (currentUser) {
+        console.log("Ya existe sesión en Firebase:", currentUser.email);
       }
       
       console.log("Login completado exitosamente en ambos sistemas");
@@ -127,33 +163,10 @@ class AuthService {
       
       return response.data;
     } catch (error) {
-      // No mostrar ningún error 401 en consola para usuarios
-      if (!(error.response && error.response.status === 401)) {
-        // En entorno de desarrollo, mostrar todos los errores excepto 401
-        if (process.env.NODE_ENV === 'development') {
-          console.log("[DEV-ONLY] Error de login:", error);
-        }
-      }
+      console.error("Error en proceso de login:", error);
       
-      // Limpiar cualquier estado parcial
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-      
-      // Si hay error específico de Firebase, manejarlo
-      if (error.code) {
-        switch (error.code) {
-          case 'auth/user-not-found':
-            throw new Error('No se encontró ningún usuario con este correo electrónico');
-          case 'auth/wrong-password':
-            throw new Error('La contraseña es incorrecta');
-          case 'auth/too-many-requests':
-            throw new Error('Se han realizado demasiados intentos. Por favor, espera unos minutos');
-          case 'auth/user-disabled':
-            throw new Error('Esta cuenta ha sido deshabilitada');
-          default:
-            throw error;
-        }
-      }
+      // Limpiar cualquier dato temporal
+      sessionStorage.removeItem('attemptedRecovery');
       
       throw error;
     }
@@ -168,23 +181,96 @@ class AuthService {
     try {
       console.log("Iniciando proceso de registro con datos:", user.email);
       
+      // Detectar si estamos registrando una cuenta de Google
+      const isGoogleAuth = user.password && user.password.startsWith('google-auth-');
+      if (isGoogleAuth) {
+        console.log("Detectado registro para usuario de Google");
+        
+        // Almacenar el UID para posibles recuperaciones de sesión
+        const uid = user.password.replace('google-auth-', '');
+        if (uid) {
+          sessionStorage.setItem('firebaseUid', uid);
+          console.log("UID de Google almacenado para recuperación de sesión:", uid);
+        }
+        
+        // Para usuarios de Google, primero verificar si ya existe intentando login
+        try {
+          console.log("Verificando si el usuario de Google ya existe...");
+          const loginResponse = await this.login({
+            email: user.email,
+            password: user.password
+          });
+          
+          console.log("Usuario de Google ya existía, login exitoso");
+          return loginResponse; // Retornar el token de login
+        } catch (loginError) {
+          console.log("Usuario de Google no existe, continuando con registro");
+          // Si el login falla, continuamos con el registro
+        }
+      }
+      
+      console.log("Enviando solicitud de registro al backend:", `${API_URL}/registro`);
+      
       // Primero registramos en Firebase (esto ya debería estar manejado en RegisterView)
       // Y luego registramos en el backend
       const response = await axios.post(`${API_URL}/registro`, user);
       
+      console.log("Respuesta del backend:", response.status, response.statusText);
+      
       if (response.data) {
-        // NO guardar el token automáticamente en registro
-        // Lo guardaremos después de que el usuario verifique su email
-        console.log("Token JWT recibido pero no almacenado todavía (pendiente de verificación)");
-        
-        // Guardar temporalmente para recuperación
-        sessionStorage.setItem('tempAuthToken', response.data);
+        // Para usuarios de Google, guardar el token JWT inmediatamente ya que no necesitan verificación
+        if (isGoogleAuth) {
+          console.log("Autenticando usuario de Google inmediatamente ya que están verificados");
+          localStorage.setItem('authToken', response.data);
+          this.storeUserDataFromToken(response.data);
+          
+          // Disparar evento para actualizar la interfaz
+          window.dispatchEvent(new CustomEvent('auth-state-changed'));
+        } else {
+          // NO guardar el token automáticamente en registro normal
+          // Lo guardaremos después de que el usuario verifique su email
+          console.log("Token JWT recibido pero no almacenado todavía (pendiente de verificación)");
+          
+          // Guardar temporalmente para recuperación
+          sessionStorage.setItem('tempAuthToken', response.data);
+        }
         
         console.log("Registro completado exitosamente");
       }
       return response.data;
     } catch (error) {
-      console.error("Error durante el proceso de registro:", error);
+      console.error("ERROR COMPLETO DE REGISTRO:", error);
+      
+      // Manejo especial para usuarios de Google
+      if (user.password && user.password.startsWith('google-auth-')) {
+        console.error("Error detallado de registro con Google:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message
+        });
+        
+        // Si el error es 401 o contiene mensajes de "ya existe", intentar login
+        if (error.response?.status === 401 || 
+            (error.response?.data && typeof error.response.data === 'string' && 
+             error.response.data.includes('ya existe'))) {
+          
+          console.log("Usuario parece ya existir, intentando login directo...");
+          try {
+            const loginResponse = await this.login({
+              email: user.email,
+              password: user.password
+            });
+            
+            console.log("Login exitoso después de error de registro");
+            return loginResponse;
+          } catch (loginError) {
+            console.error("Login también falló después de error de registro:", loginError);
+            throw error; // Relanzar el error original si login también falla
+          }
+        }
+      }
+      
       throw error;
     }
   }
