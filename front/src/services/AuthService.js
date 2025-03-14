@@ -7,6 +7,12 @@ import FirebaseAuthService from './FirebaseAuthService';
 // Si el backend está en un puerto distinto al frontend, hay que especificar la URL completa
 const API_URL = 'http://localhost:8080/api/auth';
 
+// Crear una instancia personalizada de axios para el servicio de autenticación
+// para no afectar a otras partes de la aplicación
+const authAxios = axios.create({
+  baseURL: API_URL
+});
+
 // Añadir interceptor para incluir el token en cada solicitud
 axios.interceptors.request.use(
   config => {
@@ -21,16 +27,64 @@ axios.interceptors.request.use(
   }
 );
 
-// Interceptor para manejar errores de respuesta
+// Configurar el mismo interceptor para la instancia personalizada
+authAxios.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para manejar errores de respuesta global
 axios.interceptors.response.use(
   response => response,
   error => {
-    console.error('Error en respuesta HTTP:', error);
+    // No mostrar errores 401 en la consola del navegador
+    if (!(error.response && error.response.status === 401)) {
+      console.error('Error en respuesta HTTP:', error);
+    }
+    
     if (error.response && error.response.status === 401) {
       // Si recibimos un 401 Unauthorized, cerramos la sesión
       localStorage.removeItem('authToken');
       localStorage.removeItem('userData');
-      window.location.href = '/login';
+      
+      // Solo redirigir si no estamos ya en la página de login
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para la instancia personalizada - silencia completamente errores 401
+authAxios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      // Silenciar completamente los errores de credenciales incorrectas
+      // No mostrar en consola
+      
+      // Limpiar datos de autenticación
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      
+      // Solo redirigir si no estamos ya en la página de login
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login') {
+        window.location.href = '/login';
+      }
+    } else {
+      // Para otros errores, mantener el comportamiento normal
+      console.error('Error en respuesta HTTP:', error);
     }
     return Promise.reject(error);
   }
@@ -46,8 +100,8 @@ class AuthService {
     try {
       console.log("Iniciando proceso de login con credenciales:", credentials.email);
       
-      // Primero autenticamos con el backend para obtener el JWT
-      const response = await axios.post(`${API_URL}/login`, credentials);
+      // Usar la instancia personalizada de axios para el login
+      const response = await authAxios.post('/login', credentials);
       
       if (!response.data) {
         throw new Error('No se recibió token JWT del servidor');
@@ -73,7 +127,13 @@ class AuthService {
       
       return response.data;
     } catch (error) {
-      console.error("Error durante el proceso de login:", error);
+      // No mostrar ningún error 401 en consola para usuarios
+      if (!(error.response && error.response.status === 401)) {
+        // En entorno de desarrollo, mostrar todos los errores excepto 401
+        if (process.env.NODE_ENV === 'development') {
+          console.log("[DEV-ONLY] Error de login:", error);
+        }
+      }
       
       // Limpiar cualquier estado parcial
       localStorage.removeItem('authToken');

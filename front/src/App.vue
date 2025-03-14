@@ -19,11 +19,9 @@ const actualizarEstadoUsuario = async () => {
   // Si hay usuario de Firebase pero no token JWT, es posible que sea un nuevo registro
   // o un problema de sincronización
   if (currentUser && !jwtToken) {
-    console.log("Inconsistencia: Usuario Firebase presente pero no hay JWT");
     // Si estamos en la página de registro, no hacer nada para evitar interrumpir
     // el flujo de verificación de email
     if (router.currentRoute.value.path === '/registro') {
-      console.log("En página de registro, no redirigir");
       return;
     }
     
@@ -32,11 +30,6 @@ const actualizarEstadoUsuario = async () => {
   
   // Verificar si hay token JWT y usuario de Firebase
   const userData = AuthService.getCurrentUser();
-  
-  console.log("Verificando estado de autenticación:");
-  console.log("- Firebase User:", currentUser ? currentUser.email : "No");
-  console.log("- JWT Token:", jwtToken ? "Presente" : "No");
-  console.log("- User Data:", userData);
   
   // Si hay inconsistencia entre Firebase y JWT, intentar resolver
   if (!currentUser && jwtToken && userData) {
@@ -72,7 +65,6 @@ const actualizarEstadoUsuario = async () => {
     console.log("Usuario completamente autenticado:", userData.nombre);
     usuario.value = userData;
   } else {
-    console.log("No hay usuario autenticado o autenticación incompleta");
     usuario.value = null;
     
     // Verificar si estamos en una ruta protegida
@@ -91,7 +83,6 @@ onMounted(() => {
   
   // Configurar listener para cambios de autenticación de Firebase
   const unsubscribe = onAuthStateChanged(auth, (user) => {
-    console.log("Cambio en estado de autenticación detectado");
     actualizarEstadoUsuario();
   });
   
@@ -124,6 +115,17 @@ const logout = async () => {
     console.error("Error al cerrar sesión:", error);
   }
 };
+
+// Función para recargar la página de registro o navegar a ella
+const reloadRegistro = () => {
+  if (router.currentRoute.value.path === '/registro') {
+    console.log("Recargando página de registro");
+    window.location.reload();
+  } else {
+    console.log("Navegando a página de registro");
+    router.push('/registro');
+  }
+};
 </script>
 
 <template>
@@ -147,7 +149,7 @@ const logout = async () => {
         </template>
         <template v-else>
           <RouterLink to="/login" class="nav-link">Iniciar Sesión</RouterLink>
-          <RouterLink to="/registro" class="nav-button">Regístrate</RouterLink>
+          <a href="#" @click.prevent="reloadRegistro" class="nav-button">Regístrate</a>
         </template>
       </nav>
     </div>

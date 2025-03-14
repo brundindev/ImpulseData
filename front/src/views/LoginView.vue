@@ -2,7 +2,18 @@
   <div class="login-container">
     <div class="login-card">
       <h1>Iniciar Sesión</h1>
-      <div v-if="error" class="alert alert-danger">
+      
+      <!-- Mensaje de error personalizado con ícono X -->
+      <div v-if="credencialesIncorrectas" class="alert alert-danger error-box">
+        <div class="error-icon">✖</div>
+        <div class="error-content">
+          <div class="error-title">Error de autenticación</div>
+          <p>{{ error }}</p>
+        </div>
+      </div>
+      
+      <!-- Mensaje de error estándar -->
+      <div v-else-if="error" class="alert alert-danger">
         <p>{{ error }}</p>
         <div v-if="emailNoVerificado" class="email-verification">
           <p>Por favor, verifica tu dirección de correo electrónico antes de iniciar sesión.</p>
@@ -51,11 +62,33 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from '../services/AuthService';
 import axios from 'axios';
 import FirebaseAuthService from '../services/FirebaseAuthService';
+
+// Configurar un manejador global para suprimir errores de red en consola
+// Solo para este componente
+const originalConsoleError = console.error;
+console.error = function(...args) {
+  // Suprimir errores específicos relacionados con login
+  const errorText = args.join(' ');
+  if (errorText.includes('401') || 
+      errorText.includes('login') || 
+      errorText.includes('Unauthorized') ||
+      errorText.includes('axios')) {
+    // No mostrar estos errores en consola
+    return;
+  }
+  // Pasar el resto de los errores al console.error original
+  originalConsoleError.apply(console, args);
+};
+
+// Restablecer console.error al desmontar el componente
+onUnmounted(() => {
+  console.error = originalConsoleError;
+});
 
 const router = useRouter();
 const email = ref('');
@@ -64,6 +97,9 @@ const error = ref('');
 const loading = ref(false);
 const emailNoVerificado = computed(() => {
   return error.value && error.value.toLowerCase().includes('verifica') && email.value;
+});
+const credencialesIncorrectas = computed(() => {
+  return error.value && error.value.toLowerCase().includes('credenciales incorrectas');
 });
 
 const login = async () => {
@@ -77,6 +113,17 @@ const login = async () => {
   error.value = '';
   
   try {
+    // Capturar errores de red y suprimirlos
+    window.addEventListener('unhandledrejection', function suppressLoginErrors(event) {
+      if (event.reason && 
+          (event.reason.toString().includes('401') || 
+           event.reason.toString().includes('login') ||
+           event.reason.toString().includes('Unauthorized'))) {
+        event.preventDefault();
+        window.removeEventListener('unhandledrejection', suppressLoginErrors);
+      }
+    });
+    
     // Intentar inicio de sesión
     await AuthService.login({
       email: email.value,
@@ -89,7 +136,8 @@ const login = async () => {
     // Redirigir a la página de inicio
     router.push('/');
   } catch (err) {
-    console.error('Error de inicio de sesión:', err);
+    // No registrar errores 401 en la consola
+    // Este bloque maneja silenciosamente los errores
     
     // Manejar diferentes tipos de errores
     if (err.response) {
@@ -104,12 +152,20 @@ const login = async () => {
     } else if (err.request) {
       // La solicitud se realizó pero no se recibió respuesta
       error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+    } else if (err.message) {
+      // Si es un error con mensaje personalizado (como los de Firebase)
+      error.value = err.message;
     } else {
       // Ocurrió un error al configurar la solicitud
       error.value = 'Error al procesar la solicitud. Por favor, inténtalo de nuevo.';
     }
-  } finally {
+    
+    // Garantizar que loading sea false para todos los errores
     loading.value = false;
+  } finally {
+    if (loading.value) { // Solo desactivar loading si no se ha hecho en el catch
+      loading.value = false;
+    }
   }
 };
 
@@ -127,7 +183,10 @@ const reenviarVerificacion = async () => {
       
       error.value = 'Se ha enviado un nuevo correo de verificación a tu dirección de email.';
     } catch (firebaseError) {
-      console.error('Error con Firebase:', firebaseError);
+      // Solo mostrar errores en consola en entorno de desarrollo
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[DEV-ONLY] Error con Firebase:', firebaseError);
+      }
       
       // Si falla Firebase, llamamos al backend
       const response = await axios.get(
@@ -137,7 +196,13 @@ const reenviarVerificacion = async () => {
       error.value = 'Se ha enviado un nuevo correo de verificación a tu dirección de email.';
     }
   } catch (err) {
-    console.error('Error al reenviar verificación:', err);
+    // Solo mostrar errores en consola en entorno de desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[DEV-ONLY] Error al reenviar verificación:', err);
+    } else {
+      // En producción, no mostramos el error en consola
+      console.log('Error de verificación manejado correctamente');
+    }
     
     if (err.code) {
       // Errores específicos de Firebase
@@ -352,5 +417,39 @@ label {
   .btn {
     padding: 0.75rem;
   }
+}
+
+/* Estilos para el mensaje de error personalizado */
+.error-box {
+  display: flex;
+  align-items: flex-start;
+  padding: 15px;
+  border-left: 4px solid #e62222;
+  background-color: #ffeeee;
+  border-radius: 5px;
+}
+
+.error-icon {
+  color: #e62222;
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background-color: rgba(230, 34, 34, 0.1);
+  border-radius: 50%;
+}
+
+.error-content {
+  flex: 1;
+}
+
+.error-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #e62222;
 }
 </style>
