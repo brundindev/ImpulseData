@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from './services/AuthService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -10,6 +10,11 @@ import AlicanteBanner from './components/AlicanteBanner.vue';
 const router = useRouter();
 const auth = getAuth();
 const usuario = ref(null);
+
+// Verificar si estamos en la ruta de registro
+const estaEnRegistro = computed(() => {
+  return router.currentRoute.value.path === '/registro';
+});
 
 // Función para actualizar el estado del usuario
 const actualizarEstadoUsuario = async () => {
@@ -149,7 +154,7 @@ const reloadRegistro = () => {
         </template>
         <template v-else>
           <RouterLink to="/login" class="nav-link">Iniciar Sesión</RouterLink>
-          <a href="#" @click.prevent="reloadRegistro" class="nav-button">Regístrate</a>
+          <a href="#" @click.prevent="reloadRegistro" class="button2" :class="{ 'button2-active': estaEnRegistro }">Regístrate</a>
         </template>
       </nav>
     </div>
@@ -388,5 +393,75 @@ const reloadRegistro = () => {
 /* button click effect*/
 .Btn:active {
   transform: translate(2px ,2px);
+}
+
+/* Estilos para el botón Regístrate */
+.button2 {
+  display: inline-block;
+  transition: all 0.2s ease-in;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  color: #090909;
+  padding: 0.5em 1.2em;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 0.5em;
+  background: #e8e8e8;
+  border: 1px solid #e8e8e8;
+  box-shadow: 4px 4px 8px #c5c5c5, -4px -4px 8px #ffffff;
+  text-decoration: none;
+}
+
+.button2:active {
+  color: #666;
+  box-shadow: inset 3px 3px 6px #c5c5c5, inset -3px -3px 6px #ffffff;
+}
+
+.button2:before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.25);
+  top: 100%;
+  width: 140%;
+  height: 180%;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  display: block;
+  transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
+  z-index: -1;
+}
+
+.button2:after {
+  content: "";
+  position: absolute;
+  left: 55%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.45);
+  top: 180%;
+  width: 160%;
+  height: 190%;
+  background-color: #004698;
+  border-radius: 50%;
+  display: block;
+  transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
+  z-index: -1;
+}
+
+.button2:hover, .button2-active {
+  color: #ffffff;
+  border: 1px solid #004698;
+}
+
+.button2:hover:before, .button2-active:before {
+  top: -35%;
+  background-color: #004698;
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+}
+
+.button2:hover:after, .button2-active:after {
+  top: -45%;
+  background-color: #004698;
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
 </style>
