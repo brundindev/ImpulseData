@@ -48,6 +48,18 @@ class FirebaseAuthService {
    * @returns {Promise} - Datos del usuario
    */
   async loginWithGoogle() {
+    // Suprimir advertencias específicas de COOP en la consola
+    const originalConsoleError = console.error;
+    console.error = function(...args) {
+      const errorText = args.join(' ');
+      if (errorText.includes('Cross-Origin-Opener-Policy') || 
+          errorText.includes('window.close')) {
+        // No mostrar estas advertencias en la consola
+        return;
+      }
+      originalConsoleError.apply(console, args);
+    };
+    
     try {
       const provider = new GoogleAuthProvider();
       // Solicitar acceso al perfil de Google para tener más datos
@@ -61,7 +73,6 @@ class FirebaseAuthService {
       
       const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
-      
       
       // Forzar el estado de verificación para usuarios de Google
       // ya que los emails de Google ya están verificados
@@ -109,8 +120,14 @@ class FirebaseAuthService {
       
       return user;
     } catch (error) {
+      // Restaurar console.error original
+      console.error = originalConsoleError;
+      
       console.error('Error al iniciar sesión con Google:', error);
       throw error;
+    } finally {
+      // Asegurarse de restaurar console.error incluso si hay excepciones
+      console.error = originalConsoleError;
     }
   }
 
@@ -166,13 +183,32 @@ class FirebaseAuthService {
    */
   async reautenticar() {
     try {
+      // Verificar si estamos en proceso de cierre de sesión
+      const cerrando = sessionStorage.getItem('cerrando_sesion');
+      if (cerrando === 'true') {
+        console.log("No se intenta reautenticar durante el cierre de sesión");
+        return null;
+      }
+      
       // Si ya hay usuario, solo lo devolvemos
       if (auth.currentUser) {
         console.log("Ya existe un usuario autenticado en Firebase:", auth.currentUser.email);
         return auth.currentUser;
       }
       
+      // Verificar si ya hemos intentado reautenticar recientemente
+      const ultimoIntento = sessionStorage.getItem('ultimoIntentoReautenticacion');
+      const ahora = Date.now();
+      // Si hemos intentado reautenticar en los últimos 5 minutos, no lo intentamos de nuevo
+      if (ultimoIntento && (ahora - parseInt(ultimoIntento)) < 300000) { // 5 minutos
+        console.log("Se ha intentado reautenticar recientemente, omitiendo intento");
+        return null;
+      }
+      
       console.log("Intentando recuperar sesión de Firebase...");
+      
+      // Marcar este intento
+      sessionStorage.setItem('ultimoIntentoReautenticacion', ahora.toString());
       
       // Primero intentamos restaurar la sesión mediante el uid almacenado
       const storedUid = sessionStorage.getItem('firebaseUid');
@@ -197,7 +233,11 @@ class FirebaseAuthService {
               console.log("Reautenticación exitosa:", userCredential.email);
               return userCredential;
             } catch (loginError) {
-              console.warn("No se pudo reautenticar con credenciales:", loginError);
+              // No mostrar el error completo en consola, solo un mensaje informativo
+              console.log("No se pudo reautenticar usuario", email);
+              
+              // Registrar el intento fallido para no repetirlo constantemente
+              sessionStorage.setItem('reautenticacionFallida', 'true');
             }
           }
         }
@@ -218,13 +258,24 @@ class FirebaseAuthService {
         return null;
       }
       
+      // Si ya intentamos y falló, no volvemos a intentar
+      if (sessionStorage.getItem('reautenticacionFallida') === 'true') {
+        console.log("La reautenticación ha fallado previamente, se mantiene sesión con JWT");
+        return null;
+      }
+      
       // Para una reautenticación completa necesitaríamos la contraseña
       // Pero no la guardamos por seguridad
       
-      console.log("No se pudo recuperar la sesión automáticamente. Se requiere inicio de sesión manual.");
+      console.log("No se pudo recuperar la sesión automáticamente. Se mantiene la sesión con JWT.");
       return null;
     } catch (error) {
-      console.error("Error al intentar reautenticar:", error);
+      // No mostrar el error completo, solo un mensaje informativo
+      console.log("Error controlado durante la reautenticación");
+      
+      // Marcar que ha habido un fallo para no volver a intentarlo
+      sessionStorage.setItem('reautenticacionFallida', 'true');
+      
       return null;
     }
   }

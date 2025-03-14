@@ -120,9 +120,7 @@ class AuthService {
       if (!response.data) {
         throw new Error('No se recibió token JWT del servidor');
       }
-      
-      console.log("Login exitoso en el backend, token JWT recibido.");
-      
+            
       // Guardar el token JWT y los datos de usuario
       localStorage.setItem('authToken', response.data);
       this.storeUserDataFromToken(response.data);
@@ -155,9 +153,7 @@ class AuthService {
       } else if (currentUser) {
         console.log("Ya existe sesión en Firebase:", currentUser.email);
       }
-      
-      console.log("Login completado exitosamente en ambos sistemas");
-      
+            
       // Disparar evento para actualizar la interfaz
       window.dispatchEvent(new CustomEvent('auth-state-changed'));
       
@@ -201,7 +197,6 @@ class AuthService {
             password: user.password
           });
           
-          console.log("Usuario de Google ya existía, login exitoso");
           return loginResponse; // Retornar el token de login
         } catch (loginError) {
           console.log("Usuario de Google no existe, continuando con registro");

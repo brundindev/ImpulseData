@@ -305,11 +305,8 @@ const loginWithGoogle = async () => {
         // Comprobar si el usuario ya está autenticado después de la verificación
         try {
           // Intentar iniciar sesión nuevamente antes de registrar
-          console.log("Intentando iniciar sesión de nuevo después de la verificación...");
           await AuthService.login(loginData);
-          
-          console.log("Login exitoso después de la verificación");
-          
+                    
           // Emitir el cambio de estado de autenticación usando Pinia
           authStore.setAuth(true);
           

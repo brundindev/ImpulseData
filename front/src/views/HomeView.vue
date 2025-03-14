@@ -538,7 +538,7 @@ const cargarDatos = async () => {
       
       return;
     }
-        
+    
     // Obtener contadores
     const contadores = await FirestoreService.obtenerContadores();
     empresasCount.value = contadores.empresasCount;
@@ -557,7 +557,7 @@ const cargarDatos = async () => {
       }
       return perteneceAlUsuario;
     });
-        
+    
   } catch (err) {
     console.error("Error al cargar datos en HomeView:", err);
     error.value = 'No se pudieron cargar los datos. Por favor, inténtalo de nuevo.';
@@ -792,7 +792,7 @@ const eliminarEmpresa = async () => {
 };
 
 // Logout function modificada para limpiar todos los datos
-const logout = () => {  
+const logout = () => {
   // Limpiar todos los datos locales
   empresas.value = [];
   empresasCount.value = 0;

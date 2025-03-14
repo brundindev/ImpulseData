@@ -15,10 +15,19 @@ console.error = function(...args) {
   if (errorString.includes('401') || 
       errorString.includes('Unauthorized') || 
       errorString.includes('login') ||
-      errorString.includes('axios')) {
+      errorString.includes('axios') ||
+      // Nuevos errores a suprimir:
+      errorString.includes('ERR_BLOCKED_BY_CLIENT') ||
+      errorString.includes('Cross-Origin-Opener-Policy') ||
+      errorString.includes('Firestore.Listen') ||
+      errorString.includes('window.close') ||
+      // Errores específicos de Firebase Auth:
+      errorString.includes('auth/invalid-credential') ||
+      errorString.includes('Error al iniciar sesión con Firebase') ||
+      errorString.includes('No se pudo reautenticar con credenciales')) {
     // En desarrollo, se puede mostrar un mensaje personalizado
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Depuración] Error de autenticación suprimido');
+      console.log('[Depuración] Error suprimido:', errorString.substring(0, 50) + '...');
       // Opcionalmente descomentar para ver el error original en desarrollo
       // originalConsoleError.apply(console, args);
     }
@@ -29,21 +38,21 @@ console.error = function(...args) {
   originalConsoleError.apply(console, args);
 };
 
-// Interceptar errores no capturados
+// También capturar errores no manejados en promesas
 window.addEventListener('unhandledrejection', function(event) {
-  // Si el error está relacionado con credenciales incorrectas, lo suprimimos
-  if (event.reason && (
-    event.reason.toString().includes('401') ||
-    event.reason.toString().includes('Unauthorized') ||
-    event.reason.toString().includes('login') ||
-    event.reason.toString().includes('axios')
-  )) {
-    // Prevenir que aparezca en la consola
+  const errorMsg = event.reason?.message || String(event.reason);
+  
+  // Si es un error que queremos suprimir, prevenir su propagación
+  if (errorMsg.includes('ERR_BLOCKED_BY_CLIENT') || 
+      errorMsg.includes('Cross-Origin-Opener-Policy') ||
+      errorMsg.includes('Firestore.Listen') ||
+      errorMsg.includes('window.close')) {
+    // Evitar que el error aparezca en la consola
     event.preventDefault();
+    event.stopPropagation();
     
-    // En modo desarrollo, podemos mostrar un mensaje personalizado
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Depuración] Promesa rechazada suprimida (error de autenticación)');
+      console.log('[Depuración] Promesa rechazada suprimida:', errorMsg.substring(0, 50) + '...');
     }
   }
 });

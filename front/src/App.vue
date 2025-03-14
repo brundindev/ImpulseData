@@ -21,6 +21,13 @@ const estaEnRegistro = computed(() => {
 const actualizarEstadoUsuario = async () => {
   const jwtToken = localStorage.getItem('authToken');
   const currentUser = auth.currentUser;
+  const cerrando = sessionStorage.getItem('cerrando_sesion');
+  
+  // Si estamos en proceso de cierre de sesión, no hacer nada
+  if (cerrando === 'true') {
+    console.log("Detectado cierre de sesión en progreso, ignorando cambios de estado de autenticación");
+    return;
+  }
   
   // Si hay usuario de Firebase pero no token JWT, es posible que sea un nuevo registro
   // o un problema de sincronización
@@ -31,7 +38,7 @@ const actualizarEstadoUsuario = async () => {
       return;
     }
     
-    console.warn("Inconsistencia: Usuario Firebase presente pero no hay JWT");
+    console.log("Detectada inconsistencia: Usuario Firebase presente pero no hay JWT");
     
     // Intentar recuperar la sesión si tenemos datos del usuario
     const storedUid = sessionStorage.getItem('firebaseUid');
@@ -46,9 +53,10 @@ const actualizarEstadoUsuario = async () => {
         // Intentar iniciar sesión para obtener el JWT
         await AuthService.login(loginData);
         usuario.value = AuthService.getCurrentUser();
+        console.log("Sesión recuperada exitosamente");
         return; // Si se logró recuperar la sesión, salimos
       } catch (loginError) {
-        console.warn("No se pudo recuperar la sesión automáticamente:", loginError);
+        console.log("No se pudo recuperar la sesión automáticamente");
       }
     }
   }
@@ -58,17 +66,18 @@ const actualizarEstadoUsuario = async () => {
   
   // Si hay inconsistencia entre Firebase y JWT, intentar resolver
   if (!currentUser && jwtToken && userData) {
-    console.warn("Inconsistencia: JWT presente pero no hay usuario Firebase - Manteniendo sesión con JWT");
+    console.log("Sesión activa con JWT pero no con Firebase - Manteniendo sesión con JWT");
     // En este caso mantenemos la sesión basada en el JWT
     usuario.value = userData;
     
     // Intentar recuperar sesión de Firebase si tenemos el email
-    if (userData.email) {
+    // Solo si no se ha intentado recientemente
+    if (userData.email && !sessionStorage.getItem('reautenticacionFallida')) {
       try {
         // No forzamos cierre de sesión, solo intentamos recuperar
         await FirebaseAuthService.reautenticar();
       } catch (reAuthError) {
-        console.warn("No se pudo recuperar sesión de Firebase:", reAuthError);
+        console.log("No se pudo recuperar sesión de Firebase, se mantiene con JWT");
       }
     }
     
@@ -82,8 +91,8 @@ const actualizarEstadoUsuario = async () => {
         sessionStorage.setItem('lastReload', now.toString());
         window.location.reload();
       } else {
-        // Si ya hemos recargado recientemente, redirigir al login
-        router.push('/login');
+        // Si ya hemos recargado recientemente, mantenemos la sesión basada en JWT
+        console.log("Se mantiene la sesión basada en JWT");
       }
     }
     return;
@@ -92,7 +101,7 @@ const actualizarEstadoUsuario = async () => {
   // Si el usuario de Firebase existe pero no hay JWT, intentar una vez más 
   // recuperar la sesión antes de cerrar
   if (currentUser && !jwtToken) {
-    console.warn("Inconsistencia: Usuario Firebase presente pero no hay JWT");
+    console.log("Detectada inconsistencia: Usuario Firebase presente pero no hay JWT");
     
     // Intentar una vez más recuperar la sesión
     try {
@@ -108,6 +117,7 @@ const actualizarEstadoUsuario = async () => {
         await AuthService.login(loginData);
         usuario.value = AuthService.getCurrentUser();
         sessionStorage.removeItem('attemptedRecovery');
+        console.log("Sesión JWT recuperada correctamente");
         return;
       }
       
@@ -115,7 +125,7 @@ const actualizarEstadoUsuario = async () => {
       usuario.value = null;
       router.push('/login');
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.log("Error al recuperar sesión, cerrando sesión");
     }
     return;
   }
@@ -123,6 +133,7 @@ const actualizarEstadoUsuario = async () => {
   // Actualizar estado según lo que tengamos
   if (currentUser && jwtToken && userData) {
     usuario.value = userData;
+    console.log("Sesión activa y sincronizada correctamente");
   } else {
     usuario.value = null;
     
@@ -157,19 +168,38 @@ onMounted(() => {
 // Logout function
 const logout = async () => {
   try {
+    // Indicar que estamos en proceso de cierre de sesión
+    sessionStorage.setItem('cerrando_sesion', 'true');
+    
     // Limpiar datos locales
     usuario.value = null;
+    
+    // Asegurarnos de limpiar todos los datos relacionados
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    sessionStorage.removeItem('firebaseUid');
+    sessionStorage.removeItem('attemptedRecovery');
+    sessionStorage.removeItem('lastReload');
     
     // Cerrar sesión en Firebase y backend
     await AuthService.logout();
     
+    console.log("Sesión cerrada correctamente y datos de usuario eliminados");
+    
     // Disparar evento para actualizar toda la aplicación
     window.dispatchEvent(new CustomEvent('auth-state-changed'));
+    
+    // Esperar un momento antes de redirigir
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Quitar la marca de cierre de sesión
+    sessionStorage.removeItem('cerrando_sesion');
     
     // Redirigir al login
     router.push('/login');
   } catch (error) {
     console.error("Error al cerrar sesión:", error);
+    sessionStorage.removeItem('cerrando_sesion');
   }
 };
 
