@@ -165,5 +165,5 @@ const reloadRegistro = () => {
   </main>
 </template>
 
-<style src="./assets/App.css">
-</style>
+<style src="./assets/App.css"></style>
+  
