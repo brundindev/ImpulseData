@@ -1,4 +1,6 @@
-# ![simple-solid-color-black-background-banner_2753863 jpg!w700wp](https://github.com/user-attachments/assets/64d71e13-cd6d-40f0-bf8d-65587cf91b07)
+# <img src="/docs/img/ImpulseData_Logo.jpg" alt="ImpulseData" width="600" height="400">
+
+
 
 
 # 🚀 ImpulseData - Alicante Futura Lab
