@@ -7,8 +7,8 @@
         <p class="welcome-subtitle" v-if="usuario">Bienvenido, <span class="user-name">{{ usuario.nombre }}</span></p>
       </div>
       <div class="action-buttons">
-        <button class="btn btn-primary btn-create" @click="showFormModal = true; modoEdicion = false;">
-          <span class="icon">+</span> Crear nueva empresa
+        <button class="btn-crear-empresa" @click="showFormModal = true; modoEdicion = false;">
+          <span> + Crear nueva empresa</span>
         </button>
       </div>
     </div>
@@ -83,9 +83,16 @@
               </div>
             </div>
             <div class="form-actions">
-              <button class="btn btn-icon btn-edit" @click="editarEmpresa(empresa)">Editar</button>
-              <button class="btn btn-icon btn-view" @click="verEmpresa(empresa)">Ver</button>
-              <button class="btn btn-icon btn-delete" @click="confirmarEliminar(empresa)">Eliminar</button>
+              <button class="button" @click="editarEmpresa(empresa)">Editar</button>
+              <button class="button" @click="verEmpresa(empresa)">Ver</button>
+              <button class="noselect" @click="confirmarEliminar(empresa)">
+                <span class="text">Eliminar</span>
+                <span class="icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                  </svg>
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -271,7 +278,7 @@
             </button>
             
             <div class="form-actions modal-actions">
-              <button type="button" class="btn btn-cancel" @click="showFormModal = false">Cancelar</button>
+              <button type="button" class="button-cancel" @click="showFormModal = false">Cancelar</button>
               <button type="submit" class="btn btn-save" :disabled="guardando">Guardar empresa</button>
             </div>
           </form>
@@ -291,9 +298,14 @@
           <p class="warning-text">Esta acción no se puede deshacer y eliminará todos los departamentos, centros y formaciones asociados.</p>
           
           <div class="form-actions modal-actions">
-            <button type="button" class="btn btn-cancel" @click="mostrarConfirmacion = false">Cancelar</button>
-            <button type="button" class="btn btn-danger" @click="eliminarEmpresa" :disabled="eliminando">
-              {{ eliminando ? 'Eliminando...' : 'Eliminar' }}
+            <button type="button" class="button-cancel" @click="mostrarConfirmacion = false">Cancelar</button>
+            <button type="button" class="noselect" @click="eliminarEmpresa" :disabled="eliminando">
+              <span class="text">{{ eliminando ? 'Eliminando...' : 'Eliminar' }}</span>
+              <span class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                </svg>
+              </span>
             </button>
           </div>
         </div>
@@ -374,12 +386,12 @@
             </div>
             
             <div class="form-actions modal-actions">
-              <button type="button" class="btn btn-cancel" @click="showViewModal = false">Cancelar</button>
-              <button type="button" class="btn btn-secondary" @click="editarEmpresaDesdeVista()">
+              <button type="button" class="button-cancel" @click="showViewModal = false">Cancelar</button>
+              <button type="button" class="button" @click="editarEmpresaDesdeVista()">
                 Editar
               </button>
-              <button type="button" class="btn btn-primary" @click="descargarPDF()">
-                <span class="icon">↓</span> Descargar PDF
+              <button type="button" class="buttonDownload" @click="descargarPDF()">
+                Descargar PDF
               </button>
             </div>
           </div>
@@ -1502,13 +1514,45 @@ const descargarPDF = () => {
   margin-top: 2rem;
 }
 
-.btn-cancel {
-  background-color: #f1f1f1;
-  color: var(--text-color);
+.button-cancel {
+  padding: 0.6em 1.2em;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #e62222;
+  transition: all 1000ms;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+  outline: 2px solid #e62222;
+  background-color: transparent;
 }
 
-.btn-cancel:hover {
-  background-color: #e0e0e0;
+.button-cancel:hover {
+  color: #ffffff;
+  transform: scale(1.1);
+  outline: 2px solid #ff3636;
+  box-shadow: 4px 5px 17px -4px #a31515;
+}
+
+.button-cancel::before {
+  content: "";
+  position: absolute;
+  left: -50px;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background-color: #e62222;
+  transform: skewX(45deg);
+  z-index: -1;
+  transition: width 1000ms;
+}
+
+.button-cancel:hover::before {
+  width: 250%;
 }
 
 .btn-save {
@@ -1691,5 +1735,257 @@ const descargarPDF = () => {
   .banner-info p {
     font-size: 0.9rem;
   }
+}
+
+/* Botón animado de descarga */
+.buttonDownload {
+  display: inline-block;
+  position: relative;
+  padding: 10px 25px;
+  background-color: #4CC713;
+  color: white;
+  font-family: sans-serif;
+  text-decoration: none;
+  font-size: 0.9em;
+  text-align: center;
+  text-indent: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.buttonDownload:hover {
+  background-color: #45a21a;
+  color: white;
+}
+
+.buttonDownload:before, .buttonDownload:after {
+  content: ' ';
+  display: block;
+  position: absolute;
+  left: 15px;
+  top: 52%;
+}
+
+.buttonDownload:before {
+  width: 10px;
+  height: 2px;
+  border-style: solid;
+  border-width: 0 2px 2px;
+}
+
+.buttonDownload:after {
+  width: 0;
+  height: 0;
+  margin-left: 3px;
+  margin-top: -7px;
+  border-style: solid;
+  border-width: 4px 4px 0 4px;
+  border-color: transparent;
+  border-top-color: inherit;
+  animation: downloadArrow 1s linear infinite;
+  animation-play-state: paused;
+}
+
+.buttonDownload:hover:before {
+  border-color: #cdefbd;
+}
+
+.buttonDownload:hover:after {
+  border-top-color: #cdefbd;
+  animation-play-state: running;
+}
+
+@keyframes downloadArrow {
+  0% {
+    margin-top: -7px;
+    opacity: 1;
+  }
+
+  0.001% {
+    margin-top: -15px;
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    margin-top: 0;
+    opacity: 0.4;
+  }
+}
+
+/* Botón con efecto de barrido */
+.button {
+  padding: 0.6em 1.2em;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #004698;
+  transition: all 1000ms;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+  outline: 2px solid #004698;
+  background-color: transparent;
+}
+
+.button:hover {
+  color: #ffffff;
+  transform: scale(1.1);
+  outline: 2px solid #0062d6;
+  box-shadow: 4px 5px 17px -4px #002d6e;
+}
+
+.button::before {
+  content: "";
+  position: absolute;
+  left: -50px;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background-color: #004698;
+  transform: skewX(45deg);
+  z-index: -1;
+  transition: width 1000ms;
+}
+
+.button:hover::before {
+  width: 250%;
+}
+
+/* Botón de eliminar con animación */
+.noselect {
+  width: 130px;
+  height: 38px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  background: #e62222;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+  transition: 200ms;
+}
+
+.noselect .text {
+  transform: translateX(20px);
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  transition: 200ms;
+}
+
+.noselect .icon {
+  position: absolute;
+  border-left: 1px solid #c41b1b;
+  transform: translateX(90px);
+  height: 28px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 200ms;
+}
+
+.noselect svg {
+  width: 15px;
+  fill: #eee;
+}
+
+.noselect:hover {
+  background: #ff3636;
+}
+
+.noselect:hover .text {
+  color: transparent;
+}
+
+.noselect:hover .icon {
+  width: 130px;
+  border-left: none;
+  transform: translateX(0);
+}
+
+.noselect:focus {
+  outline: none;
+}
+
+.noselect:active .icon svg {
+  transform: scale(0.8);
+}
+
+.noselect:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.noselect:disabled .icon {
+  border-left: 1px solid #b1b1b1;
+}
+
+/* Botón Crear empresa con diseño especial */
+.btn-crear-empresa {
+ position: relative;
+ height: 50px;
+ padding: 0 30px;
+ border: 2px solid #000;
+ background: #e8e8e8;
+ user-select: none;
+ white-space: nowrap;
+ transition: all .05s linear;
+ font-family: inherit;
+}
+
+.btn-crear-empresa:before, .btn-crear-empresa:after {
+ content: "";
+ position: absolute;
+ background: #e8e8e8;
+ transition: all .2s linear;
+}
+
+.btn-crear-empresa:before {
+ width: calc(100% + 6px);
+ height: calc(100% - 16px);
+ top: 8px;
+ left: -3px;
+}
+
+.btn-crear-empresa:after {
+ width: calc(100% - 16px);
+ height: calc(100% + 6px);
+ top: -3px;
+ left: 8px;
+}
+
+.btn-crear-empresa:hover {
+ cursor: crosshair;
+}
+
+.btn-crear-empresa:active {
+ transform: scale(0.95);
+}
+
+.btn-crear-empresa:hover:before {
+ height: calc(100% - 32px);
+ top: 16px;
+}
+
+.btn-crear-empresa:hover:after {
+ width: calc(100% - 32px);
+ left: 16px;
+}
+
+.btn-crear-empresa span {
+ font-size: 15px;
+ z-index: 3;
+ position: relative;
+ font-weight: 600;
 }
 </style>
