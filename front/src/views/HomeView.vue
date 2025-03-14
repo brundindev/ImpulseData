@@ -410,7 +410,6 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import FirebaseAuthService from '../services/FirebaseAuthService';
-import AlicanteBanner from '../components/AlicanteBanner.vue';
 import axios from 'axios';
 
 const router = useRouter();

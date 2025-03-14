@@ -5,8 +5,6 @@ import { useRouter } from 'vue-router';
 import AuthService from './services/AuthService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import FirebaseAuthService from './services/FirebaseAuthService';
-// Mantenemos el componente por si se necesita en otras partes
-import AlicanteBanner from './components/AlicanteBanner.vue';
 
 const router = useRouter();
 const auth = getAuth();
