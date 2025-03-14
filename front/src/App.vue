@@ -4,6 +4,8 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from './services/AuthService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+// Mantenemos el componente por si se necesita en otras partes
+import AlicanteBanner from './components/AlicanteBanner.vue';
 
 const router = useRouter();
 const auth = getAuth();
@@ -128,6 +130,7 @@ const logout = async () => {
   <header class="app-header">
     <div class="header-container">
       <div class="logo-container">
+        <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="impulsa-logo" />
         <span class="app-logo">IMPULSEDATA</span>
       </div>
       <nav class="main-nav">
@@ -170,6 +173,13 @@ const logout = async () => {
 .logo-container {
   display: flex;
   align-items: center;
+  gap: 15px;
+}
+
+.impulsa-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
 .app-logo {
@@ -275,6 +285,10 @@ const logout = async () => {
   
   .app-logo {
     font-size: 1.3rem;
+  }
+  
+  .impulsa-logo {
+    height: 32px;
   }
 }
 

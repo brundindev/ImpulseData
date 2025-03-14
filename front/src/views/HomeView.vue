@@ -13,6 +13,17 @@
       </div>
     </div>
     
+    <!-- Banner de Alicante destacado -->
+    <div class="alicante-banner-showcase">
+      <div class="banner-image-container">
+        <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image" />
+      </div>
+      <div class="banner-info">
+        <h3>Impulsedata - Alicante Futura</h3>
+        <p>Plataforma digital de gestión de datos para la innovación y el desarrollo sostenible de Alicante.</p>
+      </div>
+    </div>
+    
     <!-- Contenido principal -->
     <div class="dashboard-content">
       <!-- Panel de estadísticas -->
@@ -387,6 +398,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import FirebaseAuthService from '../services/FirebaseAuthService';
+import AlicanteBanner from '../components/AlicanteBanner.vue';
 
 const router = useRouter();
 const auth = getAuth();
@@ -1611,5 +1623,73 @@ const descargarPDF = () => {
   transform: translateY(-5px);
   box-shadow: 0 6px 16px rgba(0, 70, 152, 0.4);
   background-color: var(--primary-hover);
+}
+
+/* Estilos para el banner de Alicante */
+.alicante-banner-showcase {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background: linear-gradient(to right, #f5f5f5, #e0e0e0);
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.banner-image-container {
+  flex: 0 0 200px;
+  max-width: 200px;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.banner-image:hover {
+  transform: scale(1.03);
+}
+
+.banner-info {
+  flex: 1;
+}
+
+.banner-info h3 {
+  color: #004698;
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.banner-info p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .alicante-banner-showcase {
+    flex-direction: column;
+    text-align: center;
+    padding: 15px;
+  }
+  
+  .banner-image-container {
+    max-width: 180px;
+    margin: 0 auto;
+  }
+  
+  .banner-info h3 {
+    font-size: 1.2rem;
+    margin-top: 10px;
+  }
+  
+  .banner-info p {
+    font-size: 0.9rem;
+  }
 }
 </style>
