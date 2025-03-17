@@ -411,6 +411,10 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import FirebaseAuthService from '../services/FirebaseAuthService';
 import axios from 'axios';
+// Importar el logo e imágenes
+import logoUrl from '../assets/img/impulsedata_logo.png';
+import impulsaAlicanteLogo from '../assets/img/impulsaalicante.png';
+import ayuntamientoLogo from '../assets/img/ayuntamiento-alicante.jpg';
 
 const router = useRouter();
 const auth = getAuth();
@@ -468,9 +472,6 @@ const nuevaEmpresa = reactive({
     }
   ]
 });
-
-// Importar el logo - usar URL relativa que funcione en el contexto de Vue
-import logoUrl from '../assets/img/impulsedata_logo.png';
 
 onMounted(() => {
   // Verificar estado de autenticación
@@ -905,48 +906,49 @@ const descargarPDF = () => {
     const doc = new jsPDF();
     const title = `Detalles de Empresa: ${empresaActual.nombre}`;
     
-    // Convertir la imagen importada a formato data URL
-    const img = new Image();
-    img.src = logoUrl;
+    // Establecer fondo blanco (por defecto)
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
     
-    // Usar el evento onload para asegurarnos de que la imagen está cargada
-    img.onload = function() {
-      // Crear un canvas para convertir la imagen a data URL
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      
-      // Obtener data URL
-      const dataURL = canvas.toDataURL('image/png');
-      
-      try {
-        // Añadir logo como data URL (con ancho reducido)
-        doc.addImage(dataURL, 'PNG', 14, 10, 20, 10);
-      } catch (imgError) {
-        console.warn("No se pudo cargar el logo:", imgError);
-      }
-      
-      // Continuar con la generación del PDF
-      completarPDF(doc, title);
-    };
+    // Dibujar cuadrados decorativos en azul corporativo
+    doc.setFillColor(0, 70, 152); // Color azul corporativo #004698
     
-    // Si hay un error al cargar la imagen, continuar sin ella
-    img.onerror = function() {
-      console.warn("No se pudo cargar el logo, continuando sin él");
-      completarPDF(doc, title);
-    };
+    // Cuadrado grande en la esquina superior derecha
+    doc.rect(doc.internal.pageSize.width - 60, 0, 60, 60, 'F');
     
-  } catch (error) {
-    console.error("Error al generar PDF:", error);
-    alert("Error al generar el PDF. Por favor, inténtelo de nuevo.");
-  }
-};
+    // Cuadrado mediano en la esquina inferior izquierda
+    doc.rect(0, doc.internal.pageSize.height - 40, 40, 40, 'F');
+    
+    // Cuadrados pequeños decorativos
+    doc.rect(doc.internal.pageSize.width - 80, 20, 15, 15, 'F');
+    doc.rect(20, doc.internal.pageSize.height - 55, 15, 15, 'F');
+    
+    // Cargar y añadir las imágenes
+    const imgWidth = 60;
+    const imgHeight = 30;
+    const startY = 30;
+    
+    // Añadir las imágenes una al lado de la otra
+    doc.addImage(impulsaAlicanteLogo, 'PNG', 20, startY, imgWidth, imgHeight);
+    doc.addImage(ayuntamientoLogo, 'JPG', doc.internal.pageSize.width - imgWidth - 20, startY, imgWidth, imgHeight);
+    
+    // Texto en azul corporativo para la portada
+    doc.setTextColor(0, 70, 152);
+    doc.setFontSize(40);
+    doc.text('MEMORIA', 105, 120, { align: 'center' });
+    doc.text('DE ACTIVIDAD', 105, 140, { align: 'center' });
+    
+    // Añadir el año en un cuadro azul
+    doc.setFillColor(0, 70, 152);
+    doc.rect(85, 160, 40, 40, 'F');
+    doc.setFontSize(30);
+    doc.setTextColor(255, 255, 255);
+    doc.text('20', 105, 180, { align: 'center' });
+    doc.text('25', 105, 195, { align: 'center' });
 
-// Función para completar la generación del PDF después de intentar cargar el logo
-const completarPDF = (doc, title) => {
-  try {
+    // Añadir nueva página para el contenido
+    doc.addPage();
+    
     // Añadir nombre del proyecto junto al logo
     doc.setFontSize(16);
     doc.setTextColor(0, 70, 152); // Color azul corporativo #004698
@@ -1054,7 +1056,7 @@ const completarPDF = (doc, title) => {
       
       // Añadir logo en la segunda página también
       try {
-        doc.addImage(dataURL, 'PNG', 14, 10, 15, 10);
+        doc.addImage('docs/img/impulsaalicante.png', 'PNG', 14, 10, 15, 10);
       } catch (imgError) {
         console.warn("No se pudo cargar el logo en la segunda página:", imgError);
       }
@@ -1101,7 +1103,7 @@ const completarPDF = (doc, title) => {
     
     // Añadir cabecera con logo en la página de gráficos
     try {
-      doc.addImage(dataURL, 'PNG', 14, 10, 15, 10);
+      doc.addImage('docs/img/impulsaalicante.png', 'PNG', 14, 10, 15, 10);
     } catch (imgError) {
       console.warn("No se pudo cargar el logo en la página de gráficos:", imgError);
     }
