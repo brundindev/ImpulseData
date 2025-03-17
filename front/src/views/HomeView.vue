@@ -970,9 +970,6 @@ const descargarPDF = () => {
     doc.text('20', 105, 180, { align: 'center' });
     doc.text('25', 105, 195, { align: 'center' });
 
-    // Añadir nueva página para el contenido
-    doc.addPage();
-    
     // Diseño de la cabecera de las páginas interiores
     const diseñarCabecera = () => {
         // Fondo de cabecera con degradado
@@ -993,7 +990,7 @@ const descargarPDF = () => {
         doc.text('ImpulseData', 38, 16);
         
         // Información de contacto con diseño mejorado
-        doc.setFontSize(8);
+      doc.setFontSize(8);
         doc.setTextColor(230, 240, 255);
         doc.text([
             'Información de contacto:',
@@ -1002,10 +999,89 @@ const descargarPDF = () => {
             'Web: www.impulsedata.es'
         ], doc.internal.pageSize.width - 70, 8, { align: 'left' });
     };
-    
-    // Aplicar diseño de cabecera a la segunda página
+
+    // Crear array para almacenar las entradas del índice y sus páginas
+    const indiceEntradas = [];
+    let paginaActual = 3; // Comenzamos en página 3 (después de portada e índice)
+
+    // Función para agregar entradas al índice
+    const agregarEntradaIndice = (titulo, nivel = 0) => {
+        const y = 60 + (indiceEntradas.length * 12);
+        
+        // Fondo decorativo para cada entrada
+        if (nivel === 0) {
+            doc.setFillColor(230, 240, 255);
+            doc.rect(10, y - 6, doc.internal.pageSize.width - 20, 10, 'F');
+        }
+
+        // Línea de puntos decorativa
+        doc.setDrawColor(0, 70, 152);
+        doc.setLineWidth(0.1);
+        for (let i = 0; i < 50; i++) {
+            doc.line(
+                nivel === 0 ? 20 : 30 + (nivel * 10),
+                y + 2,
+                doc.internal.pageSize.width - 30,
+                y + 2
+            );
+        }
+
+        // Texto de la entrada
+        doc.setFontSize(nivel === 0 ? 12 : 10);
+        doc.setTextColor(0, 70, 152);
+        doc.text(
+            titulo,
+            nivel === 0 ? 20 : 30 + (nivel * 10),
+            y
+        );
+
+        // Número de página
+        doc.text(
+            paginaActual.toString(),
+            doc.internal.pageSize.width - 20,
+            y,
+            { align: 'right' }
+        );
+
+        indiceEntradas.push({ titulo, pagina: paginaActual });
+        if (nivel === 0) paginaActual++;
+    };
+
+    // Añadir página para el índice después de la portada
+    doc.addPage();
     diseñarCabecera();
-    
+
+    // Título del índice con efectos visuales
+    doc.setFillColor(0, 70, 152);
+    doc.rect(0, 35, doc.internal.pageSize.width, 15, 'F');
+    doc.setFontSize(18);
+    doc.setTextColor(255, 255, 255);
+    doc.text('ÍNDICE', 14, 45);
+
+    // Agregar entradas al índice
+    agregarEntradaIndice('Información de la empresa');
+    agregarEntradaIndice('Departamentos');
+    agregarEntradaIndice('Centros');
+    agregarEntradaIndice('Análisis de Formaciones');
+    agregarEntradaIndice('Distribución por tipo de formación', 1);
+    agregarEntradaIndice('Detalle por tipo de formación', 1);
+    agregarEntradaIndice('Horas totales por tipo de formación', 1);
+    agregarEntradaIndice('Formaciones ordenadas por duración', 1);
+
+    // Añadir elementos decorativos al índice
+    // Cuadrado decorativo en la esquina superior derecha
+    doc.setFillColor(0, 70, 152);
+    doc.rect(doc.internal.pageSize.width - 40, 0, 40, 40, 'F');
+
+    // Línea decorativa inferior
+    doc.setDrawColor(0, 70, 152);
+    doc.setLineWidth(0.5);
+    doc.line(10, doc.internal.pageSize.height - 30, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 30);
+
+    // Continuar con el contenido principal
+    doc.addPage();
+    diseñarCabecera();
+
     // Estilo mejorado para el título principal
     doc.setFillColor(230, 240, 255);
     doc.rect(0, 35, doc.internal.pageSize.width, 15, 'F');
@@ -1073,7 +1149,7 @@ const descargarPDF = () => {
       doc.line(14, y - 6, 14, y + 4);
       
       // Texto
-      doc.setFontSize(12);
+    doc.setFontSize(12);
       doc.setTextColor(0, 70, 152);
       doc.text(texto, 20, y);
       
@@ -1137,7 +1213,7 @@ const descargarPDF = () => {
     }
     
     // Nueva página para formaciones y gráficos
-    doc.addPage();
+      doc.addPage();
     diseñarCabecera();
     currentY = 40;
     
