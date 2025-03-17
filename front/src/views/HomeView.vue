@@ -910,7 +910,7 @@ const descargarPDF = () => {
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
     
-    // Dibujar cuadrados decorativos en azul corporativo
+    // Dibujar elementos decorativos en la portada
     doc.setFillColor(0, 70, 152); // Color azul corporativo #004698
     
     // Cuadrado grande en la esquina superior derecha
@@ -919,9 +919,16 @@ const descargarPDF = () => {
     // Cuadrado mediano en la esquina inferior izquierda
     doc.rect(0, doc.internal.pageSize.height - 40, 40, 40, 'F');
     
-    // Cuadrados pequeños decorativos
+    // Elementos decorativos adicionales
+    doc.setFillColor(230, 240, 255); // Azul claro
     doc.rect(doc.internal.pageSize.width - 80, 20, 15, 15, 'F');
     doc.rect(20, doc.internal.pageSize.height - 55, 15, 15, 'F');
+    
+    // Líneas decorativas
+    doc.setDrawColor(0, 70, 152);
+    doc.setLineWidth(0.5);
+    doc.line(0, 80, 30, 80);
+    doc.line(doc.internal.pageSize.width - 30, 80, doc.internal.pageSize.width, 80);
     
     // Cargar y añadir las imágenes
     const imgWidth = 60;
@@ -932,16 +939,33 @@ const descargarPDF = () => {
     doc.addImage(impulsaAlicanteLogo, 'PNG', 20, startY, imgWidth, imgHeight);
     doc.addImage(ayuntamientoLogo, 'JPG', doc.internal.pageSize.width - imgWidth - 20, startY, imgWidth, imgHeight);
     
-    // Texto en azul corporativo para la portada
-    doc.setTextColor(0, 70, 152);
+    // Texto en azul corporativo para la portada con sombra
+    // Efecto sombra (texto ligeramente desplazado en gris)
+    doc.setTextColor(220, 220, 220);
     doc.setFontSize(40);
+    doc.text('MEMORIA', 106, 121, { align: 'center' });
+    doc.text('DE ACTIVIDAD', 106, 141, { align: 'center' });
+    
+    // Texto principal
+    doc.setTextColor(0, 70, 152);
     doc.text('MEMORIA', 105, 120, { align: 'center' });
     doc.text('DE ACTIVIDAD', 105, 140, { align: 'center' });
     
-    // Añadir el año en un cuadro azul
+    // Añadir el año con diseño moderno
     doc.setFillColor(0, 70, 152);
     doc.rect(85, 160, 40, 40, 'F');
+    
+    // Añadir bordes decorativos al cuadro del año
+    doc.setDrawColor(230, 240, 255);
+    doc.setLineWidth(0.5);
+    doc.rect(83, 158, 44, 44, 'S');
+    
     doc.setFontSize(30);
+    // Efecto sombra para los números
+    doc.setTextColor(0, 40, 100);
+    doc.text('20', 106, 181, { align: 'center' });
+    doc.text('25', 106, 196, { align: 'center' });
+    // Números principales
     doc.setTextColor(255, 255, 255);
     doc.text('20', 105, 180, { align: 'center' });
     doc.text('25', 105, 195, { align: 'center' });
@@ -949,34 +973,50 @@ const descargarPDF = () => {
     // Añadir nueva página para el contenido
     doc.addPage();
     
-    // Añadir nombre del proyecto junto al logo
-    doc.setFontSize(16);
-    doc.setTextColor(0, 70, 152); // Color azul corporativo #004698
-    doc.text('ImpulseData', 38, 16);
+    // Diseño de la cabecera de las páginas interiores
+    const diseñarCabecera = () => {
+        // Fondo de cabecera con degradado
+        doc.setFillColor(0, 70, 152);
+        doc.rect(0, 0, doc.internal.pageSize.width, 25, 'F');
+        
+        // Línea decorativa
+        doc.setDrawColor(230, 240, 255);
+        doc.setLineWidth(0.5);
+        doc.line(14, 26, doc.internal.pageSize.width - 14, 26);
+        
+        // Añadir logo
+        doc.addImage(impulsaAlicanteLogo, 'PNG', 14, 5, 20, 15);
+        
+        // Nombre del proyecto
+        doc.setFontSize(16);
+        doc.setTextColor(255, 255, 255);
+        doc.text('ImpulseData', 38, 16);
+        
+        // Información de contacto con diseño mejorado
+        doc.setFontSize(8);
+        doc.setTextColor(230, 240, 255);
+        doc.text([
+            'Información de contacto:',
+            'Email: info@impulsedata.es',
+            'Teléfono: +34 900 123 456',
+            'Web: www.impulsedata.es'
+        ], doc.internal.pageSize.width - 70, 8, { align: 'left' });
+    };
     
-    // Añadir información de contacto en la esquina superior derecha
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100); // Gris oscuro
-    doc.text([
-      'Información de contacto:',
-      'Email: info@impulsedata.es',
-      'Teléfono: +34 900 123 456',
-      'Web: www.impulsedata.es'
-    ], doc.internal.pageSize.width - 70, 13, { align: 'left' });
+    // Aplicar diseño de cabecera a la segunda página
+    diseñarCabecera();
     
-    // Línea separadora después de la cabecera
-    doc.setDrawColor(0, 70, 152); // Color azul corporativo
-    doc.setLineWidth(0.5);
-    doc.line(14, 28, doc.internal.pageSize.width - 14, 28);
-    
-    // Configurar estilo del documento para el título principal
+    // Estilo mejorado para el título principal
+    doc.setFillColor(230, 240, 255);
+    doc.rect(0, 35, doc.internal.pageSize.width, 15, 'F');
     doc.setFontSize(18);
-    doc.setTextColor(40, 40, 40);
-    doc.text(title, 14, 40);
+    doc.setTextColor(0, 70, 152);
+    doc.text(title, 14, 45);
     
-    // Información básica
+    // Información básica con estilo mejorado
     doc.setFontSize(12);
-    doc.text('Información de la empresa', 14, 53);
+    doc.setTextColor(0, 70, 152);
+    doc.text('Información de la empresa', 14, 70);
     
     const infoEmpresa = [
       ['Nombre', empresaActual.nombre],
@@ -985,20 +1025,66 @@ const descargarPDF = () => {
       ['Descripción', empresaActual.descripcion || 'Sin descripción']
     ];
     
-    // Usar autoTable como plugin
+    // Estilo mejorado para las tablas
+    const estiloTabla = {
+      headStyles: { 
+        fillColor: [0, 70, 152],
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      bodyStyles: {
+        fontSize: 10,
+        lineColor: [230, 240, 255],
+        lineWidth: 0.1
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 255]
+      },
+      columnStyles: {
+        0: { 
+          cellWidth: 40,
+          fillColor: [230, 240, 255],
+          textColor: [0, 70, 152],
+          fontStyle: 'bold'
+        }
+      },
+      margin: { top: 5 }
+    };
+    
+    // Usar autoTable con el nuevo estilo
     autoTable(doc, {
-      startY: 58,
+      startY: 75,
       head: [['Campo', 'Valor']],
       body: infoEmpresa,
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-      styles: { fontSize: 10 },
-      columnStyles: { 0: { cellWidth: 40 } }
+      ...estiloTabla
     });
     
+    // Función para crear encabezados de sección con estilo
+    const crearEncabezadoSeccion = (texto, y) => {
+      // Fondo decorativo
+      doc.setFillColor(230, 240, 255);
+      doc.rect(10, y - 6, doc.internal.pageSize.width - 20, 10, 'F');
+      
+      // Líneas decorativas
+      doc.setDrawColor(0, 70, 152);
+      doc.setLineWidth(0.5);
+      doc.line(14, y - 6, 14, y + 4);
+      
+      // Texto
+      doc.setFontSize(12);
+      doc.setTextColor(0, 70, 152);
+      doc.text(texto, 20, y);
+      
+      return y + 15;
+    };
+    
+    // Aplicar el nuevo estilo a todas las tablas y secciones
+    let currentY = doc.lastAutoTable.finalY + 20;
+    
     // Departamentos
-    let currentY = doc.lastAutoTable.finalY + 15;
-    doc.setFontSize(12);
-    doc.text('Departamentos', 14, currentY);
+    currentY = crearEncabezadoSeccion('Departamentos', currentY);
     
     if (empresaActual.departamentos.length > 0) {
       const departamentosData = empresaActual.departamentos.map((dep, index) => [
@@ -1006,23 +1092,29 @@ const descargarPDF = () => {
       ]);
       
       autoTable(doc, {
-        startY: currentY + 5,
+        startY: currentY,
         head: [['#', 'Nombre']],
         body: departamentosData,
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-        styles: { fontSize: 10 }
+        ...estiloTabla
       });
       
-      currentY = doc.lastAutoTable.finalY + 15;
+      currentY = doc.lastAutoTable.finalY + 20;
     } else {
       doc.setFontSize(10);
-      doc.text('No hay departamentos registrados.', 14, currentY + 10);
+      doc.setTextColor(128, 128, 128);
+      doc.text('No hay departamentos registrados.', 14, currentY);
       currentY += 20;
     }
     
+    // Verificar si necesitamos una nueva página
+    if (currentY > doc.internal.pageSize.height - 60) {
+      doc.addPage();
+      diseñarCabecera();
+      currentY = 40;
+    }
+    
     // Centros
-    doc.setFontSize(12);
-    doc.text('Centros', 14, currentY);
+    currentY = crearEncabezadoSeccion('Centros', currentY);
     
     if (empresaActual.centros.length > 0) {
       const centrosData = empresaActual.centros.map((centro, index) => [
@@ -1030,118 +1122,39 @@ const descargarPDF = () => {
       ]);
       
       autoTable(doc, {
-        startY: currentY + 5,
+        startY: currentY,
         head: [['#', 'Nombre', 'Dirección']],
         body: centrosData,
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-        styles: { fontSize: 10 }
+        ...estiloTabla
       });
       
-      currentY = doc.lastAutoTable.finalY + 15;
+      currentY = doc.lastAutoTable.finalY + 20;
     } else {
       doc.setFontSize(10);
-      doc.text('No hay centros registrados.', 14, currentY + 10);
+      doc.setTextColor(128, 128, 128);
+      doc.text('No hay centros registrados.', 14, currentY);
       currentY += 20;
     }
     
-    // Formaciones
-    // Verificar si necesitamos una nueva página
-    if (currentY > 240) {
-      doc.addPage();
-      
-      // Repetir cabecera en la nueva página
-      doc.setFontSize(16);
-      doc.setTextColor(0, 70, 152);
-      doc.text('ImpulseData', 38, 16);
-      
-      // Añadir logo en la segunda página también
-      try {
-        doc.addImage('docs/img/impulsaalicante.png', 'PNG', 14, 10, 15, 10);
-      } catch (imgError) {
-        console.warn("No se pudo cargar el logo en la segunda página:", imgError);
-      }
-      
-      doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
-      doc.text([
-        'Información de contacto:',
-        'Email: info@impulsedata.es',
-        'Teléfono: +34 900 123 456',
-        'Web: www.impulsedata.es'
-      ], doc.internal.pageSize.width - 70, 13, { align: 'left' });
-      
-      doc.setDrawColor(0, 70, 152);
-      doc.setLineWidth(0.5);
-      doc.line(14, 28, doc.internal.pageSize.width - 14, 28);
-      
-      currentY = 40;
-    }
-    
-    doc.setFontSize(12);
-    doc.setTextColor(40, 40, 40);
-    doc.text('Formaciones', 14, currentY);
-    
-    if (empresaActual.formaciones.length > 0) {
-      const formacionesData = empresaActual.formaciones.map((formacion, index) => [
-        `Formación ${index + 1}`, formacion.nombre, formatTipoFormacion(formacion.tipo), `${formacion.duracion} horas`
-      ]);
-      
-      autoTable(doc, {
-        startY: currentY + 5,
-        head: [['#', 'Nombre', 'Tipo', 'Duración']],
-        body: formacionesData,
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-        styles: { fontSize: 10 }
-      });
-    } else {
-      doc.setFontSize(10);
-      doc.text('No hay formaciones registradas.', 14, currentY + 10);
-    }
-    
-    // Añadir una página adicional para gráficos de formaciones
+    // Nueva página para formaciones y gráficos
     doc.addPage();
+    diseñarCabecera();
+    currentY = 40;
     
-    // Añadir cabecera con logo en la página de gráficos
-    try {
-      doc.addImage('docs/img/impulsaalicante.png', 'PNG', 14, 10, 15, 10);
-    } catch (imgError) {
-      console.warn("No se pudo cargar el logo en la página de gráficos:", imgError);
-    }
-    
-    // Añadir nombre del proyecto junto al logo
-    doc.setFontSize(16);
-    doc.setTextColor(0, 70, 152);
-    doc.text('ImpulseData', 38, 16);
-    
-    // Añadir información de contacto en la esquina superior derecha
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text([
-      'Información de contacto:',
-      'Email: info@impulsedata.es',
-      'Teléfono: +34 900 123 456',
-      'Web: www.impulsedata.es'
-    ], doc.internal.pageSize.width - 70, 13, { align: 'left' });
-    
-    // Línea separadora después de la cabecera
-    doc.setDrawColor(0, 70, 152);
-    doc.setLineWidth(0.5);
-    doc.line(14, 28, doc.internal.pageSize.width - 14, 28);
-    
-    // Título de la página de gráficos
+    // Título de la sección de formaciones con estilo
+    doc.setFillColor(230, 240, 255);
+    doc.rect(0, 35, doc.internal.pageSize.width, 15, 'F');
     doc.setFontSize(18);
-    doc.setTextColor(40, 40, 40);
-    doc.text('Análisis de Formaciones', 14, 40);
+    doc.setTextColor(0, 70, 152);
+    doc.text('Análisis de Formaciones', 14, 45);
     
     // Si hay formaciones, generar visualizaciones
     if (empresaActual.formaciones.length > 0) {
       // Establecer posición inicial para la sección de distribución
       let posY = 55;
       
-      // 1. Distribucion por tipo de formación - GRÁFICO CIRCULAR
-      doc.setFontSize(14);
-      doc.setTextColor(0, 70, 152);
-      doc.text('Distribución por tipo de formación', 14, posY);
+      // 1. Distribución por tipo de formación - GRÁFICO CIRCULAR
+      currentY = crearEncabezadoSeccion('Distribución por tipo de formación', posY);
       posY += 15;
       
       // Contar formaciones por tipo
@@ -1157,54 +1170,60 @@ const descargarPDF = () => {
         }
       });
       
-      // Configuración para representación visual
+      // Configuración para representación visual mejorada
       const colors = {
-        presencial: [41, 128, 185],  // azul
-        virtual: [39, 174, 96],      // verde
-        hibrida: [142, 68, 173]      // púrpura
+        presencial: [0, 70, 152],     // azul corporativo
+        virtual: [41, 128, 185],      // azul más claro
+        hibrida: [230, 240, 255]      // azul muy claro
       };
       
       // Calcular total para porcentajes
       const total = Object.values(tiposCounts).reduce((sum, count) => sum + count, 0);
       
       if (total > 0) {
-        // Configuración del gráfico circular
+        // Configuración del gráfico circular mejorado
         const centerX = 105;
         const centerY = posY + 50;
         const radius = 40;
+        
+        // Añadir sombra al gráfico
+        doc.setDrawColor(200, 200, 200);
+        doc.setFillColor(240, 240, 240);
+        doc.circle(centerX + 2, centerY + 2, radius, 'F');
         
         // Variables para el tracking del ángulo
         let startAngle = 0;
         let endAngle = 0;
         
-        // Crear una leyenda a la derecha
+        // Crear una leyenda mejorada
+        doc.setFillColor(230, 240, 255);
+        doc.rect(150, posY - 5, 50, 70, 'F');
+        doc.setDrawColor(0, 70, 152);
+        doc.setLineWidth(0.1);
+        doc.rect(150, posY - 5, 50, 70, 'S');
+        
         doc.setFontSize(10);
-        doc.setTextColor(60, 60, 60);
-        doc.text('Leyenda:', 160, posY);
+        doc.setTextColor(0, 70, 152);
+        doc.text('Leyenda:', 155, posY + 5);
         
-        let legendY = posY + 15;
+        let legendY = posY + 20;
         
-        // Dibujar el gráfico circular (pie chart)
+        // Dibujar el gráfico circular mejorado
         Object.entries(tiposCounts).forEach(([tipo, count], index) => {
           if (count > 0) {
-            // Calcular ángulos en radianes
             const porcentaje = count / total;
             startAngle = endAngle;
             endAngle = startAngle + (porcentaje * 2 * Math.PI);
             
-            // Dibujar el sector del gráfico
+            // Dibujar sector con efecto 3D
             doc.setFillColor(...colors[tipo]);
-            doc.setDrawColor(...colors[tipo]);
+            doc.setDrawColor(255, 255, 255);
+            doc.setLineWidth(0.5);
             
-            // Dibujamos el sector con múltiples líneas pequeñas (simulando un arco)
-            doc.setLineWidth(1);
             const steps = Math.max(20, Math.floor(porcentaje * 100));
-            doc.setFillColor(...colors[tipo]);
             
-            // Comenzar un nuevo path para este sector
+            // Dibujar sector principal
             doc.moveTo(centerX, centerY);
-            
-            // Trazar líneas para formar el sector
             for (let i = 0; i <= steps; i++) {
               const angle = startAngle + (i * (endAngle - startAngle) / steps);
               const xPos = centerX + Math.cos(angle) * radius;
@@ -1217,34 +1236,54 @@ const descargarPDF = () => {
                 doc.lineTo(xPos, yPos);
               }
             }
-            
-            // Cerrar el path volviendo al centro y rellenar
             doc.lineTo(centerX, centerY);
             doc.fill();
             
-            // Añadir etiqueta de porcentaje dentro del gráfico si hay espacio
+            // Añadir borde blanco para efecto 3D
+            doc.setDrawColor(255, 255, 255);
+            doc.setLineWidth(0.5);
+            doc.moveTo(centerX, centerY);
+            for (let i = 0; i <= steps; i++) {
+              const angle = startAngle + (i * (endAngle - startAngle) / steps);
+              const xPos = centerX + Math.cos(angle) * radius;
+              const yPos = centerY + Math.sin(angle) * radius;
+              
+              if (i === 0) {
+                doc.moveTo(centerX, centerY);
+                doc.lineTo(xPos, yPos);
+              } else {
+                doc.lineTo(xPos, yPos);
+              }
+            }
+            doc.stroke();
+            
+            // Etiqueta de porcentaje mejorada
             if (porcentaje > 0.08) {
               const labelAngle = startAngle + ((endAngle - startAngle) / 2);
               const labelRadius = radius * 0.7;
               const labelX = centerX + Math.cos(labelAngle) * labelRadius;
               const labelY = centerY + Math.sin(labelAngle) * labelRadius;
               
+              // Fondo blanco para mejor legibilidad
+              doc.setFillColor(255, 255, 255);
+              doc.circle(labelX, labelY, 8, 'F');
+              
               doc.setFontSize(9);
-              doc.setTextColor(255, 255, 255);
+              doc.setTextColor(0, 70, 152);
               doc.text(`${Math.round(porcentaje * 100)}%`, labelX, labelY, {
                 align: 'center'
               });
             }
             
-            // Añadir a la leyenda
+            // Leyenda mejorada
             doc.setFillColor(...colors[tipo]);
-            doc.rect(160, legendY - 4, 10, 10, 'F');
+            doc.roundedRect(155, legendY - 4, 8, 8, 1, 1, 'F');
             
-            doc.setTextColor(60, 60, 60);
-            doc.setFontSize(10);
+            doc.setTextColor(0, 70, 152);
+            doc.setFontSize(8);
             const tipoLabel = formatTipoFormacion(tipo);
             const cantidadLabel = `${count} (${Math.round(porcentaje * 100)}%)`;
-            doc.text(`${tipoLabel}: ${cantidadLabel}`, 175, legendY);
+            doc.text(`${tipoLabel}: ${cantidadLabel}`, 168, legendY);
             
             legendY += 15;
           }
@@ -1252,20 +1291,12 @@ const descargarPDF = () => {
         
         // Actualizar posición para la siguiente sección
         posY = centerY + radius + 25;
-      } else {
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text('No hay datos suficientes para generar el gráfico.', 14, posY + 20);
-        posY += 40;
       }
       
       // 2. Tabla detallada con información sobre los tipos de formación
-      doc.setFontSize(14);
-      doc.setTextColor(0, 70, 152);
-      doc.text('Detalle por tipo de formación', 14, posY);
-      posY += 10;
+      currentY = crearEncabezadoSeccion('Detalle por tipo de formación', posY + 10);
       
-      // Crear tabla de datos
+      // Crear tabla de datos con estilo mejorado
       const detalleData = Object.entries(tiposCounts).map(([tipo, count]) => {
         const porcentaje = total > 0 ? Math.round((count / total) * 100) + '%' : '0%';
         return [
@@ -1280,20 +1311,20 @@ const descargarPDF = () => {
       
       // Generar tabla con el detalle
       autoTable(doc, {
-        startY: posY,
+        startY: currentY + 5,
         head: [['Tipo', 'Cantidad', 'Porcentaje']],
         body: detalleData,
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-        styles: { fontSize: 10 },
-        footStyles: { fillColor: [220, 220, 220], textColor: [40, 40, 40], fontStyle: 'bold' }
+        ...estiloTabla,
+        footStyles: { 
+          fillColor: [230, 240, 255], 
+          textColor: [0, 70, 152], 
+          fontStyle: 'bold'
+        }
       });
       
       // 3. Horas de formación por tipo
-      posY = doc.lastAutoTable.finalY + 20;
-      doc.setFontSize(14);
-      doc.setTextColor(0, 70, 152);
-      doc.text('Horas totales por tipo de formación', 14, posY);
-      posY += 10;
+      currentY = doc.lastAutoTable.finalY + 20;
+      currentY = crearEncabezadoSeccion('Horas totales por tipo de formación', currentY);
       
       // Calcular horas por tipo
       const horasPorTipo = {
@@ -1321,22 +1352,22 @@ const descargarPDF = () => {
       // Añadir fila de total
       horasData.push(['Total', `${totalHoras} horas`, '100%']);
       
-      // Generar tabla
+      // Generar tabla con estilo mejorado
       autoTable(doc, {
-        startY: posY,
+        startY: currentY + 5,
         head: [['Tipo', 'Horas', 'Porcentaje']],
         body: horasData,
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-        styles: { fontSize: 10 },
-        footStyles: { fillColor: [220, 220, 220], textColor: [40, 40, 40], fontStyle: 'bold' }
+        ...estiloTabla,
+        footStyles: { 
+          fillColor: [230, 240, 255], 
+          textColor: [0, 70, 152], 
+          fontStyle: 'bold'
+        }
       });
       
-      // 4. Lista de formaciones por duración (de mayor a menor)
-      posY = doc.lastAutoTable.finalY + 20;
-      doc.setFontSize(14);
-      doc.setTextColor(0, 70, 152);
-      doc.text('Formaciones ordenadas por duración', 14, posY);
-      posY += 10;
+      // 4. Lista de formaciones por duración
+      currentY = doc.lastAutoTable.finalY + 20;
+      currentY = crearEncabezadoSeccion('Formaciones ordenadas por duración', currentY);
       
       // Ordenar formaciones por duración
       const formacionesOrdenadas = [...empresaActual.formaciones].sort((a, b) => 
@@ -1351,34 +1382,44 @@ const descargarPDF = () => {
         `${formacion.duracion} horas`
       ]);
       
-      // Generar tabla
+      // Generar tabla con estilo mejorado
       autoTable(doc, {
-        startY: posY,
+        startY: currentY + 5,
         head: [['#', 'Nombre', 'Tipo', 'Duración']],
         body: formacionesData,
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-        styles: { fontSize: 10 }
+        ...estiloTabla
       });
       
     } else {
       // Mensaje cuando no hay formaciones
       doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
+      doc.setTextColor(128, 128, 128);
       doc.text('No hay datos de formaciones disponibles para generar gráficos.', 14, 60);
     }
     
-    // Añadir fecha y hora de generación
+    // Añadir fecha y hora de generación con estilo mejorado
     const now = new Date();
     const fechaGeneracion = `Documento generado el ${now.toLocaleDateString('es-ES')} a las ${now.toLocaleTimeString('es-ES')}`;
     const pageCount = doc.internal.getNumberOfPages();
     
-    // Añadir pie de página en todas las páginas
+    // Añadir pie de página mejorado en todas las páginas
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
+      
+      // Fondo del pie de página
+      doc.setFillColor(248, 250, 255);
+      doc.rect(0, doc.internal.pageSize.height - 20, doc.internal.pageSize.width, 20, 'F');
+      
+      // Línea decorativa
+      doc.setDrawColor(0, 70, 152);
+      doc.setLineWidth(0.1);
+      doc.line(10, doc.internal.pageSize.height - 15, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 15);
+      
+      // Texto del pie de página
       doc.setFontSize(8);
-      doc.setTextColor(128, 128, 128);
-      doc.text(fechaGeneracion, 14, doc.internal.pageSize.height - 10);
-      doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+      doc.setTextColor(0, 70, 152);
+      doc.text(fechaGeneracion, 14, doc.internal.pageSize.height - 8);
+      doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 8);
     }
     
     // Guardar el PDF
