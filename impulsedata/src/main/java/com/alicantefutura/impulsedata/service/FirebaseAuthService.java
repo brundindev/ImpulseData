@@ -187,4 +187,27 @@ public class FirebaseAuthService {
             throw e;
         }
     }
+
+    /**
+     * Actualiza la contraseña de un usuario en Firebase Auth
+     * 
+     * @param uid         UID del usuario
+     * @param newPassword Nueva contraseña
+     * @throws FirebaseAuthException Si ocurre un error al actualizar la contraseña
+     */
+    public void actualizarPassword(String uid, String newPassword) throws FirebaseAuthException {
+        try {
+            logger.info("Actualizando contraseña para usuario en Firebase Auth: {}", uid);
+            
+            UpdateRequest request = new UpdateRequest(uid)
+                    .setPassword(newPassword);
+            
+            FirebaseAuth.getInstance().updateUser(request);
+            
+            logger.info("Contraseña actualizada correctamente para usuario: {}", uid);
+        } catch (FirebaseAuthException e) {
+            logger.error("Error al actualizar contraseña: {}", e.getMessage());
+            throw e;
+        }
+    }
 } 

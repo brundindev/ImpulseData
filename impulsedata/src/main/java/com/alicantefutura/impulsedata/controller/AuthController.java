@@ -1,7 +1,15 @@
 package com.alicantefutura.impulsedata.controller;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.alicantefutura.impulsedata.dto.LoginRequest;
 import com.alicantefutura.impulsedata.dto.RegistroRequest;
@@ -87,6 +95,39 @@ public class AuthController {
             return ResponseEntity.ok("Email marcado como verificado correctamente.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "Actualizar contraseña", description = "Actualiza la contraseña de un usuario autenticado.")
+    @PostMapping("/actualizar-password")
+    public ResponseEntity<String> actualizarPassword(
+            @RequestBody Map<String, String> request,
+            @RequestHeader("Authorization") String token) {
+        try {
+            String email = request.get("email");
+            String oldPassword = request.get("oldPassword");
+            String newPassword = request.get("newPassword");
+            
+            if (email == null || oldPassword == null || newPassword == null) {
+                return ResponseEntity.badRequest().body("Todos los campos son requeridos: email, oldPassword, newPassword");
+            }
+            
+            // Extraer el token sin el prefijo "Bearer "
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            } else {
+                return ResponseEntity.status(401).body("Token de autorización inválido");
+            }
+            
+            boolean actualizado = authService.actualizarPassword(email, oldPassword, newPassword, token);
+            
+            if (actualizado) {
+                return ResponseEntity.ok("Contraseña actualizada con éxito");
+            } else {
+                return ResponseEntity.badRequest().body("No se pudo actualizar la contraseña");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al actualizar la contraseña: " + e.getMessage());
         }
     }
 }

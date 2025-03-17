@@ -10,6 +10,16 @@ const router = useRouter();
 const auth = getAuth();
 const usuario = ref(null);
 const showDropdown= ref(false);
+const userPhoto = ref('');
+const userInitials = computed(() => {
+  if (!usuario.value || !usuario.value.nombre) return '?';
+  return usuario.value.nombre
+    .split(' ')
+    .map(name => name[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+});
 
 // Verificar si estamos en la ruta de registro
 const estaEnRegistro = computed(() => {
@@ -33,6 +43,13 @@ const actualizarEstadoUsuario = async () => {
   if (cerrando === 'true') {
     console.log("Detectado cierre de sesión en progreso, ignorando cambios de estado de autenticación");
     return;
+  }
+  
+  // Actualizar la foto de perfil si el usuario de Firebase existe
+  if (currentUser && currentUser.photoURL) {
+    userPhoto.value = currentUser.photoURL;
+  } else {
+    userPhoto.value = '';
   }
   
   // Si hay usuario de Firebase pero no token JWT, es posible que sea un nuevo registro
@@ -243,7 +260,13 @@ const irAPanelControl = () => {
           <RouterLink to="/" class="nav-link">Inicio</RouterLink>
           <div class="user-dropdown">
             <div class="dropdown-toggle">
-              <span class="user-name">{{ usuario.nombre }}</span>
+              <div class="user-profile-container">
+                <div class="user-avatar">
+                  <img v-if="userPhoto" :src="userPhoto" alt="Foto de perfil" class="user-avatar-img" />
+                  <div v-else class="user-avatar-placeholder">{{ userInitials }}</div>
+                </div>
+                <span class="user-name">{{ usuario.nombre }}</span>
+              </div>
               <span class="dropdown-arrow">▼</span>         
             </div>
             <div class="dropdown-menu">

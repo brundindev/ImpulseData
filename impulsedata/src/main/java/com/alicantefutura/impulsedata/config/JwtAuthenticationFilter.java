@@ -41,22 +41,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+            // Aquí va la validación del token de Firebase
+        }
+
         final String userEmail;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
+        userEmail = jwtService.extractUsername(token);
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             var userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            if (jwtService.isTokenValid(token, userDetails)) {
                 var authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,

@@ -396,4 +396,56 @@ public class AuthService {
             throw new RuntimeException("Error al generar el enlace de verificación: " + e.getMessage());
         }
     }
+
+    /**
+     * Actualiza la contraseña de un usuario
+     * 
+     * @param email       Email del usuario
+     * @param oldPassword Contraseña actual
+     * @param newPassword Nueva contraseña
+     * @param token       Token de autenticación
+     * @return true si se actualizó correctamente, false en caso contrario
+     */
+    public boolean actualizarPassword(String email, String oldPassword, String newPassword, String token) {
+        try {
+            // Verificar que el token es válido y corresponde al usuario
+            String emailFromToken = jwtService.extractUsername(token);
+            if (!email.equals(emailFromToken)) {
+                throw new RuntimeException("El email del token no coincide con el proporcionado");
+            }
+
+            // Autenticar el usuario con sus credenciales actuales
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, oldPassword));
+
+            // Buscar usuario en Firestore
+            var documentos = firestore.collection("usuarios")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .get()
+                    .getDocuments();
+
+            if (documentos.isEmpty()) {
+                throw new RuntimeException("Usuario no encontrado");
+            }
+
+            var usuarioDoc = documentos.get(0);
+            String uid = usuarioDoc.getId();
+            var usuario = usuarioDoc.toObject(Usuario.class);
+
+            // Actualizar la contraseña en Firebase Auth
+            firebaseAuthService.actualizarPassword(uid, newPassword);
+
+            // Actualizar la contraseña en Firestore
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            firestore.collection("usuarios").document(uid)
+                    .update("password", encodedPassword)
+                    .get();
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al actualizar la contraseña: " + e.getMessage());
+        }
+    }
 } 
