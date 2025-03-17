@@ -1052,10 +1052,10 @@ const descargarPDF = () => {
     diseñarCabecera();
 
     // Título del índice con efectos visuales
-    doc.setFillColor(0, 70, 152);
+    doc.setFillColor(230, 240, 255);
     doc.rect(0, 35, doc.internal.pageSize.width, 15, 'F');
     doc.setFontSize(18);
-    doc.setTextColor(255, 255, 255);
+    doc.setTextColor(0, 70, 152);
     doc.text('ÍNDICE', 14, 45);
 
     // Agregar entradas al índice
@@ -1067,11 +1067,6 @@ const descargarPDF = () => {
     agregarEntradaIndice('Detalle por tipo de formación', 1);
     agregarEntradaIndice('Horas totales por tipo de formación', 1);
     agregarEntradaIndice('Formaciones ordenadas por duración', 1);
-
-    // Añadir elementos decorativos al índice
-    // Cuadrado decorativo en la esquina superior derecha
-    doc.setFillColor(0, 70, 152);
-    doc.rect(doc.internal.pageSize.width - 40, 0, 40, 40, 'F');
 
     // Línea decorativa inferior
     doc.setDrawColor(0, 70, 152);
