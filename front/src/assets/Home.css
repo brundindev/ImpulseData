@@ -475,7 +475,7 @@
   border: none;
   border-radius: 5px;
   font-weight: bold;
-  letter-spacing: 3px;
+  letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
   color: #e62222;
@@ -485,6 +485,12 @@
   overflow: hidden;
   outline: 2px solid #e62222;
   background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-width: 120px;
+  white-space: nowrap; /*para evitar que el texto se ponga en muchas lineas*/
 }
 
 .button-cancel:hover {

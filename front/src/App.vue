@@ -9,11 +9,19 @@ import FirebaseAuthService from './services/FirebaseAuthService';
 const router = useRouter();
 const auth = getAuth();
 const usuario = ref(null);
+const showDropdown= ref(false);
 
 // Verificar si estamos en la ruta de registro
 const estaEnRegistro = computed(() => {
   return router.currentRoute.value.path === '/registro';
 });
+
+// Función para cerrar el dropdown cuando se hace clic fuera de él
+const closeDropdown = (event) => {
+  if (!event.target.closest('.user-dropdown')) {
+    showDropdown.value = false;
+  }
+};
 
 // Función para actualizar el estado del usuario
 const actualizarEstadoUsuario = async () => {
@@ -171,6 +179,7 @@ const logout = async () => {
     
     // Limpiar datos locales
     usuario.value = null;
+    showDropdown.value= false;
     
     // Asegurarnos de limpiar todos los datos relacionados
     localStorage.removeItem('authToken');
@@ -209,6 +218,17 @@ const reloadRegistro = () => {
     router.push('/registro');
   }
 };
+
+const irAPerfil = () => {
+  showDropdown.value = false;
+  router.push('/perfil');
+};
+
+const irAPanelControl = () => {
+  showDropdown.value = false;
+  router.push('/panel-control');
+};
+
 </script>
 
 <template>
@@ -221,6 +241,32 @@ const reloadRegistro = () => {
       <nav class="main-nav">
         <template v-if="usuario">
           <RouterLink to="/" class="nav-link">Inicio</RouterLink>
+          <div class="user-dropdown">
+            <div class="dropdown-toggle">
+              <span class="user-name">{{ usuario.nombre }}</span>
+              <span class="dropdown-arrow">▼</span>         
+            </div>
+            <div class="dropdown-menu">
+              <RouterLink to="/perfil" class="dropdown-item">
+                <svg class="dropdown-icon" viewBox="0 0 24 24">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+                </svg>
+                Mi Perfil
+              </RouterLink>
+              <RouterLink to="/panel-control" class="dropdown-item">
+                <svg class="dropdown-icon" viewBox="0 0 24 24">
+                  <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path>
+                </svg>
+                Panel de Control
+              </RouterLink>
+              <div class="dropdown-item logout-item" @click="logout">
+                <svg class="dropdown-icon" viewBox="0 0 24 24">
+                  <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"></path>
+                </svg>
+                Cerrar Sesión
+              </div>
+            </div>
+          </div>
           <button @click="logout" class="Btn">
             <div class="sign">
               <svg viewBox="0 0 512 512">

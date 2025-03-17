@@ -31,33 +31,33 @@ public class FirebaseConfig {
             // Método alternativo para cargar las credenciales
             GoogleCredentials credentials;
             
-            // Intentar varios métodos para cargar las credenciales
             try {
                 // Intento 1: Cargar desde ClassPathResource
                 Resource resource = new ClassPathResource(firebaseCredentialsPath.replace("classpath:", ""));
-                InputStream serviceAccount = resource.getInputStream();
-                credentials = GoogleCredentials.fromStream(serviceAccount);
-                System.out.println("Credenciales de Firebase cargadas usando ClassPathResource");
+                if (resource.exists()) {
+                    InputStream serviceAccount = resource.getInputStream();
+                    credentials = GoogleCredentials.fromStream(serviceAccount);
+                    System.out.println("Credenciales de Firebase cargadas usando ClassPathResource");
+                } else {
+                    throw new IOException("El archivo de credenciales no existe en el classpath");
+                }
             } catch (Exception e1) {
                 try {
-                    // Intento 2: Cargar usando ResourceUtils
-                    File credentialFile = ResourceUtils.getFile(firebaseCredentialsPath);
-                    InputStream serviceAccount = new FileInputStream(credentialFile);
-                    credentials = GoogleCredentials.fromStream(serviceAccount);
-                    System.out.println("Credenciales de Firebase cargadas usando ResourceUtils");
-                } catch (Exception e2) {
-                    try {
-                        // Intento 3: Cargar usando ruta absoluta
-                        String path = "src/main/resources/" + firebaseCredentialsPath.replace("classpath:", "");
-                        InputStream serviceAccount = new FileInputStream(new File(path));
+                    // Intento 2: Cargar usando ruta absoluta
+                    String path = "src/main/resources/" + firebaseCredentialsPath.replace("classpath:", "");
+                    File credentialFile = new File(path);
+                    if (credentialFile.exists()) {
+                        InputStream serviceAccount = new FileInputStream(credentialFile);
                         credentials = GoogleCredentials.fromStream(serviceAccount);
                         System.out.println("Credenciales de Firebase cargadas usando ruta absoluta");
-                    } catch (Exception e3) {
-                        // Intento 4: Como último recurso, usar credenciales por defecto
-                        System.out.println("No se pudo cargar el archivo de credenciales. Usando credenciales por defecto.");
-                        credentials = GoogleCredentials.getApplicationDefault();
-                        System.out.println("Usando credenciales de aplicación por defecto");
+                    } else {
+                        throw new IOException("El archivo de credenciales no existe en la ruta absoluta");
                     }
+                } catch (Exception e2) {
+                    // Intento 3: Como último recurso, usar credenciales por defecto
+                    System.out.println("No se pudo cargar el archivo de credenciales. Usando credenciales por defecto.");
+                    credentials = GoogleCredentials.getApplicationDefault();
+                    System.out.println("Usando credenciales de aplicación por defecto");
                 }
             }
 
