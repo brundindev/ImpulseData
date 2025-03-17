@@ -514,19 +514,12 @@
 .btn-save {
   background-color: var(--success-color);
   color: white;
-  padding: 0.3em 1em;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  font-size: 14px;
 }
 
 .btn-save:hover:not([disabled]) {
   background-color: #3d9a40;
-  transform: scale(1.1);
-  box-shadow: 4px 5px 17px -4px #2d7a30;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
 }
 
 .btn:disabled {
