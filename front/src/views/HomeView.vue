@@ -7,8 +7,8 @@
         <p class="welcome-subtitle" v-if="usuario">Bienvenido, <span class="user-name">{{ usuario.nombre }}</span></p>
       </div>
       <div class="action-buttons">
-        <button class="btn-crear-empresa" @click="showFormModal = true; modoEdicion = false;">
-          <span> + Crear nueva empresa</span>
+        <button class="btn-nueva-empresa" @click="showFormModal = true; modoEdicion = false;">
+          <a href="#"><span>+ Crear nueva empresa</span></a>
         </button>
       </div>
     </div>

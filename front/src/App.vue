@@ -252,7 +252,7 @@ const irAPanelControl = () => {
   <header class="app-header">
     <div class="header-container">
       <div class="logo-container">
-        <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="impulsa-logo" />
+        <img src="@/assets/img/impulsedata_logo.png" alt="Impulsa Alicante" class="impulsa-logo" />
         <RouterLink to="/" class="app-logo">IMPULSEDATA</RouterLink>
       </div>
       <nav class="main-nav">
