@@ -30,19 +30,19 @@
       <div class="stats-section">
         <div class="stat-card">
           <h3>Empresas</h3>
-          <div class="stat-value">{{ empresasCount }}</div>
+          <div class="stat-value"><AnimatedNumber :number="empresasCount" /></div>
         </div>
         <div class="stat-card">
           <h3>Departamentos</h3>
-          <div class="stat-value">{{ departamentosCount }}</div>
+          <div class="stat-value"><AnimatedNumber :number="departamentosCount" /></div>
         </div>
         <div class="stat-card">
           <h3>Centros</h3>
-          <div class="stat-value">{{ centrosCount }}</div>
+          <div class="stat-value"><AnimatedNumber :number="centrosCount" /></div>
         </div>
         <div class="stat-card">
           <h3>Formaciones</h3>
-          <div class="stat-value">{{ formacionesCount }}</div>
+          <div class="stat-value"><AnimatedNumber :number="formacionesCount" /></div>
         </div>
       </div>
       
@@ -411,6 +411,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import FirebaseAuthService from '../services/FirebaseAuthService';
 import axios from 'axios';
+import AnimatedNumber from '../components/AnimatedNumber.vue';
 // Importar el logo e imágenes
 import logoUrl from '../assets/img/impulsedata_logo.png';
 import impulsaAlicanteLogo from '../assets/img/impulsaalicante.png';
@@ -541,10 +542,10 @@ const cargarDatos = async () => {
     
     // Obtener contadores
     const contadores = await FirestoreService.obtenerContadores();
-    empresasCount.value = contadores.empresasCount;
-    departamentosCount.value = contadores.departamentosCount;
-    centrosCount.value = contadores.centrosCount;
-    formacionesCount.value = contadores.formacionesCount;
+    empresasCount.value = parseInt(contadores.empresasCount) || 0;
+    departamentosCount.value = parseInt(contadores.departamentosCount) || 0;
+    centrosCount.value = parseInt(contadores.centrosCount) || 0;
+    formacionesCount.value = parseInt(contadores.formacionesCount) || 0;
     
     // Obtener empresas
     const empresasRecibidas = await FirestoreService.obtenerEmpresas();
@@ -899,7 +900,89 @@ const formatTipoFormacion = (tipo) => {
   return tipos[tipo] || tipo;
 };
 
-// Descargar PDF con detalles de la empresa
+// Función para crear una portada para cada sección
+const crearPortadaSeccion = (texto, doc) => {
+  // Añadir nueva página para portada
+  doc.addPage();
+  
+  // Fondo decorativo para toda la página
+  doc.setFillColor(240, 245, 255);
+  doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+  
+  // Borde decorativo
+  doc.setDrawColor(0, 70, 152);
+  doc.setLineWidth(1.5);
+  doc.rect(20, 20, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40, 'S');
+  
+  // Marco interior
+  doc.setDrawColor(0, 100, 200);
+  doc.setLineWidth(0.5);
+  doc.rect(30, 30, doc.internal.pageSize.width - 60, doc.internal.pageSize.height - 60, 'S');
+  
+  // Líneas decorativas en las esquinas
+  doc.setDrawColor(0, 70, 152);
+  doc.setLineWidth(2);
+  // Esquina superior izquierda
+  doc.line(20, 35, 50, 35);
+  doc.line(35, 20, 35, 50);
+  // Esquina superior derecha
+  doc.line(doc.internal.pageSize.width - 50, 35, doc.internal.pageSize.width - 20, 35);
+  doc.line(doc.internal.pageSize.width - 35, 20, doc.internal.pageSize.width - 35, 50);
+  // Esquina inferior izquierda
+  doc.line(20, doc.internal.pageSize.height - 35, 50, doc.internal.pageSize.height - 35);
+  doc.line(35, doc.internal.pageSize.height - 50, 35, doc.internal.pageSize.height - 20);
+  // Esquina inferior derecha
+  doc.line(doc.internal.pageSize.width - 50, doc.internal.pageSize.height - 35, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 35);
+  doc.line(doc.internal.pageSize.width - 35, doc.internal.pageSize.height - 50, doc.internal.pageSize.width - 35, doc.internal.pageSize.height - 20);
+  
+  // Logo o imagen (dibujamos un círculo para representar un logo)
+  doc.setFillColor(0, 70, 152);
+  doc.circle(doc.internal.pageSize.width / 2, 70, 20, 'F');
+  
+  // Título grande y centrado
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 70, 152);
+  doc.setFontSize(28);
+  const titleWidth = doc.getStringUnitWidth(texto) * doc.getFontSize() / doc.internal.scaleFactor;
+  const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
+  doc.text(texto, titleX, 120);
+  
+  // Línea decorativa bajo el título
+  doc.setLineWidth(1);
+  doc.line(doc.internal.pageSize.width / 2 - 50, 130, doc.internal.pageSize.width / 2 + 50, 130);
+  
+  // Subtítulo o descripción
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(14);
+  doc.setTextColor(100, 100, 100);
+  const subtitulo = `Informe detallado de ${empresaActual.nombre}`;
+  const subtitleWidth = doc.getStringUnitWidth(subtitulo) * doc.getFontSize() / doc.internal.scaleFactor;
+  const subtitleX = (doc.internal.pageSize.width - subtitleWidth) / 2;
+  doc.text(subtitulo, subtitleX, 150);
+  
+  // Fecha del informe
+  const fechaGeneracion = new Date().toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+  doc.setFontSize(12);
+  const fechaWidth = doc.getStringUnitWidth(fechaGeneracion) * doc.getFontSize() / doc.internal.scaleFactor;
+  const fechaX = (doc.internal.pageSize.width - fechaWidth) / 2;
+  doc.text(fechaGeneracion, fechaX, 170);
+  
+  // Añadir paginación al pie de página
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text('ImpulseData - Alicante Futura', doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 20, { align: 'center' });
+  
+  // Añadir una nueva página para comenzar la sección
+  doc.addPage();
+  
+  return 20; // Retorna la posición Y inicial para comenzar la sección
+};
+
+// Usar la función de portada dentro de descargarPDF
 const descargarPDF = () => {
   try {
     // Crear nuevo documento PDF
@@ -1155,6 +1238,8 @@ const descargarPDF = () => {
     let currentY = doc.lastAutoTable.finalY + 20;
     
     // Departamentos
+    currentY = crearPortadaSeccion('Departamentos', doc);
+    
     currentY = crearEncabezadoSeccion('Departamentos', currentY);
     
     if (empresaActual.departamentos.length > 0) {
@@ -1185,6 +1270,8 @@ const descargarPDF = () => {
     }
     
     // Centros
+    currentY = crearPortadaSeccion('Centros', doc);
+    
     currentY = crearEncabezadoSeccion('Centros', currentY);
     
     if (empresaActual.centros.length > 0) {
@@ -1213,20 +1300,17 @@ const descargarPDF = () => {
     currentY = 40;
     
     // Título de la sección de formaciones con estilo
-    doc.setFillColor(230, 240, 255);
-    doc.rect(0, 35, doc.internal.pageSize.width, 15, 'F');
-    doc.setFontSize(18);
-    doc.setTextColor(0, 70, 152);
-    doc.text('Análisis de Formaciones', 14, 45);
+    currentY = crearPortadaSeccion('Formaciones', doc);
+    
+    currentY = crearEncabezadoSeccion('Análisis de Formaciones', currentY);
     
     // Si hay formaciones, generar visualizaciones
     if (empresaActual.formaciones.length > 0) {
-      // Establecer posición inicial para la sección de distribución
-      let posY = 55;
+      // Añadir portada para la sección de formaciones
+      currentY = crearPortadaSeccion('Formaciones', doc);
       
       // 1. Distribución por tipo de formación - GRÁFICO CIRCULAR
-      currentY = crearEncabezadoSeccion('Distribución por tipo de formación', posY);
-      posY += 15;
+      currentY = crearEncabezadoSeccion('Distribución por tipo de formación', currentY);
       
       // Contar formaciones por tipo
       const tiposCounts = {
@@ -1254,7 +1338,7 @@ const descargarPDF = () => {
       if (total > 0) {
         // Configuración del gráfico circular mejorado
         const centerX = 105;
-        const centerY = posY + 50;
+        const centerY = currentY + 50;
         const radius = 40;
         
         // Añadir sombra al gráfico
@@ -1268,16 +1352,16 @@ const descargarPDF = () => {
         
         // Crear una leyenda mejorada
         doc.setFillColor(230, 240, 255);
-        doc.rect(150, posY - 5, 50, 70, 'F');
+        doc.rect(150, currentY - 5, 50, 70, 'F');
         doc.setDrawColor(0, 70, 152);
         doc.setLineWidth(0.1);
-        doc.rect(150, posY - 5, 50, 70, 'S');
+        doc.rect(150, currentY - 5, 50, 70, 'S');
         
         doc.setFontSize(10);
         doc.setTextColor(0, 70, 152);
-        doc.text('Leyenda:', 155, posY + 5);
+        doc.text('Leyenda:', 155, currentY + 5);
         
-        let legendY = posY + 20;
+        let legendY = currentY + 20;
         
         // Dibujar el gráfico circular mejorado
         Object.entries(tiposCounts).forEach(([tipo, count], index) => {
@@ -1361,11 +1445,11 @@ const descargarPDF = () => {
         });
         
         // Actualizar posición para la siguiente sección
-        posY = centerY + radius + 25;
+        currentY = centerY + radius + 25;
       }
       
       // 2. Tabla detallada con información sobre los tipos de formación
-      currentY = crearEncabezadoSeccion('Detalle por tipo de formación', posY + 10);
+      currentY = crearEncabezadoSeccion('Detalle por tipo de formación', currentY + 10);
       
       // Crear tabla de datos con estilo mejorado
       const detalleData = Object.entries(tiposCounts).map(([tipo, count]) => {
