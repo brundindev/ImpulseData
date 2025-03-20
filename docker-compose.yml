@@ -4,7 +4,7 @@ services:
   vue-app:
     build: ./front
     ports:
-      - "80:80"
+      - "5173:5173"
 
   springboot-app:
     build: ./impulsedata

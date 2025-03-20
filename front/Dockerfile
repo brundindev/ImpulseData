@@ -1,5 +1,5 @@
 # Usa una imagen de Node.js como base
-FROM node:16-alpine
+FROM node:18-bullseye-slim
 
 # Establece el directorio de trabajo
 WORKDIR /app
@@ -20,8 +20,8 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=0 /app/dist /usr/share/nginx/html
 
-# Expone el puerto 80
-EXPOSE 80
+# Expone el puerto 5173
+EXPOSE 5173
 
 # Comando para iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]
