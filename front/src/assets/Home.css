@@ -1146,5 +1146,5 @@
 
 /* Ajustar el z-index del navbar para que esté detrás de los modales */
 .app-header {
-  display: none; /* Ocultar esta definición duplicada para evitar conflictos */
+  display: block; /* Ocultar esta definición duplicada para evitar conflictos */
 }
