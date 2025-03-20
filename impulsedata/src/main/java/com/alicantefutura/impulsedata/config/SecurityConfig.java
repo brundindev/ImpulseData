@@ -80,7 +80,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Puerto por defecto de Vite
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:5173", // Puerto por defecto de Vite
+            "http://localhost",      // Nuevo puerto en Docker
+            "http://localhost:80"    // Especificar explícitamente puerto 80
+        )); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

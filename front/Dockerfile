@@ -21,7 +21,7 @@ FROM nginx:alpine
 COPY --from=0 /app/dist /usr/share/nginx/html
 
 # Expone el puerto 5173
-EXPOSE 5173
+EXPOSE 80
 
 # Comando para iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]
