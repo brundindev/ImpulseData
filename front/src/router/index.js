@@ -17,7 +17,7 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
-      path: '/',
+      path: '/home',
       name: 'home',
       component: HomeView,
       meta: { requiresAuth: true }
@@ -60,6 +60,15 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const isAuthenticated = localStorage.getItem('authToken');
   
+  // Si el usuario va a la ruta principal
+  if (to.path === '/') {
+    if (isAuthenticated) {
+      next('/home');  // Si está autenticado, redirige a home
+    } else {
+      next();  // Si no está autenticado, muestra WelcomeView
+    }
+    return;
+  }
   // Si estamos yendo a la página de registro o verificación, permitir siempre
   if (to.path === '/registro' || to.path === '/verify-email') {
     next();
