@@ -44,8 +44,8 @@
       <footer class="welcome-footer">
         <div class="footer-content">
           <div class="footer-logo">
-            <h3>Impulsa Alicante</h3>
-            <p>© 2025 Impulsa Alicante. <br> Todos los derechos reservados.</p>
+            <h3>ImpulseData</h3>
+            <p>© 2025 ImpulseData. <br> Todos los derechos reservados.</p>
           </div>
           <div class="footer-links">
             <div class="footer-column">
