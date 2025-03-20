@@ -146,7 +146,7 @@ const actualizarEstadoUsuario = async () => {
       
       await AuthService.logout();
       usuario.value = null;
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.log("Error al recuperar sesión, cerrando sesión");
     }
@@ -163,7 +163,7 @@ const actualizarEstadoUsuario = async () => {
     // Verificar si estamos en una ruta protegida
     const requiresAuth = router.currentRoute.value.meta.requiresAuth;
     if (requiresAuth) {
-      router.push('/login');
+      router.push('/');
     }
   }
 };
@@ -220,7 +220,7 @@ const logout = async () => {
     sessionStorage.removeItem('cerrando_sesion');
     
     // Redirigir al login
-    router.push('/login');
+    router.push('/');
   } catch (error) {
     console.error("Error al cerrar sesión:", error);
     sessionStorage.removeItem('cerrando_sesion');

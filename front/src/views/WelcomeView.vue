@@ -2,7 +2,7 @@
     <div class="welcome-page">
       <div class="hero-section">
         <div class="hero-content">
-          <h1>Impulsa Alicante</h1>
+          <h1>ImpulseData</h1>
           <p style="text-align: center;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur magni facere </p>
           <div class="cta-buttons" style="display: flex; justify-content: center;">
             <router-link to="/registro" class="signup-btn">Registrarse</router-link>
@@ -65,23 +65,18 @@
     </div>
   </template>
   
-  <script>
-  export default {
-    name: 'WelcomeView',
-    data() {
-      return {
-        isWelcomePage: true
-      }
-    },
-    created() {
-      // Emit an event that the parent component can listen for
-      this.$emit('set-welcome-page', true);
-    },
-    beforeUnmount() {
-      // Reset when navigating away
-      this.$emit('set-welcome-page', false);
-    }
-  }
+  <script setup>
+  import { onMounted, onBeforeUnmount } from 'vue'
+
+  const emit = defineEmits(['set-welcome-page'])
+
+  onMounted(() => {
+    emit('set-welcome-page', true)
+  })
+
+  onBeforeUnmount(() => {
+    emit('set-welcome-page', false)
+  })
   </script>
   
   <style scoped>
