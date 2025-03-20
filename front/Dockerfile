@@ -18,9 +18,14 @@ RUN npm run build
 
 # Usa una imagen de Nginx para servir la aplicación
 FROM nginx:alpine
+
+# Copia la configuración de Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copia los archivos compilados
 COPY --from=0 /app/dist /usr/share/nginx/html
 
-# Expone el puerto 5173
+# Expone el puerto 80
 EXPOSE 80
 
 # Comando para iniciar Nginx

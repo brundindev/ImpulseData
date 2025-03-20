@@ -22,8 +22,11 @@ FROM openjdk:17-jdk-slim
 # Copia el archivo JAR desde la etapa de construcción
 COPY --from=build /app/target/*.jar app.jar
 
+# Copia el archivo de credenciales de Firebase desde la etapa de construcción
+COPY --from=build /app/src/main/resources/impulsedata-alicantefutura-firebase-adminsdk-fbsvc-01841a49ee.json /app/impulsedata-alicantefutura-firebase-adminsdk-fbsvc-01841a49ee.json
+
 # Expone el puerto 8080
 EXPOSE 8080
 
 # Comando para ejecutar la aplicación
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
