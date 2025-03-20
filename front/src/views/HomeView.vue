@@ -1,92 +1,316 @@
 <template>
-  <div class="dashboard-container">
-    <!-- Encabezado del dashboard -->
-    <div class="dashboard-header">
-      <div class="welcome-section">
-        <h1 class="welcome-title">Dashboard</h1>
-        <p class="welcome-subtitle" v-if="usuario">Bienvenido, <span class="user-name">{{ usuario.nombre }}</span></p>
-      </div>
-      <div class="action-buttons">
-        <button class="btn-nueva-empresa" @click="showFormModal = true; modoEdicion = false;">
-          <a href="#"><span>+ Crear nueva empresa</span></a>
-        </button>
-      </div>
+  <div>
+    <!-- Fondo con efecto visual -->
+    <div class="home-background"></div>
+    <div class="floating-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
     </div>
     
-    <!-- Banner de Alicante destacado -->
-    <div class="alicante-banner-showcase">
-      <div class="banner-image-container">
-        <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image" />
-      </div>
-      <div class="banner-info">
-        <h3>Impulsedata - Alicante Futura</h3>
-        <p>Plataforma digital de gestión de datos para la innovación y el desarrollo sostenible de Alicante.</p>
-      </div>
-    </div>
-    
-    <!-- Contenido principal -->
-    <div class="dashboard-content">
-      <!-- Panel de estadísticas -->
-      <div class="stats-section">
-        <div class="stat-card">
-          <h3>Empresas</h3>
-          <div class="stat-value"><AnimatedNumber :number="empresasCount" /></div>
+    <div class="dashboard-container">
+      <!-- Encabezado del dashboard -->
+      <div class="dashboard-header">
+        <div class="welcome-section">
+          <h1 class="welcome-title">Dashboard</h1>
+          <p class="welcome-subtitle" v-if="usuario">Bienvenido, <span class="user-name">{{ usuario.nombre }}</span></p>
         </div>
-        <div class="stat-card">
-          <h3>Departamentos</h3>
-          <div class="stat-value"><AnimatedNumber :number="departamentosCount" /></div>
-        </div>
-        <div class="stat-card">
-          <h3>Centros</h3>
-          <div class="stat-value"><AnimatedNumber :number="centrosCount" /></div>
-        </div>
-        <div class="stat-card">
-          <h3>Formaciones</h3>
-          <div class="stat-value"><AnimatedNumber :number="formacionesCount" /></div>
+        <div class="action-buttons">
+          <button class="btn-nueva-empresa" @click="showFormModal = true; modoEdicion = false;">
+            <a href="#"><span>+ Crear nueva empresa</span></a>
+          </button>
         </div>
       </div>
       
-      <!-- Loader para estados de carga -->
-      <div v-if="cargando" class="loading-container">
-        <div class="loader"></div>
-        <p>Cargando datos...</p>
+      <!-- Banner de Alicante destacado -->
+      <div class="alicante-banner-showcase">
+        <div class="banner-image-container">
+          <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image" />
+        </div>
+        <div class="banner-info">
+          <h3>Impulsedata - Alicante Futura</h3>
+          <p>Plataforma digital de gestión de datos para la innovación y el desarrollo sostenible de Alicante.</p>
+        </div>
       </div>
       
-      <!-- Mensaje de error si algo falla -->
-      <div v-else-if="error" class="error-container">
-        <p>{{ error }}</p>
-        <button @click="cargarDatos" class="btn btn-primary">Reintentar</button>
-      </div>
-      
-      <!-- Lista de empresas -->
-      <div v-else class="forms-section">
-        <h2>Mis empresas</h2>
-        
-        <div v-if="empresas.length === 0" class="empty-state">
-          <p>No tienes empresas registradas todavía.</p>
-          <button class="btn btn-secondary" @click="showFormModal = true">Crear</button>
+      <!-- Contenido principal -->
+      <div class="dashboard-content">
+        <!-- Panel de estadísticas -->
+        <div class="stats-section">
+          <div class="stat-card">
+            <h3>Empresas</h3>
+            <div class="stat-value"><AnimatedNumber :number="empresasCount" /></div>
+          </div>
+          <div class="stat-card">
+            <h3>Departamentos</h3>
+            <div class="stat-value"><AnimatedNumber :number="departamentosCount" /></div>
+          </div>
+          <div class="stat-card">
+            <h3>Centros</h3>
+            <div class="stat-value"><AnimatedNumber :number="centrosCount" /></div>
+          </div>
+          <div class="stat-card">
+            <h3>Formaciones</h3>
+            <div class="stat-value"><AnimatedNumber :number="formacionesCount" /></div>
+          </div>
         </div>
         
-        <div v-else class="forms-list">
-          <div v-for="empresa in empresas" :key="empresa.id" class="form-card">
-            <div class="form-info" @click="verEmpresa(empresa)">
-              <h3>{{ empresa.nombre }}</h3>
-              <p>{{ empresa.descripcion }}</p>
-              <div class="form-meta">
-                <span>Ciudad: {{ empresa.ciudad }}</span>
-                <span>Creada: {{ formatDate(empresa.fechaCreacion) }}</span>
+        <!-- Loader para estados de carga -->
+        <div v-if="cargando" class="loading-container">
+          <div class="loader"></div>
+          <p>Cargando datos...</p>
+        </div>
+        
+        <!-- Mensaje de error si algo falla -->
+        <div v-else-if="error" class="error-container">
+          <p>{{ error }}</p>
+          <button @click="cargarDatos" class="btn btn-primary">Reintentar</button>
+        </div>
+        
+        <!-- Lista de empresas -->
+        <div v-else class="forms-section">
+          <h2>Mis empresas</h2>
+          
+          <div v-if="empresas.length === 0" class="empty-state">
+            <p>No tienes empresas registradas todavía.</p>
+            <button class="btn btn-secondary" @click="showFormModal = true">Crear</button>
+          </div>
+          
+          <div v-else class="forms-list">
+            <div v-for="empresa in empresas" :key="empresa.id" class="form-card">
+              <div class="form-info" @click="verEmpresa(empresa)">
+                <h3>{{ empresa.nombre }}</h3>
+                <p>{{ empresa.descripcion }}</p>
+                <div class="form-meta">
+                  <span>Ciudad: {{ empresa.ciudad }}</span>
+                  <span>Creada: {{ formatDate(empresa.fechaCreacion) }}</span>
+                </div>
+                <div class="form-stats">
+                  <span class="stat-pill">{{ empresa.numDepartamentos }} departamentos</span>
+                  <span class="stat-pill">{{ empresa.numCentros }} centros</span>
+                  <span class="stat-pill">{{ empresa.numFormaciones }} formaciones</span>
+                </div>
               </div>
-              <div class="form-stats">
-                <span class="stat-pill">{{ empresa.numDepartamentos }} departamentos</span>
-                <span class="stat-pill">{{ empresa.numCentros }} centros</span>
-                <span class="stat-pill">{{ empresa.numFormaciones }} formaciones</span>
+              <div class="form-actions">
+                <button class="button" @click="editarEmpresa(empresa)">Editar</button>
+                <button class="button" @click="verEmpresa(empresa)">Ver</button>
+                <button class="noselect" @click="confirmarEliminar(empresa)">
+                  <span class="text">Eliminar</span>
+                  <span class="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                    </svg>
+                  </span>
+                </button>
               </div>
             </div>
-            <div class="form-actions">
-              <button class="button" @click="editarEmpresa(empresa)">Editar</button>
-              <button class="button" @click="verEmpresa(empresa)">Ver</button>
-              <button class="noselect" @click="confirmarEliminar(empresa)">
-                <span class="text">Eliminar</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botón flotante para crear nueva empresa -->
+      <button class="btn-floating" @click="showFormModal = true; modoEdicion = false;">
+        <span class="icon">+</span>
+      </button>
+      
+      <!-- Modal para crear/editar empresa -->
+      <div class="modal-overlay" v-if="showFormModal" @click.self="showFormModal = false">
+        <div class="modal-container">
+          <div class="modal-header">
+            <h2>{{ modoEdicion ? 'Editar empresa' : 'Crear nueva empresa' }}</h2>
+            <button class="btn-close" @click="showFormModal = false">×</button>
+          </div>
+          <div class="modal-body">
+            <div v-if="guardando" class="saving-overlay">
+              <div class="loader"></div>
+              <p>Guardando datos...</p>
+            </div>
+            <form @submit.prevent="guardarEmpresa">
+              <div class="form-group">
+                <label for="nombreEmpresa">Nombre de la empresa</label>
+                <input 
+                  type="text" 
+                  id="nombreEmpresa" 
+                  v-model="nuevaEmpresa.nombre" 
+                  required 
+                  placeholder="Ej: Acme Corporation"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label for="fechaCreacion">Fecha de creación</label>
+                <input 
+                  type="date" 
+                  id="fechaCreacion" 
+                  v-model="nuevaEmpresa.fechaCreacion" 
+                  required
+                >
+              </div>
+              
+              <div class="form-group">
+                <label for="descripcionEmpresa">Descripción</label>
+                <textarea 
+                  id="descripcionEmpresa" 
+                  v-model="nuevaEmpresa.descripcion" 
+                  rows="3" 
+                  placeholder="Describe brevemente la empresa"
+                ></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label for="ciudadEmpresa">Ciudad</label>
+                <input 
+                  type="text" 
+                  id="ciudadEmpresa" 
+                  v-model="nuevaEmpresa.ciudad" 
+                  required 
+                  placeholder="Ej: Alicante"
+                >
+              </div>
+              
+              <h3 class="section-title">Departamentos</h3>
+              <div class="questions-container">
+                <div v-for="(departamento, index) in nuevaEmpresa.departamentos" :key="index" class="question-item">
+                  <div class="question-header">
+                    <h4>Departamento {{ index + 1 }}</h4>
+                    <button 
+                      type="button" 
+                      class="btn-icon btn-delete-small" 
+                      @click="eliminarDepartamento(index)"
+                      v-if="nuevaEmpresa.departamentos.length > 1"
+                    >×</button>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label :for="'nombreDep'+index">Nombre del departamento</label>
+                    <input 
+                      type="text" 
+                      :id="'nombreDep'+index" 
+                      v-model="departamento.nombre" 
+                      required 
+                      placeholder="Ej: Empleo y Formación"
+                    >
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary" @click="agregarDepartamento">
+                + Añadir departamento
+              </button>
+              
+              <h3 class="section-title">Centros</h3>
+              <div class="questions-container">
+                <div v-for="(centro, index) in nuevaEmpresa.centros" :key="index" class="question-item">
+                  <div class="question-header">
+                    <h4>Centro {{ index + 1 }}</h4>
+                    <button 
+                      type="button" 
+                      class="btn-icon btn-delete-small" 
+                      @click="eliminarCentro(index)"
+                      v-if="nuevaEmpresa.centros.length > 1"
+                    >×</button>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label :for="'nombreCentro'+index">Nombre del centro</label>
+                    <input 
+                      type="text" 
+                      :id="'nombreCentro'+index" 
+                      v-model="centro.nombre" 
+                      required 
+                      placeholder="Ej: Sede Principal"
+                    >
+                  </div>
+                  
+                  <div class="form-group">
+                    <label :for="'direccionCentro'+index">Dirección</label>
+                    <input 
+                      type="text" 
+                      :id="'direccionCentro'+index" 
+                      v-model="centro.direccion" 
+                      required 
+                      placeholder="Ej: Calle Principal 123"
+                    >
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary" @click="agregarCentro">
+                + Añadir centro
+              </button>
+              
+              <h3 class="section-title">Formaciones</h3>
+              <div class="questions-container">
+                <div v-for="(formacion, index) in nuevaEmpresa.formaciones" :key="index" class="question-item">
+                  <div class="question-header">
+                    <h4>Formación {{ index + 1 }}</h4>
+                    <button 
+                      type="button" 
+                      class="btn-icon btn-delete-small" 
+                      @click="eliminarFormacion(index)"
+                      v-if="nuevaEmpresa.formaciones.length > 1"
+                    >×</button>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label :for="'nombreFormacion'+index">Nombre de la formación</label>
+                    <input 
+                      type="text" 
+                      :id="'nombreFormacion'+index" 
+                      v-model="formacion.nombre" 
+                      required 
+                      placeholder="Ej: LABORA"
+                    >
+                  </div>
+                  
+                  <div class="form-group">
+                    <label :for="'tipoFormacion'+index">Tipo de formación</label>
+                    <select :id="'tipoFormacion'+index" v-model="formacion.tipo" required>
+                      <option value="presencial">Presencial</option>
+                      <option value="virtual">Virtual</option>
+                      <option value="hibrida">Híbrida</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label :for="'duracionFormacion'+index">Duración (horas)</label>
+                    <input 
+                      type="number" 
+                      :id="'duracionFormacion'+index" 
+                      v-model="formacion.duracion" 
+                      required 
+                      min="1"
+                    >
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary" @click="agregarFormacion">
+                + Añadir formación
+              </button>
+              
+              <div class="form-actions modal-actions">
+                <button type="button" class="button-cancel" @click="showFormModal = false">Cancelar</button>
+                <button type="submit" class="btn btn-save" :disabled="guardando">Guardar empresa</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Modal de confirmación para eliminar -->
+      <div class="modal-overlay" v-if="mostrarConfirmacion" @click.self="mostrarConfirmacion = false">
+        <div class="modal-container modal-small">
+          <div class="modal-header">
+            <h2>Confirmar eliminación</h2>
+            <button class="btn-close" @click="mostrarConfirmacion = false">×</button>
+          </div>
+          <div class="modal-body">
+            <p>¿Estás seguro de que deseas eliminar la empresa <strong>{{ empresaAEliminar?.nombre }}</strong>?</p>
+            <p class="warning-text">Esta acción no se puede deshacer y eliminará todos los departamentos, centros y formaciones asociados.</p>
+            
+            <div class="form-actions modal-actions">
+              <button type="button" class="button-cancel" @click="mostrarConfirmacion = false">Cancelar</button>
+              <button type="button" class="noselect" @click="eliminarEmpresa" :disabled="eliminando">
+                <span class="text">{{ eliminando ? 'Eliminando...' : 'Eliminar' }}</span>
                 <span class="icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                     <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
@@ -97,302 +321,89 @@
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Botón flotante para crear nueva empresa -->
-    <button class="btn-floating" @click="showFormModal = true; modoEdicion = false;">
-      <span class="icon">+</span>
-    </button>
-    
-    <!-- Modal para crear/editar empresa -->
-    <div class="modal-overlay" v-if="showFormModal" @click.self="showFormModal = false">
-      <div class="modal-container">
-        <div class="modal-header">
-          <h2>{{ modoEdicion ? 'Editar empresa' : 'Crear nueva empresa' }}</h2>
-          <button class="btn-close" @click="showFormModal = false">×</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="guardando" class="saving-overlay">
-            <div class="loader"></div>
-            <p>Guardando datos...</p>
+      
+      <!-- Modal para ver detalles de empresa -->
+      <div class="modal-overlay" v-if="showViewModal" @click.self="showViewModal = false">
+        <div class="modal-container">
+          <div class="modal-header">
+            <h2>Detalles de empresa</h2>
+            <button class="btn-close" @click="showViewModal = false">×</button>
           </div>
-          <form @submit.prevent="guardarEmpresa">
-            <div class="form-group">
-              <label for="nombreEmpresa">Nombre de la empresa</label>
-              <input 
-                type="text" 
-                id="nombreEmpresa" 
-                v-model="nuevaEmpresa.nombre" 
-                required 
-                placeholder="Ej: Acme Corporation"
-              >
+          <div class="modal-body">
+            <div v-if="cargando" class="saving-overlay">
+              <div class="loader"></div>
+              <p>Cargando datos...</p>
             </div>
-            
-            <div class="form-group">
-              <label for="fechaCreacion">Fecha de creación</label>
-              <input 
-                type="date" 
-                id="fechaCreacion" 
-                v-model="nuevaEmpresa.fechaCreacion" 
-                required
-              >
-            </div>
-            
-            <div class="form-group">
-              <label for="descripcionEmpresa">Descripción</label>
-              <textarea 
-                id="descripcionEmpresa" 
-                v-model="nuevaEmpresa.descripcion" 
-                rows="3" 
-                placeholder="Describe brevemente la empresa"
-              ></textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="ciudadEmpresa">Ciudad</label>
-              <input 
-                type="text" 
-                id="ciudadEmpresa" 
-                v-model="nuevaEmpresa.ciudad" 
-                required 
-                placeholder="Ej: Alicante"
-              >
-            </div>
-            
-            <h3 class="section-title">Departamentos</h3>
-            <div class="questions-container">
-              <div v-for="(departamento, index) in nuevaEmpresa.departamentos" :key="index" class="question-item">
-                <div class="question-header">
-                  <h4>Departamento {{ index + 1 }}</h4>
-                  <button 
-                    type="button" 
-                    class="btn-icon btn-delete-small" 
-                    @click="eliminarDepartamento(index)"
-                    v-if="nuevaEmpresa.departamentos.length > 1"
-                  >×</button>
+            <div class="view-content">
+              <div class="form-group">
+                <label>Nombre de la empresa</label>
+                <div class="view-field">{{ empresaActual.nombre }}</div>
+              </div>
+              
+              <div class="form-group">
+                <label>Fecha de creación</label>
+                <div class="view-field">{{ formatDate(empresaActual.fechaCreacion) }}</div>
+              </div>
+              
+              <div class="form-group">
+                <label>Descripción</label>
+                <div class="view-field description">{{ empresaActual.descripcion || 'Sin descripción' }}</div>
+              </div>
+              
+              <div class="form-group">
+                <label>Ciudad</label>
+                <div class="view-field">{{ empresaActual.ciudad || 'No especificada' }}</div>
+              </div>
+              
+              <h3 class="section-title">Departamentos</h3>
+              <div class="view-list">
+                <div v-if="!empresaActual.departamentos || empresaActual.departamentos.length === 0" class="empty-message">
+                  No hay departamentos registrados.
                 </div>
-                
-                <div class="form-group">
-                  <label :for="'nombreDep'+index">Nombre del departamento</label>
-                  <input 
-                    type="text" 
-                    :id="'nombreDep'+index" 
-                    v-model="departamento.nombre" 
-                    required 
-                    placeholder="Ej: Empleo y Formación"
-                  >
+                <div v-for="(departamento, index) in empresaActual.departamentos" :key="index" class="view-item">
+                  <div class="view-item-title">Departamento {{ index + 1 }}</div>
+                  <div class="view-item-content">{{ departamento.nombre }}</div>
                 </div>
               </div>
-            </div>
-            <button type="button" class="btn btn-secondary" @click="agregarDepartamento">
-              + Añadir departamento
-            </button>
-            
-            <h3 class="section-title">Centros</h3>
-            <div class="questions-container">
-              <div v-for="(centro, index) in nuevaEmpresa.centros" :key="index" class="question-item">
-                <div class="question-header">
-                  <h4>Centro {{ index + 1 }}</h4>
-                  <button 
-                    type="button" 
-                    class="btn-icon btn-delete-small" 
-                    @click="eliminarCentro(index)"
-                    v-if="nuevaEmpresa.centros.length > 1"
-                  >×</button>
+              
+              <h3 class="section-title">Centros</h3>
+              <div class="view-list">
+                <div v-if="!empresaActual.centros || empresaActual.centros.length === 0" class="empty-message">
+                  No hay centros registrados.
                 </div>
-                
-                <div class="form-group">
-                  <label :for="'nombreCentro'+index">Nombre del centro</label>
-                  <input 
-                    type="text" 
-                    :id="'nombreCentro'+index" 
-                    v-model="centro.nombre" 
-                    required 
-                    placeholder="Ej: Sede Principal"
-                  >
-                </div>
-                
-                <div class="form-group">
-                  <label :for="'direccionCentro'+index">Dirección</label>
-                  <input 
-                    type="text" 
-                    :id="'direccionCentro'+index" 
-                    v-model="centro.direccion" 
-                    required 
-                    placeholder="Ej: Calle Principal 123"
-                  >
+                <div v-for="(centro, index) in empresaActual.centros" :key="index" class="view-item">
+                  <div class="view-item-title">Centro {{ index + 1 }}</div>
+                  <div class="view-item-content">
+                    <div><strong>Nombre:</strong> {{ centro.nombre }}</div>
+                    <div><strong>Dirección:</strong> {{ centro.direccion || 'No especificada' }}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <button type="button" class="btn btn-secondary" @click="agregarCentro">
-              + Añadir centro
-            </button>
-            
-            <h3 class="section-title">Formaciones</h3>
-            <div class="questions-container">
-              <div v-for="(formacion, index) in nuevaEmpresa.formaciones" :key="index" class="question-item">
-                <div class="question-header">
-                  <h4>Formación {{ index + 1 }}</h4>
-                  <button 
-                    type="button" 
-                    class="btn-icon btn-delete-small" 
-                    @click="eliminarFormacion(index)"
-                    v-if="nuevaEmpresa.formaciones.length > 1"
-                  >×</button>
+              
+              <h3 class="section-title">Formaciones</h3>
+              <div class="view-list">
+                <div v-if="!empresaActual.formaciones || empresaActual.formaciones.length === 0" class="empty-message">
+                  No hay formaciones registradas.
                 </div>
-                
-                <div class="form-group">
-                  <label :for="'nombreFormacion'+index">Nombre de la formación</label>
-                  <input 
-                    type="text" 
-                    :id="'nombreFormacion'+index" 
-                    v-model="formacion.nombre" 
-                    required 
-                    placeholder="Ej: LABORA"
-                  >
-                </div>
-                
-                <div class="form-group">
-                  <label :for="'tipoFormacion'+index">Tipo de formación</label>
-                  <select :id="'tipoFormacion'+index" v-model="formacion.tipo" required>
-                    <option value="presencial">Presencial</option>
-                    <option value="virtual">Virtual</option>
-                    <option value="hibrida">Híbrida</option>
-                  </select>
-                </div>
-                
-                <div class="form-group">
-                  <label :for="'duracionFormacion'+index">Duración (horas)</label>
-                  <input 
-                    type="number" 
-                    :id="'duracionFormacion'+index" 
-                    v-model="formacion.duracion" 
-                    required 
-                    min="1"
-                  >
+                <div v-for="(formacion, index) in empresaActual.formaciones" :key="index" class="view-item">
+                  <div class="view-item-title">Formación {{ index + 1 }}</div>
+                  <div class="view-item-content">
+                    <div><strong>Nombre:</strong> {{ formacion.nombre }}</div>
+                    <div><strong>Tipo:</strong> {{ formatTipoFormacion(formacion.tipo) }}</div>
+                    <div><strong>Duración:</strong> {{ formacion.duracion }} horas</div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <button type="button" class="btn btn-secondary" @click="agregarFormacion">
-              + Añadir formación
-            </button>
-            
-            <div class="form-actions modal-actions">
-              <button type="button" class="button-cancel" @click="showFormModal = false">Cancelar</button>
-              <button type="submit" class="btn btn-save" :disabled="guardando">Guardar empresa</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Modal de confirmación para eliminar -->
-    <div class="modal-overlay" v-if="mostrarConfirmacion" @click.self="mostrarConfirmacion = false">
-      <div class="modal-container modal-small">
-        <div class="modal-header">
-          <h2>Confirmar eliminación</h2>
-          <button class="btn-close" @click="mostrarConfirmacion = false">×</button>
-        </div>
-        <div class="modal-body">
-          <p>¿Estás seguro de que deseas eliminar la empresa <strong>{{ empresaAEliminar?.nombre }}</strong>?</p>
-          <p class="warning-text">Esta acción no se puede deshacer y eliminará todos los departamentos, centros y formaciones asociados.</p>
-          
-          <div class="form-actions modal-actions">
-            <button type="button" class="button-cancel" @click="mostrarConfirmacion = false">Cancelar</button>
-            <button type="button" class="noselect" @click="eliminarEmpresa" :disabled="eliminando">
-              <span class="text">{{ eliminando ? 'Eliminando...' : 'Eliminar' }}</span>
-              <span class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                  <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
-                </svg>
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Modal para ver detalles de empresa -->
-    <div class="modal-overlay" v-if="showViewModal" @click.self="showViewModal = false">
-      <div class="modal-container">
-        <div class="modal-header">
-          <h2>Detalles de empresa</h2>
-          <button class="btn-close" @click="showViewModal = false">×</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="cargando" class="saving-overlay">
-            <div class="loader"></div>
-            <p>Cargando datos...</p>
-          </div>
-          <div class="view-content">
-            <div class="form-group">
-              <label>Nombre de la empresa</label>
-              <div class="view-field">{{ empresaActual.nombre }}</div>
-            </div>
-            
-            <div class="form-group">
-              <label>Fecha de creación</label>
-              <div class="view-field">{{ formatDate(empresaActual.fechaCreacion) }}</div>
-            </div>
-            
-            <div class="form-group">
-              <label>Descripción</label>
-              <div class="view-field description">{{ empresaActual.descripcion || 'Sin descripción' }}</div>
-            </div>
-            
-            <div class="form-group">
-              <label>Ciudad</label>
-              <div class="view-field">{{ empresaActual.ciudad || 'No especificada' }}</div>
-            </div>
-            
-            <h3 class="section-title">Departamentos</h3>
-            <div class="view-list">
-              <div v-if="!empresaActual.departamentos || empresaActual.departamentos.length === 0" class="empty-message">
-                No hay departamentos registrados.
+              
+              <div class="form-actions modal-actions">
+                <button type="button" class="button-cancel" @click="showViewModal = false">Cancelar</button>
+                <button type="button" class="button" @click="editarEmpresaDesdeVista()">
+                  Editar
+                </button>
+                <button type="button" class="buttonDownload" @click="descargarPDF()">
+                  Descargar PDF
+                </button>
               </div>
-              <div v-for="(departamento, index) in empresaActual.departamentos" :key="index" class="view-item">
-                <div class="view-item-title">Departamento {{ index + 1 }}</div>
-                <div class="view-item-content">{{ departamento.nombre }}</div>
-              </div>
-            </div>
-            
-            <h3 class="section-title">Centros</h3>
-            <div class="view-list">
-              <div v-if="!empresaActual.centros || empresaActual.centros.length === 0" class="empty-message">
-                No hay centros registrados.
-              </div>
-              <div v-for="(centro, index) in empresaActual.centros" :key="index" class="view-item">
-                <div class="view-item-title">Centro {{ index + 1 }}</div>
-                <div class="view-item-content">
-                  <div><strong>Nombre:</strong> {{ centro.nombre }}</div>
-                  <div><strong>Dirección:</strong> {{ centro.direccion || 'No especificada' }}</div>
-                </div>
-              </div>
-            </div>
-            
-            <h3 class="section-title">Formaciones</h3>
-            <div class="view-list">
-              <div v-if="!empresaActual.formaciones || empresaActual.formaciones.length === 0" class="empty-message">
-                No hay formaciones registradas.
-              </div>
-              <div v-for="(formacion, index) in empresaActual.formaciones" :key="index" class="view-item">
-                <div class="view-item-title">Formación {{ index + 1 }}</div>
-                <div class="view-item-content">
-                  <div><strong>Nombre:</strong> {{ formacion.nombre }}</div>
-                  <div><strong>Tipo:</strong> {{ formatTipoFormacion(formacion.tipo) }}</div>
-                  <div><strong>Duración:</strong> {{ formacion.duracion }} horas</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="form-actions modal-actions">
-              <button type="button" class="button-cancel" @click="showViewModal = false">Cancelar</button>
-              <button type="button" class="button" @click="editarEmpresaDesdeVista()">
-                Editar
-              </button>
-              <button type="button" class="buttonDownload" @click="descargarPDF()">
-                Descargar PDF
-              </button>
             </div>
           </div>
         </div>
