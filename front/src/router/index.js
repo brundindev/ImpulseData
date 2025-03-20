@@ -5,12 +5,19 @@ import RegisterView from '../views/RegisterView.vue'
 import VerifyEmailView from '../views/VerifyEmailView.vue'
 import CambiarPasswordView from '../views/CambiarPasswordView.vue'
 import PanelControlView from '../views/PanelControlView.vue'
+import WelcomeView from '../views/WelcomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
+      name: 'welcome',
+      component: WelcomeView,
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/home',
       name: 'home',
       component: HomeView,
       meta: { requiresAuth: true }
@@ -53,6 +60,15 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const isAuthenticated = localStorage.getItem('authToken');
   
+  // Si el usuario va a la ruta principal
+  if (to.path === '/') {
+    if (isAuthenticated) {
+      next('/home');  // Si está autenticado, redirige a home
+    } else {
+      next();  // Si no está autenticado, muestra WelcomeView
+    }
+    return;
+  }
   // Si estamos yendo a la página de registro o verificación, permitir siempre
   if (to.path === '/registro' || to.path === '/verify-email') {
     next();

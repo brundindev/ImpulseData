@@ -113,7 +113,29 @@
     background-color: #f8d7da;
     box-shadow: 0 4px 8px rgba(244, 67, 54, 0.2);
   }
+
+  .transparent-header {
+    background-color: transparent;
+    box-shadow: none;
+  }
   
+  /* You might also want to adjust the text color for better visibility on different backgrounds */
+.transparent-header .nav-link,
+.transparent-header .app-logo,
+.transparent-header .user-name {
+  color: #fff; /* or any color that works with your background */
+}
+
+.transparent-header .nav-link:hover,
+.transparent-header .app-logo:hover {
+  color: #e1e1e1;
+}
+
+/* Adjust the underline color for nav links if needed */
+.transparent-header .nav-link::after {
+  background-color: #fff;
+}
+
   .main-content {
     min-height: calc(100vh - 70px);
   }
