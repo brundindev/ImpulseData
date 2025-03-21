@@ -1,5 +1,5 @@
 <template>
-    <div class="welcome-page">
+    <div class="welcome-page no-scrollbar">
       <div class="hero-section">
         <div class="hero-content">
           <h1>ImpulseData</h1>
@@ -13,55 +13,6 @@
           <img src="../assets/img/impulsedata_logo.png" alt="Application Dashboard Preview" />
         </div>
       </div>
-  
-      <section id="features" class="features-section">
-        <h2 style="color: white;">Características</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-bolt"></i>
-            </div>
-            <h3 style="color: white;">Característica 1</h3>
-            <p style="color: white;">Interfaz intuitiva y fácil de usar.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-shield-alt"></i>
-            </div>
-            <h3 style="color: white;">Característica 2</h3>
-            <p style="color: white;">Seguridad y protección de datos.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-chart-line"></i>
-            </div>
-            <h3 style="color: white;">Característica 3</h3>
-            <p style="color: white;">Generación de informes y análisis de datos.</p>
-          </div>
-        </div>
-      </section>
-  
-      <footer class="welcome-footer">
-        <div class="footer-content">
-          <div class="footer-logo">
-            <h3>ImpulseData</h3>
-            <p>© 2025 ImpulseData. <br> Todos los derechos reservados.</p>
-          </div>
-          <div class="footer-links">
-            <div class="footer-column">
-                <h4>Ayuda</h4>
-                <a href="#">Contacto</a>
-                <a href="#">Soporte</a>
-                <a href="#">FAQ</a>
-            </div>
-            <div class="footer-column">
-              <h4>Legal</h4>
-              <a href="#">Política de privacidad</a>
-              <a href="#">Términos y condiciones</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   </template>
   
@@ -80,8 +31,23 @@
   </script>
   
   <style scoped>
+  html, body {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE and Edge */  
+    overflow-y: hidden !important;
+  }
+
+  html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari y Opera */
+  }
+  
+  .no-scrollbar{
+    /* height: 80vh; */
+    overflow-y: hidden;
+    overflow-x: hidden;
+  }
   .welcome-page {
-    min-height: 100vh;
+    min-height: calc(100vh - 4.2em);
     background: linear-gradient(180deg, #1D2024 0%, black 50%, black 100%);
     color: white;
     position: relative;
@@ -97,7 +63,7 @@
   height: 100%;
   background: radial-gradient(circle at 15% 15%, rgba(116, 155, 208, 0.1) 0%, transparent 60%);
   pointer-events: none;
- }
+}
 
  .welcome-page::after {
   content: '';
@@ -108,15 +74,16 @@
   height: 100%;
   background: radial-gradient(circle at 85% 85%, rgba(0, 70, 152, 0.15) 0%, transparent 55%);
   pointer-events: none;
-}
+  }
 
   .hero-section {
     display: flex;
-    padding: 8rem 2rem 4rem;
+    padding: 4rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
     align-items: center;
     gap: 2rem;
+    height: calc(100vh - 8rem);
   }
   
   .hero-content {
@@ -141,7 +108,7 @@
     gap: 1rem;
   }
   
-  .signup-btn, .pricing-btn {
+  .signup-btn {
     background-color: var(--primary-color);
     color: white;
     padding: 0.5rem 1.5rem;
@@ -149,7 +116,7 @@
     transition: background-color 0.3s ease;
   }
   
-  .signup-btn:hover, .pricing-btn:hover {
+  .signup-btn:hover {
     background-color: var(--primary-hover);
     color: white;
   }
@@ -172,115 +139,31 @@
     box-shadow: var(--shadow);
     border-radius: 8px;
     overflow: hidden;
+    display: flex;
+    align-items: center;
   }
   
   .hero-image img {
     width: 100%;
     height: auto;
     display: block;
+    object-fit: contain;
   }
-  
-  /* Features Section */
-  .features-section {
-    padding: 4rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    text-align: center;
-  }
-  
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-  }
-  
-  .feature-card {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    padding: 2rem;
-    transition: transform 0.3s ease;
-  }
-  
-  .feature-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .feature-icon {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: var(--secondary-color);
-  }
-  
-  
-  /* Footer */
-  .welcome-footer {
-    background-color: transparent;
-    padding: 3rem 2rem;
-  }
-  
-  .footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-  
-  .footer-logo {
-    margin-bottom: 2rem;
-  }
-  
-  .footer-logo h3 {
-    color: white;
-    margin-bottom: 0.5rem;
-  }
-  
-  .footer-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-  }
-  
-  .footer-column h4 {
-    color: white;
-    margin-bottom: 1rem;
-  }
-  
-  .footer-column a {
-    display: block;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 0.5rem;
-    transition: color 0.3s ease;
-  }
-  
-  .footer-column a:hover {
-    color: white;
-  }
-  
+    
   /* Responsive */
   @media (max-width: 768px) {
     .hero-section {
       flex-direction: column;
-      padding: 6rem 1rem 2rem;
+      padding: 3rem 1rem;
+      height:auto;
     }
     
     .hero-content h1 {
       font-size: 2rem;
     }
-    
-    .pricing-cards {
-      flex-direction: column;
-      align-items: center;
+
+    .hero-image {
+      max-height: 50vh; /* Limita la altura en móviles */
     }
-    
-    .pricing-card.featured {
-      transform: none;
-      order: -1;
-    }
-    
-    .footer-content {
-      flex-direction: column;
-    }
-  }
+  }  
   </style>
