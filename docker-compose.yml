@@ -1,14 +1,41 @@
-version: '3.8'
+# version: '3.8'
 
 services:
   vue-app:
-    build: ./front
+    build: 
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=development
     ports:
       - "80:80"
+    volumes:
+      - ./front/src:/usr/share/nginx/html/src
+      - ./front/public:/usr/share/nginx/html/public
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./front/src
+          target: /usr/share/nginx/html/src
+        - action: rebuild
+          path: ./front/package.json
 
   springboot-app:
-    build: ./impulsedata
+    build: 
+      context: ./impulsedata
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    volumes:
+      - ./impulsedata/src:/app/src
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./impulsedata/src
+          target: /app/src
+        - action: rebuild
+          path: ./impulsedata/pom.xml
     depends_on:
       - vue-app

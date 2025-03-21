@@ -2,7 +2,17 @@
   <div>
     <!-- Fondo con efecto visual -->
     <div class="home-background"></div>
+    
+    <!-- Añadir nuevos efectos de ondas -->
+    <div class="wave-background">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
+    
     <div class="floating-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
       <div class="particle"></div>
       <div class="particle"></div>
       <div class="particle"></div>

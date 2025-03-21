@@ -1076,7 +1076,8 @@
   pointer-events: none;
 }
 
-/* Efecto de partículas flotantes */
+/* Efectos visuales mejorados para HomeView, Perfil y Panel de Control */
+/* Efecto de partículas flotantes - Versión mejorada */
 .floating-particles {
   position: fixed;
   top: 0;
@@ -1085,62 +1086,316 @@
   height: 100%;
   pointer-events: none;
   z-index: -5;
+  overflow: hidden;
 }
 
 .particle {
   position: absolute;
-  background: rgba(0, 70, 152, 0.1);
+  background: linear-gradient(135deg, rgba(0, 70, 152, 0.1) 0%, rgba(0, 100, 255, 0.2) 100%);
   border-radius: 50%;
-  animation: float 20s infinite linear;
+  animation: float 20s infinite ease-in-out;
+  filter: blur(2px);
+  box-shadow: 0 0 20px rgba(0, 70, 152, 0.2);
 }
 
 .particle:nth-child(1) {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   top: 10%;
   left: 10%;
   animation-delay: 0s;
 }
 
 .particle:nth-child(2) {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   top: 20%;
   right: 15%;
   animation-delay: -5s;
 }
 
 .particle:nth-child(3) {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   bottom: 20%;
   left: 20%;
   animation-delay: -10s;
 }
 
 .particle:nth-child(4) {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   bottom: 10%;
   right: 10%;
   animation-delay: -15s;
 }
 
+.particle:nth-child(5) {
+  width: 50px;
+  height: 50px;
+  top: 50%;
+  left: 50%;
+  animation-delay: -7s;
+}
+
+.particle:nth-child(6) {
+  width: 90px;
+  height: 90px;
+  top: 80%;
+  left: 40%;
+  animation-delay: -12s;
+}
+
 @keyframes float {
   0% {
-    transform: translate(0, 0) rotate(0deg);
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 0.5;
   }
   25% {
-    transform: translate(50px, 50px) rotate(90deg);
+    transform: translate(50px, 50px) rotate(90deg) scale(1.1);
+    opacity: 0.7;
   }
   50% {
-    transform: translate(0, 100px) rotate(180deg);
+    transform: translate(0, 100px) rotate(180deg) scale(1);
+    opacity: 0.5;
   }
   75% {
-    transform: translate(-50px, 50px) rotate(270deg);
+    transform: translate(-50px, 50px) rotate(270deg) scale(0.9);
+    opacity: 0.7;
   }
   100% {
-    transform: translate(0, 0) rotate(360deg);
+    transform: translate(0, 0) rotate(360deg) scale(1);
+    opacity: 0.5;
+  }
+}
+
+/* Efecto de ondas en el fondo */
+.wave-background {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -12;
+  overflow: hidden;
+}
+
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  border-radius: 40%;
+  animation: wave 20s infinite linear;
+  background: radial-gradient(ellipse at center, rgba(0, 70, 152, 0) 0%, rgba(0, 70, 152, 0.03) 100%);
+}
+
+.wave:nth-child(1) {
+  animation-duration: 20s;
+}
+
+.wave:nth-child(2) {
+  animation-duration: 25s;
+  animation-delay: -5s;
+  opacity: 0.6;
+}
+
+.wave:nth-child(3) {
+  animation-duration: 30s;
+  animation-delay: -10s;
+  opacity: 0.4;
+}
+
+@keyframes wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Efectos de brillo para tarjetas */
+.stat-card, .form-card, .summary-card, .chart-card, .profile-card, .view-item {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.stat-card::before, .form-card::before, .summary-card::before, .chart-card::before, .profile-card::before, .view-item::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.8s ease, opacity 0.8s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.stat-card:hover::before, .form-card:hover::before, .summary-card:hover::before, .chart-card:hover::before, .profile-card:hover::before, .view-item:hover::before {
+  transform: scale(1);
+  opacity: 0.3;
+}
+
+.stat-card:hover, .form-card:hover, .summary-card:hover, .chart-card:hover, .profile-card:hover, .view-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 70, 152, 0.2);
+}
+
+/* Efecto de foco para botones principales */
+.btn-primary, .btn-save, .buttonDownload, .btn-floating {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after, .btn-save::after, .buttonDownload::after, .btn-floating::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: -100%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+  transition: all 0.5s ease;
+}
+
+.btn-primary:hover::after, .btn-save:hover::after, .buttonDownload:hover::after, .btn-floating:hover::after {
+  left: 100%;
+}
+
+/* Animación de títulos de sección */
+.dashboard-title, .profile-card h1, .section-title, .forms-section h2 {
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-title::after, .profile-card h1::after, .section-title::after, .forms-section h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color) 0%, rgba(0, 70, 152, 0.2) 100%);
+  transition: width 0.5s ease;
+}
+
+.dashboard-title:hover::after, .profile-card h1:hover::after, .section-title:hover::after, .forms-section h2:hover::after {
+  width: 100%;
+}
+
+/* Añadir efecto de desplazamiento a las tarjetas de empresas */
+.form-card {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.form-info {
+  transition: transform 0.5s ease;
+  transform-origin: center center;
+}
+
+.form-card:hover .form-info {
+  transform: translateZ(10px);
+}
+
+.form-actions {
+  transform: translateZ(5px);
+  transition: transform 0.5s ease;
+}
+
+.form-card:hover .form-actions {
+  transform: translateZ(15px);
+}
+
+/* Estilizar el scrollbar para todos los componentes */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 70, 152, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* Añadir más partículas para la vista de perfil y panel de control */
+.floating-particles-profile .particle,
+.floating-particles-panel .particle {
+  background: linear-gradient(135deg, rgba(0, 70, 152, 0.1) 0%, rgba(0, 152, 70, 0.2) 100%);
+}
+
+/* Añadir gradientes animados para tarjetas en panel de control */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.summary-card {
+  border-left: 4px solid transparent;
+  background-image: linear-gradient(white, white), linear-gradient(135deg, #004698 0%, #0080f0 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
+}
+
+.summary-card:hover {
+  animation-play-state: paused;
+}
+
+/* Añadir efecto de pulso a los iconos */
+.summary-icon, .activity-icon {
+  position: relative;
+}
+
+.summary-icon::after, .activity-icon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  z-index: -1;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
   }
 }
 

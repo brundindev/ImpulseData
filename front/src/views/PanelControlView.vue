@@ -1,112 +1,130 @@
 <template>
-  <div class="dashboard-container">
-    <div class="dashboard-header">
-      <h1 class="dashboard-title">Panel de Control</h1>
-      <button @click="recargarDatos" class="reload-button" :disabled="cargando">
-        <i class="fas fa-sync-alt" :class="{ 'fa-spin': cargando }"></i>
-        {{ cargando ? 'Cargando...' : 'Actualizar datos' }}
-      </button>
+  <div>
+    <!-- Fondos y efectos visuales mejorados -->
+    <div class="home-background"></div>
+    <div class="wave-background">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
     </div>
-    
-    <div v-if="cargando" class="loading-container">
-      <div class="loading-spinner"></div>
-      <p>Cargando datos...</p>
+    <div class="floating-particles floating-particles-panel">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
     </div>
-    
-    <div v-else-if="empresas.length === 0" class="no-data-container">
-      <p>No se encontraron datos para tu usuario. Por favor, contacta con el administrador.</p>
-    </div>
-    
-    <div v-else>
-      <div class="user-company">
-        <h2>{{ empresas[0].nombre }}</h2>
+  
+    <div class="dashboard-container">
+      <div class="dashboard-header">
+        <h1 class="dashboard-title">Panel de Control</h1>
+        <button @click="recargarDatos" class="reload-button" :disabled="cargando">
+          <i class="fas fa-sync-alt" :class="{ 'fa-spin': cargando }"></i>
+          {{ cargando ? 'Cargando...' : 'Actualizar datos' }}
+        </button>
       </div>
       
-      <div class="dashboard-summary">
-        <div class="summary-card">
-          <div class="summary-icon">
-            <i class="fas fa-building"></i>
-          </div>
-          <div class="summary-content">
-            <h3>{{ totalEmpresas }}</h3>
-            <p>Empresas</p>
-          </div>
-        </div>
-        
-        <div class="summary-card">
-          <div class="summary-icon">
-            <i class="fas fa-users"></i>
-          </div>
-          <div class="summary-content">
-            <h3>{{ totalDepartamentos }}</h3>
-            <p>Departamentos</p>
-          </div>
-        </div>
-        
-        <div class="summary-card">
-          <div class="summary-icon">
-            <i class="fas fa-map-marker-alt"></i>
-          </div>
-          <div class="summary-content">
-            <h3>{{ totalCentros }}</h3>
-            <p>Centros</p>
-          </div>
-        </div>
-        
-        <div class="summary-card">
-          <div class="summary-icon">
-            <i class="fas fa-graduation-cap"></i>
-          </div>
-          <div class="summary-content">
-            <h3>{{ totalFormaciones }}</h3>
-            <p>Formaciones</p>
-          </div>
-        </div>
+      <div v-if="cargando" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Cargando datos...</p>
       </div>
       
-      <div class="charts-grid">
-        <div class="chart-card">
-          <h2>Departamentos</h2>
-          <div class="chart-container">
-            <canvas ref="departamentosChart"></canvas>
-          </div>
-        </div>
-        
-        <div class="chart-card">
-          <h2>Centros</h2>
-          <div class="chart-container">
-            <canvas ref="centrosChart"></canvas>
-          </div>
-        </div>
-        
-        <div class="chart-card">
-          <h2>Estado de Formaciones</h2>
-          <div class="chart-container">
-            <canvas ref="formacionesChart"></canvas>
-          </div>
-        </div>
-        
-        <div class="chart-card">
-          <h2>Sectores</h2>
-          <div class="chart-container">
-            <canvas ref="organismosChart"></canvas>
-          </div>
-        </div>
+      <div v-else-if="empresas.length === 0" class="no-data-container">
+        <p>No se encontraron datos para tu usuario. Por favor, contacta con el administrador.</p>
       </div>
       
-      <div class="recent-activity">
-        <h2>Actividad Reciente</h2>
-        <div class="activity-list" v-if="actividades.length > 0">
-          <div v-for="(actividad, index) in actividades" :key="index" class="activity-item">
-            <div class="activity-icon" :class="getIconClass(actividad.tipo)"></div>
-            <div class="activity-details">
-              <p class="activity-description">{{ actividad.descripcion }}</p>
-              <span class="activity-date">{{ formatDate(actividad.fecha) }}</span>
+      <div v-else>
+        <div class="user-company">
+          <h2>{{ empresas[0].nombre }}</h2>
+        </div>
+        
+        <div class="dashboard-summary">
+          <div class="summary-card">
+            <div class="summary-icon">
+              <i class="fas fa-building"></i>
+            </div>
+            <div class="summary-content">
+              <h3>{{ totalEmpresas }}</h3>
+              <p>Empresas</p>
+            </div>
+          </div>
+          
+          <div class="summary-card">
+            <div class="summary-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="summary-content">
+              <h3>{{ totalDepartamentos }}</h3>
+              <p>Departamentos</p>
+            </div>
+          </div>
+          
+          <div class="summary-card">
+            <div class="summary-icon">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="summary-content">
+              <h3>{{ totalCentros }}</h3>
+              <p>Centros</p>
+            </div>
+          </div>
+          
+          <div class="summary-card">
+            <div class="summary-icon">
+              <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="summary-content">
+              <h3>{{ totalFormaciones }}</h3>
+              <p>Formaciones</p>
             </div>
           </div>
         </div>
-        <div v-else class="no-activity">
-          <p>No hay actividad reciente para mostrar</p>
+        
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h2>Departamentos</h2>
+            <div class="chart-container">
+              <canvas ref="departamentosChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="chart-card">
+            <h2>Centros</h2>
+            <div class="chart-container">
+              <canvas ref="centrosChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="chart-card">
+            <h2>Estado de Formaciones</h2>
+            <div class="chart-container">
+              <canvas ref="formacionesChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="chart-card">
+            <h2>Sectores</h2>
+            <div class="chart-container">
+              <canvas ref="organismosChart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <div class="recent-activity">
+          <h2>Actividad Reciente</h2>
+          <div class="activity-list" v-if="actividades.length > 0">
+            <div v-for="(actividad, index) in actividades" :key="index" class="activity-item">
+              <div class="activity-icon" :class="getIconClass(actividad.tipo)"></div>
+              <div class="activity-details">
+                <p class="activity-description">{{ actividad.descripcion }}</p>
+                <span class="activity-date">{{ formatDate(actividad.fecha) }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="no-activity">
+            <p>No hay actividad reciente para mostrar</p>
+          </div>
         </div>
       </div>
     </div>

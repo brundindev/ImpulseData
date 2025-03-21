@@ -1,151 +1,169 @@
 <template>
-  <div class="profile-container">
-    <div class="profile-card">
-      <h1>Mi Perfil</h1>
+  <div>
+    <!-- Añadir fondos y efectos visuales -->
+    <div class="home-background"></div>
+    <div class="wave-background">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
+    <div class="floating-particles floating-particles-profile">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    
+    <div class="profile-container">
+      <div class="profile-card">
+        <h1>Mi Perfil</h1>
 
-      <!-- Foto de perfil -->
-      <div class="profile-photo-section">
-        <div class="profile-photo-container">
-          <img v-if="photoURL" :src="photoURL" alt="Foto de perfil" class="profile-photo" />
-          <div v-else class="profile-photo-placeholder">
-            {{ userInitials }}
-          </div>
-          <div class="photo-overlay">
-            <label for="photo-upload" class="change-photo-btn">
-              Cambiar foto
-              <input id="photo-upload" type="file" accept="image/*" @change="handlePhotoUpload" />
-            </label>
+        <!-- Foto de perfil -->
+        <div class="profile-photo-section">
+          <div class="profile-photo-container">
+            <img v-if="photoURL" :src="photoURL" alt="Foto de perfil" class="profile-photo" />
+            <div v-else class="profile-photo-placeholder">
+              {{ userInitials }}
+            </div>
+            <div class="photo-overlay">
+              <label for="photo-upload" class="change-photo-btn">
+                Cambiar foto
+                <input id="photo-upload" type="file" accept="image/*" @change="handlePhotoUpload" />
+              </label>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Información de usuario -->
-      <div class="user-info-section">
-        <div class="form-group">
-          <label for="displayName">Nombre de usuario</label>
-          <input
-            type="text"
-            id="displayName"
-            v-model="displayName"
-            class="form-control"
-            disabled
-            readonly
-          />
+        <!-- Información de usuario -->
+        <div class="user-info-section">
+          <div class="form-group">
+            <label for="displayName">Nombre de usuario</label>
+            <input
+              type="text"
+              id="displayName"
+              v-model="displayName"
+              class="form-control"
+              disabled
+              readonly
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Correo electrónico</label>
+            <input
+              type="email"
+              id="email"
+              v-model="email"
+              class="form-control"
+              disabled
+              readonly
+            />
+          </div>
+        </div>
+
+        <hr class="section-divider" />
+        
+        <!-- Mensajes de éxito y error -->
+        <div v-if="photoSuccess" class="alert alert-success success-box">
+          <div class="success-icon">✓</div>
+          <div class="success-content">
+            <div class="success-title">¡Foto actualizada!</div>
+            <p>Tu foto de perfil ha sido actualizada correctamente.</p>
+          </div>
         </div>
         
-        <div class="form-group">
-          <label for="email">Correo electrónico</label>
-          <input
-            type="email"
-            id="email"
-            v-model="email"
-            class="form-control"
-            disabled
-            readonly
-          />
-        </div>
-      </div>
-
-      <hr class="section-divider" />
-      
-      <!-- Mensajes de éxito y error -->
-      <div v-if="photoSuccess" class="alert alert-success success-box">
-        <div class="success-icon">✓</div>
-        <div class="success-content">
-          <div class="success-title">¡Foto actualizada!</div>
-          <p>Tu foto de perfil ha sido actualizada correctamente.</p>
-        </div>
-      </div>
-      
-      <div v-if="photoError" class="alert alert-danger error-box">
-        <div class="error-icon">✖</div>
-        <div class="error-content">
-          <div class="error-title">Error</div>
-          <p>{{ photoError }}</p>
-        </div>
-      </div>
-
-      <!-- Mensaje de éxito de contraseña -->
-      <div v-if="exito" class="alert alert-success success-box">
-        <div class="success-icon">✓</div>
-        <div class="success-content">
-          <div class="success-title">¡Contraseña actualizada!</div>
-          <p>Tu contraseña ha sido cambiada correctamente.</p>
-        </div>
-      </div>
-
-      <!-- Mensaje de error de contraseña -->
-      <div v-if="error" class="alert alert-danger error-box">
-        <div class="error-icon">✖</div>
-        <div class="error-content">
-          <div class="error-title">Error</div>
-          <p>{{ error }}</p>
-        </div>
-      </div>
-
-      <h2>Cambiar Contraseña</h2>
-      <form @submit.prevent="cambiarPassword">
-        <div class="form-group">
-          <label for="currentPassword">Contraseña actual</label>
-          <input
-            type="password"
-            id="currentPassword"
-            v-model="currentPassword"
-            class="form-control"
-            required
-            placeholder="Introduce tu contraseña actual"
-            :disabled="loading"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="newPassword">Nueva contraseña</label>
-          <input
-            type="password"
-            id="newPassword"
-            v-model="newPassword"
-            class="form-control"
-            required
-            placeholder="Introduce tu nueva contraseña"
-            :disabled="loading"
-            @input="validarPassword"
-          />
-          <div class="password-requirements" :class="{ active: newPassword }">
-            <p>La contraseña debe contener:</p>
-            <ul>
-              <li :class="{ valid: tieneMinimo8 }">Mínimo 8 caracteres</li>
-              <li :class="{ valid: tieneMayuscula }">Al menos una mayúscula</li>
-              <li :class="{ valid: tieneMinuscula }">Al menos una minúscula</li>
-              <li :class="{ valid: tieneNumero }">Al menos un número</li>
-            </ul>
+        <div v-if="photoError" class="alert alert-danger error-box">
+          <div class="error-icon">✖</div>
+          <div class="error-content">
+            <div class="error-title">Error</div>
+            <p>{{ photoError }}</p>
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="confirmPassword">Confirmar nueva contraseña</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            v-model="confirmPassword"
-            class="form-control"
-            required
-            placeholder="Confirma tu nueva contraseña"
-            :disabled="loading"
-          />
-          <div v-if="!passwordsMatch && confirmPassword" class="password-mismatch">
-            Las contraseñas no coinciden
+        <!-- Mensaje de éxito de contraseña -->
+        <div v-if="exito" class="alert alert-success success-box">
+          <div class="success-icon">✓</div>
+          <div class="success-content">
+            <div class="success-title">¡Contraseña actualizada!</div>
+            <p>Tu contraseña ha sido cambiada correctamente.</p>
           </div>
         </div>
 
-        <div class="actions">
-          <button type="submit" class="btn btn-primary" :disabled="!isFormValid || loading">
-            {{ loading ? 'Cambiando contraseña...' : 'Cambiar Contraseña' }}
-          </button>
+        <!-- Mensaje de error de contraseña -->
+        <div v-if="error" class="alert alert-danger error-box">
+          <div class="error-icon">✖</div>
+          <div class="error-content">
+            <div class="error-title">Error</div>
+            <p>{{ error }}</p>
+          </div>
         </div>
-      </form>
-      
-      <div class="back-link">
-        <router-link to="/">Volver al Dashboard</router-link>
+
+        <h2>Cambiar Contraseña</h2>
+        <form @submit.prevent="cambiarPassword">
+          <div class="form-group">
+            <label for="currentPassword">Contraseña actual</label>
+            <input
+              type="password"
+              id="currentPassword"
+              v-model="currentPassword"
+              class="form-control"
+              required
+              placeholder="Introduce tu contraseña actual"
+              :disabled="loading"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="newPassword">Nueva contraseña</label>
+            <input
+              type="password"
+              id="newPassword"
+              v-model="newPassword"
+              class="form-control"
+              required
+              placeholder="Introduce tu nueva contraseña"
+              :disabled="loading"
+              @input="validarPassword"
+            />
+            <div class="password-requirements" :class="{ active: newPassword }">
+              <p>La contraseña debe contener:</p>
+              <ul>
+                <li :class="{ valid: tieneMinimo8 }">Mínimo 8 caracteres</li>
+                <li :class="{ valid: tieneMayuscula }">Al menos una mayúscula</li>
+                <li :class="{ valid: tieneMinuscula }">Al menos una minúscula</li>
+                <li :class="{ valid: tieneNumero }">Al menos un número</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar nueva contraseña</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              v-model="confirmPassword"
+              class="form-control"
+              required
+              placeholder="Confirma tu nueva contraseña"
+              :disabled="loading"
+            />
+            <div v-if="!passwordsMatch && confirmPassword" class="password-mismatch">
+              Las contraseñas no coinciden
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" :disabled="!isFormValid || loading">
+              {{ loading ? 'Cambiando contraseña...' : 'Cambiar Contraseña' }}
+            </button>
+          </div>
+        </form>
+        
+        <div class="back-link">
+          <router-link to="/">Volver al Dashboard</router-link>
+        </div>
       </div>
     </div>
   </div>
