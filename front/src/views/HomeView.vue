@@ -413,6 +413,9 @@
                 <button type="button" class="buttonDownload" @click="descargarPDF()">
                   Descargar PDF
                 </button>
+                <button type="button" class="buttonDownload word-btn" @click="descargarWord()">
+                  Descargar Word
+                </button>
               </div>
             </div>
           </div>
@@ -1003,337 +1006,163 @@ const crearPortadaSeccion = (texto, doc) => {
   return 20; // Retorna la posición Y inicial para comenzar la sección
 };
 
-// Usar la función de portada dentro de descargarPDF
+// Función para descargar informe en PDF
 const descargarPDF = () => {
   try {
-    // Crear nuevo documento PDF
+    // Crear documento PDF
     const doc = new jsPDF();
-    const title = `Detalles de Empresa: ${empresaActual.nombre}`;
     
-    // Establecer fondo blanco (por defecto)
-    doc.setFillColor(255, 255, 255);
+    // Portada principal
+    doc.setFillColor(240, 245, 255);
     doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
     
-    // Dibujar elementos decorativos en la portada
-    doc.setFillColor(0, 70, 152); // Color azul corporativo #004698
-    
-    // Cuadrado grande en la esquina superior derecha
-    doc.rect(doc.internal.pageSize.width - 60, 0, 60, 60, 'F');
-    
-    // Cuadrado mediano en la esquina inferior izquierda
-    doc.rect(0, doc.internal.pageSize.height - 40, 40, 40, 'F');
-    
-    // Elementos decorativos adicionales
-    doc.setFillColor(230, 240, 255); // Azul claro
-    doc.rect(doc.internal.pageSize.width - 80, 20, 15, 15, 'F');
-    doc.rect(20, doc.internal.pageSize.height - 55, 15, 15, 'F');
-    
-    // Líneas decorativas
+    // Borde decorativo
     doc.setDrawColor(0, 70, 152);
-    doc.setLineWidth(0.5);
-    doc.line(0, 80, 30, 80);
-    doc.line(doc.internal.pageSize.width - 30, 80, doc.internal.pageSize.width, 80);
+    doc.setLineWidth(1.5);
+    doc.rect(15, 15, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 30, 'S');
     
-    // Cargar y añadir las imágenes
-    const imgWidth = 60;
-    const imgHeight = 30;
-    const startY = 30;
+    // Logos en la portada
+    try {
+      // Logo ImpulseData
+      doc.addImage(logoUrl, 'PNG', doc.internal.pageSize.width / 2 - 30, 40, 60, 30);
+      
+      // Logo Alicante Futura
+      doc.addImage(impulsaAlicanteLogo, 'PNG', doc.internal.pageSize.width / 2 - 40, 80, 80, 30);
+      
+      // Logo Ayuntamiento
+      doc.addImage(ayuntamientoLogo, 'JPG', doc.internal.pageSize.width / 2 - 25, 120, 50, 30);
+    } catch (error) {
+      console.error("Error al cargar imágenes:", error);
+      // Si falla la carga de imágenes, dibujamos placeholders
+      doc.setFillColor(0, 70, 152);
+      doc.circle(doc.internal.pageSize.width / 2, 60, 15, 'F');
+      doc.circle(doc.internal.pageSize.width / 2, 95, 15, 'F');
+      doc.circle(doc.internal.pageSize.width / 2, 130, 15, 'F');
+    }
     
-    // Añadir las imágenes una al lado de la otra
-    doc.addImage(impulsaAlicanteLogo, 'PNG', 20, startY, imgWidth, imgHeight);
-    doc.addImage(ayuntamientoLogo, 'JPG', doc.internal.pageSize.width - imgWidth - 20, startY, imgWidth, imgHeight);
-    
-    // Texto en azul corporativo para la portada con sombra
-    // Efecto sombra (texto ligeramente desplazado en gris)
-    doc.setTextColor(220, 220, 220);
-    doc.setFontSize(40);
-    doc.text('MEMORIA', 106, 121, { align: 'center' });
-    doc.text('DE ACTIVIDAD', 106, 141, { align: 'center' });
-    
-    // Texto principal
+    // Título principal
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 70, 152);
-    doc.text('MEMORIA', 105, 120, { align: 'center' });
-    doc.text('DE ACTIVIDAD', 105, 140, { align: 'center' });
+    doc.setFontSize(22);
+    doc.text('INFORME EMPRESARIAL', doc.internal.pageSize.width / 2, 170, { align: 'center' });
     
-    // Añadir el año con diseño moderno
-    doc.setFillColor(0, 70, 152);
-    doc.rect(85, 160, 40, 40, 'F');
-    
-    // Añadir bordes decorativos al cuadro del año
-    doc.setDrawColor(230, 240, 255);
-    doc.setLineWidth(0.5);
-    doc.rect(83, 158, 44, 44, 'S');
-    
-    doc.setFontSize(30);
-    // Efecto sombra para los números
-    doc.setTextColor(0, 40, 100);
-    doc.text('20', 106, 181, { align: 'center' });
-    doc.text('25', 106, 196, { align: 'center' });
-    // Números principales
-    doc.setTextColor(255, 255, 255);
-    doc.text('20', 105, 180, { align: 'center' });
-    doc.text('25', 105, 195, { align: 'center' });
-
-    // Diseño de la cabecera de las páginas interiores
-    const diseñarCabecera = () => {
-        // Fondo de cabecera con degradado
-        doc.setFillColor(0, 70, 152);
-        doc.rect(0, 0, doc.internal.pageSize.width, 25, 'F');
-        
-        // Línea decorativa
-        doc.setDrawColor(230, 240, 255);
-        doc.setLineWidth(0.5);
-        doc.line(14, 26, doc.internal.pageSize.width - 14, 26);
-        
-        // Añadir logo
-        doc.addImage(impulsaAlicanteLogo, 'PNG', 14, 5, 20, 15);
-        
-        // Nombre del proyecto
+    // Subtítulo
+    doc.setFont('helvetica', 'normal');
         doc.setFontSize(16);
-        doc.setTextColor(255, 255, 255);
-        doc.text('ImpulseData', 38, 16);
-        
-        // Información de contacto con diseño mejorado
-      doc.setFontSize(8);
-        doc.setTextColor(230, 240, 255);
-        doc.text([
-            'Información de contacto:',
-            'Email: info@impulsedata.es',
-            'Teléfono: +34 900 123 456',
-            'Web: www.impulsedata.es'
-        ], doc.internal.pageSize.width - 70, 8, { align: 'left' });
-    };
-
-    // Crear array para almacenar las entradas del índice y sus páginas
-    const indiceEntradas = [];
-    let paginaActual = 3; // Comenzamos en página 3 (después de portada e índice)
-
-    // Función para agregar entradas al índice
-    const agregarEntradaIndice = (titulo, nivel = 0) => {
-        const y = 60 + (indiceEntradas.length * 12);
-        
-        // Fondo decorativo para cada entrada
-        if (nivel === 0) {
-            doc.setFillColor(230, 240, 255);
-            doc.rect(10, y - 6, doc.internal.pageSize.width - 20, 10, 'F');
-        }
-
-        // Línea de puntos decorativa
-        doc.setDrawColor(0, 70, 152);
-        doc.setLineWidth(0.1);
-        for (let i = 0; i < 50; i++) {
-            doc.line(
-                nivel === 0 ? 20 : 30 + (nivel * 10),
-                y + 2,
-                doc.internal.pageSize.width - 30,
-                y + 2
-            );
-        }
-
-        // Texto de la entrada
-        doc.setFontSize(nivel === 0 ? 12 : 10);
-        doc.setTextColor(0, 70, 152);
-        doc.text(
-            titulo,
-            nivel === 0 ? 20 : 30 + (nivel * 10),
-            y
-        );
-
-        // Número de página
-        doc.text(
-            paginaActual.toString(),
-            doc.internal.pageSize.width - 20,
-            y,
-            { align: 'right' }
-        );
-
-        indiceEntradas.push({ titulo, pagina: paginaActual });
-        if (nivel === 0) paginaActual++;
-    };
-
-    // Añadir página para el índice después de la portada
-    doc.addPage();
-    diseñarCabecera();
-
-    // Título del índice con efectos visuales
-    doc.setFillColor(230, 240, 255);
-    doc.rect(0, 35, doc.internal.pageSize.width, 15, 'F');
-    doc.setFontSize(18);
-    doc.setTextColor(0, 70, 152);
-    doc.text('ÍNDICE', 14, 45);
-
-    // Agregar entradas al índice
-    agregarEntradaIndice('Información de la empresa');
-    agregarEntradaIndice('Departamentos');
-    agregarEntradaIndice('Centros');
-    agregarEntradaIndice('Análisis de Formaciones');
-    agregarEntradaIndice('Distribución por tipo de formación', 1);
-    agregarEntradaIndice('Detalle por tipo de formación', 1);
-    agregarEntradaIndice('Horas totales por tipo de formación', 1);
-    agregarEntradaIndice('Formaciones ordenadas por duración', 1);
-
-    // Línea decorativa inferior
-    doc.setDrawColor(0, 70, 152);
-    doc.setLineWidth(0.5);
-    doc.line(10, doc.internal.pageSize.height - 30, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 30);
-
-    // Continuar con el contenido principal
-    doc.addPage();
-    diseñarCabecera();
-
-    // Estilo mejorado para el título principal
-    doc.setFillColor(230, 240, 255);
-    doc.rect(0, 35, doc.internal.pageSize.width, 15, 'F');
-    doc.setFontSize(18);
-    doc.setTextColor(0, 70, 152);
-    doc.text(title, 14, 45);
+    doc.text(empresaActual.nombre, doc.internal.pageSize.width / 2, 185, { align: 'center' });
     
-    // Información básica con estilo mejorado
+    // Fecha de generación
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+        doc.text(
+      `Generado el ${new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'})}`, 
+      doc.internal.pageSize.width / 2, 
+      doc.internal.pageSize.height - 20, 
+      { align: 'center' }
+    );
+    
+    // Sección de información general
+    let yPos = crearPortadaSeccion('Información General', doc);
+    
+    // Datos de la empresa
     doc.setFontSize(12);
-    doc.setTextColor(0, 70, 152);
-    doc.text('Información de la empresa', 14, 70);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Nombre de la empresa:', 20, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(empresaActual.nombre, 120, yPos);
     
-    const infoEmpresa = [
-      ['Nombre', empresaActual.nombre],
-      ['Fecha de creación', formatDate(empresaActual.fechaCreacion)],
-      ['Ciudad', empresaActual.ciudad || 'No especificada'],
-      ['Descripción', empresaActual.descripcion || 'Sin descripción']
-    ];
+    doc.setFont('helvetica', 'bold');
+    doc.text('Fecha de creación:', 20, yPos + 10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formatDate(empresaActual.fechaCreacion), 120, yPos + 10);
     
-    // Estilo mejorado para las tablas
-    const estiloTabla = {
+    doc.setFont('helvetica', 'bold');
+    doc.text('Ciudad:', 20, yPos + 20);
+    doc.setFont('helvetica', 'normal');
+    doc.text(empresaActual.ciudad || 'No especificada', 120, yPos + 20);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Descripción:', 20, yPos + 30);
+    doc.setFont('helvetica', 'normal');
+    
+    // Manejo de texto largo en descripción
+    const descripcion = empresaActual.descripcion || 'Sin descripción';
+    const textLines = doc.splitTextToSize(descripcion, 150);
+    doc.text(textLines, 120, yPos + 30);
+    
+    // Sección de departamentos
+    yPos = crearPortadaSeccion('Departamentos', doc);
+    
+    if (empresaActual.departamentos && empresaActual.departamentos.length > 0) {
+      // Crear tabla de departamentos
+      const departamentosData = empresaActual.departamentos.map((dep, index) => {
+        return [index + 1, dep.nombre];
+      });
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['#', 'Nombre del Departamento']],
+        body: departamentosData,
+        theme: 'grid',
       headStyles: { 
         fillColor: [0, 70, 152],
-        textColor: 255,
-        fontSize: 11,
-        fontStyle: 'bold',
-        halign: 'center'
-      },
-      bodyStyles: {
-        fontSize: 10,
-        lineColor: [230, 240, 255],
-        lineWidth: 0.1
-      },
-      alternateRowStyles: {
-        fillColor: [248, 250, 255]
-      },
-      columnStyles: {
-        0: { 
-          cellWidth: 40,
-          fillColor: [230, 240, 255],
-          textColor: [0, 70, 152],
-          fontStyle: 'bold'
+          textColor: [255, 255, 255]
         }
-      },
-      margin: { top: 5 }
-    };
+      });
+    } else {
+      doc.text('No hay departamentos registrados.', 20, yPos);
+    }
     
-    // Usar autoTable con el nuevo estilo
-    autoTable(doc, {
-      startY: 75,
-      head: [['Campo', 'Valor']],
-      body: infoEmpresa,
-      ...estiloTabla
-    });
+    // Sección de centros
+    yPos = crearPortadaSeccion('Centros', doc);
     
-    // Función para crear encabezados de sección con estilo
-    const crearEncabezadoSeccion = (texto, y) => {
-      // Fondo decorativo
-      doc.setFillColor(230, 240, 255);
-      doc.rect(10, y - 6, doc.internal.pageSize.width - 20, 10, 'F');
-      
-      // Líneas decorativas
-      doc.setDrawColor(0, 70, 152);
-      doc.setLineWidth(0.5);
-      doc.line(14, y - 6, 14, y + 4);
-      
-      // Texto
-    doc.setFontSize(12);
-      doc.setTextColor(0, 70, 152);
-      doc.text(texto, 20, y);
-      
-      return y + 15;
-    };
-    
-    // Aplicar el nuevo estilo a todas las tablas y secciones
-    let currentY = doc.lastAutoTable.finalY + 20;
-    
-    // Departamentos
-    currentY = crearPortadaSeccion('Departamentos', doc);
-    
-    currentY = crearEncabezadoSeccion('Departamentos', currentY);
-    
-    if (empresaActual.departamentos.length > 0) {
-      const departamentosData = empresaActual.departamentos.map((dep, index) => [
-        `Departamento ${index + 1}`, dep.nombre
-      ]);
-      
-      autoTable(doc, {
-        startY: currentY,
-        head: [['#', 'Nombre']],
-        body: departamentosData,
-        ...estiloTabla
+    if (empresaActual.centros && empresaActual.centros.length > 0) {
+      // Crear tabla de centros
+      const centrosData = empresaActual.centros.map((centro, index) => {
+        return [index + 1, centro.nombre, centro.direccion || 'No especificada'];
       });
       
-      currentY = doc.lastAutoTable.finalY + 20;
-    } else {
-      doc.setFontSize(10);
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay departamentos registrados.', 14, currentY);
-      currentY += 20;
-    }
-    
-    // Verificar si necesitamos una nueva página
-    if (currentY > doc.internal.pageSize.height - 60) {
-      doc.addPage();
-      diseñarCabecera();
-      currentY = 40;
-    }
-    
-    // Centros
-    currentY = crearPortadaSeccion('Centros', doc);
-    
-    currentY = crearEncabezadoSeccion('Centros', currentY);
-    
-    if (empresaActual.centros.length > 0) {
-      const centrosData = empresaActual.centros.map((centro, index) => [
-        `Centro ${index + 1}`, centro.nombre, centro.direccion || 'No especificada'
-      ]);
-      
       autoTable(doc, {
-        startY: currentY,
-        head: [['#', 'Nombre', 'Dirección']],
+        startY: yPos,
+        head: [['#', 'Nombre del Centro', 'Dirección']],
         body: centrosData,
-        ...estiloTabla
+        theme: 'grid',
+        headStyles: {
+          fillColor: [0, 70, 152],
+          textColor: [255, 255, 255]
+        }
       });
-      
-      currentY = doc.lastAutoTable.finalY + 20;
     } else {
-      doc.setFontSize(10);
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay centros registrados.', 14, currentY);
-      currentY += 20;
+      doc.text('No hay centros registrados.', 20, yPos);
     }
     
-    // Nueva página para formaciones y gráficos
-      doc.addPage();
-    diseñarCabecera();
-    currentY = 40;
+    // Sección de formaciones
+    yPos = crearPortadaSeccion('Formaciones', doc);
     
-    // Título de la sección de formaciones con estilo
-    currentY = crearPortadaSeccion('Formaciones', doc);
-    
-    currentY = crearEncabezadoSeccion('Análisis de Formaciones', currentY);
-    
-    // Si hay formaciones, generar visualizaciones
-    if (empresaActual.formaciones.length > 0) {
-      // Añadir portada para la sección de formaciones
-      currentY = crearPortadaSeccion('Formaciones', doc);
+    if (empresaActual.formaciones && empresaActual.formaciones.length > 0) {
+      // Crear tabla de formaciones
+      const formacionesData = empresaActual.formaciones.map((formacion, index) => {
+        return [
+          index + 1, 
+          formacion.nombre, 
+          formatTipoFormacion(formacion.tipo), 
+          `${formacion.duracion} horas`
+        ];
+      });
       
-      // 1. Distribución por tipo de formación - GRÁFICO CIRCULAR
-      currentY = crearEncabezadoSeccion('Distribución por tipo de formación', currentY);
+      autoTable(doc, {
+        startY: yPos,
+        head: [['#', 'Nombre de la Formación', 'Tipo', 'Duración']],
+        body: formacionesData,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [0, 70, 152],
+          textColor: [255, 255, 255]
+        }
+      });
       
-      // Contar formaciones por tipo
+      // Añadir gráficos o estadísticas adicionales
       const tiposCounts = {
         presencial: 0,
         virtual: 0,
@@ -1346,12 +1175,26 @@ const descargarPDF = () => {
         }
       });
       
-      // Configuración para representación visual mejorada
-      const colors = {
-        presencial: [0, 70, 152],     // azul corporativo
-        virtual: [41, 128, 185],      // azul más claro
-        hibrida: [230, 240, 255]      // azul muy claro
-      };
+      // Crear tabla resumen por tipo
+      doc.addPage();
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('Resumen por tipo de formación', 20, 20);
+      
+      const tiposData = Object.entries(tiposCounts).map(([tipo, count]) => {
+        return [formatTipoFormacion(tipo), count];
+      });
+      
+      autoTable(doc, {
+        startY: 30,
+        head: [['Tipo de Formación', 'Cantidad']],
+        body: tiposData,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [0, 70, 152],
+          textColor: [255, 255, 255]
+        }
+      });
       
       // Calcular total para porcentajes
       const total = Object.values(tiposCounts).reduce((sum, count) => sum + count, 0);
@@ -1359,8 +1202,15 @@ const descargarPDF = () => {
       if (total > 0) {
         // Configuración del gráfico circular mejorado
         const centerX = 105;
-        const centerY = currentY + 50;
+        const centerY = 100;
         const radius = 40;
+        
+        // Colores para los tipos de formación
+        const colors = {
+          presencial: [0, 70, 152], // Azul
+          virtual: [220, 57, 18],   // Rojo
+          hibrida: [255, 153, 0]    // Naranja
+        };
         
         // Añadir sombra al gráfico
         doc.setDrawColor(200, 200, 200);
@@ -1373,16 +1223,16 @@ const descargarPDF = () => {
         
         // Crear una leyenda mejorada
         doc.setFillColor(230, 240, 255);
-        doc.rect(150, currentY - 5, 50, 70, 'F');
+        doc.rect(150, 75, 50, 70, 'F');
         doc.setDrawColor(0, 70, 152);
         doc.setLineWidth(0.1);
-        doc.rect(150, currentY - 5, 50, 70, 'S');
+        doc.rect(150, 75, 50, 70, 'S');
         
         doc.setFontSize(10);
         doc.setTextColor(0, 70, 152);
-        doc.text('Leyenda:', 155, currentY + 5);
+        doc.text('Leyenda:', 155, 85);
         
-        let legendY = currentY + 20;
+        let legendY = 100;
         
         // Dibujar el gráfico circular mejorado
         Object.entries(tiposCounts).forEach(([tipo, count], index) => {
@@ -1433,76 +1283,255 @@ const descargarPDF = () => {
             }
             doc.stroke();
             
-            // Etiqueta de porcentaje mejorada
-            if (porcentaje > 0.08) {
-              const labelAngle = startAngle + ((endAngle - startAngle) / 2);
-              const labelRadius = radius * 0.7;
-              const labelX = centerX + Math.cos(labelAngle) * labelRadius;
-              const labelY = centerY + Math.sin(labelAngle) * labelRadius;
+            // Añadir etiqueta de porcentaje dentro del sector (si hay espacio suficiente)
+            if (porcentaje > 0.1) {
+              const labelAngle = startAngle + (endAngle - startAngle) / 2;
+              const labelDistance = radius * 0.7;
+              const labelX = centerX + Math.cos(labelAngle) * labelDistance;
+              const labelY = centerY + Math.sin(labelAngle) * labelDistance;
               
-              // Fondo blanco para mejor legibilidad
-              doc.setFillColor(255, 255, 255);
-              doc.circle(labelX, labelY, 8, 'F');
-              
-              doc.setFontSize(9);
-              doc.setTextColor(0, 70, 152);
-              doc.text(`${Math.round(porcentaje * 100)}%`, labelX, labelY, {
-                align: 'center'
-              });
+              doc.setTextColor(255, 255, 255);
+              doc.setFontSize(8);
+              doc.text(`${Math.round(porcentaje * 100)}%`, labelX, labelY, { align: 'center' });
             }
             
-            // Leyenda mejorada
+            // Agregar a la leyenda
             doc.setFillColor(...colors[tipo]);
-            doc.roundedRect(155, legendY - 4, 8, 8, 1, 1, 'F');
+            doc.rect(155, legendY - 5, 10, 10, 'F');
             
-            doc.setTextColor(0, 70, 152);
+            doc.setTextColor(0, 0, 0);
             doc.setFontSize(8);
-            const tipoLabel = formatTipoFormacion(tipo);
-            const cantidadLabel = `${count} (${Math.round(porcentaje * 100)}%)`;
-            doc.text(`${tipoLabel}: ${cantidadLabel}`, 168, legendY);
+            doc.text(`${formatTipoFormacion(tipo)} (${count})`, 170, legendY);
             
             legendY += 15;
           }
         });
         
-        // Actualizar posición para la siguiente sección
-        currentY = centerY + radius + 25;
+        // Título del gráfico
+        doc.setFontSize(12);
+        doc.setTextColor(0, 70, 152);
+        doc.text('Distribución por tipo', centerX, centerY - radius - 10, { align: 'center' });
       }
       
-      // 2. Tabla detallada con información sobre los tipos de formación
-      currentY = crearEncabezadoSeccion('Detalle por tipo de formación', currentY + 10);
+    } else {
+      doc.text('No hay formaciones registradas.', 20, yPos);
+    }
+    
+    // Generar y descargar el PDF
+    doc.save(`informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+    
+  } catch (error) {
+    console.error("Error al generar el PDF:", error);
+    alert("Error al generar el PDF. Por favor, inténtelo de nuevo.");
+  }
+};
+
+// Usar la función para descargar informe en formato Word (docx)
+const descargarWord = () => {
+  try {
+    // Crear un elemento de texto HTML que servirá como fuente para el documento Word
+    const contenido = document.createElement('div');
+    contenido.className = 'word-export-content';
+    
+    // Estilos para la exportación (se incluirán en el documento)
+    const estilos = `
+      <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; }
+        h1 { color: #004698; font-size: 20pt; margin-bottom: 15px; }
+        h2 { color: #004698; font-size: 16pt; margin-top: 25px; margin-bottom: 10px; }
+        h3 { color: #004698; font-size: 14pt; margin-top: 20px; }
+        p { margin: 5px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+        th { background-color: #004698; color: white; padding: 8px; text-align: left; border: 1px solid #ddd; }
+        td { padding: 8px; border: 1px solid #ddd; }
+        .portada { text-align: center; padding: 40px 20px; margin-bottom: 40px; }
+        .portada-borde { border: 2px solid #004698; padding: 20px; margin: 0 auto; height: 90%; }
+        .logos { margin-bottom: 40px; }
+        .logo { max-width: 200px; max-height: 70px; margin: 10px; }
+        .portada h1 { font-size: 28pt; margin: 40px 0 10px 0; }
+        .portada h2 { font-size: 18pt; margin: 10px 0 40px 0; }
+        .info-empresa { margin-bottom: 30px; }
+        .info-item { margin-bottom: 10px; }
+        .info-label { font-weight: bold; display: inline-block; width: 150px; }
+        .seccion { margin-top: 30px; page-break-before: always; padding: 20px; }
+        .seccion-titulo { 
+          background-color: #f0f5ff; 
+          color: #004698; 
+          text-align: center; 
+          padding: 15px 0;
+          margin-bottom: 20px;
+          font-size: 24pt;
+          border: 1px solid #004698;
+          border-radius: 5px;
+        }
+        .seccion-borde { border: 1px solid #004698; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+        .footer { text-align: center; font-size: 9pt; color: #666; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 10px; }
+        .header { border-bottom: 2px solid #004698; padding-bottom: 10px; margin-bottom: 20px; }
+        .resumen-box { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin: 20px 0; }
+      </style>
+    `;
+    
+    // Portada principal
+    const portada = `
+      <div class="portada">
+        <div class="portada-borde">
+          <div class="logos">
+            <img src="${logoUrl}" alt="Logo ImpulseData" class="logo" />
+            <br/>
+            <img src="${impulsaAlicanteLogo}" alt="Impulsa Alicante" class="logo" />
+            <br/>
+            <img src="${ayuntamientoLogo}" alt="Ayuntamiento Alicante" class="logo" />
+          </div>
+          <h1>INFORME EMPRESARIAL</h1>
+          <h2>${empresaActual.nombre}</h2>
+          <p style="margin-top: 50px; font-size: 12pt;">Memoria de actividad</p>
+          <p style="margin-top: 100px; font-size: 12pt;">Informe generado el ${new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'})}</p>
+        </div>
+      </div>
+    `;
+    
+    // Sección de información general
+    const infoEmpresa = `
+      <div class="seccion">
+        <div class="seccion-titulo">
+          Información General
+        </div>
+        <div class="seccion-borde">
+          <div class="info-empresa">
+            <div class="info-item"><span class="info-label">Nombre:</span> ${empresaActual.nombre}</div>
+            <div class="info-item"><span class="info-label">Fecha de creación:</span> ${formatDate(empresaActual.fechaCreacion)}</div>
+            <div class="info-item"><span class="info-label">Ciudad:</span> ${empresaActual.ciudad || 'No especificada'}</div>
+            <div class="info-item"><span class="info-label">Descripción:</span> ${empresaActual.descripcion || 'Sin descripción'}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Sección de departamentos
+    let departamentosHTML = `
+      <div class="seccion">
+        <div class="seccion-titulo">
+          Departamentos
+        </div>
+        <div class="seccion-borde">
+    `;
+    
+    if (empresaActual.departamentos && empresaActual.departamentos.length > 0) {
+      departamentosHTML += `<table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre del Departamento</th>
+          </tr>
+        </thead>
+        <tbody>`;
       
-      // Crear tabla de datos con estilo mejorado
-      const detalleData = Object.entries(tiposCounts).map(([tipo, count]) => {
-        const porcentaje = total > 0 ? Math.round((count / total) * 100) + '%' : '0%';
-        return [
-          formatTipoFormacion(tipo),
-          count.toString(),
-          porcentaje
-        ];
+      empresaActual.departamentos.forEach((dep, index) => {
+        departamentosHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${dep.nombre}</td>
+          </tr>
+        `;
       });
       
-      // Añadir fila de total
-      detalleData.push(['Total', total.toString(), '100%']);
+      departamentosHTML += `</tbody></table>`;
+              } else {
+      departamentosHTML += `<p>No hay departamentos registrados.</p>`;
+    }
+    
+    departamentosHTML += `</div></div>`;
+    
+    // Sección de centros
+    let centrosHTML = `
+      <div class="seccion">
+        <div class="seccion-titulo">
+          Centros
+        </div>
+        <div class="seccion-borde">
+    `;
+    
+    if (empresaActual.centros && empresaActual.centros.length > 0) {
+      centrosHTML += `<table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre del Centro</th>
+            <th>Dirección</th>
+          </tr>
+        </thead>
+        <tbody>`;
       
-      // Generar tabla con el detalle
-      autoTable(doc, {
-        startY: currentY + 5,
-        head: [['Tipo', 'Cantidad', 'Porcentaje']],
-        body: detalleData,
-        ...estiloTabla,
-        footStyles: { 
-          fillColor: [230, 240, 255], 
-          textColor: [0, 70, 152], 
-          fontStyle: 'bold'
+      empresaActual.centros.forEach((centro, index) => {
+        centrosHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${centro.nombre}</td>
+            <td>${centro.direccion || 'No especificada'}</td>
+          </tr>
+        `;
+      });
+      
+      centrosHTML += `</tbody></table>`;
+    } else {
+      centrosHTML += `<p>No hay centros registrados.</p>`;
+    }
+    
+    centrosHTML += `</div></div>`;
+    
+    // Sección de formaciones
+    let formacionesHTML = `
+      <div class="seccion">
+        <div class="seccion-titulo">
+          Formaciones
+        </div>
+        <div class="seccion-borde">
+    `;
+    
+    if (empresaActual.formaciones && empresaActual.formaciones.length > 0) {
+      // Tabla principal de formaciones
+      formacionesHTML += `
+        <h2>Listado completo de formaciones</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre de la Formación</th>
+              <th>Tipo</th>
+              <th>Duración</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      empresaActual.formaciones.forEach((formacion, index) => {
+        formacionesHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${formacion.nombre}</td>
+            <td>${formatTipoFormacion(formacion.tipo)}</td>
+            <td>${formacion.duracion} horas</td>
+          </tr>
+        `;
+      });
+      
+      formacionesHTML += `</tbody></table>`;
+      
+      // Distribucion por tipo
+      const tiposCounts = {
+        presencial: 0,
+        virtual: 0,
+        hibrida: 0
+      };
+      
+      empresaActual.formaciones.forEach(formacion => {
+        if (tiposCounts[formacion.tipo] !== undefined) {
+          tiposCounts[formacion.tipo]++;
         }
       });
       
-      // 3. Horas de formación por tipo
-      currentY = doc.lastAutoTable.finalY + 20;
-      currentY = crearEncabezadoSeccion('Horas totales por tipo de formación', currentY);
-      
-      // Calcular horas por tipo
+      // Horas por tipo
       const horasPorTipo = {
         presencial: 0,
         virtual: 0,
@@ -1515,95 +1544,205 @@ const descargarPDF = () => {
         }
       });
       
-      // Total de horas
+      // Total horas
       const totalHoras = Object.values(horasPorTipo).reduce((sum, curr) => sum + curr, 0);
       
-      // Tabla con horas y porcentajes
-      const horasData = Object.entries(horasPorTipo).map(([tipo, horas]) => [
-        formatTipoFormacion(tipo),
-        `${horas} horas`,
-        totalHoras > 0 ? `${Math.round((horas / totalHoras) * 100)}%` : '0%'
-      ]);
+      // Resumen por tipo de formación
+      formacionesHTML += `
+        <div class="resumen-box">
+          <h2>Resumen por tipo de formación</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo de Formación</th>
+                <th>Cantidad</th>
+                <th>Porcentaje</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
       
-      // Añadir fila de total
-      horasData.push(['Total', `${totalHoras} horas`, '100%']);
+      const total = Object.values(tiposCounts).reduce((sum, count) => sum + count, 0);
       
-      // Generar tabla con estilo mejorado
-      autoTable(doc, {
-        startY: currentY + 5,
-        head: [['Tipo', 'Horas', 'Porcentaje']],
-        body: horasData,
-        ...estiloTabla,
-        footStyles: { 
-          fillColor: [230, 240, 255], 
-          textColor: [0, 70, 152], 
-          fontStyle: 'bold'
-        }
+      Object.entries(tiposCounts).forEach(([tipo, count]) => {
+        const porcentaje = total > 0 ? Math.round((count / total) * 100) : 0;
+        formacionesHTML += `
+          <tr>
+            <td>${formatTipoFormacion(tipo)}</td>
+            <td>${count}</td>
+            <td>${porcentaje}%</td>
+          </tr>
+        `;
       });
       
-      // 4. Lista de formaciones por duración
-      currentY = doc.lastAutoTable.finalY + 20;
-      currentY = crearEncabezadoSeccion('Formaciones ordenadas por duración', currentY);
+      formacionesHTML += `
+        <tr style="font-weight: bold;">
+          <td>Total</td>
+          <td>${total}</td>
+          <td>100%</td>
+        </tr>
+      `;
       
-      // Ordenar formaciones por duración
+      formacionesHTML += `</tbody></table>`;
+      
+      // Lista de formaciones ordenadas por duración
       const formacionesOrdenadas = [...empresaActual.formaciones].sort((a, b) => 
         (parseInt(b.duracion) || 0) - (parseInt(a.duracion) || 0)
       );
       
-      // Datos para la tabla
-      const formacionesData = formacionesOrdenadas.map((formacion, index) => [
-        index + 1,
-        formacion.nombre,
-        formatTipoFormacion(formacion.tipo),
-        `${formacion.duracion} horas`
-      ]);
+      formacionesHTML += `
+        <h2>Formaciones ordenadas por duración</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Duración</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
       
-      // Generar tabla con estilo mejorado
-      autoTable(doc, {
-        startY: currentY + 5,
-        head: [['#', 'Nombre', 'Tipo', 'Duración']],
-        body: formacionesData,
-        ...estiloTabla
+      formacionesOrdenadas.forEach((formacion, index) => {
+        formacionesHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${formacion.nombre}</td>
+            <td>${formatTipoFormacion(formacion.tipo)}</td>
+            <td>${formacion.duracion} horas</td>
+          </tr>
+        `;
       });
       
+      formacionesHTML += `</tbody></table>`;
+      
+      // Añadir gráficos representativos
+      formacionesHTML += `
+        <div style="margin-top: 30px; border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9;">
+          <h2>Representación gráfica</h2>
+          
+          <!-- Gráfico de barras para tipos de formación -->
+          <div style="margin: 20px 0;">
+            <h3>Distribución por tipo de formación</h3>
+            <div style="display: flex; height: 200px; align-items: flex-end; margin-top: 20px; border-bottom: 2px solid #004698; border-left: 2px solid #004698; padding-left: 40px;">
+      `;
+      
+      // Calculamos el porcentaje para cada tipo y creamos barras
+      Object.entries(tiposCounts).forEach(([tipo, count], index) => {
+        const porcentaje = total > 0 ? Math.round((count / total) * 100) : 0;
+        const altura = Math.max(porcentaje * 1.8, 10); // Altura mínima de 10px
+        
+        // Determinamos color según el tipo
+        let color;
+        switch(tipo) {
+          case 'presencial':
+            color = '#3366cc';
+            break;
+          case 'virtual':
+            color = '#dc3912';
+            break;
+          case 'hibrida':
+            color = '#ff9900';
+            break;
+          default:
+            color = '#109618';
+        }
+        
+        formacionesHTML += `
+          <div style="display: flex; flex-direction: column; align-items: center; margin-right: 40px;">
+            <div style="height: ${altura}px; width: 60px; background-color: ${color}; margin-bottom: 5px;"></div>
+            <div style="font-weight: bold;">${formatTipoFormacion(tipo)}</div>
+            <div>${porcentaje}%</div>
+          </div>
+        `;
+      });
+      
+      formacionesHTML += `
+            </div>
+          </div>
+          
+          <!-- Gráfico circular para horas totales -->
+          <div style="margin: 30px 0;">
+            <h3>Horas por tipo de formación</h3>
+            <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+              <div style="width: 220px; height: 220px; border-radius: 50%; background: conic-gradient(
+      `;
+      
+      // Calculamos los ángulos para el gráfico circular
+      let startAngle = 0;
+      const colors = ['#3366cc', '#dc3912', '#ff9900', '#109618'];
+      let colorSegments = [];
+      
+      Object.entries(horasPorTipo).forEach(([tipo, horas], index) => {
+        if (totalHoras > 0) {
+          const porcentaje = (horas / totalHoras);
+          const endAngle = startAngle + (porcentaje * 360);
+          
+          colorSegments.push(`${colors[index % colors.length]} ${startAngle}deg ${endAngle}deg`);
+          startAngle = endAngle;
+        }
+      });
+      
+      formacionesHTML += colorSegments.join(', ');
+      formacionesHTML += `
+              )"></div>
+              
+              <!-- Leyenda del gráfico -->
+              <div style="margin-left: 20px;">
+      `;
+      
+      Object.entries(horasPorTipo).forEach(([tipo, horas], index) => {
+        const porcentaje = totalHoras > 0 ? Math.round((horas / totalHoras) * 100) : 0;
+        
+        formacionesHTML += `
+          <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <div style="width: 20px; height: 20px; background-color: ${colors[index % colors.length]}; margin-right: 10px;"></div>
+            <div>${formatTipoFormacion(tipo)}: ${horas} horas (${porcentaje}%)</div>
+          </div>
+        `;
+      });
+      
+      formacionesHTML += `
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
     } else {
-      // Mensaje cuando no hay formaciones
-      doc.setFontSize(12);
-      doc.setTextColor(128, 128, 128);
-      doc.text('No hay datos de formaciones disponibles para generar gráficos.', 14, 60);
+      formacionesHTML += `<p>No hay formaciones registradas.</p>`;
     }
     
-    // Añadir fecha y hora de generación con estilo mejorado
-    const now = new Date();
-    const fechaGeneracion = `Documento generado el ${now.toLocaleDateString('es-ES')} a las ${now.toLocaleTimeString('es-ES')}`;
-    const pageCount = doc.internal.getNumberOfPages();
+    formacionesHTML += `</div></div>`;
     
-    // Añadir pie de página mejorado en todas las páginas
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      
-      // Fondo del pie de página
-      doc.setFillColor(248, 250, 255);
-      doc.rect(0, doc.internal.pageSize.height - 20, doc.internal.pageSize.width, 20, 'F');
-      
-      // Línea decorativa
-      doc.setDrawColor(0, 70, 152);
-      doc.setLineWidth(0.1);
-      doc.line(10, doc.internal.pageSize.height - 15, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 15);
-      
-      // Texto del pie de página
-      doc.setFontSize(8);
-      doc.setTextColor(0, 70, 152);
-      doc.text(fechaGeneracion, 14, doc.internal.pageSize.height - 8);
-      doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 8);
-    }
+    // Pie de página
+    const footer = `
+      <div class="footer">
+        <p>ImpulseData - Alicante Futura</p>
+        <p>Documento generado el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}</p>
+      </div>
+    `;
     
-    // Guardar el PDF
-    doc.save(`empresa_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+    // Combinar todo el contenido
+    contenido.innerHTML = estilos + portada + infoEmpresa + departamentosHTML + centrosHTML + formacionesHTML + footer;
+    
+    // Convertir a Blob
+    const blob = new Blob([contenido.outerHTML], { type: 'application/msword' });
+    
+    // Crear elemento de descarga
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.doc`;
+    
+    // Añadir a la página, hacer clic y eliminar
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     
   } catch (error) {
-    console.error("Error al completar el PDF:", error);
-    alert("Error al generar el PDF. Por favor, inténtelo de nuevo.");
+    console.error("Error al generar el documento Word:", error);
+    alert("Error al generar el documento Word. Por favor, inténtelo de nuevo.");
   }
 };
 </script>

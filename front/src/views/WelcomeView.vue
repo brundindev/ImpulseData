@@ -29,8 +29,8 @@
       <div class="hero-section">
         <div class="hero-content">
           <h1 class="animated-title">ImpulseData</h1>
-          <p style="text-align: center;">✨ <strong>ImpulseData</strong> – Transformando datos en conocimiento, donde la excelencia se hace realidad. 🚀</p>
-          <div class="cta-buttons" style="display: flex; justify-content: center;">
+          <p>✨ <strong>ImpulseData</strong> – Transformando datos en conocimiento, donde la excelencia se hace realidad. 🚀</p>
+          <div class="cta-buttons">
             <router-link to="/registro" class="signup-btn glow-effect">Registrarse</router-link>
             <router-link to="/login" class="login-btn glow-effect">Iniciar sesión</router-link>
           </div>
@@ -267,11 +267,13 @@
     font-size: 1.2rem;
     color: rgba(255, 255, 255, 0.8);
     margin-bottom: 2rem;
+    text-align: left;
   }
   
   .cta-buttons {
     display: flex;
     gap: 1rem;
+    justify-content: flex-start;
   }
   
   .signup-btn {
