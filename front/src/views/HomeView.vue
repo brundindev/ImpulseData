@@ -135,6 +135,7 @@
       </button>
       
       <!-- Modal para crear/editar empresa -->
+      <teleport to="body">
       <div class="modal-overlay" v-if="showFormModal" @click.self="showFormModal = false">
         <div class="modal-container">
           <div class="modal-header">
@@ -143,7 +144,7 @@
           </div>
           <div class="modal-body">
             <div v-if="guardando" class="saving-overlay">
-              <div class="app-loader"></div>
+                <div class="app-loader"></div>
               <p>Guardando datos...</p>
             </div>
             <form @submit.prevent="guardarEmpresa">
@@ -315,8 +316,10 @@
           </div>
         </div>
       </div>
+      </teleport>
       
       <!-- Modal de confirmación para eliminar -->
+      <teleport to="body">
       <div class="modal-overlay" v-if="mostrarConfirmacion" @click.self="mostrarConfirmacion = false">
         <div class="modal-container modal-small">
           <div class="modal-header">
@@ -341,8 +344,10 @@
           </div>
         </div>
       </div>
+      </teleport>
       
       <!-- Modal para ver detalles de empresa -->
+      <teleport to="body">
       <div class="modal-overlay" v-if="showViewModal" @click.self="showViewModal = false">
         <div class="modal-container">
           <div class="modal-header">
@@ -351,7 +356,7 @@
           </div>
           <div class="modal-body">
             <div v-if="cargando" class="saving-overlay">
-              <div class="app-loader"></div>
+                <div class="app-loader"></div>
               <p>Cargando datos...</p>
             </div>
             <div class="view-content">
@@ -423,14 +428,15 @@
                 <button type="button" class="buttonDownload" @click="descargarPDF()">
                   Descargar PDF
                 </button>
-                <button type="button" class="buttonDownload word-btn" @click="descargarWord()">
-                  Descargar Word
+                  <button type="button" class="buttonDownload word-btn" @click="descargarWord()">
+                    Descargar Word
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+      </teleport>
     </div>
     
     <!-- Footer -->

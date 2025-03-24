@@ -27,6 +27,7 @@
 .view-field.description {
   min-height: 5rem;
   white-space: pre-line;
+  color: white;  
 }
 
 .view-list {
@@ -351,7 +352,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999 !important;
+  z-index: 9999999 !important;
 }
 
 .modal-container {
@@ -363,7 +364,7 @@
   overflow-y: auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   position: relative;
-  z-index: 10000 !important;
+  z-index: 10000000 !important;
 }
 
 .modal-small {
@@ -379,7 +380,7 @@
   position: sticky;
   top: 0;
   background-color: white;
-  z-index: 10;
+  z-index: 99999 !important;
 }
 
 .modal-header h2 {
@@ -650,7 +651,7 @@
   position: fixed !important;
   bottom: 30px;
   right: 30px;
-  z-index: 1000;
+  z-index: 10 !important;
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -1491,9 +1492,9 @@
   }
 }
 
-/* Ajustar el z-index del navbar para que esté detrás de los modales */
 .app-header {
   display: block; /* Ocultar esta definición duplicada para evitar conflictos */
+  z-index: 1000;
 }
 
 /* Estilos para el WelcomeView aplicados a todas las páginas */
@@ -1739,7 +1740,7 @@
 .form-group textarea, 
 .form-group select {
   background-color: rgba(255, 255, 255, 0.9) !important;
-  color: #333 !important;
+  color: #ffffff !important;
 }
 
 /* Mejorando los estilos de los modales */
@@ -1754,13 +1755,13 @@
 }
 
 .modal-header h2 {
-  color: white !important;
+  color: rgb(0, 0, 0) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Título en modal */
 .modal-container .modal-header h2 {
-  color: white !important;
+  color: #004698 !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -1798,7 +1799,7 @@ body:has(.welcome-page) .navbar-container .brand-name {
 /* Estilos para el footer */
 .app-footer {
   position: relative;
-  z-index: 2;
+  z-index: 10 !important;
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -2042,6 +2043,34 @@ body:has(.welcome-page) .navbar-container .brand-name {
   fill: #e62222 !important;
 }
 
+/* Asegurar que los textos en el dropdown sean siempre negros, incluso en fondo oscuro */
+body:has(.welcome-page) .navbar-container .dropdown-menu a,
+body:has(.welcome-page) .navbar-container .dropdown-item,
+.welcome-page ~ .navbar-container .dropdown-menu a,
+.welcome-page ~ .navbar-container .dropdown-item,
+.welcome-page + .navbar-container .dropdown-menu a,
+.welcome-page + .navbar-container .dropdown-item {
+  color: black !important;
+}
+
+body:has(.welcome-page) .navbar-container .dropdown-icon,
+.welcome-page ~ .navbar-container .dropdown-icon,
+.welcome-page + .navbar-container .dropdown-icon {
+  fill: black !important;
+}
+
+body:has(.welcome-page) .navbar-container .logout-item,
+.welcome-page ~ .navbar-container .logout-item,
+.welcome-page + .navbar-container .logout-item {
+  color: #e62222 !important;
+}
+
+body:has(.welcome-page) .navbar-container .logout-item .dropdown-icon,
+.welcome-page ~ .navbar-container .logout-item .dropdown-icon,
+.welcome-page + .navbar-container .logout-item .dropdown-icon {
+  fill: #e62222 !important;
+}
+
 /* Efecto de aparición al hacer scroll */
 .fade-up-element {
   opacity: 0;
@@ -2228,4 +2257,36 @@ body:has(.welcome-page) .navbar-container .brand-name {
 .modal-container .form-group select {
   background-color: white !important;
   color: black !important;
+}
+
+/* Estilos para el botón de registro en navbar cuando está en páginas oscuras */
+body:has(.welcome-page) .button2,
+.welcome-page ~ .navbar-container .button2,
+.welcome-page + .navbar-container .button2 {
+  background: #004698;
+  color: white;
+  border: 1px solid #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+}
+
+body:has(.welcome-page) .button2:hover,
+.welcome-page ~ .navbar-container .button2:hover,
+.welcome-page + .navbar-container .button2:hover,
+body:has(.welcome-page) .button2-active,
+.welcome-page ~ .navbar-container .button2-active,
+.welcome-page + .navbar-container .button2-active {
+  background: #0056b8;
+  border: 1px solid #ffffff;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+body:has(.welcome-page) .button2:before,
+.welcome-page ~ .navbar-container .button2:before,
+.welcome-page + .navbar-container .button2:before,
+body:has(.welcome-page) .button2:after,
+.welcome-page ~ .navbar-container .button2:after,
+.welcome-page + .navbar-container .button2:after {
+  background-color: #0062d6;
 }
