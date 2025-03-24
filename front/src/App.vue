@@ -257,7 +257,7 @@ const irAPanelControl = () => {
       </div>
       <nav class="main-nav">
         <template v-if="usuario">
-          <RouterLink to="/" class="nav-link">Inicio</RouterLink>
+          <RouterLink to="/home" class="nav-link">Inicio</RouterLink>
           <div class="user-dropdown">
             <div class="dropdown-toggle">
               <div class="user-profile-container">

@@ -177,27 +177,24 @@
     }
   }
   
-  .loading-container, .no-data-container {
+  .panel-loading-container, .no-data-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 400px;
-    background: white;
-    border-radius: 10px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 152, 0.1);
-    text-align: center;
+    height: 300px;
+    width: 100%;
+    color: #666;
   }
   
-  .loading-spinner {
+  .panel-loading-spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
     width: 50px;
     height: 50px;
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #004698;
-    border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
+    margin-bottom: 20px;
   }
   
   @keyframes spin {

@@ -67,8 +67,8 @@
         </div>
         
         <!-- Loader para estados de carga -->
-        <div v-if="cargando" class="loading-container">
-          <div class="loader"></div>
+        <div v-if="cargando" class="app-loading-container">
+          <div class="app-loader"></div>
           <p>Cargando datos...</p>
         </div>
         
@@ -133,7 +133,7 @@
           </div>
           <div class="modal-body">
             <div v-if="guardando" class="saving-overlay">
-              <div class="loader"></div>
+              <div class="app-loader"></div>
               <p>Guardando datos...</p>
             </div>
             <form @submit.prevent="guardarEmpresa">
@@ -341,7 +341,7 @@
           </div>
           <div class="modal-body">
             <div v-if="cargando" class="saving-overlay">
-              <div class="loader"></div>
+              <div class="app-loader"></div>
               <p>Cargando datos...</p>
             </div>
             <div class="view-content">

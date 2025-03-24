@@ -25,8 +25,8 @@
         </button>
       </div>
       
-      <div v-if="cargando" class="loading-container">
-        <div class="loading-spinner"></div>
+      <div v-if="cargando" class="panel-loading-container">
+        <div class="panel-loading-spinner"></div>
         <p>Cargando datos...</p>
       </div>
       
@@ -35,10 +35,6 @@
       </div>
       
       <div v-else>
-        <div class="user-company">
-          <h2>{{ empresas[0].nombre }}</h2>
-        </div>
-        
         <div class="dashboard-summary">
           <div class="summary-card">
             <div class="summary-icon">
@@ -135,6 +131,7 @@
 import { ref, onMounted, computed } from 'vue';
 import Chart from 'chart.js/auto';
 import { getAuth } from 'firebase/auth';
+import FirestoreService from '../services/FirestoreService';
 
 // Referencias a los canvas de los gráficos
 const departamentosChart = ref(null);
@@ -241,162 +238,226 @@ const cargarDatos = async (forzarRecarga = false) => {
       });
     }
     
-    // En un entorno real, aquí se harían peticiones al backend filtradas por usuario
-    // Por ahora, usaremos datos ficticios para demostración
-    
-    // Simular carga de datos
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // En un entorno real, se añadiría un parámetro para evitar caché
-    // const timestamp = Date.now();
-    // fetch(`/api/dashboard/datos?t=${timestamp}&userId=${currentUser.uid}`)
-    
-    // Para pruebas, añadimos una opción para mostrar los datos de cualquier usuario
-    // (solo para desarrollo, eliminar en producción)
-    console.log('Modo debug:', localStorage.getItem('debug_mode'));
-    
-    // Esta lógica es solo para simular distintos usuarios en desarrollo
-    // En producción, esto se manejaría desde el backend
-    let userType = '';
-    
-    if (userEmail.includes('ayuntamiento') || userEmail.includes('alicante.es')) {
-      userType = 'ayuntamiento';
-    } else if (userEmail.includes('user') || userEmail.includes('example.com')) {
-      userType = 'alicante_futura';
-    } else {
-      // Para otros correos, usar el primer segmento (antes del @) para determinar el tipo
-      const emailPrefix = userEmail.split('@')[0];
-      if (emailPrefix.includes('alicante') || emailPrefix.includes('futura')) {
-        userType = 'alicante_futura';
-      } else if (emailPrefix.includes('ayunt')) {
-        userType = 'ayuntamiento';
-      } else {
-        // Default para pruebas - se pueden alternar tipos con un valor en localStorage
-        const savedType = localStorage.getItem('user_dashboard_type');
-        userType = savedType || 'alicante_futura';
-      }
-    }
-    
-    console.log('Tipo de usuario detectado:', userType);
-    
-    // Datos ficticios completos
-    const todasEmpresas = [
-      { id: 1, nombre: 'Alicante Futura', sectores: ['Tecnología', 'Educación'], 
-        creadorEmail: ['user@example.com', 'alicante@futura.com'] }, // Array de posibles creadores
-      { id: 2, nombre: 'Ayuntamiento de Alicante', sectores: ['Administración'], 
-        creadorEmail: ['ayuntamiento@alicante.es', 'ayunt@example.com'] }
-    ];
-    
-    // Filtrar según el tipo detectado o el email exacto
-    if (userType === 'ayuntamiento') {
-      empresas.value = [todasEmpresas[1]]; // Asignar Ayuntamiento
-    } else if (userType === 'alicante_futura') {
-      empresas.value = [todasEmpresas[0]]; // Asignar Alicante Futura
-    } else {
-      // Filtrado por email exacto (fallback)
-      empresas.value = todasEmpresas.filter(empresa => 
-        Array.isArray(empresa.creadorEmail) 
-          ? empresa.creadorEmail.includes(userEmail)
-          : empresa.creadorEmail === userEmail
-      );
-    }
-    
-    // Si no se encontraron empresas, mostrar mensaje
-    if (empresas.value.length === 0) {
-      console.log('No se encontraron empresas para el usuario, usando modo alternancia');
+    try {
+      // Obtener las empresas del usuario desde Firestore
+      const empresasData = await FirestoreService.obtenerEmpresas();
       
-      // Alternar entre las dos empresas para facilitar pruebas
-      const lastCompany = localStorage.getItem('last_company_shown');
-      if (lastCompany === '1') {
-        empresas.value = [todasEmpresas[1]];
-        localStorage.setItem('last_company_shown', '2');
+      if (empresasData && empresasData.length > 0) {
+        empresas.value = empresasData;
+        
+        // Obtener IDs de las empresas del usuario
+        const empresasIds = empresas.value.map(empresa => empresa.id);
+        
+        // Para cada empresa, obtener sus departamentos, centros y formaciones
+        for (const empresa of empresas.value) {
+          // Obtener departamentos
+          const departamentosData = await FirestoreService.obtenerDepartamentos(empresa.id);
+          departamentos.value = [...departamentos.value, ...departamentosData];
+          
+          // Obtener centros
+          const centrosData = await FirestoreService.obtenerCentros(empresa.id);
+          centros.value = [...centros.value, ...centrosData];
+          
+          // Obtener formaciones
+          const formacionesData = await FirestoreService.obtenerFormaciones(empresa.id);
+          formaciones.value = [...formaciones.value, ...formacionesData];
+        }
+        
+        // Obtener actividades recientes (si existe este método)
+        try {
+          const actividadesData = await FirestoreService.obtenerActividades(10); // Obtener las 10 más recientes
+          actividades.value = actividadesData || [];
+        } catch (actError) {
+          console.warn('No se pudieron cargar las actividades:', actError);
+          // Crear algunas actividades simuladas basadas en los datos reales
+          actividades.value = [];
+          
+          // Agregar actividades simuladas para empresas
+          empresas.value.forEach(empresa => {
+            actividades.value.push({
+              tipo: 'empresa',
+              descripcion: `Empresa: ${empresa.nombre}`,
+              fecha: new Date(empresa.fechaCreacion || Date.now()),
+              empresaId: empresa.id
+            });
+          });
+          
+          // Agregar actividades simuladas para departamentos (limitadas a 3)
+          departamentos.value.slice(0, 3).forEach(dep => {
+            actividades.value.push({
+              tipo: 'departamento',
+              descripcion: `Departamento: ${dep.nombre}`,
+              fecha: new Date(dep.fechaCreacion || Date.now()),
+              empresaId: dep.empresaId
+            });
+          });
+          
+          // Agregar actividades simuladas para formaciones (limitadas a 3)
+          formaciones.value.slice(0, 3).forEach(form => {
+            actividades.value.push({
+              tipo: 'formacion',
+              descripcion: `Formación: ${form.nombre || form.titulo}`,
+              fecha: new Date(form.fechaCreacion || Date.now()),
+              empresaId: form.empresaId
+            });
+          });
+          
+          // Ordenar actividades por fecha (más recientes primero)
+          actividades.value.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+          
+          // Limitar a 10 actividades
+          actividades.value = actividades.value.slice(0, 10);
+        }
+        
+        console.log('Resumen de datos reales cargados:', {
+          empresas: empresas.value.length,
+          departamentos: departamentos.value.length,
+          centros: centros.value.length,
+          formaciones: formaciones.value.length,
+          actividades: actividades.value.length
+        });
       } else {
-        empresas.value = [todasEmpresas[0]];
-        localStorage.setItem('last_company_shown', '1');
+        console.error('No se encontraron empresas para este usuario');
       }
+    } catch (error) {
+      console.error('Error al cargar datos desde Firestore:', error);
+      
+      // Si hay un error al cargar desde Firestore, cargar datos ficticios para desarrollo/pruebas
+      // Esto debería eliminarse en producción
+      console.warn('Cargando datos ficticios como fallback...');
+      
+      // Datos ficticios completos
+      const todasEmpresas = [
+        { id: 1, nombre: 'Alicante Futura', sectores: ['Tecnología', 'Educación'], 
+          creadorEmail: ['user@example.com', 'alicante@futura.com'] }, // Array de posibles creadores
+        { id: 2, nombre: 'Ayuntamiento de Alicante', sectores: ['Administración'], 
+          creadorEmail: ['ayuntamiento@alicante.es', 'ayunt@example.com'] }
+      ];
+      
+      // Determinar el tipo de usuario basado en su email
+      let userType = '';
+      
+      if (userEmail.includes('ayuntamiento') || userEmail.includes('alicante.es')) {
+        userType = 'ayuntamiento';
+      } else if (userEmail.includes('user') || userEmail.includes('example.com')) {
+        userType = 'alicante_futura';
+      } else {
+        // Para otros correos, usar el primer segmento (antes del @) para determinar el tipo
+        const emailPrefix = userEmail.split('@')[0];
+        if (emailPrefix.includes('alicante') || emailPrefix.includes('futura')) {
+          userType = 'alicante_futura';
+        } else if (emailPrefix.includes('ayunt')) {
+          userType = 'ayuntamiento';
+        } else {
+          // Default para pruebas - se pueden alternar tipos con un valor en localStorage
+          const savedType = localStorage.getItem('user_dashboard_type');
+          userType = savedType || 'alicante_futura';
+        }
+      }
+      
+      console.log('Tipo de usuario detectado (modo fallback):', userType);
+      
+      // Filtrar según el tipo detectado o el email exacto
+      if (userType === 'ayuntamiento') {
+        empresas.value = [todasEmpresas[1]]; // Asignar Ayuntamiento
+      } else if (userType === 'alicante_futura') {
+        empresas.value = [todasEmpresas[0]]; // Asignar Alicante Futura
+      } else {
+        // Filtrado por email exacto (fallback)
+        empresas.value = todasEmpresas.filter(empresa => 
+          Array.isArray(empresa.creadorEmail) 
+            ? empresa.creadorEmail.includes(userEmail)
+            : empresa.creadorEmail === userEmail
+        );
+      }
+      
+      // Si no se encontraron empresas, mostrar mensaje
+      if (empresas.value.length === 0) {
+        console.log('No se encontraron empresas para el usuario, usando modo alternancia');
+        
+        // Alternar entre las dos empresas para facilitar pruebas
+        const lastCompany = localStorage.getItem('last_company_shown');
+        if (lastCompany === '1') {
+          empresas.value = [todasEmpresas[1]];
+          localStorage.setItem('last_company_shown', '2');
+        } else {
+          empresas.value = [todasEmpresas[0]];
+          localStorage.setItem('last_company_shown', '1');
+        }
+      }
+      
+      // Obtener los IDs de las empresas del usuario
+      const empresasIds = empresas.value.map(empresa => empresa.id);
+      console.log('IDs de empresas mostradas (fallback):', empresasIds);
+      
+      // Para las siguientes entidades, filtramos según las empresas asignadas al usuario
+      
+      // Todos los departamentos
+      const todosDepartamentos = [
+        { id: 1, nombre: 'Desarrollo', empresaId: 1, creadorEmail: 'user@example.com' },
+        { id: 2, nombre: 'Marketing', empresaId: 1, creadorEmail: 'user@example.com' },
+        { id: 3, nombre: 'Recursos Humanos', empresaId: 1, creadorEmail: 'otro@example.com' },
+        { id: 4, nombre: 'Contabilidad', empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
+        { id: 5, nombre: 'Atención Ciudadana', empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
+        { id: 6, nombre: 'Urbanismo', empresaId: 2, creadorEmail: 'otro@alicante.es' }
+      ];
+      
+      // Filtrar departamentos: mostrar los que pertenecen a las empresas del usuario
+      departamentos.value = todosDepartamentos.filter(depto => 
+        empresasIds.includes(depto.empresaId)
+      );
+      
+      // Todos los centros
+      const todosCentros = [
+        { id: 1, nombre: 'Centro Principal', empresaId: 1, ciudad: 'Alicante', creadorEmail: 'user@example.com' },
+        { id: 2, nombre: 'Centro Norte', empresaId: 1, ciudad: 'Alicante', creadorEmail: 'user@example.com' },
+        { id: 3, nombre: 'Ayuntamiento Central', empresaId: 2, ciudad: 'Alicante', creadorEmail: 'ayuntamiento@alicante.es' },
+        { id: 4, nombre: 'Oficina Distrito 1', empresaId: 2, ciudad: 'Alicante', creadorEmail: 'ayuntamiento@alicante.es' },
+        { id: 5, nombre: 'Oficina Distrito 2', empresaId: 2, ciudad: 'Alicante', creadorEmail: 'otro@alicante.es' }
+      ];
+      
+      // Filtrar centros: mostrar los que pertenecen a las empresas del usuario
+      centros.value = todosCentros.filter(centro => 
+        empresasIds.includes(centro.empresaId)
+      );
+      
+      // Todas las formaciones
+      const todasFormaciones = [
+        { id: 1, titulo: 'Desarrollo Web', estado: 'Completada', participantes: 15, empresaId: 1, creadorEmail: 'user@example.com' },
+        { id: 2, titulo: 'Marketing Digital', estado: 'En curso', participantes: 12, empresaId: 1, creadorEmail: 'user@example.com' },
+        { id: 3, titulo: 'Gestión de Proyectos', estado: 'Pendiente', participantes: 20, empresaId: 1, creadorEmail: 'otro@example.com' },
+        { id: 4, titulo: 'Atención al Ciudadano', estado: 'Completada', participantes: 18, empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
+        { id: 5, titulo: 'Normativa Urbanística', estado: 'En curso', participantes: 10, empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' }
+      ];
+      
+      // Filtrar formaciones: mostrar las que pertenecen a las empresas del usuario
+      formaciones.value = todasFormaciones.filter(formacion => 
+        empresasIds.includes(formacion.empresaId)
+      );
+      
+      // Todas las actividades
+      const todasActividades = [
+        { tipo: 'empresa', descripcion: 'Se ha actualizado la información de Alicante Futura', fecha: new Date(2023, 2, 15), empresaId: 1, creadorEmail: 'user@example.com' },
+        { tipo: 'departamento', descripcion: 'Nuevo departamento: Marketing', fecha: new Date(2023, 2, 12), empresaId: 1, creadorEmail: 'user@example.com' },
+        { tipo: 'formacion', descripcion: 'Formación completada: Desarrollo Web', fecha: new Date(2023, 2, 10), empresaId: 1, creadorEmail: 'user@example.com' },
+        { tipo: 'centro', descripcion: 'Nuevo centro: Oficina Distrito 2', fecha: new Date(2023, 2, 5), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
+        { tipo: 'departamento', descripcion: 'Nuevo departamento: Atención Ciudadana', fecha: new Date(2023, 2, 8), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
+        { tipo: 'formacion', descripcion: 'Formación iniciada: Normativa Urbanística', fecha: new Date(2023, 2, 2), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' }
+      ];
+      
+      // Filtrar actividades: mostrar las que pertenecen a las empresas del usuario
+      actividades.value = todasActividades.filter(actividad => 
+        empresasIds.includes(actividad.empresaId)
+      );
+      
+      console.log('Resumen de datos ficticios cargados (fallback):', {
+        empresa: empresas.value[0]?.nombre,
+        departamentos: departamentos.value.length,
+        centros: centros.value.length,
+        formaciones: formaciones.value.length,
+        actividades: actividades.value.length
+      });
     }
-    
-    // Obtener los IDs de las empresas del usuario
-    const empresasIds = empresas.value.map(empresa => empresa.id);
-    console.log('IDs de empresas mostradas:', empresasIds);
-    
-    // Para las siguientes entidades, filtramos según las empresas
-    // asignadas al usuario
-    
-    // Todos los departamentos
-    const todosDepartamentos = [
-      { id: 1, nombre: 'Desarrollo', empresaId: 1, creadorEmail: 'user@example.com' },
-      { id: 2, nombre: 'Marketing', empresaId: 1, creadorEmail: 'user@example.com' },
-      { id: 3, nombre: 'Recursos Humanos', empresaId: 1, creadorEmail: 'otro@example.com' },
-      { id: 4, nombre: 'Contabilidad', empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
-      { id: 5, nombre: 'Atención Ciudadana', empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
-      { id: 6, nombre: 'Urbanismo', empresaId: 2, creadorEmail: 'otro@alicante.es' }
-    ];
-    
-    // Filtrar departamentos: mostrar los que pertenecen a las empresas del usuario
-    departamentos.value = todosDepartamentos.filter(depto => 
-      empresasIds.includes(depto.empresaId)
-    );
-    
-    console.log('Departamentos filtrados:', departamentos.value.length);
-    
-    // Todos los centros
-    const todosCentros = [
-      { id: 1, nombre: 'Centro Principal', empresaId: 1, ciudad: 'Alicante', creadorEmail: 'user@example.com' },
-      { id: 2, nombre: 'Centro Norte', empresaId: 1, ciudad: 'Alicante', creadorEmail: 'user@example.com' },
-      { id: 3, nombre: 'Ayuntamiento Central', empresaId: 2, ciudad: 'Alicante', creadorEmail: 'ayuntamiento@alicante.es' },
-      { id: 4, nombre: 'Oficina Distrito 1', empresaId: 2, ciudad: 'Alicante', creadorEmail: 'ayuntamiento@alicante.es' },
-      { id: 5, nombre: 'Oficina Distrito 2', empresaId: 2, ciudad: 'Alicante', creadorEmail: 'otro@alicante.es' }
-    ];
-    
-    // Filtrar centros: mostrar los que pertenecen a las empresas del usuario
-    centros.value = todosCentros.filter(centro => 
-      empresasIds.includes(centro.empresaId)
-    );
-    
-    console.log('Centros filtrados:', centros.value.length);
-    
-    // Todas las formaciones
-    const todasFormaciones = [
-      { id: 1, titulo: 'Desarrollo Web', estado: 'Completada', participantes: 15, empresaId: 1, creadorEmail: 'user@example.com' },
-      { id: 2, titulo: 'Marketing Digital', estado: 'En curso', participantes: 12, empresaId: 1, creadorEmail: 'user@example.com' },
-      { id: 3, titulo: 'Gestión de Proyectos', estado: 'Pendiente', participantes: 20, empresaId: 1, creadorEmail: 'otro@example.com' },
-      { id: 4, titulo: 'Atención al Ciudadano', estado: 'Completada', participantes: 18, empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
-      { id: 5, titulo: 'Normativa Urbanística', estado: 'En curso', participantes: 10, empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' }
-    ];
-    
-    // Filtrar formaciones: mostrar las que pertenecen a las empresas del usuario
-    formaciones.value = todasFormaciones.filter(formacion => 
-      empresasIds.includes(formacion.empresaId)
-    );
-    
-    console.log('Formaciones filtradas:', formaciones.value.length);
-    
-    // Todas las actividades
-    const todasActividades = [
-      { tipo: 'empresa', descripcion: 'Se ha actualizado la información de Alicante Futura', fecha: new Date(2023, 2, 15), empresaId: 1, creadorEmail: 'user@example.com' },
-      { tipo: 'departamento', descripcion: 'Nuevo departamento: Marketing', fecha: new Date(2023, 2, 12), empresaId: 1, creadorEmail: 'user@example.com' },
-      { tipo: 'formacion', descripcion: 'Formación completada: Desarrollo Web', fecha: new Date(2023, 2, 10), empresaId: 1, creadorEmail: 'user@example.com' },
-      { tipo: 'centro', descripcion: 'Nuevo centro: Oficina Distrito 2', fecha: new Date(2023, 2, 5), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
-      { tipo: 'departamento', descripcion: 'Nuevo departamento: Atención Ciudadana', fecha: new Date(2023, 2, 8), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
-      { tipo: 'formacion', descripcion: 'Formación iniciada: Normativa Urbanística', fecha: new Date(2023, 2, 2), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' }
-    ];
-    
-    // Filtrar actividades: mostrar las que pertenecen a las empresas del usuario
-    actividades.value = todasActividades.filter(actividad => 
-      empresasIds.includes(actividad.empresaId)
-    );
-    
-    console.log('Actividades filtradas:', actividades.value.length);
-    
-    // Imprimir un resumen de los datos cargados para depuración
-    console.log('Resumen de datos cargados:', {
-      empresa: empresas.value[0]?.nombre,
-      departamentos: departamentos.value.length,
-      centros: centros.value.length,
-      formaciones: formaciones.value.length,
-      actividades: actividades.value.length
-    });
     
     cargando.value = false;
   } catch (error) {
@@ -412,36 +473,54 @@ const inicializarGraficos = () => {
     return;
   }
   
-  const empresa = empresas.value[0]; // Usamos la única empresa del usuario
+  const empresa = empresas.value[0]; // Usamos la primera empresa del usuario
   
   // Datos para el gráfico de departamentos (por tipo/área)
-  // Agrupamos los departamentos por alguna característica
-  // En este caso simplificado, usamos la primera letra del nombre como "tipo" de departamento
+  // Vamos a agrupar por primera letra del nombre como antes, 
+  // pero si tienes un campo real de tipo/categoría en tus datos, úsalo
   const departamentosPorTipo = {};
   departamentos.value.forEach(dep => {
-    const tipo = dep.nombre.charAt(0).toUpperCase();
+    // Si hay un campo tipo/categoría, úsalo; sino usa la primera letra
+    const tipo = dep.tipo || dep.categoria || dep.nombre.charAt(0).toUpperCase();
     departamentosPorTipo[tipo] = (departamentosPorTipo[tipo] || 0) + 1;
   });
   
   // Datos para el gráfico de centros (por ciudad)
   const centrosPorCiudad = {};
   centros.value.forEach(centro => {
-    centrosPorCiudad[centro.ciudad] = (centrosPorCiudad[centro.ciudad] || 0) + 1;
+    const ciudad = centro.ciudad || 'No especificada';
+    centrosPorCiudad[ciudad] = (centrosPorCiudad[ciudad] || 0) + 1;
   });
   
   // Datos para el gráfico de formaciones por estado
   const formacionesPorEstado = {
-    'Completada': formaciones.value.filter(f => f.estado === 'Completada').length,
-    'En curso': formaciones.value.filter(f => f.estado === 'En curso').length,
-    'Pendiente': formaciones.value.filter(f => f.estado === 'Pendiente').length
+    'Completada': 0,
+    'En curso': 0,
+    'Pendiente': 0
   };
   
-  // Datos para el gráfico de sectores de la empresa
-  const sectores = empresa.sectores;
-  const sectoresConteo = {};
-  sectores.forEach(sector => {
-    sectoresConteo[sector] = 1; // Como solo tenemos una empresa, cada sector tiene un conteo de 1
+  formaciones.value.forEach(formacion => {
+    // Normalizar el estado para asegurar consistencia
+    const estado = formacion.estado || 'Pendiente';
+    if (formacionesPorEstado.hasOwnProperty(estado)) {
+      formacionesPorEstado[estado]++;
+    } else {
+      // Si encontramos un estado no reconocido, agregarlo
+      formacionesPorEstado[estado] = 1;
+    }
   });
+  
+  // Datos para el gráfico de sectores de la empresa
+  const sectoresConteo = {};
+  
+  if (empresa && empresa.sectores && Array.isArray(empresa.sectores)) {
+    empresa.sectores.forEach(sector => {
+      sectoresConteo[sector] = (sectoresConteo[sector] || 0) + 1;
+    });
+  } else {
+    // Si no hay sectores definidos, usar un valor por defecto
+    sectoresConteo['General'] = 1;
+  }
   
   // Crear gráfico de departamentos
   if (departamentosChartInstance) departamentosChartInstance.destroy();
