@@ -1,19 +1,29 @@
 <template>
-  <div>
-    <!-- Añadir fondos y efectos visuales -->
-    <div class="home-background"></div>
-    <div class="wave-background">
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
+  <div class="welcome-page no-scrollbar">
+    <!-- Nuevos efectos visuales -->
+    <div class="animated-background">
+      <div class="gradient-sphere sphere-1"></div>
+      <div class="gradient-sphere sphere-2"></div>
+      <div class="gradient-sphere sphere-3"></div>
     </div>
-    <div class="floating-particles floating-particles-profile">
+    
+    <!-- Partículas flotantes -->
+    <div class="floating-particles welcome-particles">
       <div class="particle"></div>
       <div class="particle"></div>
       <div class="particle"></div>
       <div class="particle"></div>
       <div class="particle"></div>
       <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    
+    <!-- Efecto de ondas -->
+    <div class="wave-background welcome-waves">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
     </div>
     
     <div class="profile-container">
@@ -104,29 +114,51 @@
         <form @submit.prevent="cambiarPassword">
           <div class="form-group">
             <label for="currentPassword">Contraseña actual</label>
-            <input
-              type="password"
-              id="currentPassword"
-              v-model="currentPassword"
-              class="form-control"
-              required
-              placeholder="Introduce tu contraseña actual"
-              :disabled="loading"
-            />
+            <div class="password-field-container">
+              <input
+                :type="showCurrentPassword ? 'text' : 'password'"
+                id="currentPassword"
+                v-model="currentPassword"
+                class="form-control"
+                required
+                placeholder="Introduce tu contraseña actual"
+                :disabled="loading"
+              />
+              <button 
+                type="button"
+                class="password-toggle-btn"
+                @click="showCurrentPassword = !showCurrentPassword"
+                tabindex="-1"
+              >
+                <i v-if="showCurrentPassword">👁️</i>
+                <i v-else>👁️‍🗨️</i>
+              </button>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="newPassword">Nueva contraseña</label>
-            <input
-              type="password"
-              id="newPassword"
-              v-model="newPassword"
-              class="form-control"
-              required
-              placeholder="Introduce tu nueva contraseña"
-              :disabled="loading"
-              @input="validarPassword"
-            />
+            <div class="password-field-container">
+              <input
+                :type="showNewPassword ? 'text' : 'password'"
+                id="newPassword"
+                v-model="newPassword"
+                class="form-control"
+                required
+                placeholder="Introduce tu nueva contraseña"
+                :disabled="loading"
+                @input="validarPassword"
+              />
+              <button 
+                type="button"
+                class="password-toggle-btn"
+                @click="showNewPassword = !showNewPassword"
+                tabindex="-1"
+              >
+                <i v-if="showNewPassword">👁️</i>
+                <i v-else>👁️‍🗨️</i>
+              </button>
+            </div>
             <div class="password-requirements" :class="{ active: newPassword }">
               <p>La contraseña debe contener:</p>
               <ul>
@@ -140,15 +172,26 @@
 
           <div class="form-group">
             <label for="confirmPassword">Confirmar nueva contraseña</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              v-model="confirmPassword"
-              class="form-control"
-              required
-              placeholder="Confirma tu nueva contraseña"
-              :disabled="loading"
-            />
+            <div class="password-field-container">
+              <input
+                :type="showConfirmPassword ? 'text' : 'password'"
+                id="confirmPassword"
+                v-model="confirmPassword"
+                class="form-control"
+                required
+                placeholder="Confirma tu nueva contraseña"
+                :disabled="loading"
+              />
+              <button 
+                type="button"
+                class="password-toggle-btn"
+                @click="showConfirmPassword = !showConfirmPassword"
+                tabindex="-1"
+              >
+                <i v-if="showConfirmPassword">👁️</i>
+                <i v-else>👁️‍🗨️</i>
+              </button>
+            </div>
             <div v-if="!passwordsMatch && confirmPassword" class="password-mismatch">
               Las contraseñas no coinciden
             </div>
@@ -187,6 +230,11 @@ const confirmPassword = ref('');
 const error = ref('');
 const exito = ref(false);
 const loading = ref(false);
+
+// Estados para controlar la visibilidad de las contraseñas
+const showCurrentPassword = ref(false);
+const showNewPassword = ref(false);
+const showConfirmPassword = ref(false);
 
 // Estados para información de perfil
 const displayName = ref('');
@@ -450,39 +498,46 @@ const actualizarPasswordEnBackend = async (email) => {
 .profile-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f5f7fa;
-  padding: 20px;
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 .profile-card {
-  background: white;
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 152, 0.1);
   width: 100%;
   max-width: 600px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  color: white;
+  position: relative;
+  z-index: 1;
+}
+
+/* Título y subtítulos con buen contraste */
+.profile-card h1, 
+.profile-card h2 {
+  color: white;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 .profile-card h1 {
-  color: #004698;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
 }
 
 .profile-card h2 {
-  color: #004698;
-  margin: 2rem 0 1rem;
   font-size: 1.5rem;
+  margin-top: 2rem;
 }
 
-.section-divider {
-  margin: 1.5rem 0;
-  border-top: 1px solid #e9ecef;
-}
-
-/* Estilos para la sección de foto de perfil */
+/* Sección para la foto de perfil */
 .profile-photo-section {
   display: flex;
   justify-content: center;
@@ -495,7 +550,8 @@ const actualizarPasswordEnBackend = async (email) => {
   height: 150px;
   border-radius: 50%;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: #e0e0e0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .profile-photo {
@@ -510,10 +566,10 @@ const actualizarPasswordEnBackend = async (email) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #004698;
-  color: white;
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: bold;
+  color: #004698;
+  background-color: #e0e0e0;
 }
 
 .photo-overlay {
@@ -521,46 +577,28 @@ const actualizarPasswordEnBackend = async (email) => {
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  width: 100%;
-  height: 0;
-  transition: .5s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 8px 0;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .profile-photo-container:hover .photo-overlay {
-  height: 50px;
+  opacity: 1;
 }
 
 .change-photo-btn {
   color: white;
   font-size: 0.9rem;
   cursor: pointer;
-  text-align: center;
-  background-color: transparent;
-  padding: 5px 10px;
-  border-radius: 4px;
-}
-
-.change-photo-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .change-photo-btn input {
-  position: absolute;
-  width: 0;
-  height: 0;
-  opacity: 0;
+  display: none;
 }
 
-/* Estilos para la información del usuario */
-.user-info-section {
-  margin-bottom: 1rem;
-}
-
+/* Formulario */
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -568,35 +606,43 @@ const actualizarPasswordEnBackend = async (email) => {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #004698;
-  font-weight: 500;
+  font-weight: 600;
+  color: white;
 }
 
 .form-control {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  color: white;
+  transition: all 0.3s ease;
 }
 
 .form-control:focus {
-  border-color: #004698;
   outline: none;
+  border-color: #004698;
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.25);
 }
 
 .form-control:disabled {
-  background-color: #f8f9fa;
+  background-color: rgba(255, 255, 255, 0.05);
   cursor: not-allowed;
-  color: #7e7e7e;
 }
 
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Requisitos de contraseña */
 .password-requirements {
   margin-top: 0.5rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 5px;
+  padding: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
   font-size: 0.9rem;
   display: none;
 }
@@ -605,105 +651,80 @@ const actualizarPasswordEnBackend = async (email) => {
   display: block;
 }
 
+.password-requirements p {
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .password-requirements ul {
-  list-style: none;
-  padding-left: 0;
-  margin: 0.5rem 0 0;
+  padding-left: 1.5rem;
+  margin: 0;
 }
 
 .password-requirements li {
-  color: #dc3545;
-  margin: 0.25rem 0;
-  padding-left: 1.5rem;
-  position: relative;
-}
-
-.password-requirements li::before {
-  content: "✖";
-  position: absolute;
-  left: 0;
-  color: #dc3545;
+  margin-bottom: 0.3rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .password-requirements li.valid {
-  color: #198754;
-}
-
-.password-requirements li.valid::before {
-  content: "✓";
-  color: #198754;
+  color: #4CAF50;
 }
 
 .password-mismatch {
-  color: #dc3545;
+  color: #f44336;
   font-size: 0.9rem;
-  margin-top: 0.5rem;
+  margin-top: 0.3rem;
 }
 
-.btn-primary {
-  background-color: #004698;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  cursor: pointer;
-  width: 100%;
-  transition: background-color 0.3s;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #003672;
-}
-
-.btn-primary:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.back-link {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-.back-link a {
-  color: #004698;
-  text-decoration: none;
-}
-
-.back-link a:hover {
-  text-decoration: underline;
+/* Mensaje de éxito y error */
+.alert {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-start;
 }
 
 .success-box, .error-box {
   display: flex;
-  align-items: start;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 5px;
+  align-items: center;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-out;
 }
 
 .success-box {
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
+  background-color: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.5);
 }
 
 .error-box {
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background-color: rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(244, 67, 54, 0.5);
 }
 
 .success-icon, .error-icon {
-  margin-right: 1rem;
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 15px;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .success-icon {
-  color: #198754;
+  background-color: rgba(76, 175, 80, 0.5);
+  color: white;
 }
 
 .error-icon {
-  color: #dc3545;
+  background-color: rgba(244, 67, 54, 0.5);
+  color: white;
 }
 
 .success-content, .error-content {
@@ -711,15 +732,104 @@ const actualizarPasswordEnBackend = async (email) => {
 }
 
 .success-title, .error-title {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  font-size: 16px;
 }
 
 .success-title {
-  color: #198754;
+  color: #4CAF50;
 }
 
 .error-title {
-  color: #dc3545;
+  color: #f44336;
+}
+
+.success-content p, .error-content p {
+  margin: 0;
+  color: white;
+}
+
+/* Botones y acciones */
+.actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #004698;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #003d82;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Enlaces */
+.back-link {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.back-link a {
+  color: #00b0ff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.back-link a:hover {
+  color: #66d4ff;
+  text-decoration: underline;
+}
+
+.section-divider {
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 2rem 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 1rem;
+  }
+  
+  .profile-card {
+    padding: 1.5rem;
+  }
+  
+  .profile-photo-container {
+    width: 120px;
+    height: 120px;
+  }
 }
 </style> 

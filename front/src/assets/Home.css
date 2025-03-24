@@ -205,18 +205,35 @@
 .empty-state {
   text-align: center;
   padding: 3rem;
-  background-color: var(--bg-light);
+  background-color: rgba(0, 0, 0, 0.4);
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .empty-state p {
   margin-bottom: 1.5rem;
-  color: var(--light-text);
+  color: white;
+  font-size: 1.1rem;
+}
+
+.empty-state button {
+  background-color: #004698;
+  color: white;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.empty-state button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+  background-color: #0056b8;
 }
 
 .forms-list {
@@ -367,7 +384,8 @@
 
 .modal-header h2 {
   margin: 0;
-  color: var(--primary-color);
+  color: #004698 !important;
+  text-shadow: none;
 }
 
 .btn-close {
@@ -413,6 +431,13 @@
   color: var(--text-color);
 }
 
+.form-group input::placeholder, 
+.form-group textarea::placeholder, 
+.form-group select::placeholder {
+  color: rgba(0, 0, 0, 0.6) !important;
+  font-weight: 400;
+}
+
 .form-group input, 
 .form-group textarea, 
 .form-group select {
@@ -422,6 +447,8 @@
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s;
+  background-color: white !important;
+  color: black !important;
 }
 
 .form-group input:focus, 
@@ -620,35 +647,29 @@
 
 /* Estilos para el botón flotante */
 .btn-floating {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  left: 77rem;
-  top: 2rem;
+  position: fixed !important;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: var(--primary-color);
+  background-color: #004698;
   color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 24px;
   border: none;
-  box-shadow: 0 4px 12px rgba(0, 70, 152, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 99;
-}
-
-.btn-floating .icon {
-  font-size: 2rem;
-  line-height: 1;
 }
 
 .btn-floating:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0, 70, 152, 0.4);
-  background-color: var(--primary-hover);
+  transform: scale(1.1);
+  background-color: #0056b8;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
 }
 
 /* Estilos para el banner de Alicante */
@@ -990,9 +1011,9 @@
 
 /* Botón animado para crear nueva empresa */
 .btn-nueva-empresa {
-  background-color: transparent;
+  background-color: #004698 !important;
+  border: 2px solid white !important;
   text-decoration: none;
-  border: none;
   cursor: pointer;
   padding: 0;
 }
@@ -1001,9 +1022,8 @@
   position: relative;
   display: inline-block;
   padding: 10px 20px;
-  border: 2px solid #000000;
   text-transform: uppercase;
-  color: #000000;
+  color: white !important;
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
@@ -1072,6 +1092,67 @@
 }
 
 /* Efectos visuales mejorados para HomeView, Perfil y Panel de Control */
+/* Esferas de gradiente animadas */
+.animated-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -9;
+}
+
+.gradient-sphere {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.2;
+  animation: floatSphere 25s infinite ease-in-out;
+}
+
+.sphere-1 {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(45deg, rgba(0, 70, 152, 0.4), rgba(0, 176, 255, 0.4));
+  top: -100px;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.sphere-2 {
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(135deg, rgba(98, 0, 234, 0.3), rgba(0, 230, 118, 0.3));
+  bottom: -200px;
+  right: -100px;
+  animation-delay: -5s;
+}
+
+.sphere-3 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(225deg, rgba(255, 171, 0, 0.3), rgba(245, 0, 87, 0.3));
+  top: 40%;
+  left: 60%;
+  animation-delay: -10s;
+}
+
+@keyframes floatSphere {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(5%, 5%) scale(1.05);
+  }
+  50% {
+    transform: translate(-5%, 8%) scale(0.95);
+  }
+  75% {
+    transform: translate(8%, -3%) scale(1.02);
+  }
+}
+
 /* Efecto de partículas flotantes - Versión mejorada */
 .floating-particles {
   position: fixed;
@@ -1139,6 +1220,22 @@
   top: 80%;
   left: 40%;
   animation-delay: -12s;
+}
+
+.particle:nth-child(7) {
+  width: 70px;
+  height: 70px;
+  top: 30%;
+  right: 30%;
+  animation-delay: -3s;
+}
+
+.particle:nth-child(8) {
+  width: 110px;
+  height: 110px;
+  bottom: 40%;
+  right: 25%;
+  animation-delay: -9s;
 }
 
 @keyframes float {
@@ -1397,4 +1494,738 @@
 /* Ajustar el z-index del navbar para que esté detrás de los modales */
 .app-header {
   display: block; /* Ocultar esta definición duplicada para evitar conflictos */
+}
+
+/* Estilos para el WelcomeView aplicados a todas las páginas */
+.welcome-page {
+  min-height: calc(100vh - 4.2em);
+  background: linear-gradient(180deg, #1D2024 0%, black 50%, black 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: radial-gradient(circle at 15% 15%, rgba(116, 155, 208, 0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.welcome-page::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 85% 85%, rgba(0, 70, 152, 0.15) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.no-scrollbar {
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+/* Estilos para las esferas de gradiente */
+.animated-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.gradient-sphere {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(50px);
+  opacity: 0.4;
+  animation: floatSphere 25s infinite ease-in-out;
+}
+
+.sphere-1 {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(45deg, #ff3d00, #00b0ff);
+  top: -100px;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.sphere-2 {
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(135deg, #6200ea, #00e676);
+  bottom: -200px;
+  right: -100px;
+  animation-delay: -5s;
+}
+
+.sphere-3 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(225deg, #ffab00, #f50057);
+  top: 40%;
+  left: 60%;
+  animation-delay: -10s;
+}
+
+/* Estilos para las partículas flotantes */
+.welcome-particles {
+  z-index: 1;
+}
+
+.welcome-particles .particle {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+/* Estilos para las ondas */
+.welcome-waves {
+  z-index: 1;
+}
+
+.welcome-waves .wave {
+  background: linear-gradient(90deg, 
+    rgba(0, 70, 152, 0.1), 
+    rgba(116, 155, 208, 0.2), 
+    rgba(255, 61, 0, 0.1),
+    rgba(255, 171, 0, 0.2),
+    rgba(0, 70, 152, 0.1)
+  );
+}
+
+@keyframes floatSphere {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(5%, 5%) scale(1.05);
+  }
+  50% {
+    transform: translate(-5%, 8%) scale(0.95);
+  }
+  75% {
+    transform: translate(8%, -3%) scale(1.02);
+  }
+}
+
+/* Efecto de texto con gradiente animado */
+.animated-title {
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(90deg, #00b0ff, #00b0ff, #0062ff);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 10s ease infinite;
+  text-shadow: none;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Efecto de animación de pulso */
+.pulse-animation {
+  animation: pulse 3s infinite ease-in-out;
+}
+
+/* Efecto de brillo al pasar el cursor */
+.glow-effect {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.glow-effect::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.3s, transform 0.5s;
+  z-index: -1;
+}
+
+.glow-effect:hover::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Ajuste para mantener contenido por encima de los efectos de fondo */
+.dashboard-container, .profile-container {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(0, 181, 255, 0.3);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 30px rgba(0, 181, 255, 0.5);
+  }
+}
+
+/* Mejorando el contraste de los títulos */
+.welcome-title, .dashboard-title, .profile-card h1, .section-title, .forms-section h2,
+.form-info h3, .stat-card h3, .form-group label, .question-header h4 {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+/* Mejorando el contraste de los textos en las tarjetas */
+.form-info p, .form-meta span, .view-field, .form-stats span, .stat-value, 
+.welcome-subtitle, .banner-info p {
+  color: white !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+}
+
+/* Modificar el botón de crear nueva empresa para mejorar visibilidad */
+.btn-nueva-empresa {
+  background-color: #004698 !important;
+  border: 2px solid white !important;
+}
+
+.btn-nueva-empresa a {
+  color: white !important;
+}
+
+/* Mejorando el contraste de las tarjetas */
+.stat-card, .form-card, .summary-card, .chart-card, .profile-card, .view-item {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mejorando el contraste de los contenedores */
+.welcome-page {
+  min-height: calc(100vh - 4.2em);
+  background: linear-gradient(180deg, #1D2024 0%, black 50%, black 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Mejorando el contraste de los inputs en modales */
+.form-group input, 
+.form-group textarea, 
+.form-group select {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+}
+
+/* Mejorando los estilos de los modales */
+.modal-container {
+  background-color: rgba(0, 20, 40, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(15px);
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-header h2 {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Título en modal */
+.modal-container .modal-header h2 {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Clase específica para el modal de creación de empresas */
+.modal-container:has(form) .modal-header h2,
+.modal-header h2 {
+  color: #004698 !important;
+  text-shadow: none !important;
+}
+
+/* Estilos para el navbar adaptativo */
+.navbar-container {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+/* Cuando está en una página con fondo oscuro (welcome-page) */
+.welcome-page ~ .navbar-container,
+.welcome-page + .navbar-container,
+body:has(.welcome-page) .navbar-container {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Cuando está en una página con fondo oscuro, cambiar el color de los textos del navbar */
+body:has(.welcome-page) .navbar-container a,
+body:has(.welcome-page) .navbar-container .nav-link,
+body:has(.welcome-page) .navbar-container .brand-name {
+  color: white !important;
+}
+
+/* Estilos para el footer */
+.app-footer {
+  position: relative;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  padding: 3rem 0 1rem;
+  margin-top: 5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Efecto de difuminado para la transición entre home y footer */
+.app-footer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -150px;
+  height: 150px;
+  background: linear-gradient(to bottom, 
+    rgba(0, 0, 0, 0) 0%, 
+    rgba(0, 0, 0, 0.3) 40%, 
+    rgba(0, 0, 0, 0.6) 70%, 
+    rgba(0, 0, 0, 0.85) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-column {
+  align-items: center;
+  text-align: center;
+}
+
+.footer-logo {
+  width: 120px;
+  height: auto;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 10px rgba(0, 176, 255, 0.5));
+}
+
+.logo-column h3 {
+  font-size: 1.5rem;
+  background: linear-gradient(90deg, #00b0ff, #0062ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.logo-column p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+.footer-column h4 {
+  color: #00b0ff;
+  margin-bottom: 1.2rem;
+  font-size: 1.2rem;
+  position: relative;
+}
+
+.footer-column h4::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, #00b0ff, transparent);
+}
+
+.links-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.links-column li {
+  margin-bottom: 0.8rem;
+}
+
+.links-column a, .contact-column a {
+  color: white;
+  text-decoration: none;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.links-column a:hover, .contact-column a:hover {
+  opacity: 1;
+  transform: translateX(5px);
+  color: #00b0ff;
+}
+
+.contact-column p {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.contact-column i {
+  margin-right: 10px;
+  color: #00b0ff;
+}
+
+.social-icons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.social-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+.social-icon:hover {
+  transform: translateY(-5px);
+  background: linear-gradient(135deg, #00b0ff, #0062ff);
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 3rem auto 0;
+  padding: 1.5rem 1.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-bottom p {
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
+.footer-bottom-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer-bottom-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.85rem;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.footer-bottom-links a:hover {
+  opacity: 1;
+}
+
+/* Responsive para el footer */
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .footer-column h4::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .social-icons {
+    justify-content: center;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .footer-bottom-links {
+    justify-content: center;
+  }
+  
+  .contact-column p {
+    justify-content: center;
+  }
+}
+
+/* Estilos para el dropdown */
+.user-dropdown .dropdown-menu {
+  background-color: white;
+  color: black;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item {
+  color: black !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dropdown-icon {
+  fill: black !important;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(0, 70, 152, 0.1);
+}
+
+.logout-item {
+  color: #e62222 !important;
+}
+
+.logout-item .dropdown-icon {
+  fill: #e62222 !important;
+}
+
+/* Efecto de aparición al hacer scroll */
+.fade-up-element {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-up-element.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Diferentes retardos para crear un efecto escalonado */
+.fade-delay-1 {
+  transition-delay: 0.1s;
+}
+
+.fade-delay-2 {
+  transition-delay: 0.2s;
+}
+
+.fade-delay-3 {
+  transition-delay: 0.3s;
+}
+
+.fade-delay-4 {
+  transition-delay: 0.4s;
+}
+
+.fade-delay-5 {
+  transition-delay: 0.5s;
+}
+
+/* Transición más rápida para las tarjetas */
+.form-card.fade-up-element {
+  transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.3s ease;
+}
+
+/* Estilos para el Panel de Actividad Reciente */
+.actividad-reciente {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.actividad-reciente h2 {
+  color: #004698;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  border-bottom: 2px solid rgba(0, 70, 152, 0.2);
+  padding-bottom: 10px;
+}
+
+.actividad-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.actividad-item:hover {
+  background-color: rgba(0, 70, 152, 0.05);
+}
+
+.actividad-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.actividad-info {
+  flex: 1;
+}
+
+.actividad-title {
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.actividad-date {
+  color: #666;
+  font-size: 12px;
+}
+
+/* Color de texto para elementos de actividad reciente con fondo verde */
+.actividad-item.formacion-item .actividad-title {
+  color: #333;
+}
+
+.actividad-item.formacion-item {
+  background-color: rgba(200, 255, 200, 0.3);
+  border-left: 3px solid #28a745;
+}
+
+/* Estilos para iconos específicos de actividad */
+.empresa-icon {
+  background-color: #004698 !important;
+}
+
+.departamento-icon {
+  background-color: #28a745 !important;
+}
+
+.centro-icon {
+  background-color: #fd7e14 !important;
+}
+
+.formacion-icon {
+  background-color: #6f42c1 !important;
+}
+
+.default-icon {
+  background-color: #6c757d !important;
+}
+
+/* Estilos para campos de contraseña */
+.password-field-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 1.1rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.password-toggle-btn:hover {
+  color: #004698;
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+}
+
+/* En el modo oscuro, ajustar colores para contraste */
+.welcome-page .form-group input::placeholder, 
+.welcome-page .form-group textarea::placeholder, 
+.welcome-page .form-group select::placeholder {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.welcome-page .form-group input, 
+.welcome-page .form-group textarea, 
+.welcome-page .form-group select {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* Estilos para los placeholders en modales */
+.modal-container .form-group input::placeholder, 
+.modal-container .form-group textarea::placeholder, 
+.modal-container .form-group select::placeholder {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.modal-container .form-group input, 
+.modal-container .form-group textarea, 
+.modal-container .form-group select {
+  background-color: white !important;
+  color: black !important;
 }

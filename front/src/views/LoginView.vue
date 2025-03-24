@@ -39,14 +39,25 @@
         </div>
         <div class="form-group">
           <label for="password">Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            v-model="password"
-            class="form-control"
-            required
-            placeholder="Introduce tu contraseña"
-          />
+          <div class="password-field-container">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              id="password"
+              v-model="password"
+              class="form-control"
+              required
+              placeholder="Introduce tu contraseña"
+            />
+            <button 
+              type="button"
+              class="password-toggle-btn"
+              @click="showPassword = !showPassword"
+              tabindex="-1"
+            >
+              <i v-if="showPassword">👁️</i>
+              <i v-else>👁️‍🗨️</i>
+            </button>
+          </div>
         </div>
         <div class="actions">
           <button type="submit" class="btn btn-primary" :disabled="loading">
@@ -121,6 +132,9 @@ const emailNoVerificado = computed(() => {
 const credencialesIncorrectas = computed(() => {
   return error.value && error.value.toLowerCase().includes('credenciales incorrectas');
 });
+
+// Estado para controlar la visibilidad de la contraseña
+const showPassword = ref(false);
 
 const login = async () => {
   // Validar formulario

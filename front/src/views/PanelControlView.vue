@@ -1,21 +1,31 @@
 <template>
-  <div>
-    <!-- Fondos y efectos visuales mejorados -->
-    <div class="home-background"></div>
-    <div class="wave-background">
+  <div class="welcome-page no-scrollbar">
+    <!-- Nuevos efectos visuales -->
+    <div class="animated-background">
+      <div class="gradient-sphere sphere-1"></div>
+      <div class="gradient-sphere sphere-2"></div>
+      <div class="gradient-sphere sphere-3"></div>
+    </div>
+    
+    <!-- Partículas flotantes -->
+    <div class="floating-particles welcome-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    
+    <!-- Efecto de ondas -->
+    <div class="wave-background welcome-waves">
       <div class="wave"></div>
       <div class="wave"></div>
       <div class="wave"></div>
     </div>
-    <div class="floating-particles floating-particles-panel">
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-    </div>
-  
+    
     <div class="dashboard-container">
       <div class="dashboard-header">
         <h1 class="dashboard-title">Panel de Control</h1>
@@ -107,14 +117,18 @@
           </div>
         </div>
         
-        <div class="recent-activity">
+        <div class="recent-activity actividad-reciente">
           <h2>Actividad Reciente</h2>
           <div class="activity-list" v-if="actividades.length > 0">
-            <div v-for="(actividad, index) in actividades" :key="index" class="activity-item">
-              <div class="activity-icon" :class="getIconClass(actividad.tipo)"></div>
-              <div class="activity-details">
-                <p class="activity-description">{{ actividad.descripcion }}</p>
-                <span class="activity-date">{{ formatDate(actividad.fecha) }}</span>
+            <div v-for="(actividad, index) in actividades" :key="index" 
+                 class="activity-item actividad-item" 
+                 :class="{'formacion-item': actividad.tipo === 'formacion'}">
+              <div class="activity-icon actividad-icon" :class="getIconClass(actividad.tipo)">
+                <i :class="getIconForType(actividad.tipo)"></i>
+              </div>
+              <div class="activity-details actividad-info">
+                <p class="activity-description actividad-title">{{ actividad.descripcion }}</p>
+                <span class="activity-date actividad-date">{{ formatDate(actividad.fecha) }}</span>
               </div>
             </div>
           </div>
@@ -644,14 +658,25 @@ const formatDate = (date) => {
   }).format(date);
 };
 
-// Obtener clase de icono para actividades
+// Obtenemos la clase de icono según el tipo de actividad
 const getIconClass = (tipo) => {
   switch (tipo) {
-    case 'empresa': return 'activity-icon-empresa';
-    case 'departamento': return 'activity-icon-departamento';
-    case 'centro': return 'activity-icon-centro';
-    case 'formacion': return 'activity-icon-formacion';
-    default: return 'activity-icon-default';
+    case 'empresa': return 'empresa-icon';
+    case 'departamento': return 'departamento-icon';
+    case 'centro': return 'centro-icon';
+    case 'formacion': return 'formacion-icon';
+    default: return 'default-icon';
+  }
+};
+
+// Obtener clase de icono para actividades
+const getIconForType = (tipo) => {
+  switch (tipo) {
+    case 'empresa': return 'fas fa-building';
+    case 'departamento': return 'fas fa-users';
+    case 'centro': return 'fas fa-map-marker-alt';
+    case 'formacion': return 'fas fa-graduation-cap';
+    default: return 'fas fa-info-circle';
   }
 };
 

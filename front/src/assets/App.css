@@ -82,7 +82,7 @@
   
   .nav-button {
     background-color: #004698;
-    color: white;
+    color: rgb(0, 0, 0);
     padding: 0.5rem 1rem;
     border-radius: 6px;
     font-weight: 600;
@@ -123,7 +123,7 @@
 .transparent-header .nav-link,
 .transparent-header .app-logo,
 .transparent-header .user-name {
-  color: #fff; /* or any color that works with your background */
+  color: #000000; /* or any color that works with your background */
 }
 
 .transparent-header .nav-link:hover,

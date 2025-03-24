@@ -51,29 +51,51 @@
         </div>
         <div class="form-group">
           <label for="password">Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            v-model="password"
-            class="form-control"
-            required
-            placeholder="Contraseña (mínimo 6 caracteres)"
-            minlength="6"
-            :disabled="loading"
-          />
+          <div class="password-field-container">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              id="password"
+              v-model="password"
+              class="form-control"
+              required
+              placeholder="Contraseña (mínimo 6 caracteres)"
+              minlength="6"
+              :disabled="loading"
+            />
+            <button 
+              type="button"
+              class="password-toggle-btn"
+              @click="showPassword = !showPassword"
+              tabindex="-1"
+            >
+              <i v-if="showPassword">👁️</i>
+              <i v-else>👁️‍🗨️</i>
+            </button>
+          </div>
         </div>
         <div class="form-group">
           <label for="confirmPassword">Confirmar Contraseña</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            v-model="confirmPassword"
-            class="form-control"
-            required
-            placeholder="Repite tu contraseña"
-            minlength="6"
-            :disabled="loading"
-          />
+          <div class="password-field-container">
+            <input
+              :type="showConfirmPassword ? 'text' : 'password'"
+              id="confirmPassword"
+              v-model="confirmPassword"
+              class="form-control"
+              required
+              placeholder="Repite tu contraseña"
+              minlength="6"
+              :disabled="loading"
+            />
+            <button 
+              type="button"
+              class="password-toggle-btn"
+              @click="showConfirmPassword = !showConfirmPassword"
+              tabindex="-1"
+            >
+              <i v-if="showConfirmPassword">👁️</i>
+              <i v-else>👁️‍🗨️</i>
+            </button>
+          </div>
         </div>
         <div v-if="loading" class="loading-state">
           <div v-if="guardandoEnFirebase" class="loading-message">
@@ -140,6 +162,10 @@ const verificacionMensaje = ref('');
 const emailRegistrado = ref('');
 const guardandoEnBackend = ref(false);
 const guardandoEnFirebase = ref(false);
+
+// Estados para controlar la visibilidad de las contraseñas
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 
 // Obtener la instancia de auth
 const auth = getAuth();

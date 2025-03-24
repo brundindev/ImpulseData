@@ -249,7 +249,7 @@ const irAPanelControl = () => {
 </script>
 
 <template>
-  <header class="app-header">
+  <header class="app-header navbar-container">
     <div class="header-container">
       <div class="logo-container">
         <img src="@/assets/img/impulsedata_logo.png" alt="Impulsa Alicante" class="impulsa-logo" />
