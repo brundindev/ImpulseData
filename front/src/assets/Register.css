@@ -57,6 +57,7 @@ label {
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s, box-shadow 0.3s;
+  color: #333 !important;
 }
 
 .form-control:focus {
@@ -122,6 +123,7 @@ label {
   margin-top: 1.5rem;
   text-align: center;
   font-size: 0.95rem;
+  color: #333 !important;
 }
 
 .login-link a {
@@ -273,7 +275,7 @@ label {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  color: #555;
+  color: #555 !important;
   font-size: 0.9rem;
 }
 
@@ -552,6 +554,9 @@ label {
   font-size: 0.9rem;
 }
 
+.loading-state p {
+  color: #555 !important;
+}
 .spinner-small {
   width: 20px;
   height: 20px;
@@ -565,6 +570,7 @@ label {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
 /* Estilos para el registro con Google */
 .separator {
   display: flex;
@@ -627,4 +633,12 @@ label {
   width: 24px;
   height: 24px;
   margin-right: 10px;
+}
+
+/* Estilos para textos claros */
+.alert-success p, 
+.verification-message, 
+.verification-section p,
+.loading-message {
+  color: #333 !important;
 }

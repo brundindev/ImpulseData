@@ -35,6 +35,7 @@
             class="form-control"
             required
             placeholder="Introduce tu email"
+            style="color: #333 !important;"
           />
         </div>
         <div class="form-group">
@@ -47,6 +48,7 @@
               class="form-control"
               required
               placeholder="Introduce tu contraseña"
+              style="color: #333 !important;"
             />
             <button 
               type="button"
