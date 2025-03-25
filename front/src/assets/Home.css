@@ -102,6 +102,19 @@
 .user-name {
   color: var(--primary-color);
   font-weight: 600;
+  text-shadow: 0 0 10px rgba(0, 181, 255, 0.7), 0 0 20px rgba(0, 181, 255, 0.5), 0 0 30px rgba(0, 70, 152, 0.3);
+  animation: glow 2s ease-in-out infinite alternate;
+  position: relative;
+  display: inline-block;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px rgba(0, 181, 255, 0.7), 0 0 20px rgba(0, 181, 255, 0.5), 0 0 30px rgba(0, 70, 152, 0.3);
+  }
+  to {
+    text-shadow: 0 0 15px rgba(0, 181, 255, 0.9), 0 0 25px rgba(0, 181, 255, 0.7), 0 0 35px rgba(0, 70, 152, 0.5);
+  }
 }
 
 .action-buttons {
@@ -1817,11 +1830,16 @@ body:has(.welcome-page) .navbar-container .brand-name {
   padding: 3rem 0 1rem;
   margin-top: 5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: auto; /* Asegurar que el footer captura eventos */
 }
 
 /* Efecto de difuminado para la transición entre home y footer */
 .app-footer::before {
-  content: '';
+  display: none; /* Ocultar el pseudo-elemento para que no bloquee los eventos */
+}
+
+/* Estilo para el nuevo div de difuminado */
+.footer-difuminado {
   position: absolute;
   left: 0;
   right: 0;
@@ -1833,7 +1851,7 @@ body:has(.welcome-page) .navbar-container .brand-name {
     rgba(0, 0, 0, 0.6) 70%, 
     rgba(0, 0, 0, 0.85) 100%);
   z-index: -1;
-  pointer-events: none;
+  pointer-events: none !important; /* Importante: asegura que los eventos pasen a través */
 }
 
 .footer-container {
