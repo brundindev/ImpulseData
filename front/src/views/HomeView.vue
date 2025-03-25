@@ -425,7 +425,7 @@
                 <button type="button" class="button" @click="editarEmpresaDesdeVista()">
                   Editar
                 </button>
-                <button type="button" class="buttonDownload" @click="descargarPDF()">
+                <button type="button" class="buttonDownload" @click="generarPDF()">
                   Descargar PDF
                 </button>
                   <button type="button" class="buttonDownload word-btn" @click="descargarWord()">
@@ -501,6 +501,14 @@
       </div>
     </footer>
   </div>
+  
+  <!-- Modal para previsualizar PDF -->
+  <PDFPreviewModal 
+    :show="showPDFPreview"
+    :pdf-url="pdfPreviewUrl"
+    @close="showPDFPreview = false"
+    @download="descargarPDF"
+  />
 </template>
 
 <script setup>
@@ -515,6 +523,7 @@ import FirebaseAuthService from '../services/FirebaseAuthService';
 import axios from 'axios';
 import AnimatedNumber from '../components/AnimatedNumber.vue';
 import ScrollAnimation from '../components/ScrollAnimation.vue';
+import PDFPreviewModal from '../components/PDFPreviewModal.vue';
 // Importar el logo e imágenes
 import logoUrl from '../assets/img/impulsedata_logo.png';
 import impulsaAlicanteLogo from '../assets/img/impulsaalicante.png';
@@ -1085,323 +1094,358 @@ const crearPortadaSeccion = (texto, doc) => {
   return 20; // Retorna la posición Y inicial para comenzar la sección
 };
 
-// Función para descargar informe en PDF
-const descargarPDF = () => {
+// Función para generar el contenido del PDF
+const generarContenidoPDF = (doc) => {
+  // Portada principal
+  doc.setFillColor(240, 245, 255);
+  doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+  
+  // Borde decorativo
+  doc.setDrawColor(0, 70, 152);
+  doc.setLineWidth(1.5);
+  doc.rect(15, 15, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 30, 'S');
+  
+  // Logos en la portada
   try {
-    // Crear documento PDF
-    const doc = new jsPDF();
+    // Logo ImpulseData
+    doc.addImage(logoUrl, 'PNG', doc.internal.pageSize.width / 2 - 30, 40, 60, 30);
     
-    // Portada principal
-    doc.setFillColor(240, 245, 255);
-    doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+    // Logo Alicante Futura
+    doc.addImage(impulsaAlicanteLogo, 'PNG', doc.internal.pageSize.width / 2 - 40, 80, 80, 30);
     
-    // Borde decorativo
-    doc.setDrawColor(0, 70, 152);
-    doc.setLineWidth(1.5);
-    doc.rect(15, 15, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 30, 'S');
+    // Logo Ayuntamiento
+    doc.addImage(ayuntamientoLogo, 'JPG', doc.internal.pageSize.width / 2 - 25, 120, 50, 30);
+  } catch (error) {
+    console.error("Error al cargar imágenes:", error);
+    // Si falla la carga de imágenes, dibujamos placeholders
+    doc.setFillColor(0, 70, 152);
+    doc.circle(doc.internal.pageSize.width / 2, 60, 15, 'F');
+    doc.circle(doc.internal.pageSize.width / 2, 95, 15, 'F');
+    doc.circle(doc.internal.pageSize.width / 2, 130, 15, 'F');
+  }
+  
+  // Título principal
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 70, 152);
+  doc.setFontSize(22);
+  doc.text('INFORME EMPRESARIAL', doc.internal.pageSize.width / 2, 170, { align: 'center' });
+  
+  // Subtítulo
+  doc.setFont('helvetica', 'normal');
+      doc.setFontSize(16);
+  doc.text(empresaActual.nombre, doc.internal.pageSize.width / 2, 185, { align: 'center' });
+  
+  // Fecha de generación
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+      doc.text(
+    `Generado el ${new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'})}`, 
+    doc.internal.pageSize.width / 2, 
+    doc.internal.pageSize.height - 20, 
+    { align: 'center' }
+  );
+  
+  // Sección de información general
+  let yPos = crearPortadaSeccion('Información General', doc);
+  
+  // Datos de la empresa
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Nombre de la empresa:', 20, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(empresaActual.nombre, 120, yPos);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Fecha de creación:', 20, yPos + 10);
+  doc.setFont('helvetica', 'normal');
+  doc.text(formatDate(empresaActual.fechaCreacion), 120, yPos + 10);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Ciudad:', 20, yPos + 20);
+  doc.setFont('helvetica', 'normal');
+  doc.text(empresaActual.ciudad || 'No especificada', 120, yPos + 20);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Descripción:', 20, yPos + 30);
+  doc.setFont('helvetica', 'normal');
+  
+  // Manejo de texto largo en descripción
+  const descripcion = empresaActual.descripcion || 'Sin descripción';
+  const textLines = doc.splitTextToSize(descripcion, 150);
+  doc.text(textLines, 120, yPos + 30);
+  
+  // Sección de departamentos
+  yPos = crearPortadaSeccion('Departamentos', doc);
+  
+  if (empresaActual.departamentos && empresaActual.departamentos.length > 0) {
+    // Crear tabla de departamentos
+    const departamentosData = empresaActual.departamentos.map((dep, index) => {
+      return [index + 1, dep.nombre];
+    });
     
-    // Logos en la portada
-    try {
-      // Logo ImpulseData
-      doc.addImage(logoUrl, 'PNG', doc.internal.pageSize.width / 2 - 30, 40, 60, 30);
-      
-      // Logo Alicante Futura
-      doc.addImage(impulsaAlicanteLogo, 'PNG', doc.internal.pageSize.width / 2 - 40, 80, 80, 30);
-      
-      // Logo Ayuntamiento
-      doc.addImage(ayuntamientoLogo, 'JPG', doc.internal.pageSize.width / 2 - 25, 120, 50, 30);
-    } catch (error) {
-      console.error("Error al cargar imágenes:", error);
-      // Si falla la carga de imágenes, dibujamos placeholders
-      doc.setFillColor(0, 70, 152);
-      doc.circle(doc.internal.pageSize.width / 2, 60, 15, 'F');
-      doc.circle(doc.internal.pageSize.width / 2, 95, 15, 'F');
-      doc.circle(doc.internal.pageSize.width / 2, 130, 15, 'F');
-    }
+    autoTable(doc, {
+      startY: yPos,
+      head: [['#', 'Nombre del Departamento']],
+      body: departamentosData,
+      theme: 'grid',
+    headStyles: { 
+      fillColor: [0, 70, 152],
+        textColor: [255, 255, 255]
+      }
+    });
+  } else {
+    doc.text('No hay departamentos registrados.', 20, yPos);
+  }
+  
+  // Sección de centros
+  yPos = crearPortadaSeccion('Centros', doc);
+  
+  if (empresaActual.centros && empresaActual.centros.length > 0) {
+    // Crear tabla de centros
+    const centrosData = empresaActual.centros.map((centro, index) => {
+      return [index + 1, centro.nombre, centro.direccion || 'No especificada'];
+    });
     
-    // Título principal
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 70, 152);
-    doc.setFontSize(22);
-    doc.text('INFORME EMPRESARIAL', doc.internal.pageSize.width / 2, 170, { align: 'center' });
-    
-    // Subtítulo
-    doc.setFont('helvetica', 'normal');
-        doc.setFontSize(16);
-    doc.text(empresaActual.nombre, doc.internal.pageSize.width / 2, 185, { align: 'center' });
-    
-    // Fecha de generación
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-        doc.text(
-      `Generado el ${new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'})}`, 
-      doc.internal.pageSize.width / 2, 
-      doc.internal.pageSize.height - 20, 
-      { align: 'center' }
-    );
-    
-    // Sección de información general
-    let yPos = crearPortadaSeccion('Información General', doc);
-    
-    // Datos de la empresa
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Nombre de la empresa:', 20, yPos);
-    doc.setFont('helvetica', 'normal');
-    doc.text(empresaActual.nombre, 120, yPos);
-    
-    doc.setFont('helvetica', 'bold');
-    doc.text('Fecha de creación:', 20, yPos + 10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(formatDate(empresaActual.fechaCreacion), 120, yPos + 10);
-    
-    doc.setFont('helvetica', 'bold');
-    doc.text('Ciudad:', 20, yPos + 20);
-    doc.setFont('helvetica', 'normal');
-    doc.text(empresaActual.ciudad || 'No especificada', 120, yPos + 20);
-    
-    doc.setFont('helvetica', 'bold');
-    doc.text('Descripción:', 20, yPos + 30);
-    doc.setFont('helvetica', 'normal');
-    
-    // Manejo de texto largo en descripción
-    const descripcion = empresaActual.descripcion || 'Sin descripción';
-    const textLines = doc.splitTextToSize(descripcion, 150);
-    doc.text(textLines, 120, yPos + 30);
-    
-    // Sección de departamentos
-    yPos = crearPortadaSeccion('Departamentos', doc);
-    
-    if (empresaActual.departamentos && empresaActual.departamentos.length > 0) {
-      // Crear tabla de departamentos
-      const departamentosData = empresaActual.departamentos.map((dep, index) => {
-        return [index + 1, dep.nombre];
-      });
-      
-      autoTable(doc, {
-        startY: yPos,
-        head: [['#', 'Nombre del Departamento']],
-        body: departamentosData,
-        theme: 'grid',
-      headStyles: { 
+    autoTable(doc, {
+      startY: yPos,
+      head: [['#', 'Nombre del Centro', 'Dirección']],
+      body: centrosData,
+      theme: 'grid',
+      headStyles: {
         fillColor: [0, 70, 152],
-          textColor: [255, 255, 255]
-        }
-      });
-    } else {
-      doc.text('No hay departamentos registrados.', 20, yPos);
-    }
+        textColor: [255, 255, 255]
+      }
+    });
+  } else {
+    doc.text('No hay centros registrados.', 20, yPos);
+  }
+  
+  // Sección de formaciones
+  yPos = crearPortadaSeccion('Formaciones', doc);
+  
+  if (empresaActual.formaciones && empresaActual.formaciones.length > 0) {
+    // Crear tabla de formaciones
+    const formacionesData = empresaActual.formaciones.map((formacion, index) => {
+      return [
+        index + 1, 
+        formacion.nombre, 
+        formatTipoFormacion(formacion.tipo), 
+        `${formacion.duracion} horas`
+      ];
+    });
     
-    // Sección de centros
-    yPos = crearPortadaSeccion('Centros', doc);
+    autoTable(doc, {
+      startY: yPos,
+      head: [['#', 'Nombre de la Formación', 'Tipo', 'Duración']],
+      body: formacionesData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [0, 70, 152],
+        textColor: [255, 255, 255]
+      }
+    });
     
-    if (empresaActual.centros && empresaActual.centros.length > 0) {
-      // Crear tabla de centros
-      const centrosData = empresaActual.centros.map((centro, index) => {
-        return [index + 1, centro.nombre, centro.direccion || 'No especificada'];
-      });
+    // Añadir gráficos o estadísticas adicionales
+    const tiposCounts = {
+      presencial: 0,
+      virtual: 0,
+      hibrida: 0
+    };
+    
+    empresaActual.formaciones.forEach(formacion => {
+      if (tiposCounts[formacion.tipo] !== undefined) {
+        tiposCounts[formacion.tipo]++;
+      }
+    });
+    
+    // Crear tabla resumen por tipo
+    doc.addPage();
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.text('Resumen por tipo de formación', 20, 20);
+    
+    const tiposData = Object.entries(tiposCounts).map(([tipo, count]) => {
+      return [formatTipoFormacion(tipo), count];
+    });
+    
+    autoTable(doc, {
+      startY: 30,
+      head: [['Tipo de Formación', 'Cantidad']],
+      body: tiposData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [0, 70, 152],
+        textColor: [255, 255, 255]
+      }
+    });
+    
+    // Calcular total para porcentajes
+    const total = Object.values(tiposCounts).reduce((sum, count) => sum + count, 0);
+    
+    if (total > 0) {
+      // Configuración del gráfico circular mejorado
+      const centerX = 105;
+      const centerY = 100;
+      const radius = 40;
       
-      autoTable(doc, {
-        startY: yPos,
-        head: [['#', 'Nombre del Centro', 'Dirección']],
-        body: centrosData,
-        theme: 'grid',
-        headStyles: {
-          fillColor: [0, 70, 152],
-          textColor: [255, 255, 255]
-        }
-      });
-    } else {
-      doc.text('No hay centros registrados.', 20, yPos);
-    }
-    
-    // Sección de formaciones
-    yPos = crearPortadaSeccion('Formaciones', doc);
-    
-    if (empresaActual.formaciones && empresaActual.formaciones.length > 0) {
-      // Crear tabla de formaciones
-      const formacionesData = empresaActual.formaciones.map((formacion, index) => {
-        return [
-          index + 1, 
-          formacion.nombre, 
-          formatTipoFormacion(formacion.tipo), 
-          `${formacion.duracion} horas`
-        ];
-      });
-      
-      autoTable(doc, {
-        startY: yPos,
-        head: [['#', 'Nombre de la Formación', 'Tipo', 'Duración']],
-        body: formacionesData,
-        theme: 'grid',
-        headStyles: {
-          fillColor: [0, 70, 152],
-          textColor: [255, 255, 255]
-        }
-      });
-      
-      // Añadir gráficos o estadísticas adicionales
-      const tiposCounts = {
-        presencial: 0,
-        virtual: 0,
-        hibrida: 0
+      // Colores para los tipos de formación
+      const colors = {
+        presencial: [0, 70, 152], // Azul
+        virtual: [220, 57, 18],   // Rojo
+        hibrida: [255, 153, 0]    // Naranja
       };
       
-      empresaActual.formaciones.forEach(formacion => {
-        if (tiposCounts[formacion.tipo] !== undefined) {
-          tiposCounts[formacion.tipo]++;
-        }
-      });
+      // Añadir sombra al gráfico
+      doc.setDrawColor(200, 200, 200);
+      doc.setFillColor(240, 240, 240);
+      doc.circle(centerX + 2, centerY + 2, radius, 'F');
       
-      // Crear tabla resumen por tipo
-      doc.addPage();
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.text('Resumen por tipo de formación', 20, 20);
+      // Variables para el tracking del ángulo
+      let startAngle = 0;
+      let endAngle = 0;
       
-      const tiposData = Object.entries(tiposCounts).map(([tipo, count]) => {
-        return [formatTipoFormacion(tipo), count];
-      });
+      // Crear una leyenda mejorada
+      doc.setFillColor(230, 240, 255);
+      doc.rect(150, 75, 50, 70, 'F');
+      doc.setDrawColor(0, 70, 152);
+      doc.setLineWidth(0.1);
+      doc.rect(150, 75, 50, 70, 'S');
       
-      autoTable(doc, {
-        startY: 30,
-        head: [['Tipo de Formación', 'Cantidad']],
-        body: tiposData,
-        theme: 'grid',
-        headStyles: {
-          fillColor: [0, 70, 152],
-          textColor: [255, 255, 255]
-        }
-      });
+      doc.setFontSize(10);
+      doc.setTextColor(0, 70, 152);
+      doc.text('Leyenda:', 155, 85);
       
-      // Calcular total para porcentajes
-      const total = Object.values(tiposCounts).reduce((sum, count) => sum + count, 0);
+      let legendY = 100;
       
-      if (total > 0) {
-        // Configuración del gráfico circular mejorado
-        const centerX = 105;
-        const centerY = 100;
-        const radius = 40;
-        
-        // Colores para los tipos de formación
-        const colors = {
-          presencial: [0, 70, 152], // Azul
-          virtual: [220, 57, 18],   // Rojo
-          hibrida: [255, 153, 0]    // Naranja
-        };
-        
-        // Añadir sombra al gráfico
-        doc.setDrawColor(200, 200, 200);
-        doc.setFillColor(240, 240, 240);
-        doc.circle(centerX + 2, centerY + 2, radius, 'F');
-        
-        // Variables para el tracking del ángulo
-        let startAngle = 0;
-        let endAngle = 0;
-        
-        // Crear una leyenda mejorada
-        doc.setFillColor(230, 240, 255);
-        doc.rect(150, 75, 50, 70, 'F');
-        doc.setDrawColor(0, 70, 152);
-        doc.setLineWidth(0.1);
-        doc.rect(150, 75, 50, 70, 'S');
-        
-        doc.setFontSize(10);
-        doc.setTextColor(0, 70, 152);
-        doc.text('Leyenda:', 155, 85);
-        
-        let legendY = 100;
-        
-        // Dibujar el gráfico circular mejorado
-        Object.entries(tiposCounts).forEach(([tipo, count], index) => {
-          if (count > 0) {
-            const porcentaje = count / total;
-            startAngle = endAngle;
-            endAngle = startAngle + (porcentaje * 2 * Math.PI);
+      // Dibujar el gráfico circular mejorado
+      Object.entries(tiposCounts).forEach(([tipo, count], index) => {
+        if (count > 0) {
+          const porcentaje = count / total;
+          startAngle = endAngle;
+          endAngle = startAngle + (porcentaje * 2 * Math.PI);
+          
+          // Dibujar sector con efecto 3D
+          doc.setFillColor(...colors[tipo]);
+          doc.setDrawColor(255, 255, 255);
+          doc.setLineWidth(0.5);
+          
+          const steps = Math.max(20, Math.floor(porcentaje * 100));
+          
+          // Dibujar sector principal
+          doc.moveTo(centerX, centerY);
+          for (let i = 0; i <= steps; i++) {
+            const angle = startAngle + (i * (endAngle - startAngle) / steps);
+            const xPos = centerX + Math.cos(angle) * radius;
+            const yPos = centerY + Math.sin(angle) * radius;
             
-            // Dibujar sector con efecto 3D
-            doc.setFillColor(...colors[tipo]);
-            doc.setDrawColor(255, 255, 255);
-            doc.setLineWidth(0.5);
-            
-            const steps = Math.max(20, Math.floor(porcentaje * 100));
-            
-            // Dibujar sector principal
-            doc.moveTo(centerX, centerY);
-            for (let i = 0; i <= steps; i++) {
-              const angle = startAngle + (i * (endAngle - startAngle) / steps);
-              const xPos = centerX + Math.cos(angle) * radius;
-              const yPos = centerY + Math.sin(angle) * radius;
-              
-              if (i === 0) {
-                doc.moveTo(centerX, centerY);
-                doc.lineTo(xPos, yPos);
-              } else {
-                doc.lineTo(xPos, yPos);
-              }
+            if (i === 0) {
+              doc.moveTo(centerX, centerY);
+              doc.lineTo(xPos, yPos);
+            } else {
+              doc.lineTo(xPos, yPos);
             }
-            doc.lineTo(centerX, centerY);
-            doc.fill();
-            
-            // Añadir borde blanco para efecto 3D
-            doc.setDrawColor(255, 255, 255);
-            doc.setLineWidth(0.5);
-            doc.moveTo(centerX, centerY);
-            for (let i = 0; i <= steps; i++) {
-              const angle = startAngle + (i * (endAngle - startAngle) / steps);
-              const xPos = centerX + Math.cos(angle) * radius;
-              const yPos = centerY + Math.sin(angle) * radius;
-              
-              if (i === 0) {
-                doc.moveTo(centerX, centerY);
-                doc.lineTo(xPos, yPos);
-              } else {
-                doc.lineTo(xPos, yPos);
-              }
-            }
-            doc.stroke();
-            
-            // Añadir etiqueta de porcentaje dentro del sector (si hay espacio suficiente)
-            if (porcentaje > 0.1) {
-              const labelAngle = startAngle + (endAngle - startAngle) / 2;
-              const labelDistance = radius * 0.7;
-              const labelX = centerX + Math.cos(labelAngle) * labelDistance;
-              const labelY = centerY + Math.sin(labelAngle) * labelDistance;
-              
-              doc.setTextColor(255, 255, 255);
-              doc.setFontSize(8);
-              doc.text(`${Math.round(porcentaje * 100)}%`, labelX, labelY, { align: 'center' });
-            }
-            
-            // Agregar a la leyenda
-            doc.setFillColor(...colors[tipo]);
-            doc.rect(155, legendY - 5, 10, 10, 'F');
-            
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(8);
-            doc.text(`${formatTipoFormacion(tipo)} (${count})`, 170, legendY);
-            
-            legendY += 15;
           }
-        });
-        
-        // Título del gráfico
-        doc.setFontSize(12);
-        doc.setTextColor(0, 70, 152);
-        doc.text('Distribución por tipo', centerX, centerY - radius - 10, { align: 'center' });
-      }
+          doc.lineTo(centerX, centerY);
+          doc.fill();
+          
+          // Añadir borde blanco para efecto 3D
+          doc.setDrawColor(255, 255, 255);
+          doc.setLineWidth(0.5);
+          doc.moveTo(centerX, centerY);
+          for (let i = 0; i <= steps; i++) {
+            const angle = startAngle + (i * (endAngle - startAngle) / steps);
+            const xPos = centerX + Math.cos(angle) * radius;
+            const yPos = centerY + Math.sin(angle) * radius;
+            
+            if (i === 0) {
+              doc.moveTo(centerX, centerY);
+              doc.lineTo(xPos, yPos);
+            } else {
+              doc.lineTo(xPos, yPos);
+            }
+          }
+          doc.stroke();
+          
+          // Añadir etiqueta de porcentaje dentro del sector (si hay espacio suficiente)
+          if (porcentaje > 0.1) {
+            const labelAngle = startAngle + (endAngle - startAngle) / 2;
+            const labelDistance = radius * 0.7;
+            const labelX = centerX + Math.cos(labelAngle) * labelDistance;
+            const labelY = centerY + Math.sin(labelAngle) * labelDistance;
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(8);
+            doc.text(`${Math.round(porcentaje * 100)}%`, labelX, labelY, { align: 'center' });
+          }
+          
+          // Agregar a la leyenda
+          doc.setFillColor(...colors[tipo]);
+          doc.rect(155, legendY - 5, 10, 10, 'F');
+          
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(8);
+          doc.text(`${formatTipoFormacion(tipo)} (${count})`, 170, legendY);
+          
+          legendY += 15;
+        }
+      });
       
-    } else {
-      doc.text('No hay formaciones registradas.', 20, yPos);
+      // Título del gráfico
+      doc.setFontSize(12);
+      doc.setTextColor(0, 70, 152);
+      doc.text('Distribución por tipo', centerX, centerY - radius - 10, { align: 'center' });
     }
     
-    // Generar y descargar el PDF
-    doc.save(`informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+  } else {
+    doc.text('No hay formaciones registradas.', 20, yPos);
+  }
+  
+  // En lugar de guardar directamente, generamos una URL para previsualización
+  const pdfOutput = doc.output('blob');
+  pdfPreviewUrl.value = URL.createObjectURL(pdfOutput);
+  showPDFPreview.value = true;
+  
+};
+
+// Función para generar el PDF y mostrar la previsualización
+const generarPDF = () => {
+  try {
+    const doc = new jsPDF();
+    generarContenidoPDF(doc);
+    
+    // En lugar de guardar directamente, generamos una URL para previsualización
+    const pdfOutput = doc.output('blob');
+    pdfPreviewUrl.value = URL.createObjectURL(pdfOutput);
+    
+    // Cerrar el modal de vista antes de mostrar la previsualización
+    showViewModal.value = false;
+    
+    // Mostrar la previsualización del PDF
+    showPDFPreview.value = true;
     
   } catch (error) {
     console.error("Error al generar el PDF:", error);
     alert("Error al generar el PDF. Por favor, inténtelo de nuevo.");
+  }
+};
+
+// Función para descargar el PDF después de la previsualización
+const descargarPDF = () => {
+  try {
+    const doc = new jsPDF();
+    generarContenidoPDF(doc);
+    
+    // Descargar el PDF
+    doc.save(`informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+    
+    // Limpiar la URL del objeto y cerrar la previsualización
+    URL.revokeObjectURL(pdfPreviewUrl.value);
+    showPDFPreview.value = false;
+    
+  } catch (error) {
+    console.error("Error al descargar el PDF:", error);
+    alert("Error al descargar el PDF. Por favor, inténtelo de nuevo.");
   }
 };
 
@@ -1824,6 +1868,9 @@ const descargarWord = () => {
     alert("Error al generar el documento Word. Por favor, inténtelo de nuevo.");
   }
 };
+
+const showPDFPreview = ref(false);
+const pdfPreviewUrl = ref('');
 </script>
 
 <style src="../assets/Home.css"></style>

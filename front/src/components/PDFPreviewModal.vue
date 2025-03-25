@@ -1,0 +1,128 @@
+<template>
+  <div v-if="show" class="pdf-preview-modal">
+    <div class="pdf-preview-content">
+      <div class="pdf-preview-header">
+        <h2>Previsualización del PDF</h2>
+        <button class="close-button" @click="$emit('close')">&times;</button>
+      </div>
+      <div class="pdf-preview-body">
+        <iframe :src="pdfUrl" frameborder="0"></iframe>
+      </div>
+      <div class="pdf-preview-footer">
+        <button class="button-cancel" @click="$emit('close')">Cancelar</button>
+        <button class="buttonDownload" @click="$emit('download')">Descargar PDF</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+defineProps({
+  show: {
+    type: Boolean,
+    required: true
+  },
+  pdfUrl: {
+    type: String,
+    required: true
+  }
+});
+
+defineEmits(['close', 'download']);
+</script>
+
+<style scoped>
+.pdf-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.pdf-preview-content {
+  background-color: white;
+  width: 90%;
+  height: 90%;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pdf-preview-header {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pdf-preview-header h2 {
+  margin: 0;
+  color: #004698;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.close-button:hover {
+  color: #004698;
+}
+
+.pdf-preview-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.pdf-preview-body iframe {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.pdf-preview-footer {
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.button-cancel {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.button-cancel:hover {
+  background-color: #f5f5f5;
+}
+
+.buttonDownload {
+  padding: 0.5rem 1rem;
+  background-color: #4CC713;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.buttonDownload:hover {
+  background-color: #45a21a;
+}
+</style> 
