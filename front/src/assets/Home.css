@@ -1565,7 +1565,7 @@
 .sphere-1 {
   width: 500px;
   height: 500px;
-  background: linear-gradient(45deg, #ff3d00, #00b0ff);
+  background: linear-gradient(45deg, #00f7ff, #00b0ff);
   top: -100px;
   left: -100px;
   animation-delay: 0s;
@@ -1583,7 +1583,7 @@
 .sphere-3 {
   width: 400px;
   height: 400px;
-  background: linear-gradient(225deg, #ffab00, #f50057);
+  background: linear-gradient(225deg, #00d0ff, #0010f5);
   top: 40%;
   left: 60%;
   animation-delay: -10s;

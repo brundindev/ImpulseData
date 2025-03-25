@@ -64,7 +64,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   .sphere-1 {
     width: 500px;
     height: 500px;
-    background: linear-gradient(45deg, #ff3d00, #00b0ff);
+    background: linear-gradient(45deg, #00f7ff, #00b0ff);
     top: -100px;
     left: -100px;
     animation-delay: 0s;
@@ -82,7 +82,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   .sphere-3 {
     width: 400px;
     height: 400px;
-    background: linear-gradient(225deg, #ffab00, #f50057);
+    background: linear-gradient(225deg, #00d0ff, #0010f5);
     top: 40%;
     left: 60%;
     animation-delay: -10s;
@@ -105,8 +105,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     background: linear-gradient(90deg, 
       rgba(0, 70, 152, 0.1), 
       rgba(116, 155, 208, 0.2), 
-      rgba(255, 61, 0, 0.1),
-      rgba(255, 171, 0, 0.2),
+      rgba(0, 183, 255, 0.1),
+      rgba(0, 212, 255, 0.2),
       rgba(0, 70, 152, 0.1)
     );
   }
