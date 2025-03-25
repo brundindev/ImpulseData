@@ -314,3 +314,38 @@ const irAPanelControl = () => {
 
 <style src="./assets/App.css">
 </style>
+
+<style>
+.main-content {
+  overflow-y: auto !important;
+  height: 100vh;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #004698 #f1f1f1;
+}
+
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #004698;
+  border-radius: 4px;
+}
+
+.welcome-page {
+  overflow: hidden !important;
+  min-height: 100vh;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden !important;
+}
+</style>
