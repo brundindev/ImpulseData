@@ -425,7 +425,7 @@
                 <button type="button" class="button" @click="editarEmpresaDesdeVista()">
                   Editar
                 </button>
-                <button type="button" class="buttonDownload" @click="generarPDF()">
+                <button type="button" class="buttonDownload" @click="previsualizarPDF()">
                   Descargar PDF
                 </button>
                   <button type="button" class="buttonDownload word-btn" @click="descargarWord()">
@@ -505,9 +505,10 @@
   
   <!-- Modal para previsualizar PDF -->
   <PDFPreviewModal 
-    :show="showPDFPreview"
-    :pdf-url="pdfPreviewUrl"
-    @close="showPDFPreview = false"
+    v-if="showPDFPreview" 
+    :show="showPDFPreview" 
+    :pdfUrl="pdfPreviewUrl" 
+    @close="cerrarPreviewPDF" 
     @download="descargarPDF"
   />
 </template>
@@ -518,13 +519,13 @@ import { useRouter } from 'vue-router';
 import AuthService from '../services/AuthService';
 import FirestoreService from '../services/FirestoreService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import FirebaseAuthService from '../services/FirebaseAuthService';
 import axios from 'axios';
 import AnimatedNumber from '../components/AnimatedNumber.vue';
 import ScrollAnimation from '../components/ScrollAnimation.vue';
 import PDFPreviewModal from '../components/PDFPreviewModal.vue';
+// Importar PDFService
+import PDFService from '../services/PDFService';
 // Importar el logo e imágenes
 import logoUrl from '../assets/img/impulsedata_logo.png';
 import impulsaAlicanteLogo from '../assets/img/impulsaalicante.png';
@@ -1005,12 +1006,15 @@ const editarEmpresaDesdeVista = () => {
 
 // Formatear tipo de formación
 const formatTipoFormacion = (tipo) => {
-  const tipos = {
-    presencial: 'Presencial',
-    virtual: 'Virtual',
-    hibrida: 'Híbrida'
+  if (!tipo) return 'No especificado';
+  
+  const tiposFormateados = {
+    'presencial': 'Presencial',
+    'virtual': 'Virtual',
+    'hibrida': 'Híbrida'
   };
-  return tipos[tipo] || tipo;
+  
+  return tiposFormateados[tipo.toLowerCase()] || tipo;
 };
 
 // Función para crear una portada para cada sección
@@ -1407,47 +1411,6 @@ const generarContenidoPDF = (doc) => {
   pdfPreviewUrl.value = URL.createObjectURL(pdfOutput);
   showPDFPreview.value = true;
   
-};
-
-// Función para generar el PDF y mostrar la previsualización
-const generarPDF = () => {
-  try {
-    const doc = new jsPDF();
-    generarContenidoPDF(doc);
-    
-    // En lugar de guardar directamente, generamos una URL para previsualización
-    const pdfOutput = doc.output('blob');
-    pdfPreviewUrl.value = URL.createObjectURL(pdfOutput);
-    
-    // Cerrar el modal de vista antes de mostrar la previsualización
-    showViewModal.value = false;
-    
-    // Mostrar la previsualización del PDF
-    showPDFPreview.value = true;
-    
-  } catch (error) {
-    console.error("Error al generar el PDF:", error);
-    alert("Error al generar el PDF. Por favor, inténtelo de nuevo.");
-  }
-};
-
-// Función para descargar el PDF después de la previsualización
-const descargarPDF = () => {
-  try {
-    const doc = new jsPDF();
-    generarContenidoPDF(doc);
-    
-    // Descargar el PDF
-    doc.save(`informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
-    
-    // Limpiar la URL del objeto y cerrar la previsualización
-    URL.revokeObjectURL(pdfPreviewUrl.value);
-    showPDFPreview.value = false;
-    
-  } catch (error) {
-    console.error("Error al descargar el PDF:", error);
-    alert("Error al descargar el PDF. Por favor, inténtelo de nuevo.");
-  }
 };
 
 // Usar la función para descargar informe en formato Word (docx)
@@ -1872,6 +1835,108 @@ const descargarWord = () => {
 
 const showPDFPreview = ref(false);
 const pdfPreviewUrl = ref('');
+
+// Función para previsualizar un PDF con manejo de errores mejorado
+const previsualizarPDF = async () => {
+  try {
+    // Indicar que estamos cargando
+    guardando.value = true;
+    
+    // Cerrar el modal de vista antes de mostrar la previsualización
+    showViewModal.value = false;
+    
+    // Limpiar cualquier URL previa
+    if (pdfPreviewUrl.value) {
+      URL.revokeObjectURL(pdfPreviewUrl.value);
+      pdfPreviewUrl.value = null;
+    }
+    
+    // Generar el PDF - directamente descargar en lugar de previsualizar si hay error
+    try {
+      const pdfBytes = await PDFService.generarInformeEmpresa(empresaActual);
+      
+      // Intentar crear URL para previsualización
+      try {
+        // Crear blob y url
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        pdfPreviewUrl.value = URL.createObjectURL(blob);
+        
+        // Mostrar el modal de previsualización
+        showPDFPreview.value = true;
+      } catch (previewError) {
+        console.error("Error al crear previsualización, descargando directamente:", previewError);
+        
+        // Si falla la previsualización, descargar directamente
+        PDFService.guardarPDF(pdfBytes, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+        alert("No se pudo generar la previsualización. El PDF se ha descargado directamente.");
+      }
+    } catch (pdfError) {
+      console.error("Error grave al generar el PDF:", pdfError);
+      alert("Error al generar el PDF. Por favor, inténtelo de nuevo más tarde.");
+    }
+    
+    // Finalizar carga
+    guardando.value = false;
+  } catch (generalError) {
+    console.error("Error inesperado en previsualizarPDF:", generalError);
+    guardando.value = false;
+    alert("Ha ocurrido un error inesperado. Por favor, inténtelo de nuevo.");
+  }
+};
+
+// Función para descargar el PDF después de la previsualización
+const descargarPDF = async () => {
+  try {
+    guardando.value = true;
+    
+    // Generar el PDF
+    try {
+      const pdfBytes = await PDFService.generarInformeEmpresa(empresaActual);
+      
+      // Intentar guardar el PDF
+      try {
+        PDFService.guardarPDF(pdfBytes, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+      } catch (saveError) {
+        console.error("Error al guardar el PDF:", saveError);
+        alert("No se pudo descargar el PDF. Verifique los permisos de su navegador.");
+        return; // Salir temprano sin cerrar modales si falla la descarga
+      }
+    } catch (pdfError) {
+      console.error("Error al generar el PDF para descarga:", pdfError);
+      alert("Error al generar el PDF. Por favor, inténtelo de nuevo más tarde.");
+      guardando.value = false;
+      return; // Salir temprano sin cerrar modales
+    }
+    
+    // Limpiar la URL del objeto
+    if (pdfPreviewUrl.value) {
+      URL.revokeObjectURL(pdfPreviewUrl.value);
+      pdfPreviewUrl.value = null;
+    }
+    
+    // Cerrar modales
+    showPDFPreview.value = false;
+    showViewModal.value = false;  // Asegurar que el modal de detalles también se cierre
+    
+    guardando.value = false;
+  } catch (error) {
+    console.error("Error inesperado al descargar el PDF:", error);
+    guardando.value = false;
+    alert("Ha ocurrido un error inesperado. Por favor, inténtelo de nuevo.");
+  }
+};
+
+// Función para cerrar la previsualización del PDF
+const cerrarPreviewPDF = () => {
+  // Limpiar la URL y cerrar todos los modales
+  if (pdfPreviewUrl.value) {
+    URL.revokeObjectURL(pdfPreviewUrl.value);
+    pdfPreviewUrl.value = null;
+  }
+  
+  showPDFPreview.value = false;
+  showViewModal.value = false; // Asegurar que el modal de detalles también se cierre
+};
 </script>
 
 <style src="../assets/Home.css"></style>
