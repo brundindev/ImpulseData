@@ -32,13 +32,13 @@
     <div class="dashboard-container">
       <!-- Encabezado del dashboard -->
       <div class="dashboard-header">
-        <div class="welcome-section">
+        <div>
           <h1 class="welcome-title">Dashboard</h1>
-          <p class="welcome-subtitle" v-if="usuario">¡Bienvenido, <span class="user-name">{{ usuario.nombre }}</span>!</p>
+          <p class="welcome-subtitle">¡Bienvenido, <span class="user-name">{{ usuario.nombre }}</span>!</p>
         </div>
         <div class="action-buttons">
-          <button class="btn-nueva-empresa" @click="showFormModal = true; modoEdicion = false;">
-            <a href="#"><span>+ Crear nueva empresa</span></a>
+          <button @click="showFormModal = true; modoEdicion = false;" class="btn btn-primary btn-create">
+            <span class="icon">+</span> Crear empresa
           </button>
         </div>
       </div>
@@ -138,12 +138,7 @@
         </div>
       </div>
       
-      <!-- Botón flotante para crear nueva empresa -->
-      <!-- Removido el botón flotante para usar el asistente virtual en su lugar
-      <button class="btn-floating" @click="showFormModal = true; modoEdicion = false;">
-        <span class="icon">+</span>
-      </button>
-      -->
+      <!-- El botón flotante ha sido reemplazado por el asistente virtual -->
       
       <!-- Modal para crear/editar empresa -->
       <teleport to="body">
