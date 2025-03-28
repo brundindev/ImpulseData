@@ -249,172 +249,116 @@ const loginWithGoogle = async () => {
           }
         }
       } catch (verificationError) {
-        console.warn("No se pudo forzar la verificación:", verificationError);
-        // No bloqueamos el flujo si esto falla
+        console.warn("No se pudo forzar la verificación del usuario:", verificationError);
       }
-    } else {
-      console.log("Usuario Google ya está verificado:", user.emailVerified);
     }
     
-    // Datos para inicio de sesión
-    const loginData = {
-      email: user.email,
-      password: `google-auth-${user.uid}` // Contraseña que nunca será usada directamente
-    };
+    console.log("Login con Google exitoso");
+    
+    // Continuar con el flujo normal: hacer login en el backend
+    const isNewUser = user.metadata?.creationTime === user.metadata?.lastSignInTime;
     
     try {
-      console.log("Intentando iniciar sesión con cuenta de Google...");
+      // Preparar datos para el login
+      const googleData = {
+        email: user.email,
+        password: `google-auth-${user.uid}`,
+        nombre: user.displayName || user.email.split('@')[0],
+        apellidos: '',
+        googleAuth: true
+      };
       
-      // Almacenar el uid antes de cualquier operación de login
-      sessionStorage.setItem('firebaseUid', user.uid);
+      console.log("Intentando login en el backend con credenciales de Google");
       
-      // Intentar iniciar sesión directamente
-      await AuthService.login(loginData);
-      
-      console.log("Login con Google exitoso");
-      
-      // Emitir el cambio de estado de autenticación usando Pinia
-      authStore.setAuth(true);
-      
-      // Verificar explícitamente que ambos sistemas estén sincronizados
-      const currentUser = auth.currentUser;
-      const jwtToken = localStorage.getItem('authToken');
-      
-      if (!currentUser && jwtToken) {
-        console.log("Detectado JWT sin usuario Firebase. Restableciendo estado...");
-        // Restaurar la sesión en Firebase 
-        try {
-          // No cerrar la sesión, solo recargar la página para forzar la sincronización
-          window.location.reload();
-          return;
-        } catch (reAuthError) {
-          console.error("No se pudo restablecer la sesión de Firebase:", reAuthError);
-        }
-      }
-      
-      // Redirigir a la página principal
-      router.push('/');
-    } catch (loginError) {
-      console.log("Error en login con Google, verificando si necesitamos registrar al usuario...", loginError);
-      
-      // Si el login falla, es posible que el usuario no exista en el backend
-      // Intentamos registrarlo primero
       try {
-        const registerData = {
-          ...loginData,
-          nombre: user.displayName || user.email.split('@')[0]
-        };
+        // Intentar hacer login con el backend
+        const loginResponse = await AuthService.login(googleData);
         
-        console.log("Intentando registrar al usuario de Google...");
+        // Guardar el UID para futuras sesiones
+        sessionStorage.setItem('firebaseUid', user.uid);
+        // Limpiar flags de intentos de reautenticación
+        sessionStorage.removeItem('reautenticacionFallida');
+        sessionStorage.removeItem('attemptedRecovery');
         
-        // Intentar forzar verificación primero
-        try {
-          console.log("Intentando forzar verificación del email primero...");
-          const verificationResponse = await axios.get(
-            `http://localhost:8080/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`
-          );
-          console.log("Respuesta de forzar verificación:", verificationResponse.data);
-        } catch (verificationError) {
-          console.log("Error al forzar verificación (podría ser que el usuario no exista):", verificationError);
-        }
+        console.log("Login con backend exitoso:", loginResponse);
         
-        // Comprobar si el usuario ya está autenticado después de la verificación
-        try {
-          // Intentar iniciar sesión nuevamente antes de registrar
-          await AuthService.login(loginData);
-                    
-          // Emitir el cambio de estado de autenticación usando Pinia
-          authStore.setAuth(true);
-          
-          // Redirigir a la página principal
-          router.push('/');
-          return;
-        } catch (retryLoginError) {
-          console.log("No se pudo iniciar sesión, procediendo con el registro...");
-        }
+        // Emitir evento de cambio de autenticación
+        window.dispatchEvent(new CustomEvent('auth-state-changed'));
+
+        // Ahora que la autenticación fue exitosa, mostrar la pantalla de carga
+        // antes de redirigir a la página de inicio
+        const event = new CustomEvent('show-global-loader');
+        window.dispatchEvent(event);
         
-        // Continuar con el registro solo si el login sigue fallando
-        console.log("Procediendo con el registro normal...");
-        await AuthService.register(registerData);
+        // Pequeña pausa para asegurar que el loader se muestre
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        console.log("Registro exitoso, esperando sincronización...");
+        // Redirigir a home con un parámetro especial
+        router.push({ path: '/home', query: { googleauth: 'true' } });
         
-        // Pequeña pausa para asegurar que la sincronización se complete
-        await new Promise(resolve => setTimeout(resolve, 1500));
+      } catch (loginError) {
+        console.log("Error en login con Google, verificando si necesitamos registrar al usuario...", loginError);
         
-        try {
-          // Después del registro, intentamos iniciar sesión nuevamente
-          console.log("Intentando iniciar sesión después del registro...");
-          await AuthService.login(loginData);
-          
-          console.log("Login post-registro exitoso");
-          
-          // Emitir el cambio de estado de autenticación usando Pinia
-          authStore.setAuth(true);
-          
-          // Redirigir a la página principal
-          router.push('/');
-        } catch (postRegisterLoginError) {
-          console.error("Error en login post-registro:", postRegisterLoginError);
-          
-          // Intento alternativo: si falla el login después del registro,
-          // intentar forzar login guardando el token manualmente
+        // Si el usuario no existe en el backend, registrarlo
+        if (loginError.response && loginError.response.status === 401) {
           try {
-            console.log("Intentando login alternativo...");
-            // Obtener token usando Firebase directamente
-            const idToken = await user.getIdToken();
-            localStorage.setItem('authToken', idToken);
+            console.log("Intentando registrar usuario de Google en el backend");
             
-            // También guardaremos información básica del usuario
-            localStorage.setItem('userData', JSON.stringify({
-              nombre: user.displayName || user.email.split('@')[0],
-              email: user.email
-            }));
+            // Añadir datos adicionales para el registro
+            const registerData = {
+              ...googleData,
+              confirmPassword: googleData.password,
+              tipoEmpresa: 'Particular', // Valor por defecto
+              googleAuth: true
+            };
             
-            console.log("Login alternativo exitoso");
+            // Registrar en el backend
+            await AuthService.register(registerData);
+            console.log("Registro exitoso, intentando login con las credenciales registradas");
             
-            // Emitir el cambio de estado de autenticación usando Pinia
-            authStore.setAuth(true);
-            // Redirigir a la página principal
-            router.push('/');
-          } catch (tokenError) {
-            console.error("Error en login alternativo:", tokenError);
-            error.value = 'Error al iniciar sesión después del registro. Por favor, inténtalo de nuevo más tarde.';
-          }
-        }
-      } catch (registerError) {
-        console.error("Error al registrar usuario de Google:", registerError);
-        
-        // Analizar el mensaje de error
-        if (registerError.response && registerError.response.data) {
-          const errorMsg = typeof registerError.response.data === 'string' 
-            ? registerError.response.data 
-            : JSON.stringify(registerError.response.data);
-          
-          if (errorMsg.includes("ya está registrado")) {
-            // Si el usuario ya está registrado pero no pudimos iniciar sesión,
-            // posiblemente hay un problema con la contraseña o con la verificación
-            console.log("El usuario ya está registrado, pero hubo problemas al iniciar sesión");
-            error.value = 'No pudimos iniciar sesión con tu cuenta de Google. Por favor, intenta restablecer tu contraseña.';
-          } else {
-            error.value = 'No se pudo completar el inicio de sesión con Google: ' + errorMsg;
+            // Ahora intentar hacer login con las credenciales recién registradas
+            await AuthService.login(googleData);
+            
+            // Guardar el UID para futuras sesiones
+            sessionStorage.setItem('firebaseUid', user.uid);
+            
+            // Emitir evento de cambio de autenticación
+            window.dispatchEvent(new CustomEvent('auth-state-changed'));
+
+            // Ahora que el registro y login fueron exitosos, mostrar la pantalla de carga
+            // antes de redirigir a la página de inicio
+            const event = new CustomEvent('show-global-loader');
+            window.dispatchEvent(event);
+            
+            // Pequeña pausa para asegurar que el loader se muestre
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Redirigir a home con un parámetro especial
+            router.push({ path: '/home', query: { googleauth: 'true' } });
+            
+          } catch (registerError) {
+            console.error("Error al registrar usuario de Google:", registerError);
+            error.value = "No se pudo crear una cuenta con Google. Inténtalo de nuevo o usa otro método.";
           }
         } else {
-          error.value = 'No se pudo completar el inicio de sesión con Google.';
+          console.error("Error inesperado al iniciar sesión con Google:", loginError);
+          error.value = "Error al iniciar sesión con Google. Por favor, inténtalo de nuevo.";
         }
       }
-    } 
-  } catch (err) {
-    console.error('Error al iniciar sesión con Google:', err);
+    } catch (backendError) {
+      console.error("Error al comunicarse con el backend:", backendError);
+      error.value = "Error de comunicación con el servidor. Por favor, inténtalo más tarde.";
+    }
+  } catch (googleError) {
+    console.error("Error en la autenticación con Google:", googleError);
     
-    // Manejar errores específicos de Firebase Auth
-    if (err.code === 'auth/popup-closed-by-user') {
-      error.value = 'El proceso de inicio de sesión fue cancelado.';
-    } else if (err.code === 'auth/cancelled-popup-request') {
-      // Este es un error común cuando se hace clic varias veces, no mostramos error
-      error.value = '';
+    // Manejar el error de cancelación de popup de manera especial
+    if (googleError.code === 'auth/popup-closed-by-user') {
+      error.value = "Inicio de sesión con Google cancelado.";
+    } else if (googleError.code === 'auth/network-request-failed') {
+      error.value = "Error de red. Verifica tu conexión a internet.";
     } else {
-      error.value = 'Error al iniciar sesión con Google. Por favor, inténtalo de nuevo.';
+      error.value = "Error al iniciar sesión con Google. " + (googleError.message || "");
     }
   } finally {
     loading.value = false;

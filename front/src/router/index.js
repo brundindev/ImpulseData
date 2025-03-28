@@ -248,8 +248,25 @@ const hideLoader = (immediate = false) => {
 
 // Protección de rutas y mostrar loader
 router.beforeEach((to, from, next) => {
-  // Mostrar el loader para todas las transiciones
-  showLoader();
+  // Verificar si ya hay un loader visible para evitar duplicación
+  const existingLoader = document.querySelector('div[style*="position: fixed"][style*="width: 100%"][style*="height: 100%"]');
+  
+  // Detectar si es un login con Google
+  const isGoogleAuthCallback = to.query.hasOwnProperty('googleauth');
+  const fromLogin = from.path === '/login';
+  const toHome = to.path === '/home';
+  
+  // Decidir si mostrar el loader basado en el contexto de navegación
+  if (!existingLoader) {
+    // Si viene de login a home con parámetro de Google auth
+    // el loader ya habrá sido mostrado manualmente antes de la navegación
+    // por lo que no necesitamos mostrar otro aquí
+    const skipLoader = fromLogin && toHome && isGoogleAuthCallback;
+    
+    if (!skipLoader) {
+      showLoader();
+    }
+  }
   
   // Lógica de protección de rutas original
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
@@ -282,12 +299,20 @@ router.beforeEach((to, from, next) => {
 
 // Ocultar loader después de la navegación
 router.afterEach((to, from) => {
-  // Tiempo de espera para ocultar el loader 
-  // 1 segundo por defecto, 2 segundos desde login a home
+  // Tiempo de espera para ocultar el loader
   let waitTime = 500;
   
-  // Si navegamos desde el login al home, aumentamos el tiempo a 2 segundos
-  if (from.path === '/login' && to.path === '/home') {
+  // Detectar si viene de una autenticación con Google
+  const isGoogleAuth = to.query.hasOwnProperty('googleauth');
+  const fromLogin = from.path === '/login';
+  
+  // Si viene de una autenticación con Google hacia home, mantener el loader más tiempo
+  // para asegurar que se vea correctamente antes de la transición al home
+  if (isGoogleAuth && fromLogin && to.path === '/home') {
+    waitTime = 1500; // Tiempo suficiente para ver la animación del loader
+  }
+  // Si es navegación desde login a home (sin Google), mantenemos tiempo normal
+  else if (fromLogin && to.path === '/home') {
     waitTime = 1000;
   }
   
@@ -296,5 +321,16 @@ router.afterEach((to, from) => {
     hideLoader();
   }, waitTime);
 });
+
+// Declarar un listener para el evento personalizado de mostrar loader
+const setupGlobalLoaderListener = () => {
+  window.addEventListener('show-global-loader', () => {
+    // Mostrar el loader (incluso si ya hay uno, lo reemplazamos)
+    showLoader();
+  });
+};
+
+// Inicializar el listener cuando se crea el router
+setupGlobalLoaderListener();
 
 export default router
