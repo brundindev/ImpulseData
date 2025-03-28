@@ -1,791 +1,768 @@
-// Archivo para crear una plantilla PDF con campos de formulario
-import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
-import fontkit from '@pdf-lib/fontkit';
+// Archivo para crear una plantilla HTML que se convertirá a PDF con html2pdf
+import html2pdf from 'html2pdf.js';
+import Chart from 'chart.js/auto';
 
 export async function crearPlantillaPDF() {
   try {
-    console.log("Iniciando creación de plantilla PDF...");
-    // Crear un nuevo documento PDF
-    const pdfDoc = await PDFDocument.create();
+    console.log("Iniciando creación de plantilla HTML para PDF...");
     
-    // Registrar fontkit para usar fuentes personalizadas
-    try {
-      pdfDoc.registerFontkit(fontkit);
-      console.log("Fontkit registrado correctamente");
-    } catch (fontkitError) {
-      console.warn("Error al registrar fontkit, continuando sin él:", fontkitError);
-      // Continuamos sin fontkit si hay error
-    }
+    // Crear contenido HTML
+    const htmlContent = createHTMLContent();
     
-    // Cargar fuentes estándar
-    let helveticaBold, helvetica, timesRoman;
-    try {
-      helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-      helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      timesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-      console.log("Fuentes cargadas correctamente");
-    } catch (fontError) {
-      console.error("Error al cargar fuentes:", fontError);
-      // Usar fuentes de fallback en caso de error
-      const fallbackFont = await pdfDoc.embedFont(StandardFonts.Courier);
-      helveticaBold = fallbackFont;
-      helvetica = fallbackFont;
-      timesRoman = fallbackFont;
-    }
-    
-    // Definir colores corporativos
-    const colorAzulPrimario = rgb(0/255, 70/255, 152/255);
-    const colorAzulSecundario = rgb(0/255, 150/255, 255/255);
-    const colorGrisClaro = rgb(240/255, 240/255, 240/255);
-    
-    console.log("Generando portada del PDF...");
-    // ======================== PORTADA ========================
-    const portada = pdfDoc.addPage([595.28, 841.89]); // A4
-    
-    // Encabezado con borde azul
-    portada.drawRectangle({
-      x: 50,
-      y: 750,
-      width: 495.28,
-      height: 50,
-      color: colorAzulPrimario,
-    });
-    
-    portada.drawText('INFORME EMPRESARIAL', {
-      x: 170,
-      y: 775,
-      size: 24,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    // Rectángulo para logo
-    portada.drawRectangle({
-      x: 220,
-      y: 600,
-      width: 150,
-      height: 100,
-      borderColor: colorAzulPrimario,
-      borderWidth: 2,
-      color: rgb(1, 1, 1, 0.05),
-    });
-    
-    portada.drawText('LOGO', {
-      x: 270,
-      y: 650,
-      size: 20,
-      font: helveticaBold,
-      color: colorAzulPrimario,
-    });
-    
-    // Campo para el nombre de la empresa
-    portada.drawRectangle({
-      x: 50,
-      y: 500,
-      width: 495.28,
-      height: 50,
-      color: colorGrisClaro,
-    });
-    
-    portada.drawText('NOMBRE DE LA EMPRESA:', {
-      x: 60,
-      y: 530,
-      size: 14,
-      font: helveticaBold,
-      color: colorAzulPrimario,
-    });
-    
-    // Campo para fecha del informe
-    portada.drawText(`Fecha del informe: ${new Date().toLocaleDateString('es-ES')}`, {
-      x: 50,
-      y: 450,
-      size: 12,
-      font: helvetica,
-      color: rgb(0, 0, 0),
-    });
-    
-    // Rectángulo inferior con información
-    portada.drawRectangle({
-      x: 50,
-      y: 100,
-      width: 495.28,
-      height: 100,
-      borderColor: colorAzulSecundario,
-      borderWidth: 1,
-      color: rgb(240/255, 248/255, 255/255, 0.5),
-    });
-    
-    portada.drawText('ImpulseData - Alicante Futura', {
-      x: 220,
-      y: 170,
-      size: 12,
-      font: helveticaBold,
-      color: colorAzulPrimario,
-    });
-    
-    portada.drawText('Plataforma digital de gestión de datos para la innovación', {
-      x: 155,
-      y: 150,
-      size: 10,
-      font: helvetica,
-      color: rgb(0, 0, 0),
-    });
-    
-    portada.drawText('y el desarrollo sostenible de Alicante', {
-      x: 195,
-      y: 130,
-      size: 10,
-      font: helvetica,
-      color: rgb(0, 0, 0),
-    });
-    
-    // ======================== INFORMACIÓN GENERAL ========================
-    const infoPage = pdfDoc.addPage([595.28, 841.89]);
-    
-    // Encabezado con Título
-    infoPage.drawRectangle({
-      x: 0,
-      y: 790,
-      width: 595.28,
-      height: 50,
-      color: colorAzulPrimario,
-    });
-    
-    infoPage.drawText('INFORMACIÓN GENERAL', {
-      x: 200,
-      y: 815,
-      size: 18,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    // Campo para nombre de empresa
-    infoPage.drawRectangle({
-      x: 50,
-      y: 730,
-      width: 495.28,
-      height: 40,
-      color: colorGrisClaro,
-    });
-    
-    infoPage.drawText('Nombre de la empresa:', {
-      x: 60,
-      y: 750,
-      size: 12,
-      font: helveticaBold,
-      color: colorAzulPrimario,
-    });
-    
-    // Crear campo de texto para el nombre
-    const nombreField = pdfDoc.getForm().createTextField('empresa.nombre');
-    nombreField.setText('');
-    nombreField.addToPage(infoPage, {
-      x: 200,
-      y: 735,
-      width: 335,
-      height: 25,
-      borderWidth: 0,
-      backgroundColor: colorGrisClaro,
-    });
-    
-    // Campo para fecha de creación
-    infoPage.drawRectangle({
-      x: 50,
-      y: 680,
-      width: 495.28,
-      height: 40,
-      color: colorGrisClaro,
-    });
-    
-    infoPage.drawText('Fecha de creación:', {
-      x: 60,
-      y: 700,
-      size: 12,
-      font: helveticaBold,
-      color: colorAzulPrimario,
-    });
-    
-    // Crear campo de texto para la fecha
-    const fechaField = pdfDoc.getForm().createTextField('empresa.fecha');
-    fechaField.setText('');
-    fechaField.addToPage(infoPage, {
-      x: 200,
-      y: 685,
-      width: 335,
-      height: 25,
-      borderWidth: 0,
-      backgroundColor: colorGrisClaro,
-    });
-    
-    // Campo para ciudad
-    infoPage.drawRectangle({
-      x: 50,
-      y: 630,
-      width: 495.28,
-      height: 40,
-      color: colorGrisClaro,
-    });
-    
-    infoPage.drawText('Ciudad:', {
-      x: 60,
-      y: 650,
-      size: 12,
-      font: helveticaBold,
-      color: colorAzulPrimario,
-    });
-    
-    // Crear campo de texto para la ciudad
-    const ciudadField = pdfDoc.getForm().createTextField('empresa.ciudad');
-    ciudadField.setText('');
-    ciudadField.addToPage(infoPage, {
-      x: 200,
-      y: 635,
-      width: 335,
-      height: 25,
-      borderWidth: 0,
-      backgroundColor: colorGrisClaro,
-    });
-    
-    // Campo para descripción
-    infoPage.drawRectangle({
-      x: 50,
-      y: 470,
-      width: 495.28,
-      height: 150,
-      color: colorGrisClaro,
-    });
-    
-    infoPage.drawText('Descripción:', {
-      x: 60,
-      y: 600,
-      size: 12,
-      font: helveticaBold,
-      color: colorAzulPrimario,
-    });
-    
-    // Crear campo de texto para la descripción (multilinea)
-    const descripcionField = pdfDoc.getForm().createTextField('empresa.descripcion');
-    descripcionField.setText('');
-    descripcionField.addToPage(infoPage, {
-      x: 60,
-      y: 480,
-      width: 475,
-      height: 110,
-      borderWidth: 0,
-      backgroundColor: colorGrisClaro,
-      multiline: true,
-    });
-    
-    // Gráfico decorativo - Círculos conectados
-    drawConnectedCircles(infoPage, 150, 350, colorAzulPrimario, colorAzulSecundario);
-    
-    // Texto informativo
-    infoPage.drawText('Este documento contiene información detallada sobre la empresa,', {
-      x: 50,
-      y: 250,
-      size: 12,
-      font: helvetica,
-      color: rgb(0, 0, 0),
-    });
-    
-    infoPage.drawText('sus departamentos, centros y formaciones ofrecidas.', {
-      x: 50,
-      y: 230,
-      size: 12,
-      font: helvetica,
-      color: rgb(0, 0, 0),
-    });
-    
-    // ======================== DEPARTAMENTOS ========================
-    const deptPage = pdfDoc.addPage([595.28, 841.89]);
-    
-    // Diseño moderno con barra lateral
-    deptPage.drawRectangle({
-      x: 0,
-      y: 0,
-      width: 100,
-      height: 841.89,
-      color: colorAzulPrimario,
-    });
-    
-    // Título rotado en la barra lateral
-    deptPage.drawText('DEPARTAMENTOS', {
-      x: 30,
-      y: 400,
-      size: 14,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-      rotate: degrees(90),
-    });
-    
-    // Encabezado
-    deptPage.drawRectangle({
-      x: 100,
-      y: 790,
-      width: 495.28,
-      height: 50,
-      color: colorAzulSecundario,
-    });
-    
-    deptPage.drawText('LISTADO DE DEPARTAMENTOS', {
-      x: 230,
-      y: 815,
-      size: 16,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    // Instrucciones
-    deptPage.drawText('Esta sección muestra los departamentos de la empresa.', {
-      x: 120,
-      y: 760,
-      size: 12,
-      font: helvetica,
-      color: rgb(0, 0, 0),
-    });
-    
-    // Tabla para departamentos (cabecera)
-    deptPage.drawRectangle({
-      x: 120,
-      y: 720,
-      width: 400,
-      height: 30,
-      color: colorAzulPrimario,
-    });
-    
-    deptPage.drawText('NOMBRE DEL DEPARTAMENTO', {
-      x: 250,
-      y: 735,
-      size: 12,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    // Espacios para 10 departamentos
-    for (let i = 0; i < 10; i++) {
-      deptPage.drawRectangle({
-        x: 120,
-        y: 720 - (i + 1) * 40,
-        width: 400,
-        height: 30,
-        color: i % 2 === 0 ? rgb(0.95, 0.95, 0.95) : rgb(0.9, 0.9, 0.9),
-        borderColor: rgb(0.8, 0.8, 0.8),
-        borderWidth: 0.5,
-      });
-      
-      // Crear campo de texto para cada departamento
-      const deptField = pdfDoc.getForm().createTextField(`departamento.${i}`);
-      deptField.setText('');
-      deptField.addToPage(deptPage, {
-        x: 130,
-        y: 723 - (i + 1) * 40,
-        width: 380,
-        height: 25,
-        borderWidth: 0,
-        backgroundColor: i % 2 === 0 ? rgb(0.95, 0.95, 0.95) : rgb(0.9, 0.9, 0.9),
-      });
-    }
-    
-    // Pie de página
-    deptPage.drawText('ImpulseData - Información Confidencial', {
-      x: 230,
-      y: 50,
-      size: 10,
-      font: helvetica,
-      color: rgb(0.5, 0.5, 0.5),
-    });
-    
-    // ======================== CENTROS ========================
-    const centrosPage = pdfDoc.addPage([595.28, 841.89]);
-    
-    // Diseño con header de color superior
-    centrosPage.drawRectangle({
-      x: 0,
-      y: 741.89,
-      width: 595.28,
-      height: 100,
-      color: colorAzulSecundario,
-    });
-    
-    // Líneas decorativas
-    for (let i = 0; i < 5; i++) {
-      centrosPage.drawLine({
-        start: { x: 0, y: 741.89 - i * 5 },
-        end: { x: 595.28, y: 741.89 - i * 5 },
-        thickness: 2,
-        color: rgb(1, 1, 1, 0.1),
-      });
-    }
-    
-    centrosPage.drawText('CENTROS', {
-      x: 260,
-      y: 790,
-      size: 24,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    // Tabla para centros (cabecera)
-    centrosPage.drawRectangle({
-      x: 50,
-      y: 700,
-      width: 495.28,
-      height: 30,
-      color: colorAzulPrimario,
-    });
-    
-    centrosPage.drawText('NOMBRE DEL CENTRO', {
-      x: 100,
-      y: 715,
-      size: 12,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    centrosPage.drawText('DIRECCIÓN', {
-      x: 350,
-      y: 715,
-      size: 12,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    // Espacios para 8 centros
-    for (let i = 0; i < 8; i++) {
-      // Fondo de fila
-      centrosPage.drawRectangle({
-        x: 50,
-        y: 670 - i * 50,
-        width: 495.28,
-        height: 40,
-        color: i % 2 === 0 ? rgb(0.95, 0.95, 0.95) : rgb(0.9, 0.9, 0.9),
-      });
-      
-      // Crear campo de texto para el nombre del centro
-      const centroNombreField = pdfDoc.getForm().createTextField(`centro.${i}.nombre`);
-      centroNombreField.setText('');
-      centroNombreField.addToPage(centrosPage, {
-        x: 60,
-        y: 676 - i * 50,
-        width: 200,
-        height: 25,
-        borderWidth: 0,
-        backgroundColor: i % 2 === 0 ? rgb(0.95, 0.95, 0.95) : rgb(0.9, 0.9, 0.9),
-      });
-      
-      // Crear campo de texto para la dirección
-      const centroDireccionField = pdfDoc.getForm().createTextField(`centro.${i}.direccion`);
-      centroDireccionField.setText('');
-      centroDireccionField.addToPage(centrosPage, {
-        x: 280,
-        y: 676 - i * 50,
-        width: 255,
-        height: 25,
-        borderWidth: 0,
-        backgroundColor: i % 2 === 0 ? rgb(0.95, 0.95, 0.95) : rgb(0.9, 0.9, 0.9),
-      });
-    }
-    
-    // Icono decorativo: edificio ilustrado
-    drawBuildingIcon(centrosPage, 300, 200, colorAzulPrimario);
-    
-    // ======================== FORMACIONES ========================
-    const formacionesPage = pdfDoc.addPage([595.28, 841.89]);
-    
-    // Diseño con diagonal de color
-    formacionesPage.drawRectangle({
-      x: 0,
-      y: 0,
-      width: 595.28,
-      height: 841.89,
-      color: rgb(0.98, 0.98, 0.98),
-    });
-    
-    // Rectángulo diagonal
-    drawDiagonalRectangle(formacionesPage, colorAzulSecundario);
-    
-    // Título en un cuadro
-    formacionesPage.drawRectangle({
-      x: 100,
-      y: 760,
-      width: 400,
-      height: 60,
-      color: colorAzulPrimario,
-      borderColor: rgb(1, 1, 1),
-      borderWidth: 1,
-    });
-    
-    formacionesPage.drawText('FORMACIONES', {
-      x: 240,
-      y: 790,
-      size: 24,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    // Tabla para formaciones (cabecera)
-    formacionesPage.drawRectangle({
-      x: 50,
-      y: 700,
-      width: 495.28,
-      height: 30,
-      color: rgb(1, 1, 1, 0.8),
-    });
-    
-    formacionesPage.drawText('NOMBRE', {
-      x: 70,
-      y: 715,
-      size: 12,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    formacionesPage.drawText('TIPO', {
-      x: 300,
-      y: 715,
-      size: 12,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    formacionesPage.drawText('DURACIÓN', {
-      x: 430,
-      y: 715,
-      size: 12,
-      font: helveticaBold,
-      color: rgb(1, 1, 1),
-    });
-    
-    // Espacios para 6 formaciones
-    for (let i = 0; i < 6; i++) {
-      // Fondo de fila
-      formacionesPage.drawRectangle({
-        x: 50,
-        y: 670 - i * 55,
-        width: 495.28,
-        height: 45,
-        color: i % 2 === 0 ? rgb(1, 1, 1, 0.05) : rgb(1, 1, 1, 0.1),
-        borderColor: rgb(0.8, 0.8, 0.8),
-        borderWidth: 0.5,
-      });
-      
-      // Crear campo de texto para el nombre de la formación
-      const formacionNombreField = pdfDoc.getForm().createTextField(`formacion.${i}.nombre`);
-      formacionNombreField.setText('');
-      formacionNombreField.addToPage(formacionesPage, {
-        x: 60,
-        y: 678 - i * 55,
-        width: 220,
-        height: 30,
-        borderWidth: 0,
-        backgroundColor: i % 2 === 0 ? rgb(1, 1, 1, 0.05) : rgb(1, 1, 1, 0.1),
-      });
-      
-      // Crear dropdown para el tipo
-      const tipoField = pdfDoc.getForm().createDropdown(`formacion.${i}.tipo`);
-      tipoField.addOptions(['Presencial', 'Virtual', 'Híbrida']);
-      tipoField.addToPage(formacionesPage, {
-        x: 290,
-        y: 678 - i * 55,
-        width: 120,
-        height: 30,
-        borderWidth: 0,
-        backgroundColor: i % 2 === 0 ? rgb(1, 1, 1, 0.05) : rgb(1, 1, 1, 0.1),
-      });
-      
-      // Crear campo de texto para la duración
-      const duracionField = pdfDoc.getForm().createTextField(`formacion.${i}.duracion`);
-      duracionField.setText('');
-      duracionField.addToPage(formacionesPage, {
-        x: 420,
-        y: 678 - i * 55,
-        width: 115,
-        height: 30,
-        borderWidth: 0,
-        backgroundColor: i % 2 === 0 ? rgb(1, 1, 1, 0.05) : rgb(1, 1, 1, 0.1),
-      });
-    }
-    
-    // Decoración: Iconos educativos
-    drawEducationIcons(formacionesPage, 300, 350, colorAzulPrimario);
-    
-    // Dibujar elementos adicionales
-    drawBuildingIcon(formacionesPage, 500, 40, colorAzulSecundario);
-    drawEducationIcons(formacionesPage, 70, 40, colorAzulSecundario);
-    
-    console.log("Guardando documento PDF generado...");
-    // Guardar el PDF
-    try {
-      const pdfBytes = await pdfDoc.save();
-      console.log("PDF generado correctamente con un tamaño de", pdfBytes.length, "bytes");
-      return pdfBytes;
-    } catch (saveError) {
-      console.error("Error al guardar el PDF:", saveError);
-      // Intentar generar un PDF mínimo como fallback
-      try {
-        console.log("Intentando generar un PDF mínimo de emergencia...");
-        const fallbackDoc = await PDFDocument.create();
-        const page = fallbackDoc.addPage([595.28, 841.89]);
-        
-        // Añadir texto explicativo del error
-        page.drawText('Error al generar el PDF completo.', {
-          x: 50,
-          y: 750,
-          size: 16,
-        });
-        
-        page.drawText('Se ha generado un PDF básico como alternativa.', {
-          x: 50,
-          y: 730,
-          size: 14,
-        });
-        
-        page.drawText('Por favor, intente de nuevo más tarde o contacte con soporte.', {
-          x: 50,
-          y: 710,
-          size: 14,
-        });
-        
-        // Guardar PDF de emergencia
-        const fallbackBytes = await fallbackDoc.save();
-        console.log("PDF de emergencia generado correctamente");
-        return fallbackBytes;
-      } catch (fallbackError) {
-        console.error("Error fatal, no se pudo generar ni siquiera el PDF de emergencia:", fallbackError);
-        throw new Error("No se pudo generar el PDF. Error crítico.");
-      }
-    }
+    return htmlContent;
   } catch (error) {
     console.error("Error al crear la plantilla PDF:", error);
     throw error;
   }
 }
 
-// Función para dibujar círculos conectados (decoración)
-function drawConnectedCircles(page, x, y, color1, color2) {
-  // Círculo 1
-  page.drawCircle({
-    x: x,
-    y,
-    size: 40,
-    color: color1,
-  });
+/**
+ * Crea el contenido HTML para el PDF
+ * @returns {string} Contenido HTML
+ */
+function createHTMLContent() {
+  // Fecha actual en formato español
+  const fechaActual = new Date().toLocaleDateString('es-ES');
   
-  // Círculo 2
-  page.drawCircle({
-    x: x + 100,
-    y,
-    size: 30,
-    color: color2,
-  });
+  // Estilos CSS inline para el documento
+  const styles = `
+    <style>
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Helvetica', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        color: #333;
+        background-color: white;
+        width: 100%;
+      }
+      .page {
+        width: 210mm;
+        height: 297mm;
+        padding: 15mm;
+        page-break-after: always;
+        position: relative;
+        background-color: white;
+        margin: 0 auto;
+        overflow: hidden;
+      }
+      .header {
+        background-color: #004698;
+        padding: 15px;
+        text-align: center;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .logo-container {
+        border: 2px solid #004698;
+        height: 100px;
+        width: 150px;
+        margin: 20px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      .logo-text {
+        color: #004698;
+        font-weight: bold;
+        font-size: 20px;
+      }
+      .form-field {
+        background-color: #f5f5f5;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border-left: 3px solid #004698;
+      }
+      .form-field label {
+        color: #004698;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+      .form-input {
+        display: block;
+        width: 100%;
+        min-height: 30px;
+        padding: 8px 10px;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 14px;
+        color: #333;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      }
+      .form-textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+      .footer {
+        border: 1px solid #0096ff;
+        padding: 15px;
+        text-align: center;
+        margin-top: 30px;
+        background-color: rgba(240, 248, 255, 0.7);
+        border-radius: 5px;
+      }
+      .footer p {
+        margin: 5px 0;
+        color: #333;
+      }
+      .section-title {
+        background-color: #004698;
+        padding: 12px;
+        text-align: center;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .section-title h2 {
+        margin: 0;
+        font-size: 20px;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .departamento-item {
+        background-color: #f5f5f5;
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 5px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border-left: 3px solid #0096ff;
+      }
+      .departamento-input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 14px;
+        background-color: white;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      }
+      .centro-item, .formacion-item {
+        background-color: #f5f5f5;
+        padding: 12px 15px;
+        margin-bottom: 12px;
+        border-radius: 5px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border-left: 3px solid #0096ff;
+      }
+      .centro-item p, .formacion-item p {
+        margin: 8px 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .centro-item label, .formacion-item label {
+        font-weight: bold;
+        color: #004698;
+        margin-bottom: 5px;
+        font-size: 14px;
+      }
+      .centro-input, .formacion-input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 14px;
+        background-color: white;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      }
+      .empty-item {
+        color: #999;
+        font-style: italic;
+        background-color: #f9f9f9;
+        border-left-color: #ccc;
+        padding: 15px;
+        text-align: center;
+      }
+      .charts-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 20px 0;
+      }
+      .chart-container {
+        border: 1px solid #ddd;
+        padding: 15px;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .chart-container h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #004698;
+        border-bottom: 2px solid #0096ff;
+        padding-bottom: 8px;
+        width: 100%;
+        text-align: center;
+        font-size: 16px;
+      }
+      .chart-wrapper {
+        width: 100%;
+        height: 180px;
+        position: relative;
+      }
+      .chart-canvas {
+        width: 100% !important;
+        height: 100% !important;
+      }
+      .fecha-informe {
+        text-align: right;
+        font-style: italic;
+        color: #666;
+        margin: 15px 0;
+      }
+      strong {
+        color: #333;
+      }
+      
+      @media print {
+        body {
+          width: 210mm;
+          height: 297mm;
+        }
+        .page {
+          margin: 0;
+          border: initial;
+          border-radius: initial;
+          width: initial;
+          min-height: initial;
+          box-shadow: initial;
+          background: initial;
+          page-break-after: always;
+        }
+      }
+    </style>
+  `;
   
-  // Círculo 3
-  page.drawCircle({
-    x: x + 180,
-    y,
-    size: 20,
-    color: color1,
-  });
+  // Scripts para generar los gráficos
+  const chartScripts = `
+    <script>
+      // Función para generar los gráficos después de que se haya cargado el documento
+      function generarGraficos() {
+        // Datos de ejemplo para los gráficos
+        const colorPalette = [
+          'rgba(0, 70, 152, 0.7)',
+          'rgba(0, 150, 255, 0.7)',
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(153, 102, 255, 0.7)',
+          'rgba(255, 159, 64, 0.7)',
+          'rgba(255, 99, 132, 0.7)'
+        ];
+        
+        // Gráfico 1: Distribución de departamentos
+        const ctx1 = document.getElementById('chart-departamentos');
+        if (ctx1) {
+          new Chart(ctx1, {
+            type: 'pie',
+            data: {
+              labels: ['Administración', 'Ventas', 'Marketing', 'Producción', 'Recursos Humanos'],
+              datasets: [{
+                data: [3, 5, 2, 8, 4],
+                backgroundColor: colorPalette,
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    boxWidth: 12,
+                    padding: 10,
+                    font: {
+                      size: 10
+                    }
+                  }
+                },
+                title: {
+                  display: false
+                }
+              }
+            }
+          });
+        }
+        
+        // Gráfico 2: Centros por ubicación
+        const ctx2 = document.getElementById('chart-centros');
+        if (ctx2) {
+          new Chart(ctx2, {
+            type: 'bar',
+            data: {
+              labels: ['Alicante', 'Valencia', 'Madrid', 'Barcelona'],
+              datasets: [{
+                label: 'Número de centros',
+                data: [4, 2, 1, 3],
+                backgroundColor: colorPalette[1],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1,
+                    font: {
+                      size: 10
+                    }
+                  }
+                },
+                x: {
+                  ticks: {
+                    font: {
+                      size: 10
+                    }
+                  }
+                }
+              },
+              plugins: {
+                legend: {
+                  display: false
+                }
+              }
+            }
+          });
+        }
+        
+        // Gráfico 3: Formaciones por tipo
+        const ctx3 = document.getElementById('chart-formaciones');
+        if (ctx3) {
+          new Chart(ctx3, {
+            type: 'doughnut',
+            data: {
+              labels: ['Presencial', 'Virtual', 'Híbrida'],
+              datasets: [{
+                data: [8, 15, 5],
+                backgroundColor: [colorPalette[0], colorPalette[1], colorPalette[2]],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    boxWidth: 12,
+                    padding: 10,
+                    font: {
+                      size: 10
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+        
+        // Gráfico 4: Horas de formación
+        const ctx4 = document.getElementById('chart-horas');
+        if (ctx4) {
+          new Chart(ctx4, {
+            type: 'line',
+            data: {
+              labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+              datasets: [{
+                label: 'Horas',
+                data: [12, 19, 8, 15, 25, 18],
+                borderColor: colorPalette[1],
+                backgroundColor: 'rgba(0, 150, 255, 0.2)',
+                tension: 0.3,
+                fill: true
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    font: {
+                      size: 10
+                    }
+                  }
+                },
+                x: {
+                  ticks: {
+                    font: {
+                      size: 10
+                    }
+                  }
+                }
+              },
+              plugins: {
+                legend: {
+                  display: false
+                }
+              }
+            }
+          });
+        }
+      }
+      
+      // Ejecutar después de que se cargue el documento
+      document.addEventListener('DOMContentLoaded', generarGraficos);
+    </script>
+  `;
   
-  // Línea conectora
-  page.drawLine({
-    start: { x: x + 40, y },
-    end: { x: x + 70, y },
-    thickness: 2,
-    color: color2,
-  });
+  // Portada
+  const portada = `
+    <div class="page">
+      <div class="header">
+        <h1>Informe Empresarial</h1>
+      </div>
+      
+      <div class="logo-container">
+        <span class="logo-text">LOGO</span>
+      </div>
+      
+      <div class="form-field">
+        <label>NOMBRE DE LA EMPRESA:</label>
+        <input type="text" class="form-input" id="empresa-nombre" placeholder="Nombre de la empresa" />
+      </div>
+      
+      <p class="fecha-informe">Fecha del informe: ${fechaActual}</p>
+      
+      <div class="footer">
+        <p><strong>ImpulseData - Alicante Futura</strong></p>
+        <p>Plataforma digital de gestión de datos para la innovación</p>
+        <p>y el desarrollo sostenible de Alicante</p>
+      </div>
+    </div>
+  `;
   
-  page.drawLine({
-    start: { x: x + 130, y },
-    end: { x: x + 160, y },
-    thickness: 2,
-    color: color1,
-  });
+  // Información general
+  const infoGeneral = `
+    <div class="page">
+      <div class="section-title">
+        <h2>Información General</h2>
+      </div>
+      
+      <div class="form-field">
+        <label>Nombre de la empresa:</label>
+        <input type="text" class="form-input" id="empresa-nombre-info" placeholder="Nombre completo de la empresa" />
+      </div>
+      
+      <div class="form-field">
+        <label>Fecha de creación:</label>
+        <input type="text" class="form-input" id="empresa-fecha" placeholder="Fecha de constitución" />
+      </div>
+      
+      <div class="form-field">
+        <label>Ciudad:</label>
+        <input type="text" class="form-input" id="empresa-ciudad" placeholder="Ciudad sede principal" />
+      </div>
+      
+      <div class="form-field">
+        <label>Descripción:</label>
+        <textarea class="form-input form-textarea" id="empresa-descripcion" placeholder="Breve descripción de la actividad de la empresa"></textarea>
+      </div>
+    </div>
+  `;
+  
+  // Departamentos
+  const departamentos = `
+    <div class="page">
+      <div class="section-title">
+        <h2>Departamentos</h2>
+      </div>
+      
+      <div id="departamentos-container">
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-0" placeholder="Nombre del departamento" />
+        </div>
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-1" placeholder="Nombre del departamento" />
+        </div>
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-2" placeholder="Nombre del departamento" />
+        </div>
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-3" placeholder="Nombre del departamento" />
+        </div>
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-4" placeholder="Nombre del departamento" />
+        </div>
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-5" placeholder="Nombre del departamento" />
+        </div>
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-6" placeholder="Nombre del departamento" />
+        </div>
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-7" placeholder="Nombre del departamento" />
+        </div>
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-8" placeholder="Nombre del departamento" />
+        </div>
+        <div class="departamento-item">
+          <input type="text" class="departamento-input" id="departamento-9" placeholder="Nombre del departamento" />
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Centros
+  const centros = `
+    <div class="page">
+      <div class="section-title">
+        <h2>Centros de Trabajo</h2>
+      </div>
+      
+      <div id="centros-container">
+        <div class="centro-item">
+          <p>
+            <label>Nombre:</label>
+            <input type="text" class="centro-input" id="centro-0-nombre" placeholder="Nombre del centro" />
+          </p>
+          <p>
+            <label>Dirección:</label>
+            <input type="text" class="centro-input" id="centro-0-direccion" placeholder="Dirección completa" />
+          </p>
+        </div>
+        <div class="centro-item">
+          <p>
+            <label>Nombre:</label>
+            <input type="text" class="centro-input" id="centro-1-nombre" placeholder="Nombre del centro" />
+          </p>
+          <p>
+            <label>Dirección:</label>
+            <input type="text" class="centro-input" id="centro-1-direccion" placeholder="Dirección completa" />
+          </p>
+        </div>
+        <div class="centro-item">
+          <p>
+            <label>Nombre:</label>
+            <input type="text" class="centro-input" id="centro-2-nombre" placeholder="Nombre del centro" />
+          </p>
+          <p>
+            <label>Dirección:</label>
+            <input type="text" class="centro-input" id="centro-2-direccion" placeholder="Dirección completa" />
+          </p>
+        </div>
+        <div class="centro-item">
+          <p>
+            <label>Nombre:</label>
+            <input type="text" class="centro-input" id="centro-3-nombre" placeholder="Nombre del centro" />
+          </p>
+          <p>
+            <label>Dirección:</label>
+            <input type="text" class="centro-input" id="centro-3-direccion" placeholder="Dirección completa" />
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Formaciones
+  const formaciones = `
+    <div class="page">
+      <div class="section-title">
+        <h2>Formaciones</h2>
+      </div>
+      
+      <div id="formaciones-container">
+        <div class="formacion-item">
+          <p>
+            <label>Nombre:</label>
+            <input type="text" class="formacion-input" id="formacion-0-nombre" placeholder="Nombre de la formación" />
+          </p>
+          <p>
+            <label>Tipo:</label>
+            <select class="formacion-input" id="formacion-0-tipo">
+              <option value="">Seleccionar tipo</option>
+              <option value="Presencial">Presencial</option>
+              <option value="Virtual">Virtual</option>
+              <option value="Híbrida">Híbrida</option>
+            </select>
+          </p>
+          <p>
+            <label>Duración:</label>
+            <input type="text" class="formacion-input" id="formacion-0-duracion" placeholder="Duración en horas" />
+          </p>
+        </div>
+        <div class="formacion-item">
+          <p>
+            <label>Nombre:</label>
+            <input type="text" class="formacion-input" id="formacion-1-nombre" placeholder="Nombre de la formación" />
+          </p>
+          <p>
+            <label>Tipo:</label>
+            <select class="formacion-input" id="formacion-1-tipo">
+              <option value="">Seleccionar tipo</option>
+              <option value="Presencial">Presencial</option>
+              <option value="Virtual">Virtual</option>
+              <option value="Híbrida">Híbrida</option>
+            </select>
+          </p>
+          <p>
+            <label>Duración:</label>
+            <input type="text" class="formacion-input" id="formacion-1-duracion" placeholder="Duración en horas" />
+          </p>
+        </div>
+        <div class="formacion-item">
+          <p>
+            <label>Nombre:</label>
+            <input type="text" class="formacion-input" id="formacion-2-nombre" placeholder="Nombre de la formación" />
+          </p>
+          <p>
+            <label>Tipo:</label>
+            <select class="formacion-input" id="formacion-2-tipo">
+              <option value="">Seleccionar tipo</option>
+              <option value="Presencial">Presencial</option>
+              <option value="Virtual">Virtual</option>
+              <option value="Híbrida">Híbrida</option>
+            </select>
+          </p>
+          <p>
+            <label>Duración:</label>
+            <input type="text" class="formacion-input" id="formacion-2-duracion" placeholder="Duración en horas" />
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Estadísticas y gráficos
+  const estadisticas = `
+    <div class="page">
+      <div class="section-title">
+        <h2>Estadísticas y Gráficos</h2>
+      </div>
+      
+      <div class="charts-section">
+        <div class="chart-container">
+          <h3>Distribución de departamentos</h3>
+          <div class="chart-wrapper">
+            <canvas id="chart-departamentos" class="chart-canvas"></canvas>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <h3>Centros por ubicación</h3>
+          <div class="chart-wrapper">
+            <canvas id="chart-centros" class="chart-canvas"></canvas>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <h3>Formaciones por tipo</h3>
+          <div class="chart-wrapper">
+            <canvas id="chart-formaciones" class="chart-canvas"></canvas>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <h3>Horas de formación</h3>
+          <div class="chart-wrapper">
+            <canvas id="chart-horas" class="chart-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Juntar todas las páginas en un único documento HTML
+  const htmlTemplate = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Informe Empresarial</title>
+      ${styles}
+    </head>
+    <body>
+      ${portada}
+      ${infoGeneral}
+      ${departamentos}
+      ${centros}
+      ${formaciones}
+      ${estadisticas}
+      ${chartScripts}
+    </body>
+    </html>
+  `;
+  
+  return htmlTemplate;
 }
 
-// Función para dibujar icono de edificio (decoración)
-function drawBuildingIcon(page, x, y, color) {
-  // Base del edificio
-  page.drawRectangle({
-    x: x - 40,
-    y: y - 40,
-    width: 80,
-    height: 100,
-    color,
-  });
-  
-  // Ventanas
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 2; j++) {
-      page.drawRectangle({
-        x: x - 30 + j * 40,
-        y: y - 30 + i * 30,
-        width: 20,
-        height: 20,
-        color: rgb(1, 1, 1),
-      });
+/**
+ * Convierte el HTML a PDF usando html2pdf
+ * @param {string} htmlContent - Contenido HTML
+ * @returns {Promise<Uint8Array>} - Bytes del PDF generado
+ */
+async function html2PDFConverter(htmlContent) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Crear un elemento contenedor temporal
+      const element = document.createElement('div');
+      element.innerHTML = htmlContent;
+      document.body.appendChild(element);
+      
+      // Configuración para html2pdf
+      const options = {
+        margin: 10,
+        filename: 'plantilla.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      };
+      
+      // Generar PDF
+      html2pdf()
+        .from(element)
+        .set(options)
+        .outputPdf('arraybuffer')
+        .then(pdfBuffer => {
+          // Limpiar el elemento temporal
+          document.body.removeChild(element);
+          
+          // Convertir ArrayBuffer a Uint8Array
+          const pdfBytes = new Uint8Array(pdfBuffer);
+          resolve(pdfBytes);
+        })
+        .catch(error => {
+          document.body.removeChild(element);
+          reject(error);
+        });
+    } catch (error) {
+      reject(error);
     }
-  }
-  
-  // Techo
-  page.drawRectangle({
-    x: x - 50,
-    y: y + 60,
-    width: 100,
-    height: 10,
-    color: rgb(0.3, 0.3, 0.3),
-  });
-}
-
-// Función para dibujar un rectángulo diagonal (decoración)
-function drawDiagonalRectangle(page, color) {
-  // Crear un polígono para el rectángulo diagonal
-  page.drawRectangle({
-    x: -100,
-    y: 500,
-    width: 800,
-    height: 400,
-    rotate: degrees(-10),
-    color: color,
-  });
-}
-
-// Función para dibujar iconos educativos (decoración)
-function drawEducationIcons(page, x, y, color) {
-  // Libro
-  page.drawRectangle({
-    x: x - 50,
-    y: y - 30,
-    width: 60,
-    height: 80,
-    color,
-  });
-  
-  page.drawRectangle({
-    x: x - 45,
-    y: y - 25,
-    width: 50,
-    height: 70,
-    color: rgb(1, 1, 1),
-  });
-  
-  // Lápiz
-  page.drawRectangle({
-    x: x + 20,
-    y: y - 40,
-    width: 10,
-    height: 70,
-    color: rgb(0.9, 0.7, 0.3),
-    rotate: degrees(30),
-  });
-  
-  // Punta del lápiz
-  page.drawRectangle({
-    x: x + 40,
-    y: y - 50,
-    width: 10,
-    height: 15,
-    color: rgb(0.3, 0.3, 0.3),
-    rotate: degrees(30),
   });
 } 
