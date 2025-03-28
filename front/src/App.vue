@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import AuthService from './services/AuthService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import FirebaseAuthService from './services/FirebaseAuthService';
+import ChatbotAssistant from './components/ChatbotAssistant.vue';
 
 const router = useRouter();
 const auth = getAuth();
@@ -309,6 +310,7 @@ const irAPanelControl = () => {
 
   <main class="main-content">
     <RouterView />
+    <ChatbotAssistant />
   </main>
 </template>
 

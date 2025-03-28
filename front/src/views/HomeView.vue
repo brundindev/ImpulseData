@@ -139,9 +139,11 @@
       </div>
       
       <!-- Botón flotante para crear nueva empresa -->
+      <!-- Removido el botón flotante para usar el asistente virtual en su lugar
       <button class="btn-floating" @click="showFormModal = true; modoEdicion = false;">
         <span class="icon">+</span>
       </button>
+      -->
       
       <!-- Modal para crear/editar empresa -->
       <teleport to="body">
@@ -541,7 +543,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, computed, watch } from 'vue';
+import { ref, onMounted, reactive, computed, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from '../services/AuthService';
 import FirestoreService from '../services/FirestoreService';
@@ -626,6 +628,20 @@ onMounted(() => {
       router.push('/login');
     }
   });
+  
+  // Añadir evento para escuchar cuando el chatbot quiere abrir el modal de empresa
+  window.addEventListener('abrir-modal-empresa', abrirModalEmpresa);
+});
+
+// Función para abrir el modal de creación de empresa
+const abrirModalEmpresa = () => {
+  showFormModal.value = true;
+  modoEdicion.value = false;
+};
+
+// Limpieza del evento al desmontar el componente
+onUnmounted(() => {
+  window.removeEventListener('abrir-modal-empresa', abrirModalEmpresa);
 });
 
 // Cargar datos desde Firestore

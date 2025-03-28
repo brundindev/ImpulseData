@@ -6,6 +6,9 @@ import router from './router'
 
 import './assets/main.css'
 
+// Importar Font Awesome
+import '@fortawesome/fontawesome-free/css/all.css';
+
 // Configurar manejador global para ocultar errores de autenticación en consola
 const originalConsoleError = console.error;
 console.error = function(...args) {

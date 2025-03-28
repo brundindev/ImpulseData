@@ -672,6 +672,7 @@
 
 /* Estilos para el botón flotante */
 .btn-floating {
+  display: none; /* Ocultamos el botón flotante ya que usamos el chatbot asistente */
   position: fixed !important;
   bottom: 30px;
   right: 30px;
