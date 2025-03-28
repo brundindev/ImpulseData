@@ -3,6 +3,78 @@ import { crearPlantillaPDF } from '../utils/PlantillaPDF';
 import Chart from 'chart.js/auto';
 
 class PDFService {
+  constructor() {
+    // Creamos un elemento para mostrar un spinner durante la generación
+    this.overlay = null;
+  }
+
+  /**
+   * Muestra un overlay con un spinner mientras se genera el PDF
+   */
+  mostrarOverlayGeneracion() {
+    // Crear overlay si no existe
+    if (!this.overlay) {
+      this.overlay = document.createElement('div');
+      this.overlay.style.position = 'fixed';
+      this.overlay.style.top = '0';
+      this.overlay.style.left = '0';
+      this.overlay.style.width = '100%';
+      this.overlay.style.height = '100%';
+      this.overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+      this.overlay.style.display = 'flex';
+      this.overlay.style.justifyContent = 'center';
+      this.overlay.style.alignItems = 'center';
+      this.overlay.style.zIndex = '9999';
+      
+      // Crear spinner
+      const spinner = document.createElement('div');
+      spinner.style.width = '40px';
+      spinner.style.height = '40px';
+      spinner.style.border = '4px solid rgba(0, 70, 152, 0.2)';
+      spinner.style.borderTop = '4px solid rgba(0, 70, 152, 0.8)';
+      spinner.style.borderRadius = '50%';
+      spinner.style.animation = 'spin 1s linear infinite';
+      
+      // Añadir estilo para la animación
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      this.overlay.appendChild(spinner);
+      
+      // Mensaje de generación
+      const mensaje = document.createElement('div');
+      mensaje.textContent = 'Generando PDF...';
+      mensaje.style.marginLeft = '15px';
+      mensaje.style.fontFamily = 'Arial, sans-serif';
+      mensaje.style.color = '#004698';
+      mensaje.style.fontWeight = 'bold';
+      
+      this.overlay.appendChild(mensaje);
+    }
+    
+    // Añadir al DOM
+    document.body.appendChild(this.overlay);
+    
+    // Bloquear scroll
+    document.body.style.overflow = 'hidden';
+  }
+  
+  /**
+   * Oculta el overlay de generación
+   */
+  ocultarOverlayGeneracion() {
+    if (this.overlay && this.overlay.parentNode) {
+      document.body.removeChild(this.overlay);
+      document.body.style.overflow = '';
+    }
+  }
+
   /**
    * Genera un PDF utilizando la plantilla con la información de la empresa
    * @param {Object} empresa - Objeto con datos de la empresa
@@ -10,11 +82,15 @@ class PDFService {
    */
   async generarInformeEmpresa(empresa) {
     try {
+      // Mostrar overlay durante la generación
+      this.mostrarOverlayGeneracion();
+      
       console.log("Iniciando generación del informe de empresa:", empresa.nombre);
       
       // Verificar que la empresa tenga campos básicos
       if (!empresa || !empresa.nombre) {
         console.error("Datos de empresa insuficientes para generar el informe");
+        this.ocultarOverlayGeneracion();
         throw new Error("Datos de empresa insuficientes");
       }
       
@@ -26,22 +102,30 @@ class PDFService {
         console.log("Plantilla HTML obtenida correctamente");
       } catch (templateError) {
         console.error("Error al crear la plantilla HTML:", templateError);
+        this.ocultarOverlayGeneracion();
         throw new Error("No se pudo crear la plantilla HTML base");
       }
       
-      // Crear un contenedor para el HTML
+      // Crear un contenedor para el HTML pero sin añadirlo al DOM todavía
       const container = document.createElement('div');
       container.innerHTML = plantillaHTML;
       
       // Rellenar datos
       this.rellenarDatosEmpresa(container, empresa);
       
-      // Generar gráficos
-      await this.generarGraficosEstadisticos(container, empresa);
+      // Crear un iframe oculto para no desestructurar la página
+      const iframe = document.createElement('iframe');
+      iframe.style.visibility = 'hidden';
+      iframe.style.position = 'absolute';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
       
-      // Convertir HTML a PDF
-      console.log("Convirtiendo HTML a PDF...");
+      // Preparar el PDF utilizando un Worker
       try {
+        // Desactivar inputs para que html2pdf los renderice correctamente
+        this.desactivarControlesFormulario(container);
+        
         // Configuración para html2pdf
         const options = {
           margin: [15, 15, 15, 15], // top, right, bottom, left
@@ -57,9 +141,7 @@ class PDFService {
             letterRendering: true,
             allowTaint: true,
             backgroundColor: '#FFFFFF',
-            windowWidth: 210 * 3.78, // Para asegurar que se vea correctamente a tamaño A4
-            x: 0,
-            y: 0
+            windowWidth: 210 * 3.78 // Para asegurar que se vea correctamente a tamaño A4
           },
           jsPDF: { 
             unit: 'mm', 
@@ -69,43 +151,84 @@ class PDFService {
             hotfixes: ['px_scaling'],
             precision: 16
           },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'], after: '.page' }
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'], after: '.page' },
+          enableLinks: false
         };
         
-        // Desactivar inputs para que html2pdf los renderice correctamente
-        this.desactivarControlesFormulario(container);
+        // Añadir el iframe al DOM
+        document.body.appendChild(iframe);
         
-        // Añadir el contenedor al DOM (necesario para html2pdf)
-        document.body.appendChild(container);
+        // Generar el contenido del iframe
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Generando PDF...</title>
+            <style>
+              body { 
+                margin: 0; 
+                padding: 0; 
+                background-color: white;
+                visibility: hidden;
+              }
+            </style>
+          </head>
+          <body>
+            <div id="pdf-container"></div>
+          </body>
+          </html>
+        `);
+        iframeDoc.close();
         
-        // Esperar a que las imágenes y gráficos carguen
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Esperar a que el iframe esté cargado
+        await new Promise(resolve => {
+          iframe.onload = resolve;
+          setTimeout(resolve, 100); // Fallback
+        });
+        
+        // Añadir el contenedor al iframe
+        const pdfContainer = iframeDoc.getElementById('pdf-container');
+        pdfContainer.appendChild(container.cloneNode(true));
+        
+        // Dar tiempo para que se carguen los recursos
+        await new Promise(resolve => setTimeout(resolve, 200));
         
         // Generar PDF
         const pdf = await html2pdf()
-          .from(container)
+          .from(pdfContainer)
           .set(options)
           .toPdf()
           .output('arraybuffer');
         
         // Limpiar
-        document.body.removeChild(container);
+        document.body.removeChild(iframe);
         
         // Convertir a Uint8Array
         const pdfBytes = new Uint8Array(pdf);
         console.log("PDF generado correctamente con un tamaño de", pdfBytes.length, "bytes");
         
+        // Ocultar overlay después de completar
+        this.ocultarOverlayGeneracion();
+        
         return pdfBytes;
       } catch (pdfError) {
         console.error("Error al generar PDF desde HTML:", pdfError);
-        // Si el contenedor fue añadido al DOM, asegurarse de quitarlo
-        if (container.parentNode) {
-          document.body.removeChild(container);
+        // Limpiar el iframe si existe
+        if (iframe.parentNode) {
+          document.body.removeChild(iframe);
         }
+        // Ocultar overlay en caso de error
+        this.ocultarOverlayGeneracion();
         throw new Error("Error al generar el documento PDF final");
       }
     } catch (error) {
       console.error('Error al generar el informe de empresa:', error);
+      // Asegurarnos de ocultar el overlay en cualquier caso de error
+      this.ocultarOverlayGeneracion();
       throw error;
     }
   }
@@ -128,8 +251,8 @@ class PDFService {
       
       // Rellenar departamentos
       if (empresa.departamentos && empresa.departamentos.length > 0) {
-        empresa.departamentos.forEach((dept, index) => {
-          if (index < 10) { // Máximo 10 departamentos en la plantilla
+          empresa.departamentos.forEach((dept, index) => {
+            if (index < 10) { // Máximo 10 departamentos en la plantilla
             this.establecerValorInput(container, `departamento-${index}`, dept.nombre);
           }
         });
@@ -159,8 +282,8 @@ class PDFService {
       
       // Rellenar centros
       if (empresa.centros && empresa.centros.length > 0) {
-        empresa.centros.forEach((centro, index) => {
-          if (index < 8) { // Máximo 8 centros en la plantilla
+          empresa.centros.forEach((centro, index) => {
+            if (index < 8) { // Máximo 8 centros en la plantilla
             this.establecerValorInput(container, `centro-${index}-nombre`, centro.nombre);
             this.establecerValorInput(container, `centro-${index}-direccion`, centro.direccion || 'Dirección no especificada');
           }
@@ -181,8 +304,8 @@ class PDFService {
       
       // Rellenar formaciones
       if (empresa.formaciones && empresa.formaciones.length > 0) {
-        empresa.formaciones.forEach((formacion, index) => {
-          if (index < 6) { // Máximo 6 formaciones en la plantilla
+          empresa.formaciones.forEach((formacion, index) => {
+            if (index < 6) { // Máximo 6 formaciones en la plantilla
             this.establecerValorInput(container, `formacion-${index}-nombre`, formacion.nombre);
             this.establecerValorSelect(container, `formacion-${index}-tipo`, this.formatTipoFormacion(formacion.tipo));
             this.establecerValorInput(container, `formacion-${index}-duracion`, `${formacion.duracion || 0} horas`);
@@ -202,10 +325,267 @@ class PDFService {
         }
       }
       
+      // Preparar los datos para los gráficos
+      this.prepararDatosGraficos(container, empresa);
+      
       console.log("Datos de la empresa rellenados correctamente en el HTML");
     } catch (error) {
       console.error("Error al rellenar datos de la empresa:", error);
       // Continuamos a pesar del error
+    }
+  }
+  
+  /**
+   * Prepara los datos para los gráficos en el HTML
+   * @param {HTMLElement} container - Contenedor con el HTML
+   * @param {Object} empresa - Datos de la empresa
+   */
+  prepararDatosGraficos(container, empresa) {
+    try {
+      // Modificar el script de Chart.js para usar datos reales de la empresa
+      const script = container.querySelector('script');
+      if (script) {
+        // Construir los datos para los gráficos basados en la empresa
+        
+        // 1. Datos para el gráfico de departamentos
+        let deptsLabels = [];
+        let deptsData = [];
+        
+        if (empresa.departamentos && empresa.departamentos.length > 0) {
+          // Agrupar los departamentos por tipo para el gráfico de sectores
+          const deptCounts = {};
+          empresa.departamentos.forEach(dept => {
+            const tipo = dept.tipo || 'Otros';
+            deptCounts[tipo] = (deptCounts[tipo] || 0) + 1;
+          });
+          
+          // Convertir a arrays para el gráfico
+          deptsLabels = Object.keys(deptCounts);
+          deptsData = Object.values(deptCounts);
+        } else {
+          deptsLabels = ['Sin departamentos'];
+          deptsData = [1];
+        }
+        
+        // 2. Datos para el gráfico de centros
+        let centrosLabels = [];
+        let centrosData = [];
+        
+        if (empresa.centros && empresa.centros.length > 0) {
+          // Agrupar los centros por ciudad
+          const centroCounts = {};
+          empresa.centros.forEach(centro => {
+            const ciudad = centro.ciudad || centro.direccion?.split(',').pop()?.trim() || 'Desconocida';
+            centroCounts[ciudad] = (centroCounts[ciudad] || 0) + 1;
+          });
+          
+          // Convertir a arrays para el gráfico
+          centrosLabels = Object.keys(centroCounts);
+          centrosData = Object.values(centroCounts);
+        } else {
+          centrosLabels = ['Sin centros'];
+          centrosData = [0];
+        }
+        
+        // 3. Datos para el gráfico de formaciones por tipo
+        let formacionesLabels = ['Presencial', 'Virtual', 'Híbrida'];
+        let formacionesData = [0, 0, 0];
+        
+        if (empresa.formaciones && empresa.formaciones.length > 0) {
+          // Contar las formaciones por tipo
+          empresa.formaciones.forEach(formacion => {
+            const tipo = this.formatTipoFormacion(formacion.tipo).toLowerCase();
+            if (tipo === 'presencial') formacionesData[0]++;
+            else if (tipo === 'virtual') formacionesData[1]++;
+            else if (tipo === 'híbrida') formacionesData[2]++;
+          });
+        }
+        
+        // 4. Datos para el gráfico de horas de formación
+        // Usamos datos de ejemplo porque normalmente no tendríamos esta información
+        const horasLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
+        const horasData = [12, 19, 8, 15, 25, 18];
+        
+        // Actualizar el script con los datos reales
+        const scriptContent = `
+          // Función para generar los gráficos después de que se haya cargado el documento
+          function generarGraficos() {
+            // Datos para los gráficos
+            const colorPalette = [
+              'rgba(0, 70, 152, 0.7)',
+              'rgba(0, 150, 255, 0.7)',
+              'rgba(75, 192, 192, 0.7)',
+              'rgba(153, 102, 255, 0.7)',
+              'rgba(255, 159, 64, 0.7)',
+              'rgba(255, 99, 132, 0.7)'
+            ];
+            
+            // Gráfico 1: Distribución de departamentos
+            const ctx1 = document.getElementById('chart-departamentos');
+            if (ctx1) {
+              new Chart(ctx1, {
+                type: 'pie',
+                data: {
+                  labels: ${JSON.stringify(deptsLabels)},
+                  datasets: [{
+                    data: ${JSON.stringify(deptsData)},
+                    backgroundColor: colorPalette,
+                    borderWidth: 1
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                      labels: {
+                        boxWidth: 12,
+                        padding: 10,
+                        font: {
+                          size: 10
+                        }
+                      }
+                    },
+                    title: {
+                      display: false
+                    }
+                  }
+                }
+              });
+            }
+            
+            // Gráfico 2: Centros por ubicación
+            const ctx2 = document.getElementById('chart-centros');
+            if (ctx2) {
+              new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                  labels: ${JSON.stringify(centrosLabels)},
+                  datasets: [{
+                    label: 'Número de centros',
+                    data: ${JSON.stringify(centrosData)},
+                    backgroundColor: colorPalette[1],
+                    borderWidth: 1
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        stepSize: 1,
+                        font: {
+                          size: 10
+                        }
+                      }
+                    },
+                    x: {
+                      ticks: {
+                        font: {
+                          size: 10
+                        }
+                      }
+                    }
+                  },
+                  plugins: {
+                    legend: {
+                      display: false
+                    }
+                  }
+                }
+              });
+            }
+            
+            // Gráfico 3: Formaciones por tipo
+            const ctx3 = document.getElementById('chart-formaciones');
+            if (ctx3) {
+              new Chart(ctx3, {
+                type: 'doughnut',
+                data: {
+                  labels: ${JSON.stringify(formacionesLabels)},
+                  datasets: [{
+                    data: ${JSON.stringify(formacionesData)},
+                    backgroundColor: [colorPalette[0], colorPalette[1], colorPalette[2]],
+                    borderWidth: 1
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                      labels: {
+                        boxWidth: 12,
+                        padding: 10,
+                        font: {
+                          size: 10
+                        }
+                      }
+                    }
+                  }
+                }
+              });
+            }
+            
+            // Gráfico 4: Horas de formación
+            const ctx4 = document.getElementById('chart-horas');
+            if (ctx4) {
+              new Chart(ctx4, {
+                type: 'line',
+                data: {
+                  labels: ${JSON.stringify(horasLabels)},
+                  datasets: [{
+                    label: 'Horas',
+                    data: ${JSON.stringify(horasData)},
+                    borderColor: colorPalette[1],
+                    backgroundColor: 'rgba(0, 150, 255, 0.2)',
+                    tension: 0.3,
+                    fill: true
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        font: {
+                          size: 10
+                        }
+                      }
+                    },
+                    x: {
+                      ticks: {
+                        font: {
+                          size: 10
+                        }
+                      }
+                    }
+                  },
+                  plugins: {
+                    legend: {
+                      display: false
+                    }
+                  }
+                }
+              });
+            }
+          }
+          
+          // Llamar a la función inmediatamente para el PDF
+          generarGraficos();
+        `;
+        
+        // Reemplazar el contenido del script
+        script.innerHTML = scriptContent;
+      }
+    } catch (error) {
+      console.error("Error al preparar datos para gráficos:", error);
     }
   }
   
@@ -282,21 +662,6 @@ class PDFService {
   }
   
   /**
-   * Genera los gráficos estadísticos basados en los datos de la empresa
-   * @param {HTMLElement} container - Contenedor con el HTML
-   * @param {Object} empresa - Datos de la empresa
-   */
-  async generarGraficosEstadisticos(container, empresa) {
-    try {
-      // Esta función se ejecuta después de que los gráficos son generados por el script incluido
-      // No hacemos nada aquí porque los gráficos ya se renderizan con datos de ejemplo
-      console.log("Los gráficos se generarán con datos predefinidos");
-    } catch (error) {
-      console.error("Error al generar gráficos estadísticos:", error);
-    }
-  }
-  
-  /**
    * Formatea una fecha en formato ISO a formato legible
    * @param {string} fecha - Fecha en formato ISO o string
    * @returns {string} - Fecha formateada
@@ -345,6 +710,8 @@ class PDFService {
       // Verificar los datos recibidos
       if (!pdfBytes || pdfBytes.length === 0) {
         console.error("Error: PDF vacío");
+        // Asegurarnos de ocultar el overlay
+        this.ocultarOverlayGeneracion();
         throw new Error("El PDF generado está vacío.");
       }
       
@@ -358,18 +725,26 @@ class PDFService {
       const a = document.createElement('a');
       a.href = url;
       a.download = nombreArchivo || 'informe.pdf';
+      a.style.display = 'none';
       document.body.appendChild(a);
       
       // Hacer clic en el enlace para iniciar la descarga
       a.click();
       
       // Limpiar
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 100);
+      
+      // Ocultar el overlay una vez completada la descarga
+      this.ocultarOverlayGeneracion();
       
       console.log("Descarga de PDF iniciada correctamente");
     } catch (error) {
       console.error("Error al guardar el PDF:", error);
+      // Asegurarnos de ocultar el overlay en caso de error
+      this.ocultarOverlayGeneracion();
       throw error;
     }
   }
@@ -385,6 +760,8 @@ class PDFService {
       
       if (!pdfBytes || pdfBytes.length === 0) {
         console.error("Error: No hay datos de PDF para previsualizar");
+        // Asegurarnos de ocultar el overlay
+        this.ocultarOverlayGeneracion();
         throw new Error("No hay datos de PDF para previsualizar");
       }
       
@@ -394,10 +771,15 @@ class PDFService {
       // Crear URL para el blob
       const url = window.URL.createObjectURL(blob);
       
+      // Ocultar el overlay una vez generada la URL
+      this.ocultarOverlayGeneracion();
+      
       console.log("URL de previsualización generada correctamente");
       return url;
     } catch (error) {
       console.error("Error al generar URL de previsualización:", error);
+      // Asegurarnos de ocultar el overlay en caso de error
+      this.ocultarOverlayGeneracion();
       throw error;
     }
   }
