@@ -49,7 +49,7 @@ export default {
         const change = difference * this.stepFactor * changePercentage;
         
         this.displayNumber = this.displayNumber + change;
-      }, 25);
+      }, 15);
     }
   },
   beforeUnmount() {
