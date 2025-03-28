@@ -77,9 +77,18 @@
         </div>
         
         <!-- Loader para estados de carga -->
-        <div v-if="cargando" class="app-loading-container">
-          <div class="app-loader"></div>
-          <p>Cargando datos...</p>
+        <div v-if="cargando" class="spinnerContainer">
+          <div class="spinner"></div>
+          <div class="loader">
+            <p>cargando</p>
+            <div class="words">
+              <span class="word">usuarios</span>
+              <span class="word">ImpulseData</span>
+              <span class="word">estadísticas</span>
+              <span class="word">datos</span>
+              <span class="word">usuarios</span>
+            </div>
+          </div>
         </div>
         
         <!-- Mensaje de error si algo falla -->
@@ -144,8 +153,17 @@
           </div>
           <div class="modal-body">
             <div v-if="guardando" class="saving-overlay">
-                <div class="app-loader"></div>
-              <p>Guardando datos...</p>
+                <div class="spinner"></div>
+                <div class="loader">
+                  <p>cargando</p>
+                  <div class="words">
+                    <span class="word">usuarios</span>
+                    <span class="word">ImpulseData</span>
+                    <span class="word">estadísticas</span>
+                    <span class="word">datos</span>
+                    <span class="word">usuarios</span>
+                  </div>
+                </div>
             </div>
             <form @submit.prevent="guardarEmpresa">
               <div class="form-group">
@@ -356,8 +374,17 @@
           </div>
           <div class="modal-body">
             <div v-if="cargando" class="saving-overlay">
-                <div class="app-loader"></div>
-              <p>Cargando datos...</p>
+                <div class="spinner"></div>
+                <div class="loader">
+                  <p>cargando</p>
+                  <div class="words">
+                    <span class="word">usuarios</span>
+                    <span class="word">ImpulseData</span>
+                    <span class="word">estadísticas</span>
+                    <span class="word">datos</span>
+                    <span class="word">usuarios</span>
+                  </div>
+                </div>
             </div>
             <div class="view-content">
               <div class="form-group">

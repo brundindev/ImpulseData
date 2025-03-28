@@ -30,14 +30,28 @@
       <div class="dashboard-header">
         <h1 class="dashboard-title">Panel de Control</h1>
         <button @click="recargarDatos" class="reload-button" :disabled="cargando">
-          <i class="fas fa-sync-alt" :class="{ 'fa-spin': cargando }"></i>
+          <i v-if="!cargando" class="fas fa-sync-alt"></i>
+          <span v-else class="button-loader">
+            <span class="button-loader-dot"></span>
+            <span class="button-loader-dot"></span>
+            <span class="button-loader-dot"></span>
+          </span>
           {{ cargando ? 'Cargando...' : 'Actualizar datos' }}
         </button>
       </div>
       
-      <div v-if="cargando" class="panel-loading-container">
-        <div class="panel-loading-spinner"></div>
-        <p>Cargando datos...</p>
+      <div v-if="cargando" class="spinnerContainer">
+        <div class="spinner"></div>
+        <div class="loader">
+          <p>cargando</p>
+          <div class="words">
+            <span class="word">usuarios</span>
+            <span class="word">ImpulseData</span>
+            <span class="word">estadísticas</span>
+            <span class="word">datos</span>
+            <span class="word">usuarios</span>
+          </div>
+        </div>
       </div>
       
       <div v-else-if="empresas.length === 0" class="no-data-container">

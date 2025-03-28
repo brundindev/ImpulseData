@@ -177,7 +177,7 @@
     }
   }
   
-  .panel-loading-container, .no-data-container {
+  .no-data-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -185,21 +185,6 @@
     height: 300px;
     width: 100%;
     color: #666;
-  }
-  
-  .panel-loading-spinner {
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
   }
   
   .no-data-container p {
@@ -239,4 +224,197 @@
   .reload-button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+  }
+
+  /* Estilos para el loader principal de la aplicación */
+  .app-loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    width: 100%;
+  }
+
+  .app-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .app-loader-circle {
+    width: 12px;
+    height: 12px;
+    background-color: #004698;
+    border-radius: 50%;
+    margin: 0 5px;
+    animation: app-loader-bounce 1.5s infinite ease-in-out both;
+  }
+
+  .app-loader-circle:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+
+  .app-loader-circle:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+
+  @keyframes app-loader-bounce {
+    0%, 80%, 100% {
+      transform: scale(0);
+    }
+    40% {
+      transform: scale(1);
+    }
+  }
+
+  .app-loader-text {
+    margin-top: 15px;
+    color: #004698;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Estilos para el loader del botón */
+  .button-loader {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+  }
+
+  .button-loader-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: button-loader-bounce 1.4s infinite ease-in-out both;
+  }
+
+  .button-loader-dot:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+
+  .button-loader-dot:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+
+  @keyframes button-loader-bounce {
+    0%, 80%, 100% {
+      transform: scale(0);
+    }
+    40% {
+      transform: scale(1);
+    }
+  }
+
+  /* Estilos para el loader rotativo */
+  .spinnerContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    width: 100%;
+  }
+
+  .spinner {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    border: 4px solid #0000;
+    border-radius: 50%;
+    border-right-color: #299fff;
+    animation: tri-spinner 1s infinite linear;
+  }
+
+  .spinner::before,
+  .spinner::after {
+    content: "";
+    grid-area: 1/1;
+    margin: 2px;
+    border: inherit;
+    border-radius: 50%;
+    animation: tri-spinner 2s infinite;
+  }
+
+  .spinner::after {
+    margin: 8px;
+    animation-duration: 3s;
+  }
+
+  @keyframes tri-spinner {
+    100% {
+      transform: rotate(1turn);
+    }
+  }
+
+  .loader {
+    color: #4a4a4a;
+    font-family: "Poppins",sans-serif;
+    font-weight: 500;
+    font-size: 25px;
+    -webkit-box-sizing: content-box;
+    box-sizing: content-box;
+    height: 40px;
+    padding: 10px 10px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    border-radius: 8px;
+  }
+
+  .words {
+    overflow: hidden;
+  }
+
+  .word {
+    display: block;
+    height: 100%;
+    padding-left: 6px;
+    color: #299fff;
+    animation: cycle-words 5s infinite;
+  }
+
+  @keyframes cycle-words {
+    10% {
+      -webkit-transform: translateY(-105%);
+      transform: translateY(-105%);
+    }
+
+    25% {
+      -webkit-transform: translateY(-100%);
+      transform: translateY(-100%);
+    }
+
+    35% {
+      -webkit-transform: translateY(-205%);
+      transform: translateY(-205%);
+    }
+
+    50% {
+      -webkit-transform: translateY(-200%);
+      transform: translateY(-200%);
+    }
+
+    60% {
+      -webkit-transform: translateY(-305%);
+      transform: translateY(-305%);
+    }
+
+    75% {
+      -webkit-transform: translateY(-300%);
+      transform: translateY(-300%);
+    }
+
+    85% {
+      -webkit-transform: translateY(-405%);
+      transform: translateY(-405%);
+    }
+
+    100% {
+      -webkit-transform: translateY(-400%);
+      transform: translateY(-400%);
+    }
   }
