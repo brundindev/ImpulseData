@@ -765,4 +765,71 @@ async function html2PDFConverter(htmlContent) {
       reject(error);
     }
   });
+}
+
+/**
+ * Ajusta las dimensiones de los canvas de los gráficos para una correcta visualización
+ * @param {HTMLElement} container - Contenedor con el HTML
+ */
+function ajustarDimensionesGraficos(container) {
+  const chartContainers = container.querySelectorAll('.chart-container');
+  
+  chartContainers.forEach(chartContainer => {
+    // Establecer dimensiones explícitas para el canvas
+    const canvas = chartContainer.querySelector('canvas');
+    if (canvas) {
+      canvas.style.width = '100%';
+      canvas.style.maxWidth = '500px';
+      canvas.style.height = '250px';
+      canvas.style.margin = '0 auto';
+    }
+    
+    // Establecer dimensiones explícitas para el contenedor
+    chartContainer.style.width = '100%';
+    chartContainer.style.maxWidth = '500px';
+    chartContainer.style.height = '280px';
+    chartContainer.style.margin = '0 auto 20px auto';
+  });
+}
+
+/**
+ * Añade meta tags y estilos adicionales para asegurar que el PDF se visualice correctamente
+ * @param {HTMLElement} container - Contenedor con el HTML
+ */
+function optimizarVisualizacion(container) {
+  // Añadir metas para optimizar la visualización
+  const head = container.querySelector('head');
+  if (head) {
+    // Meta viewport para escala inicial
+    const metaViewport = document.createElement('meta');
+    metaViewport.name = 'viewport';
+    metaViewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes';
+    head.appendChild(metaViewport);
+    
+    // Estilo para optimizar visualización PDF
+    const optimizationStyle = document.createElement('style');
+    optimizationStyle.textContent = `
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      
+      @media print {
+        html, body {
+          width: 210mm;
+          height: 297mm;
+          margin: 0;
+          padding: 0;
+        }
+      }
+      
+      html, body {
+        font-size: 12pt;
+      }
+    `;
+    head.appendChild(optimizationStyle);
+  }
+  
+  // Ajustar gráficos
+  ajustarDimensionesGraficos(container);
 } 

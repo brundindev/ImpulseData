@@ -752,7 +752,7 @@ class PDFService {
   /**
    * Genera una URL para previsualizar el PDF
    * @param {Uint8Array} pdfBytes - Bytes del PDF
-   * @returns {string} - URL para previsualizar el PDF
+   * @returns {object} - Objeto con la URL y parámetros para visualización
    */
   generarURLPreview(pdfBytes) {
     try {
@@ -775,7 +775,16 @@ class PDFService {
       this.ocultarOverlayGeneracion();
       
       console.log("URL de previsualización generada correctamente");
-      return url;
+      return {
+        url,
+        params: {
+          zoom: "page-fit",
+          view: "FitH",
+          scrollbar: "1",
+          toolbar: "1",
+          navpanes: "1"
+        }
+      };
     } catch (error) {
       console.error("Error al generar URL de previsualización:", error);
       // Asegurarnos de ocultar el overlay en caso de error

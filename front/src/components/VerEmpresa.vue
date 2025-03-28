@@ -33,7 +33,11 @@ export default {
         this.generandoPDF = true;
         const pdfBytes = await PDFService.generarInformeEmpresa(this.empresa);
         this.pdfBytes = pdfBytes; // Guardar los bytes para descargar después
-        this.pdfUrl = PDFService.generarURLPreview(pdfBytes);
+        
+        // Ahora pdfUrl es un objeto con url y parámetros
+        const pdfUrlData = PDFService.generarURLPreview(pdfBytes);
+        this.pdfUrl = pdfUrlData;
+        
         this.mostrarPdfPreview = true;
       } catch (error) {
         console.error('Error al generar PDF:', error);
