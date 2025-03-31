@@ -705,18 +705,30 @@ class PDFService {
    */
   guardarPDF(pdfBytes, nombreArchivo) {
     try {
-      console.log("Iniciando descarga de PDF...");
+      console.log("Iniciando descarga de PDF...", nombreArchivo);
       
       // Verificar los datos recibidos
-      if (!pdfBytes || pdfBytes.length === 0) {
-        console.error("Error: PDF vacío");
-        // Asegurarnos de ocultar el overlay
+      if (!pdfBytes) {
+        console.error("Error: No hay datos de PDF para descargar");
+        this.ocultarOverlayGeneracion();
+        throw new Error("No hay datos de PDF para descargar");
+      }
+
+      if (pdfBytes.length === 0) {
+        console.error("Error: PDF vacío (0 bytes)");
         this.ocultarOverlayGeneracion();
         throw new Error("El PDF generado está vacío.");
       }
       
       // Crear blob con los bytes del PDF
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      
+      // Verificar que el blob tenga contenido
+      if (blob.size === 0) {
+        console.error("Error: Blob del PDF vacío");
+        this.ocultarOverlayGeneracion();
+        throw new Error("Error al procesar el PDF para descarga.");
+      }
       
       // Crear URL para el blob
       const url = window.URL.createObjectURL(blob);
@@ -728,6 +740,8 @@ class PDFService {
       a.style.display = 'none';
       document.body.appendChild(a);
       
+      console.log("Enlace de descarga creado, iniciando descarga...");
+      
       // Hacer clic en el enlace para iniciar la descarga
       a.click();
       
@@ -735,12 +749,13 @@ class PDFService {
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-      }, 100);
+        console.log("Descarga de PDF completada y recursos limpiados");
+      }, 500); // Aumentamos el tiempo para asegurar que se complete la descarga
       
       // Ocultar el overlay una vez completada la descarga
       this.ocultarOverlayGeneracion();
       
-      console.log("Descarga de PDF iniciada correctamente");
+      return true; // Indicar éxito
     } catch (error) {
       console.error("Error al guardar el PDF:", error);
       // Asegurarnos de ocultar el overlay en caso de error

@@ -531,7 +531,9 @@
   <PDFPreviewModal 
     v-if="showPDFPreview" 
     :show="showPDFPreview" 
-    :pdfUrl="pdfPreviewUrl" 
+    :pdfUrl="pdfPreviewUrl"
+    :pdf-bytes="pdfBytes" 
+    :nombre-archivo="`informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`"
     @close="cerrarPreviewPDF" 
     @download="descargarPDF"
   />
@@ -1871,8 +1873,9 @@ const descargarWord = () => {
   }
 };
 
-const showPDFPreview = ref(false);
 const pdfPreviewUrl = ref('');
+const pdfBytes = ref(null);
+const showPDFPreview = ref(false);
 
 // Función para previsualizar un PDF con manejo de errores mejorado
 const previsualizarPDF = async () => {
@@ -1891,12 +1894,14 @@ const previsualizarPDF = async () => {
     
     // Generar el PDF - directamente descargar en lugar de previsualizar si hay error
     try {
-      const pdfBytes = await PDFService.generarInformeEmpresa(empresaActual);
+      const pdfBytesData = await PDFService.generarInformeEmpresa(empresaActual);
+      // Guardar los bytes para la descarga posterior
+      pdfBytes.value = pdfBytesData;
       
       // Intentar crear URL para previsualización
       try {
         // Crear blob y url
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const blob = new Blob([pdfBytesData], { type: 'application/pdf' });
         pdfPreviewUrl.value = URL.createObjectURL(blob);
         
         // Mostrar el modal de previsualización
@@ -1905,7 +1910,7 @@ const previsualizarPDF = async () => {
         console.error("Error al crear previsualización, descargando directamente:", previewError);
         
         // Si falla la previsualización, descargar directamente
-        PDFService.guardarPDF(pdfBytes, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+        PDFService.guardarPDF(pdfBytesData, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
         alert("No se pudo generar la previsualización. El PDF se ha descargado directamente.");
       }
     } catch (pdfError) {
@@ -1925,41 +1930,38 @@ const previsualizarPDF = async () => {
 // Función para descargar el PDF después de la previsualización
 const descargarPDF = async () => {
   try {
-    guardando.value = true;
-    
-    // Generar el PDF
-    try {
-      const pdfBytes = await PDFService.generarInformeEmpresa(empresaActual);
+    // Comprobar si ya tenemos los bytes del PDF
+    if (pdfBytes.value && pdfBytes.value.length > 0) {
+      // Usar los bytes ya generados para descargar
+      PDFService.guardarPDF(pdfBytes.value, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
       
-      // Intentar guardar el PDF
-      try {
-        PDFService.guardarPDF(pdfBytes, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
-      } catch (saveError) {
-        console.error("Error al guardar el PDF:", saveError);
-        alert("No se pudo descargar el PDF. Verifique los permisos de su navegador.");
-        return; // Salir temprano sin cerrar modales si falla la descarga
-      }
-    } catch (pdfError) {
-      console.error("Error al generar el PDF para descarga:", pdfError);
-      alert("Error al generar el PDF. Por favor, inténtelo de nuevo más tarde.");
-      guardando.value = false;
-      return; // Salir temprano sin cerrar modales
-    }
-    
-    // Limpiar la URL del objeto
-    if (pdfPreviewUrl.value) {
+      // Limpiar después de la descarga
       URL.revokeObjectURL(pdfPreviewUrl.value);
       pdfPreviewUrl.value = null;
+      pdfBytes.value = null;
+      showPDFPreview.value = false;
+      
+      return;
     }
     
-    // Cerrar modales
-    showPDFPreview.value = false;
-    showViewModal.value = false;  // Asegurar que el modal de detalles también se cierre
+    // Si no tenemos bytes, generar el PDF nuevamente
+    guardando.value = true;
     
-    guardando.value = false;
+    try {
+      const pdfBytesData = await PDFService.generarInformeEmpresa(empresaActual);
+      PDFService.guardarPDF(pdfBytesData, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+    } catch (error) {
+      console.error("Error al generar o descargar el PDF:", error);
+      alert("No se pudo descargar el PDF. Por favor, inténtelo de nuevo más tarde.");
+    } finally {
+      guardando.value = false;
+      
+      // Cerrar modales
+      showPDFPreview.value = false;
+      showViewModal.value = false;
+    }
   } catch (error) {
     console.error("Error inesperado al descargar el PDF:", error);
-    guardando.value = false;
     alert("Ha ocurrido un error inesperado. Por favor, inténtelo de nuevo.");
   }
 };

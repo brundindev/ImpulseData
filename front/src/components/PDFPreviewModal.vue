@@ -163,9 +163,18 @@ const iframeLoaded = () => {
 
 const descargarPDF = () => {
   if (props.pdfBytes) {
-    PDFService.guardarPDF(props.pdfBytes, props.nombreArchivo);
+    try {
+      console.log("Iniciando descarga de PDF desde el modal...", props.nombreArchivo);
+      PDFService.guardarPDF(props.pdfBytes, props.nombreArchivo);
+      // Emitir evento de descarga para notificar al componente padre
+      emit('download');
+    } catch (error) {
+      console.error('Error al descargar el PDF:', error);
+      alert('Error al descargar el PDF. Inténtelo de nuevo más tarde.');
+    }
   } else {
     console.error('No hay datos de PDF para descargar');
+    alert('No hay datos de PDF disponibles para descargar. Por favor, cierre y vuelva a intentarlo.');
   }
 };
 
