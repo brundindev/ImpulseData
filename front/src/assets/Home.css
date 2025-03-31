@@ -68,13 +68,35 @@
   border-radius: 8px;
   border: 1px dashed var(--border-color);
 }
+/* .main-content{
+  position: relative;
+  width: 100%;
+  padding:20px;
+  z-index: 2;
+  min-height: calc(100vh - 100px);
+} */
 
-.dashboard-container {
+/* Prueba con main-content */
+/* Reemplazar o añadir estos estilos */
+/*.dashboard-container {
+  min-height: 100vh;
+  overflow-y: auto;
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
   position: relative;
   z-index: 1;
+} */
+
+.dashboard-container {
+  width:100%;
+  width: 100%;
+  padding:20px;
+  display:flex;
+  flex-direction: column;
+  padding-bottom: 100px;
+  position: relative;
+  z-index: 2;
 }
 
 .forms-section, .stats-section, .dashboard-header, .alicante-banner-showcase {
@@ -1127,6 +1149,8 @@
   height: 100%;
   overflow: hidden;
   z-index: -9;
+  /* scrollbar */
+  pointer-events: none;
 }
 
 .gradient-sphere {
@@ -1296,6 +1320,8 @@
   left: 0;
   z-index: -12;
   overflow: hidden;
+  /* scrollbar */
+  pointer-events: none;
 }
 
 .wave {
@@ -1433,22 +1459,22 @@
 }
 
 /* Estilizar el scrollbar para todos los componentes */
-::-webkit-scrollbar {
+.dashboard-container::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-::-webkit-scrollbar-track {
+.dashboard-container::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb {
+.dashboard-container::-webkit-scrollbar-thumb {
   background: rgba(0, 70, 152, 0.5);
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.dashboard-container::-webkit-scrollbar-thumb:hover {
   background: var(--primary-color);
 }
 
@@ -1528,7 +1554,11 @@
   background: linear-gradient(180deg, #1D2024 0%, black 50%, black 100%);
   color: white;
   position: relative;
-  overflow: hidden;
+  /* cambios para el scrollbar */
+  overflow-y:auto;
+  /* cambios para que se vea en toda la pagina */
+  display: flex;
+  flex-direction: column;
 }
 
 .welcome-page::before {
@@ -1752,13 +1782,13 @@
 }
 
 /* Mejorando el contraste de los contenedores */
-.welcome-page {
+/* .welcome-page {
   min-height: calc(100vh - 4.2em);
   background: linear-gradient(180deg, #1D2024 0%, black 50%, black 100%);
   color: white;
   position: relative;
   overflow: hidden;
-}
+} */
 
 /* Mejorando el contraste de los inputs en modales */
 .form-group input, 
