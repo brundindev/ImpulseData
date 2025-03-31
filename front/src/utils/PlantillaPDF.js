@@ -1,5 +1,4 @@
 // Archivo para crear una plantilla HTML que se convertirá a PDF con html2pdf
-import html2pdf from 'html2pdf.js';
 import Chart from 'chart.js/auto';
 
 export async function crearPlantillaPDF() {

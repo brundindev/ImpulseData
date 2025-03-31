@@ -1,0 +1,88 @@
+<svg width="800" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo del documento -->
+  <rect width="800" height="1000" fill="white"/>
+  
+  <!-- Cabecera -->
+  <rect x="40" y="40" width="180" height="60" fill="#004698" rx="4"/>
+  <text x="130" y="80" font-family="Arial" font-size="18" fill="white" text-anchor="middle" font-weight="bold">ImpulseData</text>
+  
+  <text x="700" y="70" font-family="Arial" font-size="14" fill="#333" text-anchor="end">Fecha: <tspan font-weight="bold">31 de mayo, 2025</tspan></text>
+  
+  <!-- Título -->
+  <text x="400" y="150" font-family="Arial" font-size="24" fill="#004698" text-anchor="middle" font-weight="bold">Informe Empresarial</text>
+  <text x="400" y="180" font-family="Arial" font-size="16" fill="#666" text-anchor="middle">Empresa Ejemplo S.L.</text>
+  
+  <!-- Sección Información General -->
+  <text x="40" y="230" font-family="Arial" font-size="18" fill="#004698" font-weight="bold">Información General</text>
+  <line x1="40" y1="240" x2="760" y2="240" stroke="#004698" stroke-width="2"/>
+  
+  <!-- Grid de datos -->
+  <rect x="40" y="260" width="350" height="80" fill="#f7f9fc" rx="4"/>
+  <rect x="40" y="260" width="4" height="80" fill="#004698"/>
+  <text x="55" y="280" font-family="Arial" font-size="14" fill="#004698" font-weight="bold">Nombre de la empresa</text>
+  <text x="55" y="305" font-family="Arial" font-size="14" fill="#333">Empresa Ejemplo S.L.</text>
+  
+  <rect x="410" y="260" width="350" height="80" fill="#f7f9fc" rx="4"/>
+  <rect x="410" y="260" width="4" height="80" fill="#004698"/>
+  <text x="425" y="280" font-family="Arial" font-size="14" fill="#004698" font-weight="bold">Fecha de creación</text>
+  <text x="425" y="305" font-family="Arial" font-size="14" fill="#333">15 de enero, 2020</text>
+  
+  <rect x="40" y="360" width="350" height="80" fill="#f7f9fc" rx="4"/>
+  <rect x="40" y="360" width="4" height="80" fill="#004698"/>
+  <text x="55" y="380" font-family="Arial" font-size="14" fill="#004698" font-weight="bold">Ciudad</text>
+  <text x="55" y="405" font-family="Arial" font-size="14" fill="#333">Alicante</text>
+  
+  <rect x="410" y="360" width="350" height="80" fill="#f7f9fc" rx="4"/>
+  <rect x="410" y="360" width="4" height="80" fill="#004698"/>
+  <text x="425" y="380" font-family="Arial" font-size="14" fill="#004698" font-weight="bold">Descripción</text>
+  <text x="425" y="405" font-family="Arial" font-size="14" fill="#333">Empresa dedicada al desarrollo de software.</text>
+  
+  <!-- Sección Departamentos -->
+  <text x="40" y="480" font-family="Arial" font-size="18" fill="#004698" font-weight="bold">Departamentos</text>
+  <line x1="40" y1="490" x2="760" y2="490" stroke="#004698" stroke-width="2"/>
+  
+  <!-- Grid de departamentos -->
+  <rect x="40" y="510" width="350" height="60" fill="#f7f9fc" rx="4"/>
+  <rect x="40" y="510" width="4" height="60" fill="#004698"/>
+  <text x="55" y="535" font-family="Arial" font-size="14" fill="#004698" font-weight="bold">Desarrollo</text>
+  <text x="55" y="555" font-family="Arial" font-size="14" fill="#333">12 empleados</text>
+  
+  <rect x="410" y="510" width="350" height="60" fill="#f7f9fc" rx="4"/>
+  <rect x="410" y="510" width="4" height="60" fill="#004698"/>
+  <text x="425" y="535" font-family="Arial" font-size="14" fill="#004698" font-weight="bold">Marketing</text>
+  <text x="425" y="555" font-family="Arial" font-size="14" fill="#333">5 empleados</text>
+  
+  <!-- Sección Estadísticas -->
+  <text x="40" y="610" font-family="Arial" font-size="18" fill="#004698" font-weight="bold">Estadísticas</text>
+  <line x1="40" y1="620" x2="760" y2="620" stroke="#004698" stroke-width="2"/>
+  
+  <!-- Gráficos simulados -->
+  <rect x="40" y="640" width="350" height="200" fill="#f7f9fc" rx="4" stroke="#ddd"/>
+  <text x="215" y="665" font-family="Arial" font-size="14" fill="#333" text-anchor="middle" font-weight="bold">Distribución por departamento</text>
+  
+  <!-- Gráfico circular 1 -->
+  <circle cx="215" cy="745" r="75" fill="white"/>
+  <path d="M 215 745 L 215 670 A 75 75 0 0 1 290 745 Z" fill="#004698"/>
+  <path d="M 215 745 L 290 745 A 75 75 0 0 1 215 820 Z" fill="#00a0de"/>
+  <path d="M 215 745 L 215 820 A 75 75 0 0 1 140 745 Z" fill="#e63946"/>
+  <path d="M 215 745 L 140 745 A 75 75 0 0 1 215 670 Z" fill="#ffb700"/>
+  <circle cx="215" cy="745" r="30" fill="white"/>
+  
+  <rect x="410" y="640" width="350" height="200" fill="#f7f9fc" rx="4" stroke="#ddd"/>
+  <text x="585" y="665" font-family="Arial" font-size="14" fill="#333" text-anchor="middle" font-weight="bold">Formaciones por tipo</text>
+  
+  <!-- Gráfico circular 2 -->
+  <circle cx="585" cy="745" r="75" fill="white"/>
+  <path d="M 585 745 L 585 670 A 75 75 0 0 1 660 745 Z" fill="#004698"/>
+  <path d="M 585 745 L 660 745 A 75 75 0 0 1 585 820 Z" fill="#00a0de"/>
+  <path d="M 585 745 L 585 820 A 75 75 0 0 1 510 745 Z" fill="#e63946"/>
+  <circle cx="585" cy="745" r="30" fill="white"/>
+  
+  <!-- Pie de página -->
+  <line x1="40" y1="920" x2="760" y2="920" stroke="#ddd" stroke-width="1"/>
+  <text x="400" y="945" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">Este es un documento generado automáticamente por ImpulseData - Alicante Futura</text>
+  <text x="400" y="965" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">© 2025 ImpulseData. Todos los derechos reservados.</text>
+  
+  <!-- Marca de agua -->
+  <text x="400" y="500" font-family="Arial" font-size="60" fill="rgba(0,70,152,0.03)" text-anchor="middle" font-weight="bold" transform="rotate(-45 400 500)">ImpulseData Canva Preview</text>
+</svg> 

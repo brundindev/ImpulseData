@@ -9,7 +9,7 @@
         :aria-label="isOpen ? 'Cerrar asistente' : 'Abrir asistente'"
       >
         <div class="wrapper">
-          <span>{{ isOpen ? 'Cerrar' : 'ImpulseAI' }}</span>
+          <span class="button-text" :class="{ 'text-change': textChanging }">{{ isOpen ? 'Cerrar' : 'ImpulseAI' }}</span>
           <div class="circle circle-12"></div>
           <div class="circle circle-11"></div>
           <div class="circle circle-10"></div>
@@ -24,6 +24,12 @@
           <div class="circle circle-1"></div>
         </div>
       </button>
+      <!-- Ondas para el botón cuando está cerrado -->
+      <div v-if="!isOpen" class="ripple-container">
+        <div class="ripple ripple-1"></div>
+        <div class="ripple ripple-2"></div>
+        <div class="ripple ripple-3"></div>
+      </div>
     </div>
 
     <!-- Ventana de chat -->
@@ -35,7 +41,10 @@
         </div>
         <div class="assistant-info">
           <h3 class="title-white">Asistente ImpulseData</h3>
-          <p>Responderé tus consultas sobre la plataforma</p>
+          <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span class="status-text">En línea 24/7</span>
+          </div>
         </div>
         <button class="close-button" @click="toggleChat" aria-label="Cerrar chat">
           ✕
@@ -165,6 +174,7 @@ const isTyping = ref(false);
 const showSuggestions = ref(true);
 const chatContainer = ref(null);
 const showMoreQuestions = ref(false);
+const textChanging = ref(false);
 
 // Lista de preguntas sugeridas
 const suggestedQuestions = ref([
@@ -266,15 +276,29 @@ Si te preguntan sobre temas no relacionados, responde amablemente que solo puede
 Tus respuestas deben ser claras, concisas y en español.
 `;
 
-// Abrir/cerrar el chat y manejar la creación de empresa
+// Alternar la visibilidad del chat
 const toggleChat = () => {
-  isOpen.value = !isOpen.value;
-  if (isOpen.value) {
+  textChanging.value = true;
+  
+  // Guardar el valor actual antes de cambiarlo
+  const willBeOpen = !isOpen.value;
+  
+  setTimeout(() => {
+    isOpen.value = willBeOpen;
+    setTimeout(() => {
+      textChanging.value = false;
+    }, 200);
+  }, 150);
+  
+  if (willBeOpen) {
+    // El chat se va a abrir, preparar el scroll después de que esté visible
     nextTick(() => {
-      if (chatContainer.value) {
-        chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
-      }
+      scrollToBottom();
     });
+  } else {
+    // El chat se va a cerrar, limpiar entradas
+    isTyping.value = false;
+    userInput.value = '';
   }
 };
 
@@ -566,6 +590,52 @@ onMounted(() => {
   bottom: 25px;
   right: 25px;
   z-index: 1001;
+  overflow: hidden;
+  transition: background 0.5s ease;
+}
+
+/* Estado cuando el chat está abierto */
+.uiverse.chat-open {
+  --c-radial-inner: #ff4d4d;
+  --c-radial-outer: #ff8080;
+  --c-shadow: rgba(255, 77, 77, 0.5);
+  --c-shadow-inset-top: rgba(255, 77, 77, 0.9);
+  --c-shadow-inset-bottom: rgba(255, 128, 128, 0.8);
+  animation: pulse 0.5s ease-in-out;
+}
+
+/* Animación para el cambio de texto del botón */
+.button-text {
+  display: inline-block;
+  position: relative;
+  z-index: 2;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  min-width: 80px; /* Asegurar que el ancho sea consistente */
+  font-weight: 700;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.button-text.text-change {
+  transform: translateY(-20px) rotateX(90deg);
+  opacity: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Agregar animación de rotación para los círculos cuando el botón está cerrado */
+.uiverse.chat-open .circle {
+  animation-duration: calc(var(--duration) * 0.7) !important;
 }
 
 .uiverse:before {
@@ -1189,6 +1259,97 @@ onMounted(() => {
     font-size: 20px;
     bottom: 20px;
     right: 20px;
+  }
+}
+
+/* Animación de ondas para el botón */
+.ripple-container {
+  position: absolute;
+  bottom: 12px;
+  right: 70px;
+  transform: translate(50%, 50%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ripple {
+  position: absolute;
+  width: 140px;
+  height: 48px;
+  border-radius: 30px;
+  opacity: 0;
+  border: 2px solid var(--c-radial-inner);
+  animation: ripple-effect 1.6s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+}
+
+.ripple-1 {
+  animation-delay: 0s;
+}
+
+.ripple-2 {
+  animation-delay: 0.5s;
+}
+
+.ripple-3 {
+  animation-delay: 1s;
+}
+
+@keyframes ripple-effect {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Estilos para el indicador de estado */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #2ecc71;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 6px #2ecc71;
+  animation: pulse-green 2s infinite;
+}
+
+.status-dot::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(46, 204, 113, 0.4);
+  transform: scale(1.5);
+  animation: pulse-green 2s infinite;
+}
+
+.status-text {
+  color: white;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
   }
 }
 </style> 

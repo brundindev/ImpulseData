@@ -2,7 +2,7 @@
   <div v-if="show" class="pdf-preview-modal">
     <div class="pdf-preview-content">
       <div class="pdf-preview-header">
-        <h2>Previsualización del PDF</h2>
+        <h2>Previsualización del diseño</h2>
         <button class="close-button" @click="$emit('close')">&times;</button>
       </div>
       <div class="pdf-preview-body">
@@ -13,19 +13,34 @@
               color="primary"
               size="64"
             ></v-progress-circular>
-            <div class="mt-3 text-body-1">Cargando documento...</div>
+            <div class="mt-3 text-body-1">Cargando diseño...</div>
           </div>
-          <iframe 
-            v-show="!cargando"
-            ref="pdfIframe"
-            :src="pdfUrlCompleta" 
-            style="width: 100%; height: 100%; border: none;"
-            @load="iframeLoaded"
-          ></iframe>
+          
+          <!-- Previsualización de imagen para Canva -->
+          <div v-show="!cargando" class="canva-preview">
+            <img 
+              :src="imageSrc" 
+              alt="Previsualización del diseño" 
+              class="canva-preview-image" 
+              @load="imageLoaded"
+              @error="handleImageError"
+            />
+            <div v-if="imageError" class="error-message">
+              <p>No se pudo cargar la previsualización del diseño.</p>
+              <p>Se ha generado una vista simulada del informe.</p>
+            </div>
+          </div>
         </div>
       </div>
       <div class="pdf-preview-footer">
         <button class="button-cancel" @click="$emit('close')">Cancelar</button>
+        <div class="canva-edit-container" v-if="canvaData && canvaData.designID">
+          <button class="button-edit" @click="editarEnCanva">
+            <span class="canva-icon">&#9998;</span>
+            Editar en Canva
+          </button>
+          <div class="canva-tip">Personaliza colores, fuentes y más con el editor de Canva</div>
+        </div>
         <button class="buttonDownload" @click="descargarPDF">Descargar PDF</button>
       </div>
     </div>
@@ -33,8 +48,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
-import PDFService from '../services/PDFService';
+import { ref, watch, onMounted, computed } from 'vue';
 
 const props = defineProps({
   show: {
@@ -42,11 +56,11 @@ const props = defineProps({
     required: true
   },
   pdfUrl: {
-    type: [String, Object],
+    type: String,
     required: true
   },
-  pdfBytes: {
-    type: Uint8Array,
+  canvaData: {
+    type: Object,
     default: null
   },
   nombreArchivo: {
@@ -55,117 +69,51 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['close', 'download']);
+const emit = defineEmits(['close', 'download', 'edit-canva']);
 
-const pdfIframe = ref(null);
 const cargando = ref(true);
+const imageError = ref(false);
 
-// Construir la URL completa con parámetros de visualización
-const pdfUrlCompleta = computed(() => {
+// Determinar la URL de la imagen, manejando rutas relativas y absolutas
+const imageSrc = computed(() => {
   if (!props.pdfUrl) return '';
   
-  // Comprobar si pdfUrl es un objeto o una cadena
-  if (typeof props.pdfUrl === 'object' && props.pdfUrl.url) {
-    const baseUrl = props.pdfUrl.url;
-    const params = props.pdfUrl.params || {};
-    
-    // Construir fragmentos para los parámetros
-    const fragments = Object.entries(params)
-      .map(([key, value]) => `${key}=${value}`)
-      .join('&');
-    
-    return fragments ? `${baseUrl}#${fragments}` : baseUrl;
-  } else {
-    // Tratar como cadena (para compatibilidad con versiones anteriores)
+  // Si la URL comienza con "/" o "./", es una ruta relativa
+  if (props.pdfUrl.startsWith('/')) {
+    // Para rutas relativas que vienen del servidor, usamos un SVG de muestra
+    return '/placeholder-report.svg';
+  }
+  
+  // Si es una URL completa
+  if (props.pdfUrl.startsWith('http')) {
     return props.pdfUrl;
   }
+  
+  // En caso de error, usar una imagen de respaldo
+  return '/placeholder-report.svg';
 });
 
-// Listener para mensajes de postMessage para comunicarse con el visor PDF
-const handleMessage = (event) => {
-  // Solo procesar mensajes relevantes para ajustar el PDF
-  if (event.data && event.data.type === 'pdfViewerReady') {
-    // Enviar mensaje para ajustar el zoom
-    event.source.postMessage({
-      type: 'pdfViewerCommand',
-      command: 'setZoom',
-      value: 'page-fit'
-    }, '*');
-  }
+const imageLoaded = () => {
+  cargando.value = false;
+  imageError.value = false;
 };
 
-// Eventos del ciclo de vida para manejar el listener de mensajes
-onMounted(() => {
-  window.addEventListener('message', handleMessage);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('message', handleMessage);
-});
-
-const iframeLoaded = () => {
-  // Dar un poco de tiempo para que se cargue el PDF completamente
-  setTimeout(() => {
-    cargando.value = false;
-    
-    // Intentar ajustar la visualización directamente en el iframe después de cargar
-    try {
-      const iframe = pdfIframe.value;
-      if (iframe && iframe.contentWindow) {
-        // Algunos visores PDF admiten mensajes para controlar el zoom
-        iframe.contentWindow.postMessage({
-          type: 'pdfViewerCommand',
-          command: 'setZoom',
-          value: 'page-fit'
-        }, '*');
-        
-        // Intentar aplicar estilos para maximizar la visualización
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        if (iframeDoc) {
-          // Insertar estilos para el visor de PDF
-          const style = iframeDoc.createElement('style');
-          style.textContent = `
-            body, html {
-              margin: 0 !important;
-              padding: 0 !important;
-              overflow: auto !important;
-            }
-            
-            .pdfViewer .page {
-              margin: 0 auto !important;
-              border: none !important;
-            }
-            
-            #viewer {
-              margin: 0 !important;
-              width: 100% !important;
-            }
-            
-            .pdfViewer {
-              width: 100% !important;
-            }
-          `;
-          iframeDoc.head.appendChild(style);
-          
-          // Buscar el elemento del visor y ajustar
-          const viewer = iframeDoc.getElementById('viewer');
-          if (viewer) {
-            viewer.style.transform = 'scale(1)';
-            viewer.style.transformOrigin = 'center top';
-          }
-        }
-      }
-    } catch (error) {
-      console.log('No se pudo ajustar el zoom automáticamente:', error);
-    }
-  }, 500);
+const handleImageError = () => {
+  console.error('Error al cargar la imagen de previsualización');
+  cargando.value = false;
+  imageError.value = true;
+  
+  // Intentar cargar una imagen de respaldo
+  const img = document.querySelector('.canva-preview-image');
+  if (img) {
+    img.src = '/placeholder-report.svg';
+  }
 };
 
 const descargarPDF = () => {
-  if (props.pdfBytes) {
+  if (props.canvaData) {
     try {
-      console.log("Iniciando descarga de PDF desde el modal...", props.nombreArchivo);
-      PDFService.guardarPDF(props.pdfBytes, props.nombreArchivo);
+      console.log("Iniciando descarga de PDF desde Canva...", props.nombreArchivo);
       // Emitir evento de descarga para notificar al componente padre
       emit('download');
     } catch (error) {
@@ -173,14 +121,31 @@ const descargarPDF = () => {
       alert('Error al descargar el PDF. Inténtelo de nuevo más tarde.');
     }
   } else {
-    console.error('No hay datos de PDF para descargar');
-    alert('No hay datos de PDF disponibles para descargar. Por favor, cierre y vuelva a intentarlo.');
+    console.error('No hay datos del diseño para descargar');
+    alert('No hay datos disponibles para descargar. Por favor, cierre y vuelva a intentarlo.');
   }
+};
+
+const editarEnCanva = () => {
+  emit('edit-canva');
 };
 
 watch(() => props.show, (newVal) => {
   if (newVal) {
     cargando.value = true;
+  }
+});
+
+onMounted(() => {
+  // Precargar la imagen para mejorar la experiencia de usuario
+  if (props.pdfUrl) {
+    const img = new Image();
+    img.src = props.pdfUrl;
+    img.onload = () => {
+      if (props.show) {
+        cargando.value = false;
+      }
+    };
   }
 });
 </script>
@@ -206,23 +171,104 @@ watch(() => props.show, (newVal) => {
   background-color: #f5f5f5;
 }
 
-/* Ajustes específicos para el iframe del PDF */
-iframe {
-  margin: 0;
-  padding: 0;
-  transform-origin: center top;
-  display: block;
+/* Estilos para la previsualización de Canva */
+.canva-preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+  overflow: auto;
 }
 
-/* Ajustes para PDF embebido */
-:deep(embed[type="application/pdf"]) {
-  width: 100% !important;
-  height: 100% !important;
+.canva-preview-image {
+  max-width: 95%;
+  max-height: 95%;
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
 }
 
-/* Ajustes para visualizador de PDF de Chrome */
-:deep(.pdf-viewer-container) {
-  width: 100% !important;
-  height: 100% !important;
+/* Estilos para el botón y mensaje de Canva */
+.canva-edit-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.button-edit {
+  background-color: #00C4CC; /* Color de Canva */
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.button-edit:hover {
+  background-color: #00A8AE;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.canva-icon {
+  font-size: 16px;
+}
+
+.canva-tip {
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+  text-align: center;
+  max-width: 160px;
+}
+
+.button-cancel {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 9px 18px;
+  border-radius: 4px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.buttonDownload {
+  background-color: #004698;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.buttonDownload:hover {
+  background-color: #003570;
+}
+
+/* Estilos para el mensaje de error */
+.error-message {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 15px;
+  text-align: center;
+  border-radius: 4px;
+  margin: 0 20px;
+}
+
+.error-message p {
+  margin: 5px 0;
 }
 </style>

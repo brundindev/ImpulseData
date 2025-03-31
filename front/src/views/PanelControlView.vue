@@ -465,12 +465,12 @@ const cargarDatos = async (forzarRecarga = false) => {
       
       // Todas las actividades
       const todasActividades = [
-        { tipo: 'empresa', descripcion: 'Se ha actualizado la información de Alicante Futura', fecha: new Date(2023, 2, 15), empresaId: 1, creadorEmail: 'user@example.com' },
-        { tipo: 'departamento', descripcion: 'Nuevo departamento: Marketing', fecha: new Date(2023, 2, 12), empresaId: 1, creadorEmail: 'user@example.com' },
-        { tipo: 'formacion', descripcion: 'Formación completada: Desarrollo Web', fecha: new Date(2023, 2, 10), empresaId: 1, creadorEmail: 'user@example.com' },
-        { tipo: 'centro', descripcion: 'Nuevo centro: Oficina Distrito 2', fecha: new Date(2023, 2, 5), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
-        { tipo: 'departamento', descripcion: 'Nuevo departamento: Atención Ciudadana', fecha: new Date(2023, 2, 8), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
-        { tipo: 'formacion', descripcion: 'Formación iniciada: Normativa Urbanística', fecha: new Date(2023, 2, 2), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' }
+        { tipo: 'empresa', descripcion: 'Se ha actualizado la información de Alicante Futura', fecha: new Date(2025, 2, 15), empresaId: 1, creadorEmail: 'admin@impulsedata.com' },
+        { tipo: 'departamento', descripcion: 'Nuevo departamento: Marketing', fecha: new Date(2025, 2, 12), empresaId: 1, creadorEmail: 'user@example.com' },
+        { tipo: 'formacion', descripcion: 'Formación completada: Desarrollo Web', fecha: new Date(2025, 2, 10), empresaId: 1, creadorEmail: 'user@example.com' },
+        { tipo: 'centro', descripcion: 'Nuevo centro: Oficina Distrito 2', fecha: new Date(2025, 2, 5), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
+        { tipo: 'departamento', descripcion: 'Nuevo departamento: Atención Ciudadana', fecha: new Date(2025, 2, 8), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' },
+        { tipo: 'formacion', descripcion: 'Formación iniciada: Normativa Urbanística', fecha: new Date(2025, 2, 2), empresaId: 2, creadorEmail: 'ayuntamiento@alicante.es' }
       ];
       
       // Filtrar actividades: mostrar las que pertenecen a las empresas del usuario

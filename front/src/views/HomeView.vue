@@ -532,10 +532,11 @@
     v-if="showPDFPreview" 
     :show="showPDFPreview" 
     :pdfUrl="pdfPreviewUrl"
-    :pdf-bytes="pdfBytes" 
+    :canva-data="canvaData" 
     :nombre-archivo="`informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`"
     @close="cerrarPreviewPDF" 
-    @download="descargarPDF"
+    @download="descargarPDFPreview"
+    @edit-canva="editarEnCanva"
   />
 </template>
 
@@ -1874,10 +1875,10 @@ const descargarWord = () => {
 };
 
 const pdfPreviewUrl = ref('');
-const pdfBytes = ref(null);
+const canvaData = ref(null);
 const showPDFPreview = ref(false);
 
-// Función para previsualizar un PDF con manejo de errores mejorado
+// Función para previsualizar un PDF con la API de Canva
 const previsualizarPDF = async () => {
   try {
     // Indicar que estamos cargando
@@ -1888,34 +1889,32 @@ const previsualizarPDF = async () => {
     
     // Limpiar cualquier URL previa
     if (pdfPreviewUrl.value) {
-      URL.revokeObjectURL(pdfPreviewUrl.value);
       pdfPreviewUrl.value = null;
     }
     
-    // Generar el PDF - directamente descargar en lugar de previsualizar si hay error
+    // Generar el PDF usando Canva
     try {
-      const pdfBytesData = await PDFService.generarInformeEmpresa(empresaActual);
-      // Guardar los bytes para la descarga posterior
-      pdfBytes.value = pdfBytesData;
+      const canvaResponse = await PDFService.generarInformeEmpresa(empresaActual);
+      // Guardar los datos de la respuesta de Canva
+      canvaData.value = canvaResponse;
       
-      // Intentar crear URL para previsualización
+      // Obtener URL para previsualización
       try {
-        // Crear blob y url
-        const blob = new Blob([pdfBytesData], { type: 'application/pdf' });
-        pdfPreviewUrl.value = URL.createObjectURL(blob);
+        const previewData = PDFService.generarURLPreview(canvaResponse);
+        pdfPreviewUrl.value = previewData.url;
         
         // Mostrar el modal de previsualización
         showPDFPreview.value = true;
       } catch (previewError) {
-        console.error("Error al crear previsualización, descargando directamente:", previewError);
+        console.error("Error al crear previsualización de Canva:", previewError);
         
-        // Si falla la previsualización, descargar directamente
-        PDFService.guardarPDF(pdfBytesData, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
-        alert("No se pudo generar la previsualización. El PDF se ha descargado directamente.");
+        // Si falla la previsualización, abrir directamente en Canva
+        PDFService.abrirEnCanva(canvaResponse.designID);
+        alert("No se pudo generar la previsualización. Se ha abierto el diseño en Canva.");
       }
-    } catch (pdfError) {
-      console.error("Error grave al generar el PDF:", pdfError);
-      alert("Error al generar el PDF. Por favor, inténtelo de nuevo más tarde.");
+    } catch (canvaError) {
+      console.error("Error al generar el diseño en Canva:", canvaError);
+      alert("Error al generar el diseño en Canva. Por favor, inténtelo de nuevo más tarde.");
     }
     
     // Finalizar carga
@@ -1927,42 +1926,21 @@ const previsualizarPDF = async () => {
   }
 };
 
-// Función para descargar el PDF después de la previsualización
-const descargarPDF = async () => {
-  try {
-    // Comprobar si ya tenemos los bytes del PDF
-    if (pdfBytes.value && pdfBytes.value.length > 0) {
-      // Usar los bytes ya generados para descargar
-      PDFService.guardarPDF(pdfBytes.value, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
-      
-      // Limpiar después de la descarga
-      URL.revokeObjectURL(pdfPreviewUrl.value);
-      pdfPreviewUrl.value = null;
-      pdfBytes.value = null;
-      showPDFPreview.value = false;
-      
-      return;
-    }
-    
-    // Si no tenemos bytes, generar el PDF nuevamente
-    guardando.value = true;
-    
-    try {
-      const pdfBytesData = await PDFService.generarInformeEmpresa(empresaActual);
-      PDFService.guardarPDF(pdfBytesData, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
-    } catch (error) {
-      console.error("Error al generar o descargar el PDF:", error);
-      alert("No se pudo descargar el PDF. Por favor, inténtelo de nuevo más tarde.");
-    } finally {
-      guardando.value = false;
-      
-      // Cerrar modales
-      showPDFPreview.value = false;
-      showViewModal.value = false;
-    }
-  } catch (error) {
-    console.error("Error inesperado al descargar el PDF:", error);
-    alert("Ha ocurrido un error inesperado. Por favor, inténtelo de nuevo.");
+// Función para descargar el PDF desde Canva
+const descargarPDFPreview = () => {
+  if (canvaData.value) {
+    PDFService.guardarPDF(canvaData.value, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
+  } else {
+    alert("No hay un diseño disponible para descargar. Por favor, genere uno nuevo.");
+  }
+};
+
+// Función para editar el diseño en Canva
+const editarEnCanva = () => {
+  if (canvaData.value && canvaData.value.designID) {
+    PDFService.abrirEnCanva(canvaData.value.designID);
+  } else {
+    alert("No se puede abrir el diseño en Canva. Por favor, genere uno nuevo.");
   }
 };
 
@@ -1970,9 +1948,11 @@ const descargarPDF = async () => {
 const cerrarPreviewPDF = () => {
   // Limpiar la URL y cerrar todos los modales
   if (pdfPreviewUrl.value) {
-    URL.revokeObjectURL(pdfPreviewUrl.value);
     pdfPreviewUrl.value = null;
   }
+  
+  // Limpiar los datos de Canva
+  canvaData.value = null;
   
   showPDFPreview.value = false;
   showViewModal.value = false; // Asegurar que el modal de detalles también se cierre
