@@ -127,20 +127,25 @@ class PDFService {
         
         // Configuración para html2pdf
         const options = {
-          margin: [15, 15, 15, 15], // top, right, bottom, left
+          margin: 0, // Eliminar todos los márgenes
           filename: `informe_${empresa.nombre}.pdf`,
           image: { 
             type: 'jpeg', 
-            quality: 1.0 
+            quality: 1.0,
+            allowTaint: true,
+            useCORS: true
           },
           html2canvas: { 
             scale: 2, 
             useCORS: true,
-            logging: false,
-            letterRendering: true,
             allowTaint: true,
+            logging: true,
+            letterRendering: true,
+            imageTimeout: 0,
             backgroundColor: '#FFFFFF',
-            windowWidth: 210 * 3.78 // Para asegurar que se vea correctamente a tamaño A4
+            windowWidth: 210 * 3.78, // Para asegurar que se vea correctamente a tamaño A4
+            x: 0,
+            y: 0
           },
           jsPDF: { 
             unit: 'mm', 
@@ -148,9 +153,11 @@ class PDFService {
             orientation: 'portrait',
             compress: true,
             hotfixes: ['px_scaling'],
-            precision: 16
+            precision: 16,
+            putOnlyUsedFonts: true,
+            margin: 0
           },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'], after: '.page' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'], after: '.pagina' },
           enableLinks: false
         };
         
@@ -162,17 +169,30 @@ class PDFService {
         iframeDoc.open();
         iframeDoc.write(`
           <!DOCTYPE html>
-          <html>
+          <html style="margin:10px; padding:0; overflow:hidden; width:100%; height:100%;">
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Generando PDF...</title>
             <style>
-              body { 
+              html, body { 
                 margin: 0; 
                 padding: 0; 
                 background-color: white;
                 visibility: hidden;
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+              }
+              #pdf-container {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                overflow: hidden;
               }
             </style>
           </head>
@@ -251,10 +271,10 @@ class PDFService {
       // Rellenar departamentos
       if (empresa.departamentos && empresa.departamentos.length > 0) {
           empresa.departamentos.forEach((dept, index) => {
-            if (index < 10) { // Máximo 10 departamentos en la plantilla
-            this.establecerValorInput(container, `departamento-${index}`, dept.nombre);
-          }
-        });
+            if (index < 5) { // Máximo 5 departamentos en la nueva plantilla
+              this.establecerValorInput(container, `departamento-${index}`, dept.nombre);
+            }
+          });
         
         // Ocultar departamentos vacíos
         const departamentosItems = container.querySelectorAll('.departamento-item');
@@ -282,11 +302,11 @@ class PDFService {
       // Rellenar centros
       if (empresa.centros && empresa.centros.length > 0) {
           empresa.centros.forEach((centro, index) => {
-            if (index < 8) { // Máximo 8 centros en la plantilla
-            this.establecerValorInput(container, `centro-${index}-nombre`, centro.nombre);
-            this.establecerValorInput(container, `centro-${index}-direccion`, centro.direccion || 'Dirección no especificada');
-          }
-        });
+            if (index < 3) { // Máximo 3 centros en la nueva plantilla
+              this.establecerValorInput(container, `centro-${index}-nombre`, centro.nombre);
+              this.establecerValorInput(container, `centro-${index}-direccion`, centro.direccion || 'Dirección no especificada');
+            }
+          });
         
         // Ocultar centros vacíos
         const centrosItems = container.querySelectorAll('.centro-item');
@@ -304,12 +324,12 @@ class PDFService {
       // Rellenar formaciones
       if (empresa.formaciones && empresa.formaciones.length > 0) {
           empresa.formaciones.forEach((formacion, index) => {
-            if (index < 6) { // Máximo 6 formaciones en la plantilla
-            this.establecerValorInput(container, `formacion-${index}-nombre`, formacion.nombre);
-            this.establecerValorSelect(container, `formacion-${index}-tipo`, this.formatTipoFormacion(formacion.tipo));
-            this.establecerValorInput(container, `formacion-${index}-duracion`, `${formacion.duracion || 0} horas`);
-          }
-        });
+            if (index < 3) { // Máximo 3 formaciones en la nueva plantilla
+              this.establecerValorInput(container, `formacion-${index}-nombre`, formacion.nombre);
+              this.establecerValorSelect(container, `formacion-${index}-tipo`, this.formatTipoFormacion(formacion.tipo));
+              this.establecerValorInput(container, `formacion-${index}-duracion`, `${formacion.duracion || 0} horas`);
+            }
+          });
         
         // Ocultar formaciones vacías
         const formacionesItems = container.querySelectorAll('.formacion-item');
