@@ -247,6 +247,13 @@ const irAPanelControl = () => {
   router.push('/panel-control');
 };
 
+const mostrarChatbot = computed(() => {
+  const rutaActual = router.currentRoute.value.path;
+  const rutasPublicas = ['/', '/login', '/registro'];
+  
+  return usuario.value && !rutasPublicas.includes(rutaActual);
+});
+
 </script>
 
 <template>
@@ -310,7 +317,7 @@ const irAPanelControl = () => {
 
   <main class="main-content">
     <RouterView />
-    <ChatbotAssistant />
+    <ChatbotAssistant v-if="mostrarChatbot" />
   </main>
 </template>
 
