@@ -1,11 +1,10 @@
 <PDFPreviewModal 
   :show="mostrarPdfPreview" 
   :pdf-url="pdfUrl" 
-  :canva-data="canvaData"
+  :pdf-bytes="pdfBytes"
   :nombre-archivo="`informe_${empresa?.nombre || 'empresa'}.pdf`"
   @close="mostrarPdfPreview = false" 
   @download="descargarPDF" 
-  @edit-canva="editarEnCanva"
 />
 
 <template>
@@ -20,55 +19,44 @@ export default {
     return {
       mostrarPdfPreview: false,
       pdfUrl: '',
-      canvaData: null,
+      pdfBytes: null,
       generandoPDF: false,
     };
   },
 
   methods: {
     /**
-     * Genera el PDF usando Canva y muestra el modal de previsualización
+     * Genera el PDF y muestra el modal de previsualización
      */
     async generarPDF() {
       try {
         this.generandoPDF = true;
-        const canvaResponse = await PDFService.generarInformeEmpresa(this.empresa);
-        this.canvaData = canvaResponse; // Guardar los datos de Canva
+        const pdfBytes = await PDFService.generarInformeEmpresa(this.empresa);
+        this.pdfBytes = pdfBytes; // Guardar los bytes para descargar después
         
-        // Generar URL para previsualización
-        const pdfUrlData = PDFService.generarURLPreview(canvaResponse);
-        this.pdfUrl = pdfUrlData.url;
+        // Crear blob y URL para previsualización
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        this.pdfUrl = URL.createObjectURL(blob);
         
         this.mostrarPdfPreview = true;
       } catch (error) {
-        console.error('Error al generar PDF con Canva:', error);
-        this.$toast.error('Error al generar el informe con Canva. Por favor, inténtelo de nuevo.');
+        console.error('Error al generar PDF:', error);
+        this.$toast.error('Error al generar el PDF. Por favor, inténtelo de nuevo.');
       } finally {
         this.generandoPDF = false;
       }
     },
 
     /**
-     * Descarga el PDF generado por Canva
+     * Descarga el PDF generado
      */
     descargarPDF() {
-      if (this.canvaData) {
-        PDFService.guardarPDF(this.canvaData, `informe_${this.empresa?.nombre || 'empresa'}.pdf`);
+      if (this.pdfBytes) {
+        PDFService.guardarPDF(this.pdfBytes, `informe_${this.empresa?.nombre || 'empresa'}.pdf`);
       } else {
-        this.$toast.error('No hay un diseño disponible para descargar. Por favor, genérelo primero.');
+        this.$toast.error('No hay un PDF disponible para descargar. Por favor, genérelo primero.');
       }
     },
-
-    /**
-     * Abre el diseño en Canva para edición
-     */
-    editarEnCanva() {
-      if (this.canvaData && this.canvaData.designID) {
-        PDFService.abrirEnCanva(this.canvaData.designID);
-      } else {
-        this.$toast.error('No se puede editar el diseño en Canva. Por favor, genere un nuevo informe.');
-      }
-    }
   },
 };
 </script>
