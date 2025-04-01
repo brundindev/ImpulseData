@@ -55,8 +55,7 @@
               id="displayName"
               v-model="displayName"
               class="form-control"
-              disabled
-              readonly
+              placeholder="Tu nombre de usuario"
             />
           </div>
           
@@ -70,6 +69,28 @@
               disabled
               readonly
             />
+          </div>
+          
+          <div v-if="profileSuccess" class="alert alert-success success-box">
+            <div class="success-icon">✓</div>
+            <div class="success-content">
+              <div class="success-title">¡Perfil actualizado!</div>
+              <p>Tu nombre de usuario ha sido actualizado correctamente.</p>
+            </div>
+          </div>
+          
+          <div v-if="profileError" class="alert alert-danger error-box">
+            <div class="error-icon">✖</div>
+            <div class="error-content">
+              <div class="error-title">Error</div>
+              <p>{{ profileError }}</p>
+            </div>
+          </div>
+          
+          <div class="actions">
+            <button type="button" class="btn btn-primary" @click="actualizarPerfil" :disabled="loadingProfile">
+              {{ loadingProfile ? 'Actualizando...' : 'Actualizar Perfil' }}
+            </button>
           </div>
         </div>
 
@@ -243,6 +264,9 @@ const photoURL = ref('');
 const photoSuccess = ref(false);
 const photoError = ref('');
 const photoLoading = ref(false);
+const profileSuccess = ref(false);
+const profileError = ref('');
+const loadingProfile = ref(false);
 
 // Inicializar datos de perfil
 onMounted(async () => {
@@ -258,18 +282,59 @@ onMounted(async () => {
   
   if (user) {
     console.log('Usuario autenticado:', user.email);
-    displayName.value = user.displayName || 'Usuario';
+    console.log('Datos del usuario firebase:', user.displayName, user.email);
+    
+    // Si existe displayName en Firebase, usamos ese
+    if (user.displayName) {
+      displayName.value = user.displayName;
+    } else {
+      // Si no hay displayName en Firebase, buscamos en localStorage
+      try {
+        const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (localUser.displayName) {
+          displayName.value = localUser.displayName;
+        } else if (localUser.nombre) {
+          displayName.value = localUser.nombre;
+        } else {
+          // Último recurso: intentar usar el prefijo del email
+          displayName.value = user.email.split('@')[0];
+        }
+        console.log('Nombre recuperado:', displayName.value);
+      } catch (e) {
+        console.error('Error al recuperar datos del usuario:', e);
+        displayName.value = user.email.split('@')[0]; // Usar email como último recurso
+      }
+    }
+    
     email.value = user.email || '';
     photoURL.value = user.photoURL || '';
   } else {
     console.log('No se pudo obtener el usuario, intentando recuperar datos del localStorage');
-    // Como alternativa, intentamos recuperar el email del usuario desde localStorage
+    // Como alternativa, intentamos recuperar datos del usuario desde localStorage
     try {
       const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+      console.log('Datos del localStorage:', localUser);
+      
       email.value = localUser.email || '';
-      displayName.value = localUser.displayName || localUser.nombre || 'Usuario';
+      
+      // Buscar el nombre en diferentes propiedades posibles
+      if (localUser.displayName) {
+        displayName.value = localUser.displayName;
+      } else if (localUser.nombre) {
+        displayName.value = localUser.nombre;
+      } else if (localUser.name) {
+        displayName.value = localUser.name;
+      } else if (email.value) {
+        // Usar el prefijo del email como último recurso
+        displayName.value = email.value.split('@')[0];
+      } else {
+        displayName.value = 'Usuario';
+      }
+      
+      console.log('Nombre recuperado del localStorage:', displayName.value);
     } catch (e) {
       console.error('Error al recuperar datos del usuario:', e);
+      displayName.value = 'Usuario';
     }
   }
 });
@@ -492,6 +557,92 @@ const actualizarPasswordEnBackend = async (email) => {
     // No propagamos este error ya que la contraseña ya se actualizó en Firebase
   }
 }
+
+const actualizarPerfil = async () => {
+  try {
+    loadingProfile.value = true;
+    profileError.value = '';
+    profileSuccess.value = false;
+
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('No hay usuario autenticado');
+    }
+
+    // Actualizar perfil en Firebase
+    await updateProfile(user, {
+      displayName: displayName.value
+    });
+
+    // Actualizar en el backend
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.warn('No se encontró token de autenticación para actualizar en el backend');
+      } else {
+        // Enviar actualización al backend
+        const response = await fetch('http://localhost:8080/api/users/update-profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            nombreUsuario: displayName.value,
+            email: user.email
+          })
+        });
+
+        if (!response.ok) {
+          console.warn('El backend no pudo actualizar el perfil, pero Firebase sí lo hizo');
+        }
+      }
+    } catch (backendError) {
+      console.error('Error al sincronizar con el backend:', backendError);
+      // No propagamos este error ya que el perfil ya se actualizó en Firebase
+    }
+
+    // Actualizar estado local
+    console.log('Nombre actualizado en Firebase:', user.displayName);
+    
+    // Actualizar el token en localStorage
+    const newToken = await user.getIdToken(true);
+    localStorage.setItem('authToken', newToken);
+    
+    // Actualizar también en el localStorage
+    try {
+      // Obtener datos actuales del usuario
+      let userData = {};
+      try {
+        userData = JSON.parse(localStorage.getItem('user') || '{}');
+      } catch (e) {
+        console.error('Error al parsear datos de usuario:', e);
+        userData = {};
+      }
+      
+      // Actualizar los datos con el nuevo nombre
+      userData.displayName = displayName.value;
+      userData.nombre = displayName.value; // Actualizar también campo "nombre" por compatibilidad
+      
+      console.log('Actualizando datos en localStorage:', userData);
+      
+      // Guardar de vuelta en localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Forzar actualización de la UI
+      displayName.value = userData.displayName;
+    } catch (e) {
+      console.error('Error al actualizar datos de usuario en localStorage:', e);
+    }
+    
+    profileSuccess.value = true;
+  } catch (error) {
+    console.error('Error al actualizar el perfil:', error);
+    profileError.value = error.message || 'Error al actualizar el perfil';
+  } finally {
+    loadingProfile.value = false;
+  }
+};
 </script>
 
 <style src="../assets/CambiarPassword.css"></style>

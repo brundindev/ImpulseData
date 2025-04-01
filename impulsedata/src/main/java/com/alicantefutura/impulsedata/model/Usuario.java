@@ -11,7 +11,7 @@ public class Usuario implements UserDetails {
     private String id;
     private String email;
     private String password;
-    private String nombre;
+    private String nombreUsuario;
     private String rol;
     private boolean emailVerificado;
 
@@ -19,10 +19,10 @@ public class Usuario implements UserDetails {
         this.emailVerificado = false; // Por defecto, el email no está verificado
     }
 
-    public Usuario(String email, String password, String nombre, String rol) {
+    public Usuario(String email, String password, String nombreUsuario, String rol) {
         this.email = email;
         this.password = password;
-        this.nombre = nombre;
+        this.nombreUsuario = nombreUsuario;
         this.rol = rol;
         this.emailVerificado = false; // Por defecto, el email no está verificado
     }
@@ -48,12 +48,12 @@ public class Usuario implements UserDetails {
         this.password = password;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getNombreUsuario() {
+        return nombreUsuario;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setNombreUsuario(String nombreUsuario) {
+        this.nombreUsuario = nombreUsuario;
     }
 
     public String getRol() {
@@ -114,7 +114,7 @@ public class Usuario implements UserDetails {
         return "Usuario{" +
                "id='" + id + '\'' +
                ", email='" + email + '\'' +
-               ", nombre='" + nombre + '\'' +
+               ", nombreUsuario='" + nombreUsuario + '\'' +
                ", rol='" + rol + '\'' +
                ", emailVerificado=" + emailVerificado +
                '}';

@@ -13,8 +13,8 @@ public class RegistroRequest {
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
-    @NotBlank(message = "El nombre es obligatorio")
-    private String nombre;
+    @NotBlank(message = "El nombre de usuario es obligatorio")
+    private String nombreUsuario;
 
     // Getters y setters
     public String getEmail() {
@@ -33,11 +33,11 @@ public class RegistroRequest {
         this.password = password;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getNombreUsuario() {
+        return nombreUsuario;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setNombreUsuario(String nombreUsuario) {
+        this.nombreUsuario = nombreUsuario;
     }
 } 

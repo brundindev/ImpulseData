@@ -1,23 +1,21 @@
 package com.alicantefutura.impulsedata.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public class LoginRequest {
-    @NotBlank(message = "El email es obligatorio")
-    @Email(message = "El formato del email no es válido")
-    private String email;
+    @NotBlank(message = "El identificador es obligatorio")
+    private String identificador; // Puede ser email o nombreUsuario
 
     @NotBlank(message = "La contraseña es obligatoria")
     private String password;
 
     // Getters y setters
-    public String getEmail() {
-        return email;
+    public String getIdentificador() {
+        return identificador;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setIdentificador(String identificador) {
+        this.identificador = identificador;
     }
 
     public String getPassword() {

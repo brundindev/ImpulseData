@@ -90,7 +90,7 @@ public class AuthService {
                     uid = firebaseAuthService.crearUsuario(
                         request.getEmail(), 
                         request.getPassword(), 
-                        request.getNombre()
+                        request.getNombreUsuario()
                     );
                     System.out.println("Usuario creado en Firebase Auth con UID: " + uid);
                 } catch (FirebaseAuthException e) {
@@ -121,7 +121,7 @@ public class AuthService {
                 var usuario = new Usuario(
                         request.getEmail(),
                         passwordEncoder.encode(request.getPassword()),
-                        request.getNombre(),
+                        request.getNombreUsuario(),
                         "USER");
                         
                 usuario.setEmailVerificado(false); // Por defecto, el email no está verificado
@@ -176,26 +176,33 @@ public class AuthService {
 
     public String login(LoginRequest request) {
         try {
-            // Verificar si el email está verificado en Firebase
-            boolean emailVerificadoFirebase = firebaseAuthService.isEmailVerificado(request.getEmail());
-            
             // Buscar usuario en Firestore primero para evitar múltiples consultas
-            var documentos = firestore.collection("usuarios")
-                    .whereEqualTo("email", request.getEmail())
+            var querySnapshot = firestore.collection("usuarios")
+                    .whereEqualTo("email", request.getIdentificador())
                     .get()
-                    .get()
-                    .getDocuments();
+                    .get();
+
+            // Si no se encuentra por email, intentar por nombreUsuario
+            if (querySnapshot.isEmpty()) {
+                querySnapshot = firestore.collection("usuarios")
+                        .whereEqualTo("nombreUsuario", request.getIdentificador())
+                        .get()
+                        .get();
+            }
             
             // Verificar si se encontró algún usuario
-            if (documentos.isEmpty()) {
+            if (querySnapshot.isEmpty()) {
                 throw new RuntimeException("Usuario no encontrado");
             }
             
-            var usuarioDoc = documentos.get(0);
+            var usuarioDoc = querySnapshot.getDocuments().get(0);
             var usuario = usuarioDoc.toObject(Usuario.class);
             if (usuario == null) {
                 throw new RuntimeException("Usuario no encontrado");
             }
+            
+            // Verificar si el email está verificado en Firebase
+            boolean emailVerificadoFirebase = firebaseAuthService.isEmailVerificado(usuario.getEmail());
             
             // Si está verificado en Firebase pero no en nuestra base, actualizamos
             if (emailVerificadoFirebase && !usuario.isEmailVerificado()) {
@@ -209,9 +216,9 @@ public class AuthService {
                 throw new RuntimeException("Por favor, verifica tu dirección de correo electrónico antes de iniciar sesión");
             }
 
-            // Autenticar usuario
+            // Autenticar usuario (usando el email real del usuario encontrado)
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                    new UsernamePasswordAuthenticationToken(usuario.getEmail(), request.getPassword()));
 
             // Generar token
             return jwtService.generateToken(usuario);

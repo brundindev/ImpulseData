@@ -351,7 +351,9 @@ class AuthService {
       let nombreUsuario = 'Usuario';
       
       // Intentar extraer el nombre de diferentes propiedades
-      if (payload.nombre) {
+      if (payload.nombreUsuario) {
+        nombreUsuario = payload.nombreUsuario;
+      } else if (payload.nombre) {
         nombreUsuario = payload.nombre;
       } else if (payload.name) {
         nombreUsuario = payload.name;

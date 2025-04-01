@@ -26,15 +26,16 @@
       </div>
       <form v-if="!registroExitoso" @submit.prevent="register">
         <div class="form-group">
-          <label for="nombre">Nombre</label>
+          <label for="nombreUsuario">Nombre de usuario</label>
           <input
             type="text"
-            id="nombre"
-            v-model="nombre"
+            id="nombreUsuario"
+            v-model="nombreUsuario"
             class="form-control"
             required
-            placeholder="Tu nombre"
+            placeholder="Tu nombre de usuario"
             :disabled="loading"
+            style="color: #333 !important;"
           />
         </div>
         <div class="form-group">
@@ -47,6 +48,7 @@
             required
             placeholder="Tu email"
             :disabled="loading"
+            style="color: #333 !important;"
           />
         </div>
         <div class="form-group">
@@ -61,6 +63,9 @@
               placeholder="Contraseña (mínimo 6 caracteres)"
               minlength="6"
               :disabled="loading"
+              style="color: #333 !important;"
+              @input="validarPassword"
+              :class="{ 'is-valid': password && isPasswordValid, 'is-invalid': password && !isPasswordValid && password.length > 3 }"
             />
             <button 
               type="button"
@@ -71,6 +76,27 @@
               <i v-if="showPassword">👁️</i>
               <i v-else>👁️‍🗨️</i>
             </button>
+          </div>
+          <div class="password-requirements" :class="{ active: password }">
+            <p>La contraseña debe contener:</p>
+            <ul>
+              <li :class="{ valid: tieneMinimo6 }">
+                <span class="requirement-icon">{{ tieneMinimo6 ? '✅' : '❌' }}</span>
+                Mínimo 6 caracteres
+              </li>
+              <li :class="{ valid: tieneMayuscula }">
+                <span class="requirement-icon">{{ tieneMayuscula ? '✅' : '❌' }}</span>
+                Al menos una mayúscula
+              </li>
+              <li :class="{ valid: tieneMinuscula }">
+                <span class="requirement-icon">{{ tieneMinuscula ? '✅' : '❌' }}</span>
+                Al menos una minúscula
+              </li>
+              <li :class="{ valid: tieneNumero }">
+                <span class="requirement-icon">{{ tieneNumero ? '✅' : '❌' }}</span>
+                Al menos un número
+              </li>
+            </ul>
           </div>
         </div>
         <div class="form-group">
@@ -85,6 +111,8 @@
               placeholder="Repite tu contraseña"
               minlength="6"
               :disabled="loading"
+              style="color: #333 !important;"
+              :class="{ 'is-invalid': confirmPassword && !passwordsMatch }"
             />
             <button 
               type="button"
@@ -95,6 +123,12 @@
               <i v-if="showConfirmPassword">👁️</i>
               <i v-else>👁️‍🗨️</i>
             </button>
+          </div>
+          <div v-if="confirmPassword && !passwordsMatch" class="password-mismatch">
+            <span class="requirement-icon">❌</span> Las contraseñas no coinciden
+          </div>
+          <div v-if="confirmPassword && passwordsMatch" class="password-match">
+            <span class="requirement-icon">✅</span> Las contraseñas coinciden
           </div>
         </div>
         <div v-if="loading" class="loading-state">
@@ -112,7 +146,7 @@
           </div>
         </div>
         <div class="actions">
-          <button type="submit" class="btn btn-primary" :disabled="loading || !passwordsMatch">
+          <button type="submit" class="btn btn-primary" :disabled="loading || !passwordsMatch || !isPasswordValid">
             {{ loading ? 'Registrando...' : 'Crear Cuenta' }}
           </button>
         </div>
@@ -149,7 +183,7 @@ import { getAuth } from 'firebase/auth';
 
 const router = useRouter();
 const authStore = useAuthStore();
-const nombre = ref('');
+const nombreUsuario = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
@@ -170,6 +204,25 @@ const showConfirmPassword = ref(false);
 // Obtener la instancia de auth
 const auth = getAuth();
 
+// Validaciones de contraseña
+const tieneMinimo6 = computed(() => password.value.length >= 6);
+const tieneMayuscula = computed(() => /[A-Z]/.test(password.value));
+const tieneMinuscula = computed(() => /[a-z]/.test(password.value));
+const tieneNumero = computed(() => /[0-9]/.test(password.value));
+
+const isPasswordValid = computed(() => 
+  tieneMinimo6.value && 
+  tieneMayuscula.value && 
+  tieneMinuscula.value && 
+  tieneNumero.value
+);
+
+const validarPassword = () => {
+  if (confirmPassword.value) {
+    confirmPassword.value = '';
+  }
+};
+
 const passwordsMatch = computed(() => {
   return password.value === confirmPassword.value || confirmPassword.value === '';
 });
@@ -177,6 +230,11 @@ const passwordsMatch = computed(() => {
 const register = async () => {
   if (!passwordsMatch.value) {
     error.value = 'Las contraseñas no coinciden';
+    return;
+  }
+
+  if (!isPasswordValid.value) {
+    error.value = 'La contraseña no cumple con todos los requisitos de seguridad';
     return;
   }
   
@@ -195,7 +253,7 @@ const register = async () => {
       guardandoEnBackend.value = true;
       try {
       await AuthService.register({
-        nombre: nombre.value,
+        nombreUsuario: nombreUsuario.value,
         email: email.value,
         password: password.value
       });
@@ -227,7 +285,7 @@ const register = async () => {
       guardandoEnBackend.value = true;
       try {
         await AuthService.register({
-          nombre: nombre.value,
+          nombreUsuario: nombreUsuario.value,
           email: email.value,
           password: password.value
         });
@@ -435,7 +493,7 @@ const registerWithGoogle = async () => {
     const googleData = {
       email: user.email,
       password: `google-auth-${user.uid}`, // Contraseña que nunca será usada directamente
-      nombre: user.displayName || user.email.split('@')[0]
+      nombreUsuario: user.displayName || user.email.split('@')[0]
     };
     
     // Intentar iniciar sesión primero (por si el usuario ya existe)

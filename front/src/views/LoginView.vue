@@ -27,14 +27,14 @@
       </div>
       <form @submit.prevent="login">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="identificador">Email o nombre de usuario</label>
           <input
-            type="email"
-            id="email"
-            v-model="email"
+            type="text"
+            id="identificador"
+            v-model="identificador"
             class="form-control"
             required
-            placeholder="Introduce tu email"
+            placeholder="Introduce tu email o nombre de usuario"
             style="color: #333 !important;"
           />
         </div>
@@ -124,12 +124,12 @@ onUnmounted(() => {
 
 const router = useRouter();
 const authStore = useAuthStore(); // Usar el store de Pinia
-const email = ref('');
+const identificador = ref('');
 const password = ref('');
 const error = ref('');
 const loading = ref(false);
 const emailNoVerificado = computed(() => {
-  return error.value && error.value.toLowerCase().includes('verifica') && email.value;
+  return error.value && error.value.toLowerCase().includes('verifica') && identificador.value;
 });
 const credencialesIncorrectas = computed(() => {
   return error.value && error.value.toLowerCase().includes('credenciales incorrectas');
@@ -140,7 +140,7 @@ const showPassword = ref(false);
 
 const login = async () => {
   // Validar formulario
-  if (!email.value || !password.value) {
+  if (!identificador.value || !password.value) {
     error.value = 'Por favor, completa todos los campos.';
     return;
   }
@@ -162,7 +162,7 @@ const login = async () => {
     
     // Intentar inicio de sesión
     await AuthService.login({
-      email: email.value,
+      identificador: identificador.value,
       password: password.value
     });
     
@@ -263,7 +263,7 @@ const loginWithGoogle = async () => {
       const googleData = {
         email: user.email,
         password: `google-auth-${user.uid}`,
-        nombre: user.displayName || user.email.split('@')[0],
+        nombreUsuario: user.displayName || user.email.split('@')[0],
         apellidos: '',
         googleAuth: true
       };
@@ -372,7 +372,7 @@ const reenviarVerificacion = async () => {
     // Primero intentamos con Firebase
     try {
       // Iniciar sesión con Firebase para obtener el usuario
-      const user = await FirebaseAuthService.login(email.value, password.value);
+      const user = await FirebaseAuthService.login(identificador.value, password.value);
       
       // Enviar email de verificación
       await FirebaseAuthService.sendVerificationEmail(user);
@@ -386,7 +386,7 @@ const reenviarVerificacion = async () => {
       
       // Si falla Firebase, llamamos al backend
       const response = await axios.get(
-        `http://localhost:8080/api/auth/enviar-verificacion?email=${encodeURIComponent(email.value)}`
+        `http://localhost:8080/api/auth/enviar-verificacion?email=${encodeURIComponent(identificador.value)}`
       );
       
       error.value = 'Se ha enviado un nuevo correo de verificación a tu dirección de email.';
