@@ -53,6 +53,33 @@ const actualizarEstadoUsuario = async () => {
     userPhoto.value = '';
   }
   
+  // Sincronizar datos de Firebase con localStorage si hay usuario autenticado
+  if (currentUser && jwtToken) {
+    // Obtener datos actuales del localStorage
+    let userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const firebaseName = currentUser.displayName;
+    
+    // Si el nombre en Firebase es diferente al de localStorage, actualizamos
+    if (firebaseName && userData.nombre !== firebaseName) {
+      console.log(`Actualizando nombre en localStorage: ${userData.nombre} -> ${firebaseName}`);
+      userData.nombre = firebaseName;
+      userData.displayName = firebaseName;
+      localStorage.setItem('userData', JSON.stringify(userData));
+      
+      // Actualizar también en 'user' si existe
+      try {
+        if (localStorage.getItem('user')) {
+          let userObj = JSON.parse(localStorage.getItem('user'));
+          userObj.nombre = firebaseName;
+          userObj.displayName = firebaseName;
+          localStorage.setItem('user', JSON.stringify(userObj));
+        }
+      } catch (e) {
+        console.error('Error al actualizar user en localStorage:', e);
+      }
+    }
+  }
+  
   // Si hay usuario de Firebase pero no token JWT, es posible que sea un nuevo registro
   // o un problema de sincronización
   if (currentUser && !jwtToken) {
@@ -170,23 +197,26 @@ const actualizarEstadoUsuario = async () => {
 };
 
 // Configurar listener para cambios de autenticación
-onMounted(() => {
-  // Verificar estado inicial
-  actualizarEstadoUsuario();
-  
-  // Configurar listener para cambios de autenticación de Firebase
-  const unsubscribe = onAuthStateChanged(auth, (user) => {
-    actualizarEstadoUsuario();
+onMounted(async () => {
+  // Configurar observer para eventos de autenticación de Firebase
+  auth.onAuthStateChanged(async (user) => {
+    console.log(user ? "Firebase: Usuario autenticado" : "Firebase: No hay usuario autenticado");
+    await actualizarEstadoUsuario();
   });
   
-  // Escuchar evento personalizado de cambio de autenticación
-  window.addEventListener('auth-state-changed', actualizarEstadoUsuario);
-  
-  // Limpiar listener cuando el componente se desmonte
-  onUnmounted(() => {
-    unsubscribe();
-    window.removeEventListener('auth-state-changed', actualizarEstadoUsuario);
+  // Escuchar eventos personalizados para cambios en la autenticación
+  window.addEventListener('auth-state-changed', async () => {
+    console.log("Evento personalizado de cambio de estado de autenticación detectado");
+    await actualizarEstadoUsuario();
   });
+  
+  // Inicializar estado del usuario
+  await actualizarEstadoUsuario();
+});
+
+onUnmounted(() => {
+  // Limpiar event listener cuando el componente se desmonta
+  window.removeEventListener('auth-state-changed', actualizarEstadoUsuario);
 });
 
 // Logout function

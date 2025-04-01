@@ -347,6 +347,64 @@ class FirebaseAuthService {
       return null;
     }
   }
+
+  /**
+   * Actualiza el nombre de usuario en Firebase
+   * @param {string} newDisplayName - Nuevo nombre de usuario
+   * @returns {Promise<boolean>} - true si se actualizó correctamente
+   */
+  async updateDisplayName(newDisplayName) {
+    try {
+      // Esperar a que Firebase Auth esté inicializado
+      await waitForAuthInit();
+      
+      const user = auth.currentUser;
+      if (!user) {
+        console.error('No hay usuario autenticado para actualizar nombre');
+        throw new Error('No hay usuario autenticado');
+      }
+      
+      // Actualizar el perfil en Firebase
+      await user.updateProfile({
+        displayName: newDisplayName
+      });
+      
+      // Recargar usuario para obtener datos actualizados
+      await user.reload();
+      
+      // Actualizar datos en localStorage para consistencia inmediata
+      try {
+        if (localStorage.getItem('user')) {
+          const userObj = JSON.parse(localStorage.getItem('user'));
+          userObj.displayName = newDisplayName;
+          userObj.nombre = newDisplayName;
+          localStorage.setItem('user', JSON.stringify(userObj));
+        }
+        
+        if (localStorage.getItem('userData')) {
+          const userData = JSON.parse(localStorage.getItem('userData'));
+          userData.displayName = newDisplayName;
+          userData.nombre = newDisplayName;
+          localStorage.setItem('userData', JSON.stringify(userData));
+        }
+      } catch (storageError) {
+        console.error('Error al actualizar datos locales:', storageError);
+        // No bloqueamos el flujo por este error
+      }
+      
+      // Disparar evento personalizado para notificar cambio
+      const event = new CustomEvent('auth-state-changed', {
+        detail: { type: 'displayName', newValue: newDisplayName }
+      });
+      window.dispatchEvent(event);
+      
+      console.log('Nombre de usuario actualizado correctamente en Firebase:', newDisplayName);
+      return true;
+    } catch (error) {
+      console.error('Error al actualizar nombre de usuario:', error);
+      throw error;
+    }
+  }
 }
 
 export default new FirebaseAuthService(); 
