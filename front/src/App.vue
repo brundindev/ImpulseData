@@ -273,7 +273,7 @@ const mostrarChatbot = computed(() => {
                   <img v-if="userPhoto" :src="userPhoto" alt="Foto de perfil" class="user-avatar-img" />
                   <div v-else class="user-avatar-placeholder">{{ userInitials }}</div>
                 </div>
-                <span class="user-name">{{ usuario.nombre }}</span>
+                <span class="user-name">{{ usuario?.nombre || 'Usuario' }}</span>
               </div>
               <span class="dropdown-arrow">▼</span>         
             </div>

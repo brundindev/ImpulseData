@@ -33,7 +33,7 @@
         <div class="user-dropdown" v-else>
           <div class="dropdown-toggle" @click="toggleMenu" ref="dropdownToggle">
             <i class="fas fa-user-circle"></i>
-            <span v-if="usuario">{{ usuario.nombre }}</span>
+            <span v-if="usuario">{{ usuario?.nombre || 'Usuario' }}</span>
             <i class="fas fa-caret-down"></i>
           </div>
           <div class="dropdown-menu" v-if="showMenu" ref="dropdownMenu">

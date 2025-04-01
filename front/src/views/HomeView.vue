@@ -34,7 +34,7 @@
       <div class="dashboard-header">
         <div>
           <h1 class="welcome-title">Dashboard</h1>
-          <p class="welcome-subtitle">¡Bienvenido, <span class="user-name">{{ usuario.nombre }}</span>!</p>
+          <p class="welcome-subtitle">¡Bienvenido, <span class="user-name">{{ usuario?.nombre || 'Usuario' }}</span>!</p>
         </div>
         <div class="action-buttons">
           <button @click="showFormModal = true; modoEdicion = false;" class="btn btn-primary btn-create">

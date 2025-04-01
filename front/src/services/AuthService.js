@@ -312,11 +312,20 @@ class AuthService {
 
   /**
    * Obtener datos del usuario actual
-   * @returns {object|null}
+   * @returns {object}
    */
   getCurrentUser() {
-    const userData = localStorage.getItem('userData');
-    return userData ? JSON.parse(userData) : null;
+    try {
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        return JSON.parse(userData);
+      }
+    } catch (error) {
+      console.error('Error al obtener datos del usuario:', error);
+    }
+    
+    // Si no hay datos en localStorage o hay un error, devolver un objeto por defecto
+    return { nombre: 'Usuario', email: 'usuario@example.com' };
   }
 
   /**
@@ -338,13 +347,44 @@ class AuthService {
       // Convertir el payload a un objeto JSON
       const payload = JSON.parse(jsonPayload);
       
+      // Obtener un nombre válido a partir del payload
+      let nombreUsuario = 'Usuario';
+      
+      // Intentar extraer el nombre de diferentes propiedades
+      if (payload.nombre) {
+        nombreUsuario = payload.nombre;
+      } else if (payload.name) {
+        nombreUsuario = payload.name;
+      } else if (payload.sub) {
+        // Si sub es un email, extraer la parte antes del @
+        if (payload.sub.includes('@')) {
+          nombreUsuario = payload.sub.split('@')[0];
+        } else {
+          nombreUsuario = payload.sub;
+        }
+      } else if (payload.email) {
+        // Si hay email pero no hay sub
+        if (payload.email.includes('@')) {
+          nombreUsuario = payload.email.split('@')[0];
+        } else {
+          nombreUsuario = payload.email;
+        }
+      }
+      
       // Almacenar la información del usuario
       localStorage.setItem('userData', JSON.stringify({
-        nombre: payload.nombre || payload.sub.split('@')[0], // Usar el nombre si está disponible, o extraerlo del email
-        email: payload.sub
+        nombre: nombreUsuario,
+        email: payload.sub || payload.email || 'usuario@example.com'
       }));
+      
+      console.log('Datos de usuario almacenados:', { nombre: nombreUsuario, email: payload.sub || payload.email });
     } catch (error) {
       console.error('Error al decodificar el token JWT', error);
+      // En caso de error, guardar datos por defecto para evitar errores en la UI
+      localStorage.setItem('userData', JSON.stringify({
+        nombre: 'Usuario',
+        email: 'usuario@example.com'
+      }));
     }
   }
 }
