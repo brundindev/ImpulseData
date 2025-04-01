@@ -938,7 +938,13 @@
   position: relative;
 }
 
-.noselect .text {
+button.noselect .text {
+  /* cambios para el texto */
+  position:static;
+  width: auto;
+  opacity: 1;
+  margin: 15px;
+  /* hasta aqui */
   transform: translateX(5px);
   color: white;
   font-weight: bold;
@@ -946,7 +952,7 @@
   transition: 200ms;
   z-index: 2;
   flex: 1;
-  text-align: center;
+  text-align: start;
 }
 
 .noselect .icon {
@@ -970,8 +976,8 @@
   background: #ff3636;
 }
 
-.noselect:hover .text {
-  color: white;
+button.noselect:hover .text {
+  color: transparent;
   transform: translateX(-25px);
 }
 
