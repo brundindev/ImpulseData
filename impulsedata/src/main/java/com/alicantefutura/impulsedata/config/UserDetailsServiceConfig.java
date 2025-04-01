@@ -35,7 +35,7 @@ public class UserDetailsServiceConfig {
                 if (querySnapshot.isEmpty()) {
                     querySnapshot = firestore.collection("usuarios")
                             .whereEqualTo("nombreUsuario", username)
-                            .get()
+                        .get()
                             .get();
                 }
                 
