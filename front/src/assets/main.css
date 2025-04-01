@@ -80,6 +80,16 @@ button {
 /* Estilos para inputs globales */
 input, select, textarea {
   font-family: 'Inter', sans-serif;
+  border-radius: 20px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.2);
 }
 
 /* Estilos responsivos */
