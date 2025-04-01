@@ -160,7 +160,21 @@ const login = async () => {
       }
     });
     
-    // Intentar inicio de sesión
+    // Verificar si el identificador es un email o nombre de usuario
+    const isEmail = identificador.value.includes('@');
+    
+    try {
+      // Primero autenticar en Firebase (solo si es email)
+      if (isEmail) {
+        console.log('Intentando iniciar sesión en Firebase primero con email:', identificador.value);
+        await FirebaseAuthService.login(identificador.value, password.value);
+      }
+    } catch (firebaseError) {
+      console.warn('Error al iniciar sesión en Firebase:', firebaseError);
+      // No interrumpimos el flujo si Firebase falla
+    }
+    
+    // Intentar inicio de sesión en el backend
     await AuthService.login({
       identificador: identificador.value,
       password: password.value
@@ -191,6 +205,11 @@ const login = async () => {
     } else if (err.message) {
       // Si es un error con mensaje personalizado (como los de Firebase)
       error.value = err.message;
+      
+      // Manejar error específico de auth/missing-email
+      if (err.code === 'auth/missing-email') {
+        error.value = 'Por favor, introduce un email válido para iniciar sesión.';
+      }
     } else {
       // Ocurrió un error al configurar la solicitud
       error.value = 'Error al procesar la solicitud. Por favor, inténtalo de nuevo.';

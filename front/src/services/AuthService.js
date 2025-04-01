@@ -98,7 +98,17 @@ class AuthService {
    */
   async login(credentials) {
     try {
-      console.log("Iniciando proceso de login con credenciales:", credentials.email);
+      console.log("Iniciando proceso de login con credenciales:", credentials.email || credentials.identificador);
+      
+      // Verificar si tenemos credenciales válidas
+      const identifier = credentials.email || credentials.identificador;
+      if (!identifier) {
+        throw new Error('No se proporcionó un email o identificador de usuario válido');
+      }
+      
+      if (!credentials.password) {
+        throw new Error('No se proporcionó una contraseña');
+      }
       
       // Detectar si estamos haciendo login con una cuenta de Google
       const isGoogleAuth = credentials.password && credentials.password.startsWith('google-auth-');
@@ -115,7 +125,10 @@ class AuthService {
       
       // Usar la instancia personalizada de axios para el login
       console.log("Enviando solicitud de login al backend:", `${API_URL}/login`);
-      const response = await authAxios.post('/login', credentials);
+      const response = await authAxios.post('/login', {
+        identificador: identifier,
+        password: credentials.password
+      });
       
       if (!response.data) {
         throw new Error('No se recibió token JWT del servidor');
@@ -130,7 +143,8 @@ class AuthService {
       if (isGoogleAuth) {
         if (currentUser) {
           // Si ya hay sesión de Firebase, verificar si es el mismo usuario
-          if (currentUser.email === credentials.email) {
+          const userEmail = credentials.email || credentials.identificador;
+          if (currentUser.email === userEmail) {
             console.log("Ya existe sesión en Firebase con el mismo usuario:", currentUser.email);
           } else {
             console.log("Existe sesión en Firebase pero con un usuario diferente. Actualizando...");
@@ -147,9 +161,18 @@ class AuthService {
         }
       } else if (!isGoogleAuth && !currentUser) {
         // Para usuarios normales, si no hay sesión en Firebase, iniciarla
-        console.log("Iniciando sesión en Firebase");
-        const firebaseUser = await FirebaseAuthService.login(credentials.email, credentials.password);
-        console.log("Usuario autenticado en Firebase:", firebaseUser.email);
+        if (identifier.includes('@')) { // Solo intentar si es un email
+          console.log("Iniciando sesión en Firebase con email:", identifier);
+          try {
+            const firebaseUser = await FirebaseAuthService.login(identifier, credentials.password);
+            console.log("Usuario autenticado en Firebase:", firebaseUser.email);
+          } catch (firebaseError) {
+            console.warn("Error al iniciar sesión en Firebase:", firebaseError);
+            // No interrumpimos el flujo si Firebase falla
+          }
+        } else {
+          console.log("Inicio de sesión con nombre de usuario, no se intenta en Firebase directamente");
+        }
       } else if (currentUser) {
         console.log("Ya existe sesión en Firebase:", currentUser.email);
       }

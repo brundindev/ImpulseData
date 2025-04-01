@@ -6,7 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, waitForAuthInit } from '../firebase';
 
 class FirebaseAuthService {
   /**
@@ -17,6 +17,9 @@ class FirebaseAuthService {
    */
   async register(email, password) {
     try {
+      // Esperar a que Firebase Auth esté inicializado
+      await waitForAuthInit();
+      
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       // Enviar correo de verificación
       await sendEmailVerification(userCredential.user);
@@ -35,7 +38,57 @@ class FirebaseAuthService {
    */
   async login(email, password) {
     try {
+      // Esperar a que Firebase Auth esté inicializado
+      await waitForAuthInit();
+      
+      // Validar email antes de intentar login
+      if (!email || typeof email !== 'string' || !email.includes('@')) {
+        console.error('Error: El email es inválido o está vacío:', email);
+        throw {
+          code: 'auth/invalid-email',
+          message: 'El correo electrónico es inválido o está vacío'
+        };
+      }
+      
+      // Validar contraseña antes de intentar login
+      if (!password || typeof password !== 'string' || password.length < 6) {
+        console.error('Error: La contraseña es inválida o está vacía');
+        throw {
+          code: 'auth/weak-password',
+          message: 'La contraseña es inválida o está vacía'
+        };
+      }
+      
+      console.log('Intentando iniciar sesión en Firebase con email:', email);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Verificar si el usuario tiene todos los datos necesarios
+      const user = userCredential.user;
+      console.log('Sesión iniciada en Firebase:', user.email, 'displayName:', user.displayName);
+      
+      // Forzar la actualización de datos locales
+      try {
+        // Almacenar datos básicos en localStorage para asegurar consistencia
+        const userData = {
+          email: user.email,
+          displayName: user.displayName || user.email.split('@')[0],
+          nombre: user.displayName || user.email.split('@')[0],
+          uid: user.uid,
+          emailVerified: user.emailVerified
+        };
+        
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('userData', JSON.stringify(userData));
+        
+        // Almacenar el UID en sessionStorage para posibles recuperaciones
+        sessionStorage.setItem('firebaseUid', user.uid);
+        
+        console.log('Datos de usuario almacenados localmente durante login');
+      } catch (storageError) {
+        console.error('Error al almacenar datos de usuario:', storageError);
+        // No bloqueamos el flujo por este error
+      }
+      
       return userCredential.user;
     } catch (error) {
       console.error('Error al iniciar sesión con Firebase:', error);
@@ -48,6 +101,9 @@ class FirebaseAuthService {
    * @returns {Promise} - Datos del usuario
    */
   async loginWithGoogle() {
+    // Esperar a que Firebase Auth esté inicializado
+    await waitForAuthInit();
+    
     // Suprimir advertencias específicas de COOP en la consola
     const originalConsoleError = console.error;
     console.error = function(...args) {
@@ -138,6 +194,9 @@ class FirebaseAuthService {
    */
   async sendVerificationEmail(user) {
     try {
+      // Esperar a que Firebase Auth esté inicializado
+      await waitForAuthInit();
+      
       await sendEmailVerification(user);
       return true;
     } catch (error) {
@@ -152,6 +211,9 @@ class FirebaseAuthService {
    */
   async logout() {
     try {
+      // Esperar a que Firebase Auth esté inicializado
+      await waitForAuthInit();
+      
       await signOut(auth);
       return true;
     } catch (error) {
@@ -164,7 +226,10 @@ class FirebaseAuthService {
    * Verificar si el usuario está autenticado
    * @returns {boolean}
    */
-  isAuthenticated() {
+  async isAuthenticated() {
+    // Esperar a que Firebase Auth esté inicializado
+    await waitForAuthInit();
+    
     return auth.currentUser !== null;
   }
 
@@ -172,7 +237,10 @@ class FirebaseAuthService {
    * Obtener el usuario actual
    * @returns {Object|null}
    */
-  getCurrentUser() {
+  async getCurrentUser() {
+    // Esperar a que Firebase Auth esté inicializado
+    await waitForAuthInit();
+    
     return auth.currentUser;
   }
 
