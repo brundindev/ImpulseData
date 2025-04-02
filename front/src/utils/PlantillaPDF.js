@@ -40,39 +40,80 @@ function crearPlaceholderImagen(color = '#002f87', ancho = 300, alto = 100, text
 }
 
 // Función para crear una imagen para la portada principal
-function crearImagenPortada(ancho = 400, alto = 200) {
+function crearImagenPortada(ancho = 600, alto = 300) {
   const canvas = document.createElement('canvas');
   canvas.width = ancho;
   canvas.height = alto;
   const ctx = canvas.getContext('2d');
   
-  // Gradiente de fondo
-  const gradient = ctx.createLinearGradient(0, 0, 0, alto);
-  gradient.addColorStop(0, "#001852");
-  gradient.addColorStop(1, "#0055b8");
+  // Gradiente radial de fondo moderno
+  const gradient = ctx.createRadialGradient(ancho/2, alto/2, 10, ancho/2, alto/2, ancho*0.8);
+  gradient.addColorStop(0, "#0066cc");
+  gradient.addColorStop(0.5, "#004698");
+  gradient.addColorStop(1, "#001f42");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, ancho, alto);
   
-  // Añadir texto
+  // Patrón de cuadrícula moderna (puntos)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+  const dotSize = 2;
+  const spacing = 20;
+  for (let x = 0; x < ancho; x += spacing) {
+    for (let y = 0; y < alto; y += spacing) {
+      ctx.beginPath();
+      ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  
+  // Elementos decorativos - líneas curvas
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.lineWidth = 3;
+  
+  // Curva superior
+  ctx.beginPath();
+  ctx.moveTo(0, alto * 0.2);
+  ctx.bezierCurveTo(ancho * 0.3, alto * 0.1, ancho * 0.7, alto * 0.3, ancho, alto * 0.15);
+  ctx.stroke();
+  
+  // Curva inferior
+  ctx.beginPath();
+  ctx.moveTo(0, alto * 0.8);
+  ctx.bezierCurveTo(ancho * 0.3, alto * 0.9, ancho * 0.7, alto * 0.7, ancho, alto * 0.85);
+  ctx.stroke();
+  
+  // Círculo decorativo
+  ctx.beginPath();
+  ctx.arc(ancho * 0.85, alto * 0.2, 40, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.stroke();
+  
+  // Texto principal con sombra
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  ctx.shadowBlur = 15;
+  ctx.shadowOffsetX = 5;
+  ctx.shadowOffsetY = 5;
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 24px Arial';
+  
+  // Título "Alicante Futura"
+  ctx.font = 'bold 42px Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('Alicante', ancho / 2, alto / 2 - 20);
-  ctx.fillText('Futura', ancho / 2, alto / 2 + 20);
+  ctx.fillText('ALICANTE', ancho / 2, alto / 2 - 30);
   
-  // Añadir líneas decorativas
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(50, 30);
-  ctx.lineTo(ancho - 50, 30);
-  ctx.stroke();
+  ctx.font = 'bold 50px Arial, sans-serif';
+  ctx.fillText('FUTURA', ancho / 2, alto / 2 + 30);
   
-  ctx.beginPath();
-  ctx.moveTo(50, alto - 30);
-  ctx.lineTo(ancho - 50, alto - 30);
-  ctx.stroke();
+  // Quitar sombra para el subtítulo
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  
+  // Subtítulo
+  ctx.font = '20px Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.fillText('IMPULSEDATA', ancho / 2, alto / 2 + 80);
   
   // Convertir a base64
   return canvas.toDataURL('image/png');
@@ -86,14 +127,97 @@ function createHTMLContent() {
   // Crear placeholders de imágenes para la portada
   const logoImpulsa = crearPlaceholderImagen('#002f87', 150, 60, 'IMPULSA ALICANTE');
   const logoAyuntamiento = crearPlaceholderImagen('#003366', 150, 60, 'AYUNTAMIENTO');
-  const imagenPrincipal = crearImagenPortada(400, 200);
+  const imagenPrincipal = crearImagenPortada(600, 300);
   const logoObservatorio = crearPlaceholderImagen('#333333', 120, 40, 'OBSERVATORIO');
   const logoGeneralitat = crearPlaceholderImagen('#444444', 120, 40, 'GENERALITAT');
   const logoLabora = crearPlaceholderImagen('#555555', 120, 40, 'LABORA');
   const logoMinisterio = crearPlaceholderImagen('#666666', 120, 40, 'MINISTERIO');
   const logoSepe = crearPlaceholderImagen('#777777', 120, 40, 'SEPE');
 
-  return `
+  // Portada
+  const portada = `
+      <div class="pagina portada">
+          <div class="encabezado">
+              <img src="${logoImpulsa}" alt="Impulsa Alicante Logo">
+              <img src="${logoAyuntamiento}" alt="Ayuntamiento Logo">
+          </div>
+          <div class="contenido">
+              <div class="titulo-documento">Memoria de Actividad</div>
+              <div class="imagen-principal">
+                  <img src="${imagenPrincipal}" alt="Alicante Futura">
+              </div>
+              <div class="año">2023</div>
+          </div>
+          <div class="logos-inferiores">
+              <img src="${logoObservatorio}" alt="Observatorio">
+              <img src="${logoGeneralitat}" alt="Generalitat">
+              <img src="${logoLabora}" alt="Labora">
+              <img src="${logoMinisterio}" alt="Ministerio">
+              <img src="${logoSepe}" alt="SEPE">
+          </div>
+      </div>
+  `;
+
+  // Índice
+  const indice = `
+      <div class="pagina indice">
+          <h1 style="color: #004698; font-size: 28px; margin-bottom: 30px; text-align: center; text-transform: uppercase; letter-spacing: 2px;">Índice</h1>
+          
+          <div class="seccion">
+              <div class="numero">1</div>
+              <div class="texto">
+                  <h2>Introducción</h2>
+                  <ul>
+                      <li>Objetivos y alcance</li>
+                      <li>Metodología</li>
+                  </ul>
+              </div>
+          </div>
+
+          <div class="seccion">
+              <div class="numero">2</div>
+              <div class="texto">
+                  <h2>Análisis del mercado laboral</h2>
+                  <ul>
+                      <li>Evolución de la demanda</li>
+                      <li>Perfiles más solicitados</li>
+                      <li>Competencias demandadas</li>
+                  </ul>
+              </div>
+          </div>
+
+          <div class="seccion">
+              <div class="numero">3</div>
+              <div class="texto">
+                  <h2>Resultados por sectores</h2>
+                  <ul>
+                      <li>Tecnología
+                          <ul>
+                              <li>Software y desarrollo</li>
+                              <li>Infraestructura IT</li>
+                          </ul>
+                      </li>
+                      <li>Turismo</li>
+                      <li>Comercio</li>
+                  </ul>
+              </div>
+          </div>
+
+          <div class="seccion">
+              <div class="numero">4</div>
+              <div class="texto">
+                  <h2>Conclusiones</h2>
+                  <ul>
+                      <li>Hallazgos principales</li>
+                      <li>Recomendaciones</li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  `;
+
+  // Crear el contenido HTML completo
+  const htmlContent = `
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -106,7 +230,7 @@ function createHTMLContent() {
         margin: 0;
       }
       body {
-          font-family: Arial, sans-serif;
+          font-family: 'Segoe UI', Roboto, Arial, sans-serif;
           margin: 0;
           padding: 0;
           background-color: white;
@@ -128,7 +252,7 @@ function createHTMLContent() {
 
       /* Portada */
       .portada {
-          background: #002f87;
+          background: linear-gradient(135deg, #004698 0%, #001f42 100%);
           color: white;
           text-align: center;
           padding: 0;
@@ -139,538 +263,267 @@ function createHTMLContent() {
           top: 0;
           right: 0;
           bottom: 0;
+          overflow: hidden;
+      }
+      
+      /* Elementos decorativos para la portada */
+      .portada::before {
+          content: "";
+          position: absolute;
+          top: -50px;
+          right: -50px;
+          width: 200px;
+          height: 200px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.05);
+          z-index: 1;
+      }
+      
+      .portada::after {
+          content: "";
+          position: absolute;
+          bottom: -100px;
+          left: -100px;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.03);
+          z-index: 1;
       }
 
       .encabezado {
           display: flex;
           justify-content: space-between;
-          padding: 15px;
-          width: calc(100% - 30px);
+          padding: 20px;
+          width: calc(100% - 40px);
+          background: rgba(0, 0, 0, 0.2);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
 
       .encabezado img {
           height: 60px;
+          filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
       }
 
       .contenido {
-          margin-top: 50px;
+          margin-top: 30px;
           width: 100%;
+          position: relative;
+          z-index: 2;
       }
 
       .contenido h1 {
-          font-size: 32px;
-          font-weight: bold;
+          font-size: 36px;
+          font-weight: 800;
           margin-bottom: 30px;
           width: 100%;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
       }
 
       .año {
-          font-size: 50px;
-          font-weight: bold;
-          background: black;
+          font-size: 60px;
+          font-weight: 900;
+          background: rgba(0, 0, 0, 0.6);
           color: white;
           display: inline-block;
-          padding: 10px;
-          margin: 20px 0;
+          padding: 10px 30px;
+          margin: 25px 0;
+          position: relative;
+          border-radius: 5px;
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+      
+      .año::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.1) 50%, transparent 51%);
+          background-size: 10px 10px;
       }
 
       .imagen-principal {
-          margin: 30px 0;
-          width: 100%;
+          margin: 20px auto;
+          width: 90%;
           text-align: center;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
       }
 
       .imagen-principal img {
-          width: 80%;
+          width: 100%;
           height: auto;
-          max-height: 250px;
+          max-height: 300px;
           object-fit: contain;
+          display: block;
       }
 
       .logos-inferiores {
           display: flex;
           justify-content: space-around;
+          align-items: center;
           padding: 15px;
-          position: absolute;
-          bottom: 20px;
-          left: 0;
-          right: 0;
-          width: 100%;
-      }
-
-      .logos-inferiores img {
-          height: 40px;
-      }
-
-      /* Índice */
-      .indice {
-          background: white;
-          padding: 15px;
-      }
-
-      .seccion {
-          display: flex;
-          align-items: flex-start;
-          margin-bottom: 20px;
-      }
-
-      .numero {
-          background: #002f87;
-          color: white;
-          font-size: 24px;
-          font-weight: bold;
-          padding: 10px;
-          width: 50px;
-          text-align: center;
-          margin-right: 15px;
-      }
-
-      .texto h2 {
-          color: #002f87;
-          font-size: 20px;
-          margin-bottom: 10px;
-      }
-
-      .texto ul {
-          list-style-type: none;
-          padding: 0;
-      }
-
-      .texto ul ul {
-          margin-left: 20px;
-      }
-
-      .texto li {
-          margin-bottom: 5px;
-          font-size: 16px;
-      }
-
-      /* Estilos para formularios */
-      .form-field {
-          background-color: #f5f5f5;
-          padding: 12px;
-          margin-bottom: 15px;
-          border-radius: 5px;
-          border-left: 3px solid #002f87;
-      }
-
-      .form-field label {
-          color: #002f87;
-          font-weight: bold;
-          display: block;
-          margin-bottom: 8px;
-          font-size: 14px;
-      }
-
-      .form-input {
-          display: block;
-          width: 100%;
-          min-height: 30px;
-          padding: 8px 10px;
-          background-color: white;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-family: inherit;
-          font-size: 14px;
-          color: #333;
-          box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-      }
-
-      /* Estilos para departamentos, centros y formaciones */
-      .departamento-item, .centro-item, .formacion-item {
-          background-color: #f5f5f5;
-          padding: 12px;
-          margin-bottom: 12px;
-          border-radius: 5px;
-          border-left: 3px solid #002f87;
-      }
-
-      .centro-item p, .formacion-item p {
-          margin: 8px 0;
-      }
-
-      .empty-item {
-          color: #999;
-          font-style: italic;
-          background-color: #f9f9f9;
-          border-left: 3px solid #ccc;
-          padding: 15px;
-          text-align: center;
-          margin-bottom: 12px;
-          border-radius: 5px;
-      }
-
-      h2 {
-          color: #002f87;
-          font-size: 24px;
-          margin-bottom: 20px;
-          text-align: center;
-          padding: 10px;
-          background-color: #f5f5f5;
-          border-radius: 5px;
-      }
-      
-      /* Contenedor para las páginas de datos */
-      .pagina-contenido {
-          padding: 15px;
-      }
-      
-      /* Numeración de páginas */
-      .numero-pagina {
-          position: absolute;
-          bottom: 15px;
-          right: 20px;
-          font-weight: bold;
-          font-size: 16px;
-          color: #002f87;
-          z-index: 100;
-          padding: 5px 10px;
-          background-color: rgba(255, 255, 255, 0.8);
-          border-radius: 15px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-
-      /* Estilos para la nueva sección de Agencia Local de Desarrollo */
-      .agencia-container {
-          width: 100%;
-          height: 100%;
-          margin: 0;
-          padding: 0;
-          position: relative;
-          overflow: hidden;
-      }
-
-      .agencia-header {
-          background-color: #002d72; /* Azul oscuro */
-          color: white;
-          padding: 130px;
-          text-align: left;
-          width: 100%;
-          box-sizing: border-box;
-      }
-
-      .agencia-number {
-          font-size: 50px;
-          font-weight: bold;
-          background-color: #0071d9; /* Azul claro */
-          display: inline-block;
-          width: 50px;
-          text-align: center;
-      }
-
-      .agencia-header h1 {
-          font-size: 24px;
-          margin: 10px 0;
-          font-weight: bold;
-      }
-
-      .agencia-header h2 {
-          font-size: 20px;
-          margin: 0;
-      }
-
-      .agencia-footer {
-          background-color: #e0e0e0; /* Gris claro */
-          padding: 20px;
-          text-align: center;
           position: absolute;
           bottom: 0;
           left: 0;
           right: 0;
           width: 100%;
-          box-sizing: border-box;
+          background: rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(5px);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
       }
 
-      @media print {
-        body {
-          width: 210mm;
-          height: 297mm;
-          margin: 0;
-          padding: 0;
-        }
-        .pagina {
-          margin: 0;
-          padding: 0;
-          border: initial;
-          border-radius: initial;
-          width: 210mm;
-          height: 297mm;
-          box-shadow: initial;
-          background: initial;
-          page-break-after: always;
-          overflow: hidden;
+      .logos-inferiores img {
+          height: 40px;
+          opacity: 0.9;
+          filter: grayscale(30%) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+          transition: all 0.3s ease;
+      }
+
+      /* Índice */
+      .indice {
+          background: white;
+          padding: 30px;
           position: relative;
-        }
-        .portada {
-          margin: 0;
+      }
+      
+      .indice::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 10px;
+          background: linear-gradient(90deg, #004698, #0066cc);
+      }
+
+      .seccion {
+          display: flex;
+          align-items: flex-start;
+          margin-bottom: 30px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          border-radius: 8px;
+          overflow: hidden;
+          transition: all 0.3s ease;
+      }
+
+      .numero {
+          background: linear-gradient(135deg, #004698 0%, #0066cc 100%);
+          color: white;
+          font-size: 28px;
+          font-weight: bold;
+          padding: 15px;
+          width: 60px;
+          text-align: center;
+          margin-right: 0;
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .texto {
+          padding: 15px 20px;
+          flex: 1;
+      }
+      
+      .texto h2 {
+          color: #004698;
+          font-size: 22px;
+          margin-top: 0;
+          margin-bottom: 15px;
+          border-bottom: 2px solid #f0f0f0;
+          padding-bottom: 8px;
+      }
+
+      .texto ul {
+          list-style-type: none;
           padding: 0;
-          width: 210mm;
-          height: 297mm;
-        }
+          margin: 0;
+      }
+
+      .texto ul ul {
+          margin-left: 25px;
+          margin-top: 5px;
+          border-left: 2px solid #f0f0f0;
+          padding-left: 15px;
+      }
+
+      .texto li {
+          margin-bottom: 10px;
+          font-size: 16px;
+          color: #333;
+          position: relative;
+          padding-left: 20px;
+      }
+      
+      .texto li::before {
+          content: "•";
+          color: #0066cc;
+          position: absolute;
+          left: 0;
+          font-size: 18px;
+          font-weight: bold;
+      }
+      
+      .texto ul ul li::before {
+          content: "◦";
+      }
+      
+      /* Título del documento en la portada */
+      .titulo-documento {
+          font-size: 24px;
+          font-weight: 300;
+          color: rgba(255, 255, 255, 0.9);
+          text-transform: uppercase;
+          letter-spacing: 3px;
+          margin-bottom: 30px;
+          padding: 0 30px;
+          line-height: 1.4;
+      }
+      
+      /* Páginas de contenido */
+      .contenido-pagina {
+          padding: 30px;
+      }
+      
+      .contenido-pagina h1 {
+          color: #004698;
+          font-size: 28px;
+          margin-bottom: 20px;
+          border-bottom: 3px solid #004698;
+          padding-bottom: 10px;
+      }
+      
+      .contenido-pagina p {
+          line-height: 1.6;
+          color: #333;
+          margin-bottom: 15px;
+          text-align: justify;
       }
     </style>
 </head>
 <body>
+    ${portada}
+    ${indice}
 
-    <!-- Página 1: Portada -->
-    <div class="pagina portada">
-        <div class="encabezado">
-            <img src="${logoImpulsa}" alt="Logo ImpulsAlicante" class="logo-impulsalicante">
-            <img src="${logoAyuntamiento}" alt="Logo Ayuntamiento de Alicante" class="logo-ayuntamiento">
-        </div>
-        <div class="contenido">
-            <h1>MEMORIA DE ACTIVIDAD</h1>
-            <div class="año">
-                <span>20</span><span>23</span>
-            </div>
-        </div>
-        <div class="imagen-principal">
-            <img src="${imagenPrincipal}" alt="Imagen principal">
-        </div>
-        <div class="logos-inferiores">
-            <img src="${logoObservatorio}" alt="Observatorio Pacto">
-            <img src="${logoGeneralitat}" alt="Generalitat Valenciana">
-            <img src="${logoLabora}" alt="Labora">
-            <img src="${logoMinisterio}" alt="Ministerio de Trabajo y Economía Social">
-            <img src="${logoSepe}" alt="SEPE">
-        </div>
-    </div>
-
-    <!-- Página 2: Índice -->
-    <div class="pagina indice">
-        <div class="seccion">
-            <div class="numero">1</div>
-            <div class="texto">
-                <h2>AGENCIA LOCAL DE DESARROLLO ECONÓMICO Y SOCIAL</h2>
-                <ul>
-                    <li>1.1 LA AGENCIA LOCAL EN CIFRAS</li>
-                    <li>1.2 QUÉ HACEMOS</li>
-                    <li>1.3 CÓMO ESTAMOS ORGANIZADOS</li>
-                    <li>1.4 DÓNDE ESTAMOS</li>
-                </ul>
-            </div>
-        </div>
-        <div class="seccion">
-            <div class="numero">2</div>
-            <div class="texto">
-                <h2>DEPARTAMENTO DE EMPLEO Y FORMACIÓN</h2>
-                <ul>
-                    <li>2.1 DATOS TOTALES</li>
-                    <li>2.2 NUESTROS CENTROS</li>
-                    <ul>
-                        <li>2.2.1 Sede Central "Puerta Ferrisa"</li>
-                        <li>2.2.2 Centro de Formación Alejandrina Candela</li>
-                        <li>2.2.3 Centro de Empleo y Formación "El Tossalet"</li>
-                        <li>2.2.4 Servicio de Empleo, Emprendimiento y Formación "Entre dos Castillos-Las Cigarreras"</li>
-                    </ul>
-                    <li>2.3 NUESTROS SERVICIOS</li>
-                    <ul>
-                        <li>2.3.1 Orientación e Intermediación Laboral</li>
-                        <li>2.3.2 Asesoramiento Empresarial y al Autoempleo</li>
-                    </ul>
-                    <li>2.4 FORMACIÓN</li>
-                    <li>2.5 PROGRAMAS Y PROYECTOS</li>
-                    <ul>
-                        <li>2.5.1 Programa "Grandes Ciudades"</li>
-                        <li>2.5.2 Programas de Fomento del Empleo</li>
-                        <li>2.5.3 Plan de actuación en brecha digital: cursos con la Escuela de Organización Industrial – EOI</li>
-                        <li>2.5.4 Programa Reinserción Mayores de 45 años</li>
-                    </ul>
-                    <li>2.6 SUBVENCIONES A ENTIDADES</li>
-                    <ul>
-                        <li>2.6.1 Subvenciones a entidades sin ánimo de lucro</li>
-                        <li>2.6.2 Convenios nominativos</li>
-                    </ul>
-                    <li>2.7 OTROS</li>
-                    <ul>
-                        <li>2.7.1 IV Feria de Empleo y Formación</li>
-                        <li>2.7.2 IV Encuentro de Empleo dirigido a Personas con Diversidad Funcional</li>
-                        <li>2.7.3 XII Concurso de decoración navideña</li>
-                        <li>2.7.4 Participación en la Red de Entidades por el Empleo</li>
-                    </ul>
-                </ul>
-            </div>
-        </div>
-        <div class="numero-pagina">1</div>
-    </div>
-
-    <!-- Nueva página Agencia Local de Desarrollo -->
+    <!-- Contenido del informe (páginas adicionales) -->
     <div class="pagina">
-        <div class="agencia-container">
-            <div class="agencia-header">
-                <div class="agencia-number">1</div>
-                <h1>AGENCIA LOCAL DE DESARROLLO</h1>
-                <h2>ECONÓMICO Y SOCIAL</h2>
-            </div>
-            <div class="agencia-footer">
-                <img />
-            </div>
+        <div class="contenido-pagina">
+            <h1>Introducción</h1>
+            <p>Este informe presenta un análisis detallado del mercado laboral en Alicante durante el año 2023, con especial énfasis en los sectores estratégicos para la economía local.</p>
+            <p>Los datos analizados provienen de diversas fuentes oficiales, así como de encuestas y entrevistas realizadas a empresas y trabajadores de la región.</p>
+            <p>El objetivo principal es proporcionar una visión clara y actualizada de las tendencias del mercado laboral, identificando oportunidades y desafíos para el desarrollo económico y social de Alicante.</p>
+            <!-- Resto del contenido... -->
         </div>
-        <div class="numero-pagina">2</div>
-    </div>
-
-    <!-- Página para datos de empresa (campos a rellenar) -->
-    <div class="pagina">
-        <div class="pagina-contenido">
-            <div class="form-field">
-                <label for="empresa-nombre">Nombre de la Empresa:</label>
-                <input type="text" id="empresa-nombre" class="form-input" />
-            </div>
-            
-            <div class="form-field">
-                <label for="empresa-fecha">Fecha de Creación:</label>
-                <input type="text" id="empresa-fecha" class="form-input" />
-            </div>
-            
-            <div class="form-field">
-                <label for="empresa-ciudad">Ciudad:</label>
-                <input type="text" id="empresa-ciudad" class="form-input" />
-            </div>
-            
-            <div class="form-field">
-                <label for="empresa-descripcion">Descripción:</label>
-                <textarea id="empresa-descripcion" class="form-input" style="min-height: 100px;"></textarea>
-            </div>
-            
-            <div class="form-field">
-                <label for="empresa-nombre-info">Nombre para informes:</label>
-                <input type="text" id="empresa-nombre-info" class="form-input" />
-            </div>
-        </div>
-        <div class="numero-pagina">3</div>
-    </div>
-
-    <!-- Página para departamentos -->
-    <div class="pagina">
-        <div class="pagina-contenido">
-            <h2>DEPARTAMENTOS</h2>
-            <div id="departamentos-container">
-                <div class="departamento-item">
-                    <input type="text" id="departamento-0" class="form-input" placeholder="Nombre del departamento" />
-                </div>
-                <div class="departamento-item">
-                    <input type="text" id="departamento-1" class="form-input" placeholder="Nombre del departamento" />
-                </div>
-                <div class="departamento-item">
-                    <input type="text" id="departamento-2" class="form-input" placeholder="Nombre del departamento" />
-                </div>
-                <div class="departamento-item">
-                    <input type="text" id="departamento-3" class="form-input" placeholder="Nombre del departamento" />
-                </div>
-                <div class="departamento-item">
-                    <input type="text" id="departamento-4" class="form-input" placeholder="Nombre del departamento" />
-                </div>
-            </div>
-        </div>
-        <div class="numero-pagina">4</div>
-    </div>
-
-    <!-- Página para centros -->
-    <div class="pagina">
-        <div class="pagina-contenido">
-            <h2>CENTROS</h2>
-            <div id="centros-container">
-                <div class="centro-item">
-                    <p>
-                        <label for="centro-0-nombre">Nombre:</label>
-                        <input type="text" id="centro-0-nombre" class="form-input" placeholder="Nombre del centro" />
-                    </p>
-                    <p>
-                        <label for="centro-0-direccion">Dirección:</label>
-                        <input type="text" id="centro-0-direccion" class="form-input" placeholder="Dirección del centro" />
-                    </p>
-                </div>
-                <div class="centro-item">
-                    <p>
-                        <label for="centro-1-nombre">Nombre:</label>
-                        <input type="text" id="centro-1-nombre" class="form-input" placeholder="Nombre del centro" />
-                    </p>
-                    <p>
-                        <label for="centro-1-direccion">Dirección:</label>
-                        <input type="text" id="centro-1-direccion" class="form-input" placeholder="Dirección del centro" />
-                    </p>
-                </div>
-                <div class="centro-item">
-                    <p>
-                        <label for="centro-2-nombre">Nombre:</label>
-                        <input type="text" id="centro-2-nombre" class="form-input" placeholder="Nombre del centro" />
-                    </p>
-                    <p>
-                        <label for="centro-2-direccion">Dirección:</label>
-                        <input type="text" id="centro-2-direccion" class="form-input" placeholder="Dirección del centro" />
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="numero-pagina">5</div>
-    </div>
-
-    <!-- Página para formaciones -->
-    <div class="pagina">
-        <div class="pagina-contenido">
-            <h2>FORMACIONES</h2>
-            <div id="formaciones-container">
-                <div class="formacion-item">
-                    <p>
-                        <label for="formacion-0-nombre">Nombre:</label>
-                        <input type="text" id="formacion-0-nombre" class="form-input" placeholder="Nombre de la formación" />
-                    </p>
-                    <p>
-                        <label for="formacion-0-tipo">Tipo:</label>
-                        <select id="formacion-0-tipo" class="form-input">
-                            <option value="presencial">Presencial</option>
-                            <option value="virtual">Virtual</option>
-                            <option value="hibrida">Híbrida</option>
-                        </select>
-                    </p>
-                    <p>
-                        <label for="formacion-0-duracion">Duración (horas):</label>
-                        <input type="text" id="formacion-0-duracion" class="form-input" placeholder="Duración en horas" />
-                    </p>
-                </div>
-                <div class="formacion-item">
-                    <p>
-                        <label for="formacion-1-nombre">Nombre:</label>
-                        <input type="text" id="formacion-1-nombre" class="form-input" placeholder="Nombre de la formación" />
-                    </p>
-                    <p>
-                        <label for="formacion-1-tipo">Tipo:</label>
-                        <select id="formacion-1-tipo" class="form-input">
-                            <option value="presencial">Presencial</option>
-                            <option value="virtual">Virtual</option>
-                            <option value="hibrida">Híbrida</option>
-                        </select>
-                    </p>
-                    <p>
-                        <label for="formacion-1-duracion">Duración (horas):</label>
-                        <input type="text" id="formacion-1-duracion" class="form-input" placeholder="Duración en horas" />
-                    </p>
-                </div>
-                <div class="formacion-item">
-                    <p>
-                        <label for="formacion-2-nombre">Nombre:</label>
-                        <input type="text" id="formacion-2-nombre" class="form-input" placeholder="Nombre de la formación" />
-                    </p>
-                    <p>
-                        <label for="formacion-2-tipo">Tipo:</label>
-                        <select id="formacion-2-tipo" class="form-input">
-                            <option value="presencial">Presencial</option>
-                            <option value="virtual">Virtual</option>
-                            <option value="hibrida">Híbrida</option>
-                        </select>
-                    </p>
-                    <p>
-                        <label for="formacion-2-duracion">Duración (horas):</label>
-                        <input type="text" id="formacion-2-duracion" class="form-input" placeholder="Duración en horas" />
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="numero-pagina">6</div>
     </div>
 </body>
 </html>
   `;
+  
+  return htmlContent;
 }
 
 /**

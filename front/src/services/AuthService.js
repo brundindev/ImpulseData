@@ -298,13 +298,30 @@ class AuthService {
    */
   async logout() {
     try {
-      // Cerrar sesión en Firebase
-      await signOut(auth);
+      // Marcar que estamos cerrando sesión para evitar intentos de reautenticación
+      sessionStorage.setItem('cerrando_sesion', 'true');
       
       // Limpiar datos de sesión
       localStorage.removeItem('authToken');
       localStorage.removeItem('userData');
+      localStorage.removeItem('user');
+      localStorage.removeItem('userProfile');
+      
+      // Limpiar sessionStorage, manteniendo solo la marca de cierre
+      const cerrando = sessionStorage.getItem('cerrando_sesion');
       sessionStorage.clear();
+      if (cerrando) {
+        sessionStorage.setItem('cerrando_sesion', cerrando);
+      }
+      
+      // Cerrar sesión en Firebase
+      try {
+        await signOut(auth);
+        console.log("Sesión Firebase cerrada correctamente");
+      } catch (firebaseError) {
+        console.error("Error al cerrar sesión en Firebase:", firebaseError);
+        // No interrumpimos el flujo si Firebase falla
+      }
       
       // Limpiar caché de autenticación
       this.currentUser = null;
@@ -313,6 +330,8 @@ class AuthService {
       return true;
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
+      // Asegurarse de que la marca de cierre se elimine en caso de error
+      sessionStorage.removeItem('cerrando_sesion');
       throw error;
     }
   }

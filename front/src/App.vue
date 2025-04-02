@@ -154,6 +154,17 @@ const actualizarEstadoUsuario = async () => {
   if (currentUser && !jwtToken) {
     console.log("Detectada inconsistencia: Usuario Firebase presente pero no hay JWT");
     
+    // Comprobar si estamos en las rutas de login o registro
+    const isLoginPage = router.currentRoute.value.path === '/login';
+    const isRegisterPage = router.currentRoute.value.path === '/registro';
+    
+    // No interferir con el proceso de inicio de sesión o registro
+    if (isLoginPage || isRegisterPage) {
+      // Si estamos en login o registro, no hacer nada y permitir que esas vistas manejen la autenticación
+      console.log("En página de autenticación, permitiendo que el flujo continúe normalmente");
+      return;
+    }
+    
     // Intentar una vez más recuperar la sesión
     try {
       const hasTriedRecovery = sessionStorage.getItem('attemptedRecovery');
@@ -164,6 +175,7 @@ const actualizarEstadoUsuario = async () => {
           password: `google-auth-${currentUser.uid}`
         };
         
+        console.log("Intentando recuperar sesión JWT...");
         // Intentar iniciar sesión para obtener el JWT
         await AuthService.login(loginData);
         usuario.value = AuthService.getCurrentUser();
@@ -172,11 +184,23 @@ const actualizarEstadoUsuario = async () => {
         return;
       }
       
+      console.log("No se pudo recuperar la sesión JWT, cerrando sesión...");
+      // Marcar explícitamente que estamos cerrando sesión
+      sessionStorage.setItem('cerrando_sesion', 'true');
       await AuthService.logout();
       usuario.value = null;
+      
+      // Esperar un breve momento antes de continuar
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Quitar la marca de cierre de sesión
+      sessionStorage.removeItem('cerrando_sesion');
+      
+      // Redirigir a la bienvenida
       router.push('/');
     } catch (error) {
       console.log("Error al recuperar sesión, cerrando sesión");
+      sessionStorage.removeItem('cerrando_sesion');
     }
     return;
   }

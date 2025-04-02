@@ -149,6 +149,11 @@ const login = async () => {
   error.value = '';
   
   try {
+    // Limpiar datos de sesión anterior para evitar conflictos
+    sessionStorage.removeItem('reautenticacionFallida');
+    sessionStorage.removeItem('attemptedRecovery');
+    sessionStorage.removeItem('lastReload');
+    
     // Capturar errores de red y suprimirlos
     window.addEventListener('unhandledrejection', function suppressLoginErrors(event) {
       if (event.reason && 
@@ -168,6 +173,9 @@ const login = async () => {
       if (isEmail) {
         console.log('Intentando iniciar sesión en Firebase primero con email:', identificador.value);
         await FirebaseAuthService.login(identificador.value, password.value);
+        
+        // Añadir un pequeño retraso para permitir que Firebase complete su proceso
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
     } catch (firebaseError) {
       console.warn('Error al iniciar sesión en Firebase:', firebaseError);
@@ -183,8 +191,18 @@ const login = async () => {
     // Emitir un evento personalizado para notificar que el estado de autenticación ha cambiado
     window.dispatchEvent(new CustomEvent('auth-state-changed'));
     
+    // Añadir una pequeña pausa para asegurar que el evento se procese
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // Mostrar pantalla de carga antes de redirigir
+    const event = new CustomEvent('show-global-loader');
+    window.dispatchEvent(event);
+    
+    // Pequeña pausa para asegurar que el loader se muestre
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     // Redirigir a la página de inicio
-    router.push('/');
+    router.push('/home');
   } catch (err) {
     // No registrar errores 401 en la consola
     // Este bloque maneja silenciosamente los errores
