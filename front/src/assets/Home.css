@@ -117,16 +117,20 @@
   color: var(--primary-color);
 }
 .welcome-subtitle {
-  color: var(--light-text);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1.1rem;
 }
 
 .user-name {
   font-weight: 700;
-  color: #004698;
+  color: white;
   position: relative;
   display: inline-block;
   padding: 0 4px;
+}
+
+.user-name:hover {
+  color: black;
 }
 
 .user-name::after {
