@@ -136,10 +136,11 @@ class AuthService {
             
       // Guardar el token JWT y los datos de usuario
       localStorage.setItem('authToken', response.data);
-      this.storeUserDataFromToken(response.data);
+      const userData = this.storeUserDataFromToken(response.data);
       
       // Para usuarios de Google, verificar si ya están autenticados con Firebase
       const currentUser = auth.currentUser;
+      
       if (isGoogleAuth) {
         if (currentUser) {
           // Si ya hay sesión de Firebase, verificar si es el mismo usuario
@@ -160,23 +161,38 @@ class AuthService {
           console.log("No hay sesión activa en Firebase para el usuario de Google");
         }
       } else if (!isGoogleAuth && !currentUser) {
-        // Para usuarios normales, si no hay sesión en Firebase, iniciarla
-        if (identifier.includes('@')) { // Solo intentar si es un email
-          console.log("Iniciando sesión en Firebase con email:", identifier);
-          try {
-            const firebaseUser = await FirebaseAuthService.login(identifier, credentials.password);
-            console.log("Usuario autenticado en Firebase:", firebaseUser.email);
-          } catch (firebaseError) {
-            console.warn("Error al iniciar sesión en Firebase:", firebaseError);
-            // No interrumpimos el flujo si Firebase falla
+        // Para usuarios normales, intentar recuperar email del token para Firebase
+        try {
+          // Si el identificador es un email, usarlo directamente
+          if (identifier.includes('@')) {
+            console.log("Iniciando sesión en Firebase con email:", identifier);
+            try {
+              const firebaseUser = await FirebaseAuthService.login(identifier, credentials.password);
+              console.log("Usuario autenticado en Firebase:", firebaseUser.email);
+            } catch (firebaseError) {
+              console.warn("Error al iniciar sesión en Firebase con email:", firebaseError);
+            }
+          } else if (userData && userData.email && userData.email.includes('@')) {
+            // Si el identificador NO es email pero obtuvimos email del token, usarlo para Firebase
+            console.log("Iniciando sesión en Firebase con email del token:", userData.email);
+            try {
+              const firebaseUser = await FirebaseAuthService.login(userData.email, credentials.password);
+              console.log("Usuario autenticado en Firebase con email del token:", firebaseUser.email);
+            } catch (firebaseError) {
+              console.warn("Error al iniciar sesión en Firebase con email del token:", firebaseError);
+              // No interrumpimos el flujo si Firebase falla
+            }
+          } else {
+            console.log("No se pudo iniciar sesión en Firebase: no hay email disponible");
           }
-        } else {
-          console.log("Inicio de sesión con nombre de usuario, no se intenta en Firebase directamente");
+        } catch (firebaseLoginError) {
+          console.warn("Error al intentar login en Firebase:", firebaseLoginError);
+          // No interrumpimos el flujo principal si Firebase falla
         }
       } else if (currentUser) {
         console.log("Ya existe sesión en Firebase:", currentUser.email);
       }
-            
+      
       // Disparar evento para actualizar la interfaz
       window.dispatchEvent(new CustomEvent('auth-state-changed'));
       
@@ -388,47 +404,63 @@ class AuthService {
 
       // Convertir el payload a un objeto JSON
       const payload = JSON.parse(jsonPayload);
+      console.log("Payload de token JWT:", payload);
       
       // Obtener un nombre válido a partir del payload
       let nombreUsuario = 'Usuario';
+      let emailUsuario = '';
       
-      // Intentar extraer el nombre de diferentes propiedades
-      if (payload.nombreUsuario) {
+      // Intentar extraer el email
+      if (payload.sub) {
+        emailUsuario = payload.sub;
+      } else if (payload.email) {
+        emailUsuario = payload.email;
+      }
+      
+      // Intentar extraer el nombre en orden de prioridad
+      if (payload.nombreCompleto) {
+        nombreUsuario = payload.nombreCompleto;
+      } else if (payload.nombreUsuario) {
         nombreUsuario = payload.nombreUsuario;
       } else if (payload.nombre) {
         nombreUsuario = payload.nombre;
       } else if (payload.name) {
         nombreUsuario = payload.name;
-      } else if (payload.sub) {
-        // Si sub es un email, extraer la parte antes del @
-        if (payload.sub.includes('@')) {
-          nombreUsuario = payload.sub.split('@')[0];
-        } else {
-          nombreUsuario = payload.sub;
-        }
-      } else if (payload.email) {
-        // Si hay email pero no hay sub
-        if (payload.email.includes('@')) {
-          nombreUsuario = payload.email.split('@')[0];
-        } else {
-          nombreUsuario = payload.email;
-        }
+      } else if (payload.displayName) {
+        nombreUsuario = payload.displayName;
+      } else if (emailUsuario && emailUsuario.includes('@')) {
+        // Si tenemos email pero no nombre, usar parte antes del @
+        nombreUsuario = emailUsuario.split('@')[0];
       }
       
-      // Almacenar la información del usuario
-      localStorage.setItem('userData', JSON.stringify({
+      // Incluir todos los campos posibles para evitar problemas
+      const userData = {
+        id: payload.id || payload.userId || '',
         nombre: nombreUsuario,
-        email: payload.sub || payload.email || 'usuario@example.com'
-      }));
+        email: emailUsuario,
+        nombreUsuario: payload.nombreUsuario || nombreUsuario,
+        displayName: nombreUsuario,
+        uid: payload.uid || payload.id || '',
+        emailVerificado: payload.emailVerificado || true,
+        rol: payload.rol || 'USER'
+      };
       
-      console.log('Datos de usuario almacenados:', { nombre: nombreUsuario, email: payload.sub || payload.email });
+      // Almacenar la información del usuario
+      localStorage.setItem('userData', JSON.stringify(userData));
+      
+      console.log('Datos de usuario almacenados:', userData);
+      
+      return userData;
     } catch (error) {
       console.error('Error al decodificar el token JWT', error);
       // En caso de error, guardar datos por defecto para evitar errores en la UI
-      localStorage.setItem('userData', JSON.stringify({
+      const defaultUserData = {
         nombre: 'Usuario',
-        email: 'usuario@example.com'
-      }));
+        email: 'usuario@example.com',
+        displayName: 'Usuario'
+      };
+      localStorage.setItem('userData', JSON.stringify(defaultUserData));
+      return defaultUserData;
     }
   }
 }

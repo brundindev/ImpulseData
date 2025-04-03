@@ -34,7 +34,7 @@
       <div class="dashboard-header">
         <div>
           <h1 class="welcome-title">Dashboard</h1>
-          <p class="welcome-subtitle">¡Bienvenido, <span class="user-name">{{ usuario?.nombre || 'Usuario' }}</span>!</p>
+          <p class="welcome-subtitle">¡Bienvenido, <span class="user-name">{{ usuario?.nombre || usuario?.displayName || 'Usuario' }}</span>!</p>
         </div>
         <div class="action-buttons">
           <button @click="showFormModal = true; modoEdicion = false;" class="btn btn-primary btn-create">
@@ -655,6 +655,12 @@ const cargarDatos = async () => {
     const jwtToken = localStorage.getItem('authToken');
     const userData = AuthService.getCurrentUser();
     
+    console.log("Estado de autenticación:", {
+      "Firebase auth": user ? "Activo" : "Inactivo",
+      "JWT": jwtToken ? "Presente" : "Ausente", 
+      "userData": userData
+    });
+    
     // Si hay JWT pero no hay usuario Firebase, intentar iniciar sesión con Firebase
     if (!user && jwtToken && userData) {
       console.warn("HomeView - Hay JWT pero no hay sesión en Firebase. Intentando recuperar sesión...");
@@ -677,11 +683,34 @@ const cargarDatos = async () => {
       }
     }
     
-    // Si no hay usuario o token, mostrar error
-    if (!user || !jwtToken) {
-      console.error("HomeView - Autenticación incompleta:", 
-                    "Firebase:", user ? "Sí" : "No", 
-                    "JWT:", jwtToken ? "Sí" : "No");
+    // Si no hay usuario Firebase pero sí hay JWT, podemos continuar igualmente
+    // ya que las empresas se filtran por el ID de usuario en el backend
+    if (!user && jwtToken) {
+      console.log("Continuando con JWT sin autenticación de Firebase");
+      
+      try {
+        // Obtener contadores
+        const contadores = await FirestoreService.obtenerContadores();
+        empresasCount.value = parseInt(contadores.empresasCount) || 0;
+        departamentosCount.value = parseInt(contadores.departamentosCount) || 0;
+        centrosCount.value = parseInt(contadores.centrosCount) || 0;
+        formacionesCount.value = parseInt(contadores.formacionesCount) || 0;
+        
+        // Obtener empresas usando solo el JWT
+        const empresasRecibidas = await FirestoreService.obtenerEmpresas();
+        empresas.value = empresasRecibidas;
+        
+        cargando.value = false;
+        return;
+      } catch (err) {
+        console.error("Error al cargar datos con solo JWT:", err);
+        // Continuamos con el flujo normal para intentar otra estrategia
+      }
+    }
+    
+    // Si no hay token JWT, mostrar error
+    if (!jwtToken) {
+      console.error("HomeView - No hay JWT");
       
       error.value = 'No se pudo verificar tu autenticación. Por favor, inicia sesión de nuevo.';
       cargando.value = false;
@@ -704,14 +733,21 @@ const cargarDatos = async () => {
     // Obtener empresas
     const empresasRecibidas = await FirestoreService.obtenerEmpresas();
     
-    // Triple verificación: solo mostrar empresas del usuario actual
-    empresas.value = empresasRecibidas.filter(empresa => {
-      const perteneceAlUsuario = empresa.creadoPor === user.uid;
-      if (!perteneceAlUsuario) {
-        console.error(`⚠️ ALERTA DE SEGURIDAD: Se detectó empresa que no pertenece al usuario actual: ${empresa.nombre}`);
-      }
-      return perteneceAlUsuario;
-    });
+    // Si hay usuario de Firebase, filtrar por su UID
+    if (user) {
+      // Triple verificación: solo mostrar empresas del usuario actual
+      empresas.value = empresasRecibidas.filter(empresa => {
+        const perteneceAlUsuario = empresa.creadoPor === user.uid;
+        if (!perteneceAlUsuario) {
+          console.warn(`⚠️ SEGURIDAD: Se detectó empresa que no pertenece al usuario actual: ${empresa.nombre}`);
+        }
+        return perteneceAlUsuario;
+      });
+    } else {
+      // Si no hay usuario Firebase pero llegamos aquí, mostrar todas las empresas recibidas
+      // ya que el backend ya filtrará por el JWT
+      empresas.value = empresasRecibidas;
+    }
     
   } catch (err) {
     console.error("Error al cargar datos en HomeView:", err);
