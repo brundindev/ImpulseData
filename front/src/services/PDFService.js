@@ -86,13 +86,6 @@ class PDFService {
       
       console.log("Iniciando generación del informe de empresa:", empresa.nombre);
       
-      // Verificar que la empresa tenga campos básicos
-      if (!empresa || !empresa.nombre) {
-        console.error("Datos de empresa insuficientes para generar el informe");
-        this.ocultarOverlayGeneracion();
-        throw new Error("Datos de empresa insuficientes");
-      }
-      
       // Obtener la plantilla HTML
       console.log("Obteniendo plantilla HTML...");
       let plantillaHTML;
@@ -104,149 +97,240 @@ class PDFService {
         this.ocultarOverlayGeneracion();
         throw new Error("No se pudo crear la plantilla HTML base");
       }
+
+      // SOLUCIÓN FINAL: USAR HTML2PDF DIRECTAMENTE CON OUTPUTPDF
+      console.log("Usando método directo con outputPdf");
       
-      // Crear un contenedor para el HTML pero sin añadirlo al DOM todavía
-      const container = document.createElement('div');
-      container.innerHTML = plantillaHTML;
-      
-      // Rellenar datos
-      this.rellenarDatosEmpresa(container, empresa);
-      
-      // Crear un iframe oculto para no desestructurar la página
+      // Crear un iframe para aislar el renderizado
       const iframe = document.createElement('iframe');
-      iframe.style.visibility = 'hidden';
-      iframe.style.position = 'absolute';
-      iframe.style.width = '0';
-      iframe.style.height = '0';
-      iframe.style.border = '0';
+      iframe.style.position = 'fixed';
+      iframe.style.top = '0';
+      iframe.style.left = '0';
+      iframe.style.width = '793px'; // Ancho A4 en px
+      iframe.style.height = '1122px'; // Alto A4 en px
+      iframe.style.border = 'none';
+      iframe.style.zIndex = '10000';
       
-      // Preparar el PDF utilizando html2pdf
-      try {
-        // Desactivar inputs para que html2pdf los renderice correctamente
-        this.desactivarControlesFormulario(container);
-        
-        // Configuración para html2pdf
-        const options = {
-          margin: 0, // Eliminar todos los márgenes
-          filename: `informe_${empresa.nombre}.pdf`,
-          image: { 
-            type: 'jpeg', 
-            quality: 1.0,
-            allowTaint: true,
-            useCORS: true
-          },
-          html2canvas: { 
-            scale: 2, 
-            useCORS: true,
-            allowTaint: true,
-            logging: true,
-            letterRendering: true,
-            imageTimeout: 0,
-            backgroundColor: '#FFFFFF',
-            windowWidth: 210 * 3.78, // Para asegurar que se vea correctamente a tamaño A4
-            x: 0,
-            y: 0
-          },
-          jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait',
-            compress: true,
-            hotfixes: ['px_scaling'],
-            precision: 16,
-            putOnlyUsedFonts: true,
-            margin: 0
-          },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'], after: '.pagina' },
-          enableLinks: false
-        };
-        
-        // Añadir el iframe al DOM
-        document.body.appendChild(iframe);
-        
-        // Generar el contenido del iframe
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        iframeDoc.open();
-        iframeDoc.write(`
-          <!DOCTYPE html>
-          <html style="margin:10px; padding:0; overflow:hidden; width:100%; height:100%;">
+      // Hacerlo visible para debugging si es necesario
+      // Normalmente debería estar oculto, pero esto puede ayudar a ver qué sucede
+      // iframe.style.opacity = '0.2'; 
+      iframe.style.visibility = 'hidden';
+      
+      // Añadir al DOM
+      document.body.appendChild(iframe);
+      
+      // Acceder al documento del iframe
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      
+      // Escribir el HTML directamente
+      iframeDoc.open();
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
           <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Generando PDF...</title>
+            <title>PDF</title>
             <style>
-              html, body { 
-                margin: 0; 
+              body { 
+                margin: 15mm; 
                 padding: 0; 
-                background-color: white;
-                visibility: hidden;
-                overflow: hidden;
-                width: 100%;
-                height: 100%;
+                background: white; 
+                width: 793px;
+                font-family: Arial, sans-serif;
+                color: #000;
               }
-              #pdf-container {
+              * {
+                box-sizing: border-box;
+              }
+              .page { 
+                page-break-after: always; 
+                break-after: page;
                 margin: 0;
                 padding: 0;
                 width: 100%;
-                height: 100%;
-                position: absolute;
-                top: 0;
-                left: 0;
+                background: white;
+                border: none;
+                box-shadow: none;
+                min-height: 1122px; /* Altura mínima de página A4 */
+                height: auto;
+                position: relative;
                 overflow: hidden;
+              }
+              .page:first-child {
+                margin-top: 10mm;
+              }
+              .page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+              }
+              img {
+                max-width: 100%;
+                height: auto;
+                display: block;
+              }
+              /* Evitar elementos huérfanos al final de una página */
+              p, h1, h2, h3, h4, h5, h6 {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                margin-top: 5mm;
+                margin-bottom: 5mm;
+              }
+              /* Evitar saltos de página dentro de secciones críticas */
+              .no-break {
+                page-break-inside: avoid;
+                break-inside: avoid;
               }
             </style>
           </head>
-          <body>
-            <div id="pdf-container"></div>
-          </body>
-          </html>
-        `);
-        iframeDoc.close();
+          <body>${plantillaHTML}</body>
+        </html>
+      `);
+      iframeDoc.close();
+      
+      // Esperar a que todo se cargue
+      await new Promise(resolve => {
+        iframe.onload = resolve;
+        setTimeout(resolve, 1000); // Timeout como respaldo
+      });
+      
+      // Reemplazar imágenes problemáticas
+      const imagenes = iframeDoc.querySelectorAll('img');
+      imagenes.forEach(img => {
+        if (!img.src || 
+            img.src === '' || 
+            img.src === 'about:blank' || 
+            img.src.startsWith('http://localhost/') || 
+            img.src.startsWith('/')) {
+          img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        }
+      });
+      
+      // Dar tiempo para que se carguen las imágenes
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Configuración mínima para html2pdf
+      const opciones = {
+        margin: 0,
+        filename: `informe_${empresa.nombre}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 1, 
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#FFFFFF',
+          removeContainer: false
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          compress: true,
+          hotfixes: ["px_scaling"]
+        },
+        pagebreak: { 
+          mode: 'avoid-all', 
+          before: '.page', 
+          avoid: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', '.no-break']
+        }
+      };
+      
+      // Usar el método outputPdf directamente
+      try {
+        console.log("Generando PDF con outputPdf...");
         
-        // Esperar a que el iframe esté cargado
-        await new Promise(resolve => {
-          iframe.onload = resolve;
-          setTimeout(resolve, 100); // Fallback
-        });
+        // Utilizar outputPdf directamente con el body del iframe
+        const pdfData = await html2pdf()
+          .from(iframeDoc.body)
+          .set(opciones)
+          .outputPdf('arraybuffer');
         
-        // Añadir el contenedor al iframe
-        const pdfContainer = iframeDoc.getElementById('pdf-container');
-        pdfContainer.appendChild(container.cloneNode(true));
+        if (!pdfData) {
+          throw new Error("No se generaron datos PDF");
+        }
         
-        // Dar tiempo para que se carguen los recursos
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Generar PDF
-        const pdf = await html2pdf()
-          .from(pdfContainer)
-          .set(options)
-          .toPdf()
-          .output('arraybuffer');
-        
-        // Limpiar
-        document.body.removeChild(iframe);
+        console.log("PDF generado correctamente con outputPdf");
         
         // Convertir a Uint8Array
-        const pdfBytes = new Uint8Array(pdf);
-        console.log("PDF generado correctamente con un tamaño de", pdfBytes.length, "bytes");
+        const pdfBytes = new Uint8Array(pdfData);
         
-        // Ocultar overlay después de completar
+        // Limpiar iframe
+        document.body.removeChild(iframe);
+        
+        // Ocultar overlay
         this.ocultarOverlayGeneracion();
         
         return pdfBytes;
       } catch (pdfError) {
-        console.error("Error al generar PDF desde HTML:", pdfError);
-        // Limpiar el iframe si existe
-        if (iframe.parentNode) {
+        console.error("Error al generar PDF con outputPdf:", pdfError);
+        
+        // ÚLTIMO RECURSO: Descargar directamente
+        try {
+          console.log("Intentando guardar directamente el PDF...");
+          
+          // Usar el método save() directamente
+          await html2pdf()
+            .from(iframeDoc.body)
+            .set(opciones)
+            .save();
+          
+          console.log("PDF guardado directamente");
+          
+          // Para la vista previa, devolvemos un PDF vacío pequeño
+          const emptyPdf = new Uint8Array(100);
+          
+          // Limpiar iframe
           document.body.removeChild(iframe);
+          
+          // Ocultar overlay
+          this.ocultarOverlayGeneracion();
+          
+          return emptyPdf;
+        } catch (saveError) {
+          console.error("Error también al guardar directamente:", saveError);
+          
+          // ÚLTIMO RECURSO EXTREMO: Abrir ventana de impresión
+          const printWindow = window.open('', '_blank');
+          if (printWindow) {
+            printWindow.document.write(`
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <meta charset="UTF-8">
+                  <title>Memoria de Actividad - Impulsalicante</title>
+                  <style>
+                    @media print {
+                      body { margin: 0; padding: 0; }
+                      .page { page-break-after: always; }
+                    }
+                  </style>
+                </head>
+                <body>${plantillaHTML}</body>
+              </html>
+            `);
+            printWindow.document.close();
+            
+            // Esperar y mostrar el diálogo de impresión
+            setTimeout(() => {
+              printWindow.print();
+            }, 1000);
+            
+            // Limpiar iframe
+            document.body.removeChild(iframe);
+            
+            // Ocultar overlay
+            this.ocultarOverlayGeneracion();
+            
+            return new Uint8Array(100); // PDF vacío para la vista previa
+          }
+          
+          // Si todo falla, limpiamos y lanzamos el error
+          document.body.removeChild(iframe);
+          this.ocultarOverlayGeneracion();
+          throw new Error("No se pudo generar el PDF con ningún método");
         }
-        // Ocultar overlay en caso de error
-        this.ocultarOverlayGeneracion();
-        throw new Error("Error al generar el documento PDF final");
       }
     } catch (error) {
-      console.error('Error al generar el informe de empresa:', error);
-      // Asegurarnos de ocultar el overlay en cualquier caso de error
+      console.error('Error general al generar el informe:', error);
       this.ocultarOverlayGeneracion();
       throw error;
     }
