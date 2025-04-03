@@ -86,12 +86,6 @@ input, select, textarea {
   transition: all 0.3s ease;
 }
 
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.2);
-}
-
 /* Estilos responsivos */
 @media (max-width: 768px) {
   body {
