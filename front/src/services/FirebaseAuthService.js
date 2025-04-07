@@ -8,6 +8,8 @@ import {
   updateProfile
 } from 'firebase/auth';
 import { auth, waitForAuthInit } from '../firebase';
+// Importar el servicio de Firestore para crear la empresa por defecto
+import FirestoreService from './FirestoreService';
 
 class FirebaseAuthService {
   /**
@@ -113,6 +115,15 @@ class FirebaseAuthService {
         // No bloqueamos el flujo por este error
       }
       
+      // Crear la empresa por defecto para este usuario
+      try {
+        console.log("🏢 Verificando/creando empresa por defecto para el usuario...");
+        await FirestoreService.crearEmpresaPorDefecto();
+      } catch (empresaError) {
+        console.error("Error al intentar crear empresa por defecto:", empresaError);
+        // No bloqueamos el flujo de autenticación por este error
+      }
+      
       return userCredential.user;
     } catch (error) {
       console.error('Error al iniciar sesión con Firebase:', error);
@@ -196,6 +207,15 @@ class FirebaseAuthService {
           console.warn("Error al actualizar usuario de Google:", error);
           // No bloqueamos el flujo
         }
+      }
+      
+      // Crear la empresa por defecto para este usuario
+      try {
+        console.log("🏢 Verificando/creando empresa por defecto para el usuario de Google...");
+        await FirestoreService.crearEmpresaPorDefecto();
+      } catch (empresaError) {
+        console.error("Error al intentar crear empresa por defecto para usuario de Google:", empresaError);
+        // No bloqueamos el flujo de autenticación por este error
       }
       
       return user;
