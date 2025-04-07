@@ -79,7 +79,7 @@ class FirestoreService {
       const empresaData = {
         ...EMPRESA_POR_DEFECTO,
         id: empresaId,
-        nombre: "Memoria de Actividad - Impulsalicante", // Asegurarse de que tenga el nombre correcto
+        nombre: "Impulsalicante",
         creadoPor: user.uid,
         creadorEmail: user.email,
         fechaCreacionSistema: new Date().toISOString(),
