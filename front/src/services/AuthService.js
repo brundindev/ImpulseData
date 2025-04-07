@@ -418,10 +418,10 @@ class AuthService {
       }
       
       // Intentar extraer el nombre en orden de prioridad
-      if (payload.nombreCompleto) {
-        nombreUsuario = payload.nombreCompleto;
-      } else if (payload.nombreUsuario) {
+      if (payload.nombreUsuario) {
         nombreUsuario = payload.nombreUsuario;
+      } else if (payload.nombreCompleto) {
+        nombreUsuario = payload.nombreCompleto;
       } else if (payload.nombre) {
         nombreUsuario = payload.nombre;
       } else if (payload.name) {
@@ -438,7 +438,7 @@ class AuthService {
         id: payload.id || payload.userId || '',
         nombre: nombreUsuario,
         email: emailUsuario,
-        nombreUsuario: payload.nombreUsuario || nombreUsuario,
+        nombreUsuario: nombreUsuario,
         displayName: nombreUsuario,
         uid: payload.uid || payload.id || '',
         emailVerificado: payload.emailVerificado || true,

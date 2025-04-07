@@ -4,7 +4,8 @@ import {
   sendEmailVerification,
   signOut,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  updateProfile
 } from 'firebase/auth';
 import { auth, waitForAuthInit } from '../firebase';
 
@@ -65,6 +66,29 @@ class FirebaseAuthService {
       // Verificar si el usuario tiene todos los datos necesarios
       const user = userCredential.user;
       console.log('Sesión iniciada en Firebase:', user.email, 'displayName:', user.displayName);
+      
+      // Obtener el nombre de usuario del backend si no está en Firebase
+      if (!user.displayName) {
+        try {
+          const response = await fetch('http://localhost:8080/api/usuarios/nombre', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.nombreUsuario) {
+              await updateProfile(user, {
+                displayName: data.nombreUsuario
+              });
+              console.log('Nombre de usuario actualizado en Firebase:', data.nombreUsuario);
+            }
+          }
+        } catch (error) {
+          console.warn('Error al obtener nombre de usuario del backend:', error);
+        }
+      }
       
       // Forzar la actualización de datos locales
       try {
@@ -137,7 +161,7 @@ class FirebaseAuthService {
         
         try {
           // Forzar actualización del perfil para incluir que está verificado
-          await user.updateProfile({
+          await updateProfile(user, {
             displayName: user.displayName || user.email.split('@')[0]
           });
           
@@ -365,12 +389,9 @@ class FirebaseAuthService {
       }
       
       // Actualizar el perfil en Firebase
-      await user.updateProfile({
+      await updateProfile(user, {
         displayName: newDisplayName
       });
-      
-      // Recargar usuario para obtener datos actualizados
-      await user.reload();
       
       // Actualizar datos en localStorage para consistencia inmediata
       try {

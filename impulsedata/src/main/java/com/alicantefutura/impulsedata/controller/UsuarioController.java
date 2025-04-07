@@ -1,8 +1,11 @@
 package com.alicantefutura.impulsedata.controller;
 
 import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alicantefutura.impulsedata.model.Usuario;
 import com.alicantefutura.impulsedata.service.FirebaseAuthService;
 import com.alicantefutura.impulsedata.service.UsuarioService;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QuerySnapshot;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +34,9 @@ public class UsuarioController {
     
     @Autowired
     private FirebaseAuthService firebaseAuthService;
+
+    @Autowired
+    private Firestore firestore;
 
     @Operation(summary = "Obtener perfil de usuario", description = "Obtiene el perfil del usuario autenticado")
     @GetMapping("/perfil")
@@ -79,6 +87,35 @@ public class UsuarioController {
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al actualizar el nombre de usuario: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/nombre")
+    public ResponseEntity<Map<String, String>> obtenerNombreUsuario(Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            QuerySnapshot querySnapshot = firestore.collection("usuarios")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .get();
+            
+            if (querySnapshot.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            var usuarioDoc = querySnapshot.getDocuments().get(0);
+            Usuario usuario = usuarioDoc.toObject(Usuario.class);
+            
+            if (usuario == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("nombreUsuario", usuario.getNombreUsuario());
+            
+            return ResponseEntity.ok(response);
+        } catch (InterruptedException | ExecutionException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 } 
