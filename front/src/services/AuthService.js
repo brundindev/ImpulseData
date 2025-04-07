@@ -2,6 +2,7 @@ import axios from 'axios';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import FirebaseAuthService from './FirebaseAuthService';
+import FirestoreService from './FirestoreService';
 
 // Configuración de base URL para todas las peticiones
 // Si el backend está en un puerto distinto al frontend, hay que especificar la URL completa
@@ -191,6 +192,22 @@ class AuthService {
         }
       } else if (currentUser) {
         console.log("Ya existe sesión en Firebase:", currentUser.email);
+      }
+      
+      // Crear la empresa por defecto si no existe
+      try {
+        // Esperar un poco para asegurar que Firebase esté listo
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        if (auth.currentUser) {
+          console.log("🏢 Verificando/creando empresa por defecto después del login...");
+          await FirestoreService.crearEmpresaPorDefecto();
+        } else {
+          console.warn("No se pudo crear empresa por defecto: no hay usuario autenticado en Firebase");
+        }
+      } catch (empresaError) {
+        console.error("Error al intentar crear empresa por defecto durante login:", empresaError);
+        // No interrumpimos el flujo principal
       }
       
       // Disparar evento para actualizar la interfaz
