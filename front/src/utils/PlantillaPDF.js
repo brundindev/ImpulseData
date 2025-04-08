@@ -11,7 +11,7 @@ const html = `<!DOCTYPE html>
   --light-blue-bg: #e6f0ff; /* Azul muy claro para fondos */
   --text-color: #333333;
   --heading-color: var(--primary-blue); /* Color por defecto para h3, h4... */
-  --grey-bg: #f8f9fa;
+  --grey-bg: #ffffff; /* Cambiado a blanco en lugar de #f8f9fa */
   --light-grey-border: #dee2e6;
   --placeholder-bg: #cccccc;
   --placeholder-border: #999999;
@@ -32,7 +32,7 @@ body {
     margin: 0;
     padding: 0;
     color: var(--text-color);
-    background-color: #e9ecef;
+    background-color: #ffffff;
 }
 
 .container {
@@ -40,7 +40,7 @@ body {
     margin: 30px auto;
     background-color: #ffffff;
     padding: 30px 40px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    box-shadow: none; /* Eliminada la sombra */
     border-radius: 5px;
     overflow: hidden; /* Para contener márgenes negativos */
 }
@@ -170,23 +170,23 @@ tbody tr:nth-child(even) { background-color: var(--grey-bg); }
 /* Bloques de Estadísticas - Usan color de sección */
 .stats-container {
     display: flex; flex-wrap: wrap; justify-content: space-between;
-    background-color: var(--light-blue-bg); /* Fondo por defecto */
+    background-color: #ffffff; /* Cambiado a blanco */
     padding: 20px; border: 1px solid var(--light-grey-border);
     border-left: 5px solid var(--section-color); /* Borde izquierdo con color sección */
     border-radius: 4px; margin: 1.5em 0; gap: 15px;
 }
 /* Re-asignar fondo claro específico */
-.section-agencia .stats-container { background-color: #e6f0ff; border-color: #cce0ff; }
-.section-empleo .stats-container { background-color: #eaf6ec; border-color: #c8e6c9;}
-.section-promo .stats-container { background-color: #fff3e0; border-color: #ffe0b2;}
-.section-desarrollo .stats-container { background-color: #f3e5f5; border-color: #e1bee7;}
-.section-gestion .stats-container { background-color: #e0f7fa; border-color: #b2ebf2;}
-.section-marketing .stats-container { background-color: #e1f5fe; border-color: #b3e5fc;}
+.section-agencia .stats-container { background-color: #ffffff; border-color: #cce0ff; }
+.section-empleo .stats-container { background-color: #ffffff; border-color: #c8e6c9;}
+.section-promo .stats-container { background-color: #ffffff; border-color: #ffe0b2;}
+.section-desarrollo .stats-container { background-color: #ffffff; border-color: #e1bee7;}
+.section-gestion .stats-container { background-color: #ffffff; border-color: #b2ebf2;}
+.section-marketing .stats-container { background-color: #ffffff; border-color: #b3e5fc;}
 
 
 .stats-container .stat-block, .stats-container .indicator {
     background-color: #fff; padding: 10px 15px; border-radius: 3px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05); flex-grow: 1;
+    box-shadow: none; flex-grow: 1;
 }
 .budget-stats .stat-block { flex-basis: calc(50% - 10px); font-size: 1.05em; }
 .key-indicators .indicator { flex-basis: calc(33% - 10px); font-size: 0.95em; }
@@ -194,7 +194,7 @@ tbody tr:nth-child(even) { background-color: var(--grey-bg); }
 
 /* Bloques de Datos Generales - Usan color de sección */
 .data-section {
-    margin-bottom: 1.5em; padding: 15px; background-color: var(--grey-bg);
+    margin-bottom: 1.5em; padding: 15px; background-color: #ffffff;
     border: 1px solid var(--light-grey-border); border-radius: 4px;
     border-left: 4px solid var(--section-color); /* Borde izquierdo color sección */
 }
@@ -207,24 +207,24 @@ tbody tr:nth-child(even) { background-color: var(--grey-bg); }
 
 /* Lista de Localizaciones */
 .locations { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-top: 1.5em; }
-.location-block { text-align: center; background-color: var(--grey-bg); padding: 15px; border-radius: 4px; border: 1px solid var(--light-grey-border); }
+.location-block { text-align: center; background-color: #ffffff; padding: 15px; border-radius: 4px; border: 1px solid var(--light-grey-border); }
 .location-block img { margin-bottom: 10px; max-width: 100%; height: auto; }
 .location-block h4 { margin-bottom: 8px; font-size: 1.05em; color: var(--primary-blue); }
 .location-block p { font-size: 0.9em; line-height: 1.4; }
 
 /* Certificación */
-.certification { display: flex; align-items: center; background-color: var(--grey-bg); padding: 15px; border: 1px solid var(--light-grey-border); border-radius: 4px; margin-bottom: 1.5em; }
+.certification { display: flex; align-items: center; background-color: #ffffff; padding: 15px; border: 1px solid var(--light-grey-border); border-radius: 4px; margin-bottom: 1.5em; }
 .certification img { margin-right: 20px; }
 
 /* Resultados de Programa */
-.program-results { display: flex; align-items: flex-start; gap: 25px; margin: 1.5em 0; background-color: #fbfbfb; padding: 20px; border-radius: 4px; border: 1px solid #eee; }
+.program-results { display: flex; align-items: flex-start; gap: 25px; margin: 1.5em 0; background-color: #ffffff; padding: 20px; border-radius: 4px; border: 1px solid #eee; }
 .program-results img { flex-shrink: 0; }
 .program-results div { flex-grow: 1; }
 .program-results h5 { margin-top: 0; color: var(--section-color); } /* Título con color sección */
 
 /* Grid Convenios / Otros */
 .convenios-grid, .otros-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 1em; }
-.convenio-item, .otro-item { background-color: #fff; padding: 15px; border-radius: 4px; border: 1px solid var(--light-grey-border); box-shadow: 0 1px 3px rgba(0,0,0,0.06); } /* Fondo blanco y sombra */
+.convenio-item, .otro-item { background-color: #fff; padding: 15px; border-radius: 4px; border: 1px solid var(--light-grey-border); box-shadow: none; } /* Fondo blanco y sin sombra */
 .convenio-item strong { color: var(--section-color); } /* Resaltado con color sección */
 .otro-item h4 { margin-top: 0; font-size: 1.1em; color: var(--section-color); } /* Título con color sección */
 .convenio-item img, .otro-item img { max-width: 80%; height: auto; margin-top: 10px; display: block; margin-left:auto; margin-right:auto;}
@@ -238,12 +238,13 @@ tbody tr:nth-child(even) { background-color: var(--grey-bg); }
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); /* Columnas adaptables */
     gap: 40px; /* Espacio entre bloques/columnas */
     margin-top: 1.5em;
+    background-color: #ffffff;
 }
 .content-block {
     background-color: #fff;
     padding: 25px; /* Más padding */
     border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08); /* Sombra un poco más marcada */
+    box-shadow: none; /* Sin sombra */
     border-top: 4px solid var(--section-color); /* Borde superior con color sección */
     margin-bottom: 1em; /* Espacio inferior para bloques apilados */
 }
@@ -283,12 +284,28 @@ tbody tr:nth-child(even) { background-color: var(--grey-bg); }
 
 /* Contraportada */
 #contraportada {
-    background-color: var(--grey-bg); padding: 30px; margin-top: 30px;
+    background-color: #ffffff; padding: 30px; margin-top: 30px;
     border-top: 2px solid var(--primary-blue);
 }
 #contraportada img { margin-bottom: 15px; }
 #contraportada p { font-size: 1.1em; }
 
+/* Asegurar que todos los fondos son blancos */
+.column-content, .subsection-grid, .internal-columns, 
+.activity-item, .location-block, .data-section,
+tbody tr:nth-child(even) { 
+    background-color: #ffffff !important; 
+}
+
+/* Activar este estilo sólo para impresión */
+@media print {
+  body, html, .container, .page, .content-block, .data-section,
+  .stats-container, .location-block, .program-results,
+  .convenio-item, .otro-item, #contraportada {
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+  }
+}
 
 /* --- Responsive --- */
 @media (max-width: 992px) {
