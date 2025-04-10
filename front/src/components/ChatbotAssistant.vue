@@ -156,7 +156,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue';
+import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue';
 
 // Eliminar estas importaciones que pueden causar problemas
 // import { library } from '@fortawesome/fontawesome-svg-core';
@@ -546,6 +546,13 @@ onMounted(() => {
       toggleChat();
     }
   });
+
+  // Escuchar el evento personalizado para abrir/cerrar el chatbot
+  window.addEventListener('toggle-chatbot', toggleChat);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('toggle-chatbot', toggleChat);
 });
 </script>
 

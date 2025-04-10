@@ -45,12 +45,23 @@
       
       <!-- Banner de Alicante destacado -->
       <div class="alicante-banner-showcase">
-        <div class="banner-image-container">
-          <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image" />
+        <div class="banner-content">
+          <div class="banner-image-container">
+            <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image" />
+            <div class="image-glow"></div>
+          </div>
+          <div class="banner-info">
+            <h3>ImpulseData - Alicante Futura</h3>
+            <p>Plataforma digital de gestión de datos para la innovación y el desarrollo sostenible de Alicante.</p>
+            <div class="banner-action">
+              <button class="btn-apple" @click="openChatbot">Explorar <span class="arrow">→</span></button>
+            </div>
+          </div>
         </div>
-        <div class="banner-info">
-          <h3>Impulsedata - Alicante Futura</h3>
-          <p>Plataforma digital de gestión de datos para la innovación y el desarrollo sostenible de Alicante.</p>
+        <div class="banner-accent-shapes">
+          <div class="accent-shape shape-1"></div>
+          <div class="accent-shape shape-2"></div>
+          <div class="accent-shape shape-3"></div>
         </div>
       </div>
       
@@ -143,189 +154,289 @@
       <!-- Modal para crear/editar empresa -->
       <teleport to="body">
       <div class="modal-overlay" v-if="showFormModal" @click.self="showFormModal = false">
-        <div class="modal-container">
-          <div class="modal-header">
-            <h2>{{ modoEdicion ? 'Editar empresa' : 'Crear nueva empresa' }}</h2>
-            <button class="btn-close" @click="showFormModal = false">×</button>
+        <div class="modal-container apple-modal">
+          <div class="modal-accent-shapes">
+            <div class="modal-accent-shape shape-1"></div>
+            <div class="modal-accent-shape shape-2"></div>
+            <div class="modal-accent-shape shape-3"></div>
           </div>
-          <div class="modal-body">
-            <div v-if="guardando" class="saving-overlay">
-                <div class="spinner"></div>
-                <div class="loader">
-                  <p>cargando</p>
-                  <div class="words">
-                    <span class="word">usuarios</span>
-                    <span class="word">ImpulseData</span>
-                    <span class="word">estadísticas</span>
-                    <span class="word">datos</span>
-                    <span class="word">usuarios</span>
-                  </div>
-                </div>
+          
+          <div class="modal-header apple-modal-header">
+            <div class="modal-title-wrapper">
+              <div class="modal-icon-container">
+                <span class="modal-icon">{{ modoEdicion ? '✏️' : '➕' }}</span>
+              </div>
+              <h2>{{ modoEdicion ? 'Editar empresa' : 'Crear nueva empresa' }}</h2>
             </div>
-            <form @submit.prevent="guardarEmpresa">
-              <div class="form-group">
-                <label for="nombreEmpresa">Nombre de la empresa</label>
-                <input 
-                  type="text" 
-                  id="nombreEmpresa" 
-                  v-model="nuevaEmpresa.nombre" 
-                  required 
-                  placeholder="Ej: Acme Corporation"
-                >
-              </div>
-              
-              <div class="form-group">
-                <label for="fechaCreacion">Fecha de creación</label>
-                <input 
-                  type="date" 
-                  id="fechaCreacion" 
-                  v-model="nuevaEmpresa.fechaCreacion" 
-                  required
-                >
-              </div>
-              
-              <div class="form-group">
-                <label for="descripcionEmpresa">Descripción</label>
-                <textarea 
-                  id="descripcionEmpresa" 
-                  v-model="nuevaEmpresa.descripcion" 
-                  rows="3" 
-                  placeholder="Describe brevemente la empresa"
-                ></textarea>
-              </div>
-              
-              <div class="form-group">
-                <label for="ciudadEmpresa">Ciudad</label>
-                <input 
-                  type="text" 
-                  id="ciudadEmpresa" 
-                  v-model="nuevaEmpresa.ciudad" 
-                  required 
-                  placeholder="Ej: Alicante"
-                >
-              </div>
-              
-              <h3 class="section-title">Departamentos</h3>
-              <div class="questions-container">
-                <div v-for="(departamento, index) in nuevaEmpresa.departamentos" :key="index" class="question-item">
-                  <div class="question-header">
-                    <h4>Departamento {{ index + 1 }}</h4>
-                    <button 
-                      type="button" 
-                      class="btn-icon btn-delete-small" 
-                      @click="eliminarDepartamento(index)"
-                      v-if="nuevaEmpresa.departamentos.length > 1"
-                    >×</button>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label :for="'nombreDep'+index">Nombre del departamento</label>
+            <button class="btn-close apple-btn-close" @click="showFormModal = false">
+              <span>×</span>
+            </button>
+          </div>
+          
+          <div class="modal-body apple-modal-body">
+            <div v-if="guardando" class="saving-overlay apple-saving-overlay">
+                <div class="apple-spinner">
+                  <div class="apple-spinner-dot dot-1"></div>
+                  <div class="apple-spinner-dot dot-2"></div>
+                  <div class="apple-spinner-dot dot-3"></div>
+                </div>
+                <p>Guardando información...</p>
+            </div>
+            
+            <form @submit.prevent="guardarEmpresa" class="apple-form">
+              <div class="apple-form-section">
+                <h3 class="apple-section-header">Información general</h3>
+                
+                <div class="form-group apple-form-group">
+                  <label for="nombreEmpresa">Nombre de la empresa</label>
+                  <div class="apple-input-container">
                     <input 
                       type="text" 
-                      :id="'nombreDep'+index" 
-                      v-model="departamento.nombre" 
+                      id="nombreEmpresa" 
+                      v-model="nuevaEmpresa.nombre" 
                       required 
-                      placeholder="Ej: Empleo y Formación"
+                      placeholder="Ej: Acme Corporation"
+                      class="apple-input"
                     >
+                    <div class="input-focus-effect"></div>
+                  </div>
+                </div>
+                
+                <div class="form-group apple-form-group">
+                  <label for="fechaCreacion">Fecha de creación</label>
+                  <div class="apple-input-container">
+                    <input 
+                      type="date" 
+                      id="fechaCreacion" 
+                      v-model="nuevaEmpresa.fechaCreacion" 
+                      required
+                      class="apple-input"
+                    >
+                    <div class="input-focus-effect"></div>
+                  </div>
+                </div>
+                
+                <div class="form-group apple-form-group">
+                  <label for="descripcionEmpresa">Descripción</label>
+                  <div class="apple-input-container">
+                    <textarea 
+                      id="descripcionEmpresa" 
+                      v-model="nuevaEmpresa.descripcion" 
+                      rows="3" 
+                      placeholder="Describe brevemente la empresa"
+                      class="apple-input apple-textarea"
+                    ></textarea>
+                    <div class="input-focus-effect"></div>
+                  </div>
+                </div>
+                
+                <div class="form-group apple-form-group">
+                  <label for="ciudadEmpresa">Ciudad</label>
+                  <div class="apple-input-container">
+                    <input 
+                      type="text" 
+                      id="ciudadEmpresa" 
+                      v-model="nuevaEmpresa.ciudad" 
+                      required 
+                      placeholder="Ej: Alicante"
+                      class="apple-input"
+                    >
+                    <div class="input-focus-effect"></div>
                   </div>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary" @click="agregarDepartamento">
-                + Añadir departamento
-              </button>
               
-              <h3 class="section-title">Centros</h3>
-              <div class="questions-container">
-                <div v-for="(centro, index) in nuevaEmpresa.centros" :key="index" class="question-item">
-                  <div class="question-header">
-                    <h4>Centro {{ index + 1 }}</h4>
-                    <button 
-                      type="button" 
-                      class="btn-icon btn-delete-small" 
-                      @click="eliminarCentro(index)"
-                      v-if="nuevaEmpresa.centros.length > 1"
-                    >×</button>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label :for="'nombreCentro'+index">Nombre del centro</label>
-                    <input 
-                      type="text" 
-                      :id="'nombreCentro'+index" 
-                      v-model="centro.nombre" 
-                      required 
-                      placeholder="Ej: Sede Principal"
-                    >
-                  </div>
-                  
-                  <div class="form-group">
-                    <label :for="'direccionCentro'+index">Dirección</label>
-                    <input 
-                      type="text" 
-                      :id="'direccionCentro'+index" 
-                      v-model="centro.direccion" 
-                      required 
-                      placeholder="Ej: Calle Principal 123"
-                    >
+              <div class="apple-form-section">
+                <h3 class="apple-section-header">
+                  <span>Departamentos</span>
+                  <button type="button" class="apple-add-btn" @click="agregarDepartamento">
+                    <span class="add-icon">+</span>
+                    <span class="add-text">Añadir</span>
+                  </button>
+                </h3>
+                
+                <div class="apple-cards-container">
+                  <div 
+                    v-for="(departamento, index) in nuevaEmpresa.departamentos" 
+                    :key="index" 
+                    class="apple-card"
+                  >
+                    <div class="apple-card-header">
+                      <h4>Departamento {{ index + 1 }}</h4>
+                      <button 
+                        type="button" 
+                        class="apple-delete-btn" 
+                        @click="eliminarDepartamento(index)"
+                        v-if="nuevaEmpresa.departamentos.length > 1"
+                      >
+                        <span class="delete-icon">×</span>
+                      </button>
+                    </div>
+                    
+                    <div class="form-group apple-form-group">
+                      <label :for="'nombreDep'+index">Nombre del departamento</label>
+                      <div class="apple-input-container">
+                        <input 
+                          type="text" 
+                          :id="'nombreDep'+index" 
+                          v-model="departamento.nombre" 
+                          required 
+                          placeholder="Ej: Empleo y Formación"
+                          class="apple-input"
+                        >
+                        <div class="input-focus-effect"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary" @click="agregarCentro">
-                + Añadir centro
-              </button>
               
-              <h3 class="section-title">Formaciones</h3>
-              <div class="questions-container">
-                <div v-for="(formacion, index) in nuevaEmpresa.formaciones" :key="index" class="question-item">
-                  <div class="question-header">
-                    <h4>Formación {{ index + 1 }}</h4>
-                    <button 
-                      type="button" 
-                      class="btn-icon btn-delete-small" 
-                      @click="eliminarFormacion(index)"
-                      v-if="nuevaEmpresa.formaciones.length > 1"
-                    >×</button>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label :for="'nombreFormacion'+index">Nombre de la formación</label>
-                    <input 
-                      type="text" 
-                      :id="'nombreFormacion'+index" 
-                      v-model="formacion.nombre" 
-                      required 
-                      placeholder="Ej: LABORA"
-                    >
-                  </div>
-                  
-                  <div class="form-group">
-                    <label :for="'tipoFormacion'+index">Tipo de formación</label>
-                    <select :id="'tipoFormacion'+index" v-model="formacion.tipo" required>
-                      <option value="presencial">Presencial</option>
-                      <option value="virtual">Virtual</option>
-                      <option value="hibrida">Híbrida</option>
-                    </select>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label :for="'duracionFormacion'+index">Duración (horas)</label>
-                    <input 
-                      type="number" 
-                      :id="'duracionFormacion'+index" 
-                      v-model="formacion.duracion" 
-                      required 
-                      min="1"
-                    >
+              <div class="apple-form-section">
+                <h3 class="apple-section-header">
+                  <span>Centros</span>
+                  <button type="button" class="apple-add-btn" @click="agregarCentro">
+                    <span class="add-icon">+</span>
+                    <span class="add-text">Añadir</span>
+                  </button>
+                </h3>
+                
+                <div class="apple-cards-container">
+                  <div 
+                    v-for="(centro, index) in nuevaEmpresa.centros" 
+                    :key="index" 
+                    class="apple-card"
+                  >
+                    <div class="apple-card-header">
+                      <h4>Centro {{ index + 1 }}</h4>
+                      <button 
+                        type="button" 
+                        class="apple-delete-btn" 
+                        @click="eliminarCentro(index)"
+                        v-if="nuevaEmpresa.centros.length > 1"
+                      >
+                        <span class="delete-icon">×</span>
+                      </button>
+                    </div>
+                    
+                    <div class="form-group apple-form-group">
+                      <label :for="'nombreCentro'+index">Nombre del centro</label>
+                      <div class="apple-input-container">
+                        <input 
+                          type="text" 
+                          :id="'nombreCentro'+index" 
+                          v-model="centro.nombre" 
+                          required 
+                          placeholder="Ej: Sede Principal"
+                          class="apple-input"
+                        >
+                        <div class="input-focus-effect"></div>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group apple-form-group">
+                      <label :for="'direccionCentro'+index">Dirección</label>
+                      <div class="apple-input-container">
+                        <input 
+                          type="text" 
+                          :id="'direccionCentro'+index" 
+                          v-model="centro.direccion" 
+                          required 
+                          placeholder="Ej: Calle Principal 123"
+                          class="apple-input"
+                        >
+                        <div class="input-focus-effect"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary" @click="agregarFormacion">
-                + Añadir formación
-              </button>
               
-              <div class="form-actions modal-actions">
-                <button type="button" class="button-cancel" @click="showFormModal = false">Cancelar</button>
-                <button type="submit" class="btn btn-save" :disabled="guardando">Guardar empresa</button>
+              <div class="apple-form-section">
+                <h3 class="apple-section-header">
+                  <span>Formaciones</span>
+                  <button type="button" class="apple-add-btn" @click="agregarFormacion">
+                    <span class="add-icon">+</span>
+                    <span class="add-text">Añadir</span>
+                  </button>
+                </h3>
+                
+                <div class="apple-cards-container">
+                  <div 
+                    v-for="(formacion, index) in nuevaEmpresa.formaciones" 
+                    :key="index" 
+                    class="apple-card"
+                  >
+                    <div class="apple-card-header">
+                      <h4>Formación {{ index + 1 }}</h4>
+                      <button 
+                        type="button" 
+                        class="apple-delete-btn" 
+                        @click="eliminarFormacion(index)"
+                        v-if="nuevaEmpresa.formaciones.length > 1"
+                      >
+                        <span class="delete-icon">×</span>
+                      </button>
+                    </div>
+                    
+                    <div class="form-group apple-form-group">
+                      <label :for="'nombreFormacion'+index">Nombre de la formación</label>
+                      <div class="apple-input-container">
+                        <input 
+                          type="text" 
+                          :id="'nombreFormacion'+index" 
+                          v-model="formacion.nombre" 
+                          required 
+                          placeholder="Ej: LABORA"
+                          class="apple-input"
+                        >
+                        <div class="input-focus-effect"></div>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group apple-form-group">
+                      <label :for="'tipoFormacion'+index">Tipo de formación</label>
+                      <div class="apple-select-container">
+                        <select 
+                          :id="'tipoFormacion'+index" 
+                          v-model="formacion.tipo" 
+                          required
+                          class="apple-select"
+                        >
+                          <option value="presencial">Presencial</option>
+                          <option value="virtual">Virtual</option>
+                          <option value="hibrida">Híbrida</option>
+                        </select>
+                        <div class="select-arrow"></div>
+                        <div class="input-focus-effect"></div>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group apple-form-group">
+                      <label :for="'duracionFormacion'+index">Duración (horas)</label>
+                      <div class="apple-input-container">
+                        <input 
+                          type="number" 
+                          :id="'duracionFormacion'+index" 
+                          v-model="formacion.duracion" 
+                          required 
+                          min="1"
+                          class="apple-input"
+                        >
+                        <div class="input-focus-effect"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="apple-form-actions">
+                <button type="button" class="apple-btn-cancel" @click="showFormModal = false">
+                  <span class="btn-text">Cancelar</span>
+                </button>
+                <button type="submit" class="apple-btn-save" :disabled="guardando">
+                  <span class="btn-icon">{{ modoEdicion ? '✓' : '➕' }}</span>
+                  <span class="btn-text">{{ modoEdicion ? 'Guardar cambios' : 'Crear empresa' }}</span>
+                </button>
               </div>
             </form>
           </div>
@@ -336,24 +447,38 @@
       <!-- Modal de confirmación para eliminar -->
       <teleport to="body">
       <div class="modal-overlay" v-if="mostrarConfirmacion" @click.self="mostrarConfirmacion = false">
-        <div class="modal-container modal-small">
-          <div class="modal-header">
-            <h2>Confirmar eliminación</h2>
-            <button class="btn-close" @click="mostrarConfirmacion = false">×</button>
+        <div class="modal-container modal-small apple-modal apple-modal-confirm">
+          <div class="modal-accent-shapes">
+            <div class="modal-accent-shape shape-1"></div>
           </div>
-          <div class="modal-body">
-            <p>¿Estás seguro de que deseas eliminar la empresa <strong>{{ empresaAEliminar?.nombre }}</strong>?</p>
-            <p class="warning-text">Esta acción no se puede deshacer y eliminará todos los departamentos, centros y formaciones asociados.</p>
+          
+          <div class="modal-header apple-modal-header">
+            <div class="modal-title-wrapper">
+              <div class="modal-icon-container delete-icon-container">
+                <span class="modal-icon">🗑️</span>
+              </div>
+              <h2>Confirmar eliminación</h2>
+            </div>
+            <button class="btn-close apple-btn-close" @click="mostrarConfirmacion = false">
+              <span>×</span>
+            </button>
+          </div>
+          
+          <div class="modal-body apple-modal-body">
+            <p class="confirm-message">¿Estás seguro de que deseas eliminar la empresa <strong>{{ empresaAEliminar?.nombre }}</strong>?</p>
+            <p class="warning-text">Esta acción no se puede deshacer.</p>
             
-            <div class="form-actions modal-actions">
-              <button type="button" class="button-cancel" @click="mostrarConfirmacion = false">Cancelar</button>
-              <button type="button" class="noselect" @click="eliminarEmpresa" :disabled="eliminando">
-                <span class="text">{{ eliminando ? 'Eliminando...' : 'Eliminar' }}</span>
-                <span class="icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                    <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
-                  </svg>
-                </span>
+            <div class="apple-form-actions">
+              <button class="apple-btn-cancel" @click="mostrarConfirmacion = false">
+                <span class="btn-text">Cancelar</span>
+              </button>
+              <button 
+                class="apple-btn-delete" 
+                @click="eliminarEmpresa" 
+                :disabled="eliminando"
+              >
+                <span class="btn-icon">🗑️</span>
+                <span class="btn-text">Eliminar</span>
               </button>
             </div>
           </div>
@@ -361,100 +486,166 @@
       </div>
       </teleport>
       
-      <!-- Modal para ver detalles de empresa -->
+      <!-- Modal de vista de empresa -->
       <teleport to="body">
       <div class="modal-overlay" v-if="showViewModal" @click.self="showViewModal = false">
-        <div class="modal-container">
-          <div class="modal-header">
-            <h2>Detalles de empresa</h2>
-            <button class="btn-close" @click="showViewModal = false">×</button>
+        <div class="modal-container apple-modal apple-modal-view">
+          <div class="modal-accent-shapes">
+            <div class="modal-accent-shape shape-1"></div>
+            <div class="modal-accent-shape shape-2"></div>
           </div>
-          <div class="modal-body">
-            <div v-if="cargando" class="saving-overlay">
-                <div class="spinner"></div>
-                <div class="loader">
-                  <p>cargando</p>
-                  <div class="words">
-                    <span class="word">usuarios</span>
-                    <span class="word">ImpulseData</span>
-                    <span class="word">estadísticas</span>
-                    <span class="word">datos</span>
-                    <span class="word">usuarios</span>
-                  </div>
-                </div>
+          
+          <div class="modal-header apple-modal-header">
+            <div class="modal-title-wrapper">
+              <div class="modal-icon-container view-icon-container">
+                <span class="modal-icon">👁️</span>
+              </div>
+              <h2>{{ empresaActual.nombre }}</h2>
             </div>
-            <div class="view-content">
-              <div class="form-group">
-                <label>Nombre de la empresa</label>
-                <div class="view-field">{{ empresaActual.nombre }}</div>
+            <div class="view-modal-actions">
+              <button class="apple-action-btn edit-btn" @click="editarEmpresaDesdeVista()">
+                <span class="action-icon">✏️</span>
+                <span class="action-text">Editar</span>
+              </button>
+              <button class="apple-action-btn pdf-btn" @click="previsualizarPDF()">
+                <span class="action-icon">📄</span>
+                <span class="action-text">PDF</span>
+              </button>
+              <button class="btn-close apple-btn-close" @click="showViewModal = false">
+                <span>×</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="modal-body apple-modal-body">
+            <div class="apple-view-sections">
+              <!-- Información general -->
+              <div class="apple-view-section">
+                <div class="view-section-header">
+                  <h3>Información general</h3>
+                  <div class="view-section-badge">
+                    <span class="badge-icon">📊</span>
+                  </div>
+                </div>
+                
+                <div class="apple-info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Ciudad</div>
+                    <div class="info-value">{{ empresaActual.ciudad || 'No especificada' }}</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Fecha de creación</div>
+                    <div class="info-value">{{ formatDate(empresaActual.fechaCreacion) }}</div>
+                  </div>
+                  <div class="info-item wide-item">
+                    <div class="info-label">Descripción</div>
+                    <div class="info-value description">{{ empresaActual.descripcion || 'Sin descripción' }}</div>
+                  </div>
+                </div>
               </div>
               
-              <div class="form-group">
-                <label>Fecha de creación</label>
-                <div class="view-field">{{ formatDate(empresaActual.fechaCreacion) }}</div>
-              </div>
-              
-              <div class="form-group">
-                <label>Descripción</label>
-                <div class="view-field description">{{ empresaActual.descripcion || 'Sin descripción' }}</div>
-              </div>
-              
-              <div class="form-group">
-                <label>Ciudad</label>
-                <div class="view-field">{{ empresaActual.ciudad || 'No especificada' }}</div>
-              </div>
-              
-              <h3 class="section-title">Departamentos</h3>
-              <div class="view-list">
+              <!-- Departamentos -->
+              <div class="apple-view-section">
+                <div class="view-section-header">
+                  <h3>Departamentos</h3>
+                  <div class="view-section-badge blue-badge">
+                    <span class="badge-icon">🏢</span>
+                  </div>
+                </div>
+                
                 <div v-if="!empresaActual.departamentos || empresaActual.departamentos.length === 0" class="empty-message">
-                  No hay departamentos registrados.
+                  No hay departamentos registrados
                 </div>
-                <div v-for="(departamento, index) in empresaActual.departamentos" :key="index" class="view-item">
-                  <div class="view-item-title">Departamento {{ index + 1 }}</div>
-                  <div class="view-item-content">{{ departamento.nombre }}</div>
+                
+                <div v-else class="apple-cards-view">
+                  <div 
+                    v-for="(departamento, index) in empresaActual.departamentos" 
+                    :key="index"
+                    class="apple-view-card"
+                  >
+                    <div class="view-card-header">
+                      <h4>Departamento {{ index + 1 }}</h4>
+                    </div>
+                    <div class="view-card-content">
+                      <div class="info-item">
+                        <div class="info-label">Nombre</div>
+                        <div class="info-value">{{ departamento.nombre }}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              <h3 class="section-title">Centros</h3>
-              <div class="view-list">
+              <!-- Centros -->
+              <div class="apple-view-section">
+                <div class="view-section-header">
+                  <h3>Centros</h3>
+                  <div class="view-section-badge purple-badge">
+                    <span class="badge-icon">📍</span>
+                  </div>
+                </div>
+                
                 <div v-if="!empresaActual.centros || empresaActual.centros.length === 0" class="empty-message">
-                  No hay centros registrados.
+                  No hay centros registrados
                 </div>
-                <div v-for="(centro, index) in empresaActual.centros" :key="index" class="view-item">
-                  <div class="view-item-title">Centro {{ index + 1 }}</div>
-                  <div class="view-item-content">
-                    <div><strong>Nombre:</strong> {{ centro.nombre }}</div>
-                    <div><strong>Dirección:</strong> {{ centro.direccion || 'No especificada' }}</div>
+                
+                <div v-else class="apple-cards-view">
+                  <div 
+                    v-for="(centro, index) in empresaActual.centros" 
+                    :key="index"
+                    class="apple-view-card"
+                  >
+                    <div class="view-card-header">
+                      <h4>{{ centro.nombre }}</h4>
+                    </div>
+                    <div class="view-card-content">
+                      <div class="info-item">
+                        <div class="info-label">Dirección</div>
+                        <div class="info-value">{{ centro.direccion || 'No especificada' }}</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <h3 class="section-title">Formaciones</h3>
-              <div class="view-list">
+              <!-- Formaciones -->
+              <div class="apple-view-section">
+                <div class="view-section-header">
+                  <h3>Formaciones</h3>
+                  <div class="view-section-badge orange-badge">
+                    <span class="badge-icon">🎓</span>
+                  </div>
+                </div>
+                
                 <div v-if="!empresaActual.formaciones || empresaActual.formaciones.length === 0" class="empty-message">
-                  No hay formaciones registradas.
+                  No hay formaciones registradas
                 </div>
-                <div v-for="(formacion, index) in empresaActual.formaciones" :key="index" class="view-item">
-                  <div class="view-item-title">Formación {{ index + 1 }}</div>
-                  <div class="view-item-content">
-                    <div><strong>Nombre:</strong> {{ formacion.nombre }}</div>
-                    <div><strong>Tipo:</strong> {{ formatTipoFormacion(formacion.tipo) }}</div>
-                    <div><strong>Duración:</strong> {{ formacion.duracion }} horas</div>
+                
+                <div v-else class="apple-cards-view">
+                  <div 
+                    v-for="(formacion, index) in empresaActual.formaciones" 
+                    :key="index"
+                    class="apple-view-card"
+                  >
+                    <div class="view-card-header">
+                      <h4>{{ formacion.nombre }}</h4>
+                    </div>
+                    <div class="view-card-content">
+                      <div class="info-item">
+                        <div class="info-label">Tipo</div>
+                        <div class="info-value">
+                          <span class="tipo-badge" :class="'tipo-' + formacion.tipo">
+                            {{ formatTipoFormacion(formacion.tipo) }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Duración</div>
+                        <div class="info-value">{{ formacion.duracion }} horas</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <div class="form-actions modal-actions">
-                <button type="button" class="button-cancel" @click="showViewModal = false">Cancelar</button>
-                <button type="button" class="button" @click="editarEmpresaDesdeVista()">
-                  Editar
-                </button>
-                <button type="button" class="buttonDownload" @click="previsualizarPDF()">
-                  Descargar PDF
-                </button>
-                  <button type="button" class="buttonDownload word-btn" @click="descargarWord()">
-                    Descargar Word
-                </button>
               </div>
             </div>
           </div>
@@ -1080,17 +1271,18 @@ const editarEmpresaDesdeVista = () => {
   }
 };
 
-// Formatear tipo de formación
+// Función para formatear el tipo de formación
 const formatTipoFormacion = (tipo) => {
-  if (!tipo) return 'No especificado';
-  
-  const tiposFormateados = {
-    'presencial': 'Presencial',
-    'virtual': 'Virtual',
-    'hibrida': 'Híbrida'
-  };
-  
-  return tiposFormateados[tipo.toLowerCase()] || tipo;
+  switch (tipo) {
+    case 'presencial':
+      return 'Presencial';
+    case 'virtual':
+      return 'Virtual';
+    case 'hibrida':
+      return 'Híbrida';
+    default:
+      return tipo;
+  }
 };
 
 // Función para crear una portada para cada sección
@@ -2025,6 +2217,993 @@ const descargarPDFPreview = () => {
 };
 
 // La funcionalidad de edición en Canva ha sido reemplazada por la generación directa de PDF con html2pdf
+
+// Función para abrir el chatbot
+const openChatbot = () => {
+  // Usar un evento personalizado para comunicarse con el componente ChatbotAssistant
+  window.dispatchEvent(new CustomEvent('toggle-chatbot'));
+};
+
+// Arrays para controlar las animaciones de entrada
+const departamentosAnimados = ref([]);
+const centrosAnimados = ref([]);
+const formacionesAnimados = ref([]);
+
+// Inicializar arrays al agregar nuevos elementos
+watch(() => nuevaEmpresa.departamentos.length, (newLength) => {
+  while (departamentosAnimados.value.length < newLength) {
+    departamentosAnimados.value.push(false);
+  }
+});
+
+watch(() => nuevaEmpresa.centros.length, (newLength) => {
+  while (centrosAnimados.value.length < newLength) {
+    centrosAnimados.value.push(false);
+  }
+});
+
+watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
+  while (formacionesAnimados.value.length < newLength) {
+    formacionesAnimados.value.push(false);
+  }
+});
 </script>
 
 <style src="../assets/Home.css"></style>
+
+<style>
+/* Estilos del banner al estilo Apple */
+.alicante-banner-showcase {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,240,247,0.9) 100%);
+  border-radius: 18px;
+  margin: 20px 0 40px;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05), 
+              0 1px 3px rgba(0,0,0,0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.alicante-banner-showcase:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 30px 60px -12px rgba(0,0,0,0.1),
+              0 4px 25px -2px rgba(0,0,0,0.06),
+              0 2px 6px rgba(0,0,0,0.1);
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  padding: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.banner-image-container {
+  flex: 0 0 40%;
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.banner-image {
+  width: 100%;
+  border-radius: 12px;
+  transform: translateZ(20px) rotateY(-5deg);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.alicante-banner-showcase:hover .banner-image {
+  transform: translateZ(40px) rotateY(-8deg);
+}
+
+.image-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.alicante-banner-showcase:hover .image-glow {
+  opacity: 0.8;
+}
+
+.banner-info {
+  flex: 1;
+  padding-left: 40px;
+  transform: translateZ(0);
+  transition: transform 0.4s ease;
+}
+
+.alicante-banner-showcase:hover .banner-info {
+  transform: translateZ(10px);
+}
+
+.banner-info h3 {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 15px;
+  background: linear-gradient(90deg, #007AFF, #34AADC);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.banner-info p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #666;
+  margin-bottom: 25px;
+  max-width: 90%;
+}
+
+.banner-action {
+  margin-top: 20px;
+}
+
+.btn-apple {
+  background: linear-gradient(90deg, #007AFF, #34AADC);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
+}
+
+.btn-apple:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4);
+}
+
+.btn-apple .arrow {
+  margin-left: 8px;
+  transition: transform 0.3s ease;
+}
+
+.btn-apple:hover .arrow {
+  transform: translateX(4px);
+}
+
+.banner-accent-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.accent-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.4;
+  background: linear-gradient(135deg, #007AFF, #34AADC);
+  filter: blur(40px);
+}
+
+.shape-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  right: -100px;
+  animation: float-slow 10s ease-in-out infinite alternate;
+}
+
+.shape-2 {
+  width: 200px;
+  height: 200px;
+  bottom: -100px;
+  left: 40%;
+  background: linear-gradient(135deg, #5856D6, #AF52DE);
+  animation: float-slow 7s ease-in-out infinite alternate-reverse;
+}
+
+.shape-3 {
+  width: 150px;
+  height: 150px;
+  top: 40%;
+  left: -50px;
+  background: linear-gradient(135deg, #FF9500, #FF2D55);
+  animation: float-slow 12s ease-in-out infinite alternate;
+}
+
+@keyframes float-slow {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(20px, 20px);
+  }
+}
+
+/* Estilos para modales al estilo Apple */
+.apple-modal {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2), 
+              0 0 1px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translateY(0);
+  max-height: 90vh;
+  max-width: 900px;
+  width: 90%;
+}
+
+.apple-modal:hover {
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25),
+              0 0 1px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.modal-accent-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.modal-accent-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  filter: blur(60px);
+}
+
+.modal-accent-shape.shape-1 {
+  width: 400px;
+  height: 400px;
+  top: -200px;
+  right: -200px;
+  background: linear-gradient(135deg, #007AFF, #34AADC);
+  animation: float-very-slow 30s ease-in-out infinite alternate;
+}
+
+.modal-accent-shape.shape-2 {
+  width: 300px;
+  height: 300px;
+  bottom: -150px;
+  left: 30%;
+  background: linear-gradient(135deg, #5856D6, #AF52DE);
+  animation: float-very-slow 20s ease-in-out infinite alternate-reverse;
+}
+
+.modal-accent-shape.shape-3 {
+  width: 200px;
+  height: 200px;
+  top: 30%;
+  left: -100px;
+  background: linear-gradient(135deg, #FF9500, #FF2D55);
+  animation: float-very-slow 25s ease-in-out infinite alternate;
+}
+
+@keyframes float-very-slow {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(30px, 30px);
+  }
+}
+
+.apple-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 30px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+}
+
+.modal-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #007AFF, #34AADC);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2);
+}
+
+.modal-icon {
+  font-size: 20px;
+  color: white;
+}
+
+.apple-modal-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  background: linear-gradient(90deg, #007AFF, #34AADC);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.apple-btn-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.05);
+  color: #666;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apple-btn-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+
+.apple-btn-close span {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.apple-modal-body {
+  padding: 30px;
+  position: relative;
+  z-index: 1;
+  overflow-y: auto;
+  max-height: calc(90vh - 80px);
+}
+
+.apple-saving-overlay {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 10;
+}
+
+.apple-saving-overlay p {
+  font-size: 18px;
+  color: #333;
+  font-weight: 500;
+}
+
+.apple-spinner {
+  display: flex;
+  gap: 8px;
+}
+
+.apple-spinner-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #007AFF;
+  animation: apple-spinner 1.2s infinite ease-in-out;
+}
+
+.apple-spinner-dot.dot-1 {
+  animation-delay: 0s;
+}
+
+.apple-spinner-dot.dot-2 {
+  animation-delay: 0.2s;
+}
+
+.apple-spinner-dot.dot-3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes apple-spinner {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.apple-form {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.apple-form-section {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.apple-form-section:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.apple-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.apple-add-btn {
+  background: linear-gradient(to right, #007AFF, #34AADC);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+}
+
+.apple-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 122, 255, 0.4);
+}
+
+.add-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.apple-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.apple-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.apple-card.card-enter {
+  animation: card-enter 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.apple-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+}
+
+.apple-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.apple-card-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #007AFF;
+  font-weight: 500;
+}
+
+.apple-delete-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  border: none;
+  background: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.apple-delete-btn:hover {
+  background: rgba(255, 59, 48, 0.2);
+  transform: scale(1.1);
+}
+
+.delete-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.apple-form-group {
+  margin-bottom: 16px;
+}
+
+.apple-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.apple-input-container {
+  position: relative;
+}
+
+.apple-input, .apple-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+}
+
+.apple-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.apple-input:focus, .apple-select:focus {
+  outline: none;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+.input-focus-effect {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(to right, #007AFF, #34AADC);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.apple-input:focus ~ .input-focus-effect, 
+.apple-select:focus ~ .input-focus-effect {
+  width: 100%;
+}
+
+.apple-select-container {
+  position: relative;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid #999;
+  border-bottom: 2px solid #999;
+  pointer-events: none;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.apple-select {
+  appearance: none;
+  padding-right: 30px;
+}
+
+.apple-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.apple-btn-cancel {
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  color: #666;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apple-btn-cancel:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.apple-btn-save {
+  background: linear-gradient(to right, #007AFF, #34AADC);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+}
+
+.apple-btn-save:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 122, 255, 0.4);
+}
+
+.apple-btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .apple-cards-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .apple-form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .apple-btn-cancel, .apple-btn-save {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Estilos adicionales para los modales de confirmación y vista */
+.apple-modal-confirm {
+  max-width: 500px;
+}
+
+.delete-icon-container {
+  background: linear-gradient(135deg, #FF3B30, #FF9500);
+}
+
+.confirm-message {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.warning-text {
+  color: #FF3B30;
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+.apple-btn-delete {
+  background: linear-gradient(to right, #FF3B30, #FF9500);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(255, 59, 48, 0.3);
+}
+
+.apple-btn-delete:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 59, 48, 0.4);
+}
+
+.apple-btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Estilos para el modal de vista */
+.apple-modal-view {
+  max-width: 1000px;
+}
+
+.view-icon-container {
+  background: linear-gradient(135deg, #5AC8FA, #007AFF);
+}
+
+.view-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background: rgba(52, 170, 220, 0.1);
+  color: #34AADC;
+}
+
+.edit-btn:hover {
+  background: rgba(52, 170, 220, 0.2);
+  transform: translateY(-2px);
+}
+
+.pdf-btn {
+  background: rgba(255, 69, 58, 0.1);
+  color: #FF3B30;
+}
+
+.pdf-btn:hover {
+  background: rgba(255, 69, 58, 0.2);
+  transform: translateY(-2px);
+}
+
+.action-icon {
+  font-size: 16px;
+}
+
+.apple-view-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.apple-view-section {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.apple-view-section:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.view-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.view-section-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.view-section-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #5AC8FA, #007AFF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.2);
+  color: white;
+}
+
+.blue-badge {
+  background: linear-gradient(135deg, #5AC8FA, #007AFF);
+}
+
+.purple-badge {
+  background: linear-gradient(135deg, #5856D6, #AF52DE);
+}
+
+.orange-badge {
+  background: linear-gradient(135deg, #FF9500, #FF2D55);
+}
+
+.badge-icon {
+  font-size: 16px;
+}
+
+.apple-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.wide-item {
+  grid-column: 1 / -1;
+}
+
+.info-label {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 16px;
+  color: #333;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.info-value.description {
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.empty-message {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  color: #666;
+  font-style: italic;
+}
+
+.apple-cards-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.apple-view-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.apple-view-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+}
+
+.view-card-header {
+  background: linear-gradient(to right, rgba(0, 122, 255, 0.1), rgba(52, 170, 220, 0.1));
+  padding: 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.view-card-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #007AFF;
+  font-weight: 500;
+}
+
+.view-card-content {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.tipo-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tipo-presencial {
+  background-color: rgba(90, 200, 250, 0.2);
+  color: #5AC8FA;
+}
+
+.tipo-virtual {
+  background-color: rgba(88, 86, 214, 0.2);
+  color: #5856D6;
+}
+
+.tipo-hibrida {
+  background-color: rgba(255, 149, 0, 0.2);
+  color: #FF9500;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .view-modal-actions {
+    flex-wrap: wrap;
+  }
+  
+  .apple-cards-view {
+    grid-template-columns: 1fr;
+  }
+  
+  .apple-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
