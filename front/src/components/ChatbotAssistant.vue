@@ -24,12 +24,6 @@
           <div class="circle circle-1"></div>
         </div>
       </button>
-      <!-- Ondas para el botón cuando está cerrado -->
-      <div v-if="!isOpen" class="ripple-container">
-        <div class="ripple ripple-1"></div>
-        <div class="ripple ripple-2"></div>
-        <div class="ripple ripple-3"></div>
-      </div>
     </div>
 
     <!-- Ventana de chat -->
@@ -557,19 +551,33 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Variables de color */
+:root {
+  --primary-gradient: linear-gradient(90deg, #00c3ff, #00ff8c);
+  --primary-color: #004698;
+  --primary-hover: #0056b8;
+  --secondary-color: #5175a0;
+  --danger-color: #f44336;
+  --success-color: #4CAF50;
+  --border-color: #e0e0e0;
+  --text-color: #333333;
+  --light-text: #666666;
+  --card-background: #ffffff;
+}
+
 /* Estilos para el nuevo botón */
 .uiverse {
   --duration: 7s;
   --easing: linear;
-  --c-color-1: rgba(255, 163, 26, 0.7);
-  --c-color-2: #1a23ff;
-  --c-color-3: #e21bda;
-  --c-color-4: rgba(255, 232, 26, 0.7);
-  --c-shadow: rgba(255, 223, 87, 0.5);
-  --c-shadow-inset-top: rgba(255, 223, 52, 0.9);
-  --c-shadow-inset-bottom: rgba(255, 250, 215, 0.8);
-  --c-radial-inner: #ffd215;
-  --c-radial-outer: #fff172;
+  --c-color-1: rgba(0, 195, 255, 0.7);
+  --c-color-2: #00c3ff;
+  --c-color-3: #00ff8c;
+  --c-color-4: rgba(0, 255, 140, 0.7);
+  --c-shadow: rgba(0, 195, 255, 0.5);
+  --c-shadow-inset-top: rgba(0, 195, 255, 0.9);
+  --c-shadow-inset-bottom: rgba(0, 255, 140, 0.8);
+  --c-radial-inner: #00c3ff;
+  --c-radial-outer: #00ff8c;
   --c-color: #fff;
   -webkit-tap-highlight-color: transparent;
   -webkit-appearance: none;
@@ -587,11 +595,7 @@ onUnmounted(() => {
   letter-spacing: 0.02em;
   line-height: 1.5;
   color: var(--c-color);
-  background: radial-gradient(
-    circle,
-    var(--c-radial-inner),
-    var(--c-radial-outer) 80%
-  );
+  background: var(--primary-gradient);
   box-shadow: 0 0 14px var(--c-shadow);
   position: fixed;
   bottom: 25px;
@@ -962,7 +966,7 @@ onUnmounted(() => {
 }
 
 .chat-header {
-  background-color: #004698;
+  background: var(--primary-gradient);
   color: white;
   padding: 15px;
   display: flex;
@@ -972,7 +976,7 @@ onUnmounted(() => {
 
 .assistant-avatar {
   background-color: white;
-  color: #004698;
+  color: #00c3ff;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -981,6 +985,8 @@ onUnmounted(() => {
   justify-content: center;
   margin-right: 10px;
   font-size: 20px;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .assistant-info {
@@ -1000,22 +1006,32 @@ onUnmounted(() => {
 }
 
 .close-button {
-  background: none;
-  border: none;
+  background: transparent;
   color: white;
+  border: none;
+  font-size: 20px;
   cursor: pointer;
-  font-size: 18px;
-  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .chat-messages {
   flex: 1;
-  overflow-y: auto;
   padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  background-color: #f5f7fa;
+  overflow-y: auto;
+  background-color: #f5f5f5;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(0, 195, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(0, 255, 140, 0.05) 0%, transparent 50%);
 }
 
 .message-wrapper {
@@ -1063,17 +1079,29 @@ onUnmounted(() => {
 }
 
 .message-bubble {
-  background-color: white;
-  border-radius: 18px;
+  max-width: 80%;
   padding: 10px 15px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  max-width: 100%;
-  word-break: break-word;
+  margin: 5px 0;
+  border-radius: 18px;
+  position: relative;
+  word-wrap: break-word;
+  background: var(--message-bg, rgba(240, 240, 240, 0.9));
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: var(--message-color, #333);
+}
+
+.bot-message .message-bubble {
+  background: var(--primary-gradient);
+  color: white;
+  margin-right: auto;
+  border-top-left-radius: 2px;
 }
 
 .user-message .message-bubble {
-  background-color: #004698;
-  color: white;
+  background: rgba(255, 255, 255, 0.9);
+  margin-left: auto;
+  border-top-right-radius: 2px;
 }
 
 .message-bubble p {
@@ -1085,169 +1113,196 @@ onUnmounted(() => {
   opacity: 0.7;
   display: block;
   text-align: right;
+  margin-top: 4px;
 }
 
 .chat-input {
   display: flex;
-  padding: 15px;
-  background-color: white;
+  padding: 10px;
   border-top: 1px solid #e0e0e0;
+  background-color: #fff;
 }
 
 .chat-input input {
   flex: 1;
-  padding: 12px 15px;
+  padding: 10px 15px;
   border: 1px solid #e0e0e0;
   border-radius: 20px;
-  outline: none;
+  margin-right: 10px;
   font-size: 14px;
+  transition: all 0.3s ease;
 }
 
 .chat-input input:focus {
-  border-color: #004698;
+  outline: none;
+  border-color: #00c3ff;
+  box-shadow: 0 0 0 2px rgba(0, 195, 255, 0.2);
 }
 
 .send-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #004698;
+  background: var(--primary-gradient);
   color: white;
   border: none;
-  margin-left: 10px;
-  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s;
-  font-size: 18px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(0, 195, 255, 0.4);
+  transition: all 0.3s ease;
 }
 
 .send-button:hover {
-  background-color: #0056b8;
+  transform: scale(1.1);
+  box-shadow: 0 2px 12px rgba(0, 195, 255, 0.6);
 }
 
 .integrated-questions {
-  background-color: #f5f7fa;
+  margin: 20px 0;
   padding: 10px;
-  margin-top: 5px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  border-radius: 10px;
+  background-color: rgba(245, 245, 245, 0.5);
+  backdrop-filter: blur(5px);
 }
 
 .question-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .question-button {
-  background-color: white;
-  border: 1px solid #d4e4fc;
-  color: #004698;
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 195, 255, 0.3);
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 18px;
+  font-size: 14px;
+  margin: 5px;
   cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.question-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-gradient);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
 }
 
 .question-button:hover {
-  background-color: #e8f0fe;
-  border-color: #004698;
+  color: white;
+  border-color: transparent;
 }
 
-.create-question {
-  background-color: #e0f0ff;
-  border-color: #83b9ff;
-  font-weight: bold;
+.question-button:hover::after {
+  opacity: 1;
+}
+
+.question-button.create-question {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
 }
 
 .toggle-questions-button {
-  background: none;
+  display: block;
+  margin: 10px auto 0;
+  background: transparent;
   border: none;
-  color: #004698;
-  font-size: 13px;
-  margin-top: 10px;
+  color: #00c3ff;
   cursor: pointer;
+  font-size: 14px;
+  padding: 5px;
+}
+
+.toggle-questions-button:hover {
   text-decoration: underline;
 }
 
 .create-company-button-container {
   display: flex;
   justify-content: center;
-  margin: 15px 0 5px;
+  margin: 20px 0;
 }
 
 .create-company-button {
-  background-color: #004698;
+  background: var(--primary-gradient);
   color: white;
   border: none;
+  padding: 12px 20px;
   border-radius: 20px;
-  padding: 10px 16px;
-  font-size: 14px;
-  cursor: pointer;
+  font-weight: bold;
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 195, 255, 0.3);
   transition: all 0.3s ease;
 }
 
 .create-company-button:hover {
-  background-color: #0056b8;
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 195, 255, 0.5);
 }
 
 .plus-icon {
-  font-size: 18px;
+  background-color: white;
+  color: #00c3ff;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: bold;
 }
 
 .typing-indicator {
   display: flex;
   align-items: center;
-  padding: 8px 15px;
-  justify-content: flex-start;
-  background-color: #e6e6e6;
-  border-radius: 15px;
+  justify-content: center;
+  background: rgba(0, 195, 255, 0.7);
   min-width: 50px;
-  max-width: 70px;
+  padding: 8px 12px;
 }
 
 .typing-indicator span {
-  height: 10px;
-  width: 10px;
-  background-color: #888;
-  border-radius: 50%;
   display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #fff;
+  border-radius: 50%;
   margin: 0 2px;
-  opacity: 0.5;
-  animation: typingBounce 1.5s infinite ease-in-out;
+  animation: typing-dot 1.4s infinite ease-in-out both;
 }
 
 .typing-indicator span:nth-child(1) {
-  animation-delay: 0s;
+  animation-delay: -0.32s;
 }
 
 .typing-indicator span:nth-child(2) {
-  animation-delay: 0.2s;
+  animation-delay: -0.16s;
 }
 
-.typing-indicator span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes typingBounce {
-  0%, 60%, 100% {
-    transform: translateY(0);
-  }
-  30% {
-    transform: translateY(-8px);
+@keyframes typing-dot {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 
+  40% { 
+    transform: scale(1);
   }
 }
 
@@ -1271,92 +1326,60 @@ onUnmounted(() => {
 
 /* Animación de ondas para el botón */
 .ripple-container {
-  position: absolute;
-  bottom: 12px;
-  right: 70px;
-  transform: translate(50%, 50%);
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  display: none;
 }
 
 .ripple {
-  position: absolute;
-  width: 140px;
-  height: 48px;
-  border-radius: 30px;
-  opacity: 0;
-  border: 2px solid var(--c-radial-inner);
-  animation: ripple-effect 1.6s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
-}
-
-.ripple-1 {
-  animation-delay: 0s;
-}
-
-.ripple-2 {
-  animation-delay: 0.5s;
-}
-
-.ripple-3 {
-  animation-delay: 1s;
-}
-
-@keyframes ripple-effect {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
+  display: none;
 }
 
 /* Estilos para el indicador de estado */
 .status-indicator {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 2px;
+  font-size: 12px;
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
-  background-color: #2ecc71;
+  background: #4cff8c;
   border-radius: 50%;
+  margin-right: 5px;
   position: relative;
-  box-shadow: 0 0 6px #2ecc71;
-  animation: pulse-green 2s infinite;
 }
 
-.status-dot::before {
+.status-dot::after {
   content: '';
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  background-color: rgba(46, 204, 113, 0.4);
-  transform: scale(1.5);
-  animation: pulse-green 2s infinite;
+  background: inherit;
+  border-radius: inherit;
+  opacity: 0.7;
+  animation: pulse-status 1.5s ease-out infinite;
+}
+
+@keyframes pulse-status {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }
 
 .status-text {
   color: white;
   font-size: 12px;
   font-weight: 400;
-}
-
-@keyframes pulse-green {
-  0% {
-    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
-  }
 }
 </style> 

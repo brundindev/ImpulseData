@@ -1,3 +1,19 @@
+/* Variables de color */
+:root {
+  --primary-gradient: linear-gradient(90deg, #00c3ff, #00ff8c);
+  --primary-color: #004698;
+  --primary-hover: #0056b8;
+  --secondary-color: #5175a0;
+  --danger-color: #f44336;
+  --success-color: #4CAF50;
+  --border-color: #e0e0e0;
+  --text-color: #333333;
+  --light-text: #666666;
+  --card-background: #ffffff;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --pale-blue: #e6f7ff;
+}
+
 .form-stats {
   display: flex;
   gap: 0.5rem;
@@ -140,7 +156,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #004698, #0066cc, #004698);
+  background: var(--primary-gradient);
   background-size: 200% 100%;
   animation: gradientShift 3s ease infinite;
 }
@@ -238,7 +254,10 @@
 .stat-value {
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--primary-color);
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .forms-section {
@@ -748,6 +767,12 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   z-index: 1;
+  /* Añadir borde con gradiente */
+  border: 2px solid transparent;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), 
+                    var(--primary-gradient);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
 }
 
 .banner-image-container {
@@ -777,7 +802,10 @@
 }
 
 .banner-info h3 {
-  color: #004698;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 10px;
   font-size: 1.3rem;
   font-weight: 600;
@@ -816,7 +844,7 @@
   display: inline-block;
   position: relative;
   padding: 10px 25px;
-  background-color: #4CC713;
+  background: var(--primary-gradient);
   color: white;
   font-family: sans-serif;
   text-decoration: none;
@@ -826,11 +854,12 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
 
 .buttonDownload:hover {
-  background-color: #45a21a;
+  box-shadow: 0 0 15px rgba(0, 195, 255, 0.5);
+  transform: translateY(-2px);
   color: white;
 }
 
@@ -1077,11 +1106,33 @@ button.noselect:hover .text {
 
 /* Botón animado para crear nueva empresa */
 .btn-nueva-empresa {
-  background-color: #004698 !important;
+  background: var(--primary-gradient) !important;
   border: 2px solid white !important;
-  text-decoration: none;
-  cursor: pointer;
-  padding: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.btn-nueva-empresa a {
+  color: white !important;
+  position: relative;
+  z-index: 2;
+}
+
+.btn-nueva-empresa::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.6s ease;
+  z-index: 1;
+}
+
+.btn-nueva-empresa:hover::after {
+  left: 100%;
 }
 
 .btn-nueva-empresa a {
@@ -1599,6 +1650,19 @@ button.noselect:hover .text {
   height: 100%;
   background: radial-gradient(circle at 85% 85%, rgba(0, 70, 152, 0.15) 0%, transparent 55%);
   pointer-events: none;
+  animation: pulseBackground 15s infinite alternate;
+}
+
+@keyframes pulseBackground {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.7;
+  }
 }
 
 .no-scrollbar {
@@ -1607,46 +1671,37 @@ button.noselect:hover .text {
 }
 
 /* Estilos para las esferas de gradiente */
-.animated-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 0;
-}
-
 .gradient-sphere {
   position: absolute;
   border-radius: 50%;
   filter: blur(50px);
-  opacity: 0.4;
+  opacity: 0.7;
   animation: floatSphere 25s infinite ease-in-out;
+  mix-blend-mode: lighten;
 }
 
 .sphere-1 {
-  width: 500px;
-  height: 500px;
-  background: linear-gradient(45deg, #00f7ff, #00b0ff);
-  top: -100px;
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(45deg, #36eeff, #39ff8c);
+  top: -150px;
   left: -100px;
   animation-delay: 0s;
 }
 
 .sphere-2 {
-  width: 600px;
-  height: 600px;
-  background: linear-gradient(135deg, #6200ea, #00e676);
+  width: 700px;
+  height: 700px;
+  background: linear-gradient(135deg, #00c3ff, #00ff8c);
   bottom: -200px;
   right: -100px;
   animation-delay: -5s;
 }
 
 .sphere-3 {
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(225deg, #00d0ff, #0010f5);
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(225deg, #00e1ff, #5aff9c);
   top: 40%;
   left: 60%;
   animation-delay: -10s;
@@ -1658,113 +1713,322 @@ button.noselect:hover .text {
 }
 
 .welcome-particles .particle {
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4));
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
 }
 
-/* Estilos para las ondas */
-.welcome-waves {
-  z-index: 1;
+.particle:nth-child(1) {
+  width: 120px;
+  height: 120px;
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+  background: radial-gradient(circle at 30% 40%, rgba(0, 217, 255, 0.6), rgba(0, 89, 255, 0.2));
 }
 
-.welcome-waves .wave {
-  background: linear-gradient(90deg, 
-    rgba(0, 70, 152, 0.1), 
-    rgba(116, 155, 208, 0.2), 
-    rgba(255, 61, 0, 0.1),
-    rgba(255, 171, 0, 0.2),
-    rgba(0, 70, 152, 0.1)
-  );
+.particle:nth-child(2) {
+  width: 90px;
+  height: 90px;
+  top: 20%;
+  right: 15%;
+  animation-delay: -5s;
+  background: radial-gradient(circle at 30% 40%, rgba(255, 0, 128, 0.6), rgba(255, 0, 21, 0.2));
+}
+
+.particle:nth-child(3) {
+  width: 70px;
+  height: 70px;
+  bottom: 20%;
+  left: 20%;
+  animation-delay: -10s;
+  background: radial-gradient(circle at 30% 40%, rgba(255, 187, 0, 0.6), rgba(255, 102, 0, 0.2));
+}
+
+.particle:nth-child(4) {
+  width: 140px;
+  height: 140px;
+  bottom: 10%;
+  right: 10%;
+  animation-delay: -15s;
+  background: radial-gradient(circle at 30% 40%, rgba(0, 255, 106, 0.6), rgba(0, 187, 255, 0.2));
+}
+
+.particle:nth-child(5) {
+  width: 60px;
+  height: 60px;
+  top: 50%;
+  left: 50%;
+  animation-delay: -7s;
+  background: radial-gradient(circle at 30% 40%, rgba(195, 0, 255, 0.6), rgba(55, 0, 255, 0.2));
+}
+
+.particle:nth-child(6) {
+  width: 100px;
+  height: 100px;
+  top: 80%;
+  left: 40%;
+  animation-delay: -12s;
+  background: radial-gradient(circle at 30% 40%, rgba(0, 255, 230, 0.6), rgba(0, 136, 255, 0.2));
+}
+
+.particle:nth-child(7) {
+  width: 80px;
+  height: 80px;
+  top: 30%;
+  right: 30%;
+  animation-delay: -3s;
+  background: radial-gradient(circle at 30% 40%, rgba(255, 0, 191, 0.6), rgba(255, 0, 76, 0.2));
+}
+
+.particle:nth-child(8) {
+  width: 130px;
+  height: 130px;
+  bottom: 40%;
+  right: 25%;
+  animation-delay: -9s;
+  background: radial-gradient(circle at 30% 40%, rgba(255, 238, 0, 0.6), rgba(255, 145, 0, 0.2));
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translate(50px, 50px) rotate(90deg) scale(1.1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(0, 100px) rotate(180deg) scale(1);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translate(-50px, 50px) rotate(270deg) scale(0.9);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg) scale(1);
+    opacity: 0.7;
+  }
+}
+
+/* Efecto de ondas en el fondo */
+.wave-background {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -12;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  border-radius: 40%;
+  animation: wave 20s infinite linear;
+  background: radial-gradient(ellipse at center, rgba(0, 119, 255, 0) 0%, rgba(0, 119, 255, 0.05) 100%);
+}
+
+.wave:nth-child(1) {
+  animation-duration: 20s;
+  background: radial-gradient(ellipse at center, rgba(255, 0, 140, 0) 0%, rgba(255, 0, 140, 0.03) 100%);
+}
+
+.wave:nth-child(2) {
+  animation-duration: 25s;
+  animation-delay: -5s;
+  opacity: 0.7;
+  background: radial-gradient(ellipse at center, rgba(0, 255, 179, 0) 0%, rgba(0, 255, 179, 0.03) 100%);
+}
+
+.wave:nth-child(3) {
+  animation-duration: 30s;
+  animation-delay: -10s;
+  opacity: 0.5;
+  background: radial-gradient(ellipse at center, rgba(255, 196, 0, 0) 0%, rgba(255, 196, 0, 0.03) 100%);
+}
+
+/* Añadir estrellas brillantes en el fondo */
+.stars-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -8;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  background-color: white;
+  border-radius: 50%;
+  animation: twinkle 5s infinite ease-in-out;
+}
+
+.star:nth-child(1) { 
+  width: 2px; 
+  height: 2px;
+  top: 10%; 
+  left: 15%;
+  animation-delay: 0s;
+}
+.star:nth-child(2) { 
+  width: 3px; 
+  height: 3px;
+  top: 70%; 
+  left: 85%;
+  animation-delay: -0.5s;
+}
+.star:nth-child(3) { 
+  width: 2px; 
+  height: 2px;
+  top: 40%; 
+  left: 25%;
+  animation-delay: -1s;
+}
+.star:nth-child(4) { 
+  width: 1px; 
+  height: 1px;
+  top: 30%; 
+  left: 80%;
+  animation-delay: -1.5s;
+}
+.star:nth-child(5) { 
+  width: 2px; 
+  height: 2px;
+  top: 65%; 
+  left: 35%;
+  animation-delay: -2s;
+}
+.star:nth-child(6) { 
+  width: 3px; 
+  height: 3px;
+  top: 85%; 
+  left: 50%;
+  animation-delay: -2.5s;
+}
+.star:nth-child(7) { 
+  width: 2px; 
+  height: 2px;
+  top: 15%; 
+  left: 65%;
+  animation-delay: -3s;
+}
+.star:nth-child(8) { 
+  width: 1px; 
+  height: 1px;
+  top: 45%; 
+  left: 5%;
+  animation-delay: -3.5s;
+}
+.star:nth-child(9) { 
+  width: 2px; 
+  height: 2px;
+  top: 55%; 
+  left: 75%;
+  animation-delay: -4s;
+}
+.star:nth-child(10) { 
+  width: 3px; 
+  height: 3px;
+  top: 25%; 
+  left: 90%;
+  animation-delay: -4.5s;
+}
+
+@keyframes twinkle {
+  0%, 100% { 
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.5);
+    box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.7);
+  }
 }
 
 @keyframes floatSphere {
   0%, 100% {
     transform: translate(0, 0) scale(1);
+    filter: blur(50px);
   }
   25% {
     transform: translate(5%, 5%) scale(1.05);
+    filter: blur(55px);
   }
   50% {
     transform: translate(-5%, 8%) scale(0.95);
+    filter: blur(60px);
   }
   75% {
     transform: translate(8%, -3%) scale(1.02);
+    filter: blur(45px);
   }
 }
 
-/* Efecto de texto con gradiente animado */
-.animated-title {
+/* Mejorar aspecto visual de componentes interactivos */
+.btn-primary, .btn-save, .buttonDownload, .btn-floating {
   position: relative;
-  display: inline-block;
-  background: linear-gradient(90deg, #00b0ff, #00b0ff, #0062ff);
-  background-size: 400% 400%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradientShift 10s ease infinite;
-  text-shadow: none;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-/* Efecto de animación de pulso */
-.pulse-animation {
-  animation: pulse 3s infinite ease-in-out;
-}
-
-/* Efecto de brillo al pasar el cursor */
-.glow-effect {
-  position: relative;
-  z-index: 1;
   overflow: hidden;
+  z-index: 1;
+  border: none;
+  box-shadow: 0 0 15px rgba(0, 195, 255, 0.5);
+  transition: all 0.3s ease;
+  background: var(--primary-gradient) !important;
 }
 
-.glow-effect::after {
+.btn-primary:hover, .btn-save:hover, .buttonDownload:hover, .btn-floating:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(0, 195, 255, 0.7), 0 0 40px rgba(0, 255, 140, 0.3);
+}
+
+/* Mejorar aspecto de las tarjetas */
+.stat-card, .form-card, .summary-card, .chart-card, .profile-card, .view-item {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.4s ease;
+  background: rgba(30, 30, 50, 0.6) !important;
+}
+
+.stat-card:hover, .form-card:hover, .summary-card:hover, .chart-card:hover, .profile-card:hover, .view-item:hover {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 183, 255, 0.3);
+  transform: translateY(-8px) scale(1.03);
+}
+
+/* Añadir brillo a elementos importantes */
+.dashboard-title, .profile-card h1, .section-title, .forms-section h2, .welcome-title {
+  text-shadow: 0 0 10px rgba(0, 195, 255, 0.7);
+  position: relative;
+}
+
+.dashboard-title::after, .profile-card h1::after, .section-title::after, .forms-section h2::after, .welcome-title::after {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-  opacity: 0;
-  transform: scale(0.5);
-  transition: opacity 0.3s, transform 0.5s;
-  z-index: -1;
+  left: 0;
+  bottom: -5px;
+  width: 100px;
+  height: 3px;
+  background: var(--primary-gradient);
+  border-radius: 3px;
+  transform: scaleX(0.5);
+  transform-origin: left;
+  transition: transform 0.4s ease;
 }
 
-.glow-effect:hover::after {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Ajuste para mantener contenido por encima de los efectos de fondo */
-.dashboard-container, .profile-container {
-  position: relative;
-  z-index: 2;
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 20px rgba(0, 181, 255, 0.3);
-  }
-  50% {
-    transform: scale(1.03);
-    box-shadow: 0 0 30px rgba(0, 181, 255, 0.5);
-  }
+.dashboard-title:hover::after, .profile-card h1:hover::after, .section-title:hover::after, .forms-section h2:hover::after, .welcome-title:hover::after {
+  transform: scaleX(1);
 }
 
 /* Mejorando el contraste de los títulos */
@@ -1783,12 +2047,33 @@ button.noselect:hover .text {
 
 /* Modificar el botón de crear nueva empresa para mejorar visibilidad */
 .btn-nueva-empresa {
-  background-color: #004698 !important;
+  background: var(--primary-gradient) !important;
   border: 2px solid white !important;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 .btn-nueva-empresa a {
   color: white !important;
+  position: relative;
+  z-index: 2;
+}
+
+.btn-nueva-empresa::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.6s ease;
+  z-index: 1;
+}
+
+.btn-nueva-empresa:hover::after {
+  left: 100%;
 }
 
 /* Mejorando el contraste de las tarjetas */
@@ -1932,7 +2217,7 @@ body:has(.welcome-page) .navbar-container .brand-name {
 
 .logo-column h3 {
   font-size: 1.5rem;
-  background: linear-gradient(90deg, #00b0ff, #0062ff);
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1946,7 +2231,10 @@ body:has(.welcome-page) .navbar-container .brand-name {
 }
 
 .footer-column h4 {
-  color: #00b0ff;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 1.2rem;
   font-size: 1.2rem;
   position: relative;
@@ -1959,7 +2247,7 @@ body:has(.welcome-page) .navbar-container .brand-name {
   left: 0;
   width: 40px;
   height: 2px;
-  background: linear-gradient(90deg, #00b0ff, transparent);
+  background: var(--primary-gradient);
 }
 
 .links-column ul {
@@ -1983,7 +2271,10 @@ body:has(.welcome-page) .navbar-container .brand-name {
 .links-column a:hover, .contact-column a:hover {
   opacity: 1;
   transform: translateX(5px);
-  color: #00b0ff;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .contact-column p {
@@ -1995,7 +2286,10 @@ body:has(.welcome-page) .navbar-container .brand-name {
 
 .contact-column i {
   margin-right: 10px;
-  color: #00b0ff;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .social-icons {
@@ -2023,7 +2317,7 @@ body:has(.welcome-page) .navbar-container .brand-name {
 
 .social-icon:hover {
   transform: translateY(-5px);
-  background: linear-gradient(135deg, #00b0ff, #0062ff);
+  background: var(--primary-gradient);
 }
 
 .footer-bottom {
@@ -2477,4 +2771,219 @@ body:has(.welcome-page) .button2:after,
     -webkit-transform: translateY(-400%);
     transform: translateY(-400%);
   }
+}
+
+/* Modificar el botón de guardar cambios para hacerlo más pequeño */
+.apple-btn-save {
+  padding: 6px 15px !important;
+  font-size: 13px !important;
+  height: auto !important;
+}
+
+.apple-btn-save .btn-icon,
+.apple-btn-save .btn-text {
+  font-size: 13px !important;
+}
+
+.apple-btn-cancel {
+  padding: 6px 15px !important;
+  font-size: 13px !important;
+  height: auto !important;
+}
+
+/* Mejorando los estilos para los diferentes botones con gradiente */
+.reload-button, .button-cancel, .button, .btn-edit, .btn-view {
+  background: var(--primary-gradient) !important;
+  color: white !important;
+  border: none;
+}
+
+.reload-button:hover, .button-cancel:hover, .button:hover, .btn-edit:hover, .btn-view:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(0, 195, 255, 0.5);
+}
+
+/* Estilo para los botones del perfil y panel de control */
+.profile-container .btn-primary, 
+.dashboard-container .btn-primary,
+.profile-card .btn-primary {
+  background: var(--primary-gradient) !important;
+  color: white !important;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.profile-container .btn-primary:hover, 
+.dashboard-container .btn-primary:hover,
+.profile-card .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(0, 195, 255, 0.5);
+}
+
+/* Modificando las tarjetas de resumen */
+.summary-card {
+  border-left: 4px solid transparent;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), var(--primary-gradient);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
+}
+
+.summary-icon {
+  background: var(--primary-gradient) !important;
+}
+
+/* Estilo para los gráficos en el panel de control */
+.chart-card {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  background: rgba(30, 30, 50, 0.6) !important;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.chart-card h2 {
+  color: white !important;
+  text-align: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.chart-card h2::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 50px;
+  height: 2px;
+  background: var(--primary-gradient);
+  transform: translateX(-50%);
+}
+
+/* Estilo para el panel de actividad reciente */
+.actividad-reciente {
+  background: rgba(30, 30, 50, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white !important;
+}
+
+.actividad-reciente h2 {
+  color: white !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.actividad-reciente h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 50px;
+  height: 2px;
+  background: var(--primary-gradient);
+}
+
+.actividad-title, .actividad-date {
+  color: white !important;
+}
+
+.actividad-icon {
+  background: var(--primary-gradient) !important;
+}
+
+.actividad-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.actividad-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.actividad-item.formacion-item {
+  background: rgba(0, 255, 140, 0.1);
+  border-left: 3px solid #00ff8c;
+}
+
+/* Estilos para la tarjeta de perfil */
+.profile-card {
+  background: rgba(30, 30, 50, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  padding: 25px;
+  border-radius: 10px;
+  color: white;
+}
+
+.profile-card h1, .profile-card h2 {
+  color: white !important;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.profile-card h1::after, .profile-card h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -10px;
+  width: 50px;
+  height: 2px;
+  background: var(--primary-gradient);
+}
+
+.profile-photo-container {
+  border: 3px solid transparent;
+  background-image: var(--primary-gradient);
+  background-origin: border-box;
+  background-clip: border-box;
+  padding: 3px;
+  border-radius: 50%;
+}
+
+.profile-photo {
+  border-radius: 50%;
+}
+
+.change-photo-btn {
+  background: var(--primary-gradient) !important;
+  color: white !important;
+}
+
+.profile-card .form-control {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-card .form-control:focus {
+  border-color: #00c3ff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 195, 255, 0.25);
+}
+
+.profile-card .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.profile-card .form-group label {
+  color: white !important;
+}
+
+.section-divider {
+  border-color: rgba(255, 255, 255, 0.2);
+  margin: 30px 0;
+}
+
+/* Estilo para los números en las tarjetas del panel de control */
+.summary-content h3 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
 }
