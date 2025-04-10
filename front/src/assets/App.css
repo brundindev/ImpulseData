@@ -147,7 +147,11 @@ body::-webkit-scrollbar {
 }
 
   .main-content {
-    min-height: calc(100vh - 70px);
+    overflow-y: auto !important;
+    height: 100vh;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: #004698 #f1f1f1;
   }
   
   /* Responsive styles */

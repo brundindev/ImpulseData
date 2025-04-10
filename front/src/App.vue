@@ -381,10 +381,18 @@ const mostrarChatbot = computed(() => {
 <style>
 .main-content {
   overflow-y: auto !important;
-  height: 100vh;
+  min-height: 100vh;
   position: relative;
   scrollbar-width: thin;
   scrollbar-color: #004698 #f1f1f1;
+  padding-bottom: 4rem;
+}
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden; /* Solo oculta overflow horizontal */
+  overflow-y: auto; /* Permite scroll vertical */
 }
 
 .main-content::-webkit-scrollbar {
