@@ -19,8 +19,22 @@
       <div class="particle"></div>
     </div>
     
+    <!-- Estrellas brillantes -->
+    <div class="stars-container">
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+    </div>
+    
     <!-- Efecto de ondas -->
-    <div class="wave-background welcome-waves">
+    <div class="wave-background">
       <div class="wave"></div>
       <div class="wave"></div>
       <div class="wave"></div>
@@ -2482,7 +2496,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   height: 400px;
   top: -200px;
   right: -200px;
-  background: linear-gradient(135deg, #007AFF, #34AADC);
+  background: var(--primary-gradient);
   animation: float-very-slow 30s ease-in-out infinite alternate;
 }
 
@@ -2491,7 +2505,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   height: 300px;
   bottom: -150px;
   left: 30%;
-  background: linear-gradient(135deg, #5856D6, #AF52DE);
+  background: linear-gradient(135deg, #00c3ff, #00ff8c);
   animation: float-very-slow 20s ease-in-out infinite alternate-reverse;
 }
 
@@ -2500,7 +2514,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   height: 200px;
   top: 30%;
   left: -100px;
-  background: linear-gradient(135deg, #FF9500, #FF2D55);
+  background: linear-gradient(225deg, #00c3ff, #00ff8c);
   animation: float-very-slow 25s ease-in-out infinite alternate;
 }
 
@@ -2535,11 +2549,11 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #007AFF, #34AADC);
+  background: var(--primary-gradient);
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 195, 255, 0.2);
 }
 
 .modal-icon {
@@ -2551,7 +2565,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   font-size: 22px;
   font-weight: 600;
   margin: 0;
-  background: linear-gradient(90deg, #007AFF, #34AADC);
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.5px;
@@ -2615,7 +2629,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #007AFF;
+  background: var(--primary-gradient);
   animation: apple-spinner 1.2s infinite ease-in-out;
 }
 
@@ -2674,7 +2688,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 }
 
 .apple-add-btn {
-  background: linear-gradient(to right, #007AFF, #34AADC);
+  background: var(--primary-gradient);
   color: white;
   border: none;
   border-radius: 8px;
@@ -2685,12 +2699,12 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   gap: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 195, 255, 0.3);
 }
 
 .apple-add-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 122, 255, 0.4);
+  box-shadow: 0 4px 8px rgba(0, 195, 255, 0.4);
 }
 
 .add-icon {
@@ -2745,7 +2759,9 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 .apple-card-header h4 {
   margin: 0;
   font-size: 16px;
-  color: #007AFF;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-weight: 500;
 }
 
@@ -2807,8 +2823,8 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 
 .apple-input:focus, .apple-select:focus {
   outline: none;
-  border-color: #007AFF;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+  border-color: #00c3ff;
+  box-shadow: 0 0 0 3px rgba(0, 195, 255, 0.15);
 }
 
 .input-focus-effect {
@@ -2817,7 +2833,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   left: 50%;
   width: 0;
   height: 2px;
-  background: linear-gradient(to right, #007AFF, #34AADC);
+  background: var(--primary-gradient);
   transition: all 0.3s ease;
   transform: translateX(-50%);
 }
@@ -2873,7 +2889,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 }
 
 .apple-btn-save {
-  background: linear-gradient(to right, #007AFF, #34AADC);
+  background: var(--primary-gradient);
   color: white;
   border: none;
   border-radius: 8px;
@@ -2885,12 +2901,12 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 195, 255, 0.3);
 }
 
 .apple-btn-save:hover:not([disabled]) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 122, 255, 0.4);
+  box-shadow: 0 6px 15px rgba(0, 195, 255, 0.4);
 }
 
 .apple-btn-save:disabled {
@@ -2974,7 +2990,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 }
 
 .view-icon-container {
-  background: linear-gradient(135deg, #5AC8FA, #007AFF);
+  background: var(--primary-gradient);
 }
 
 .view-modal-actions {
@@ -2997,12 +3013,12 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 }
 
 .edit-btn {
-  background: rgba(52, 170, 220, 0.1);
-  color: #34AADC;
+  background: rgba(0, 195, 255, 0.1);
+  color: #00c3ff;
 }
 
 .edit-btn:hover {
-  background: rgba(52, 170, 220, 0.2);
+  background: rgba(0, 195, 255, 0.2);
   transform: translateY(-2px);
 }
 
@@ -3059,24 +3075,24 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #5AC8FA, #007AFF);
+  background: var(--primary-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 195, 255, 0.2);
   color: white;
 }
 
 .blue-badge {
-  background: linear-gradient(135deg, #5AC8FA, #007AFF);
+  background: var(--primary-gradient);
 }
 
 .purple-badge {
-  background: linear-gradient(135deg, #5856D6, #AF52DE);
+  background: linear-gradient(135deg, #00c3ff, #00e1a0);
 }
 
 .orange-badge {
-  background: linear-gradient(135deg, #FF9500, #FF2D55);
+  background: linear-gradient(135deg, #00e1a0, #00ff8c);
 }
 
 .badge-icon {
@@ -3150,7 +3166,7 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 }
 
 .view-card-header {
-  background: linear-gradient(to right, rgba(0, 122, 255, 0.1), rgba(52, 170, 220, 0.1));
+  background: linear-gradient(to right, rgba(0, 195, 255, 0.1), rgba(0, 255, 140, 0.1));
   padding: 15px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
@@ -3158,7 +3174,9 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 .view-card-header h4 {
   margin: 0;
   font-size: 16px;
-  color: #007AFF;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-weight: 500;
 }
 
@@ -3178,18 +3196,18 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 }
 
 .tipo-presencial {
-  background-color: rgba(90, 200, 250, 0.2);
-  color: #5AC8FA;
+  background-color: rgba(0, 195, 255, 0.2);
+  color: #00c3ff;
 }
 
 .tipo-virtual {
-  background-color: rgba(88, 86, 214, 0.2);
-  color: #5856D6;
+  background-color: rgba(0, 231, 160, 0.2);
+  color: #00e1a0;
 }
 
 .tipo-hibrida {
-  background-color: rgba(255, 149, 0, 0.2);
-  color: #FF9500;
+  background-color: rgba(0, 255, 140, 0.2);
+  color: #00ff8c;
 }
 
 /* Responsive styles */
@@ -3205,5 +3223,32 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
   .apple-info-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Estilos para las estrellas brillantes */
+.stars-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: twinkle 1s infinite ease-in-out;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 </style>

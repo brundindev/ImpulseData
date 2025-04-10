@@ -54,6 +54,22 @@ body::-webkit-scrollbar {
     gap: 1.5rem;
   }
   
+  /* Variables de color */
+  :root {
+    --primary-gradient: linear-gradient(90deg, #00c3ff, #00ff8c);
+    --primary-color: #004698;
+    --primary-hover: #0056b8;
+    --secondary-color: #5175a0;
+    --danger-color: #f44336;
+    --success-color: #4CAF50;
+    --border-color: #e0e0e0;
+    --text-color: #333333;
+    --light-text: #666666;
+    --card-background: #ffffff;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Opciones de navegación */
   .nav-link {
     color: #333;
     text-decoration: none;
@@ -62,6 +78,7 @@ body::-webkit-scrollbar {
     transition: color 0.3s;
     padding: 0.5rem 0;
     position: relative;
+    margin: 0 15px;
   }
   
   .nav-link:hover {
@@ -75,8 +92,8 @@ body::-webkit-scrollbar {
     height: 2px;
     bottom: 0;
     left: 0;
-    background-color: #004698;
-    transition: width 0.3s;
+    background: var(--primary-gradient);
+    transition: width 0.3s ease;
   }
   
   .nav-link:hover::after {
