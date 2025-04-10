@@ -499,7 +499,7 @@
   width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 100px;
   font-size: 1rem;
   transition: border-color 0.3s;
   background-color: white !important;
