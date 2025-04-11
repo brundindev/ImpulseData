@@ -1,0 +1,27 @@
+services:
+  # Servicio para el backend (Spring Boot)
+  - type: web
+    name: impulsedata-api
+    runtime: docker
+    rootDir: impulsedata
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: FIREBASE_CONFIG
+        sync: false
+    healthCheckPath: /actuator/health
+    buildCommand: ./mvnw package -DskipTests
+    
+  # Servicio para el frontend (Vue/Vite)
+  - type: web
+    name: impulsedata-front
+    runtime: static
+    rootDir: front
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_GEMINI_API_KEY
+        sync: false
+      - key: VITE_API_URL
+        value: https://impulsedata-api.onrender.com 
