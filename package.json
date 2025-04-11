@@ -1,4 +1,12 @@
 {
+  "name": "impulsedata",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "cd front && npm run dev",
+    "build": "bash ./vercel-build.sh",
+    "vercel-build": "bash ./vercel-build.sh"
+  },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",

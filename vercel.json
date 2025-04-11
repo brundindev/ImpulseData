@@ -1,16 +1,8 @@
 {
   "version": 2,
-  "builds": [
-    { 
-      "src": "front/package.json", 
-      "use": "@vercel/static-build", 
-      "config": { 
-        "distDir": "dist",
-        "installCommand": "pnpm install --no-frozen-lockfile"
-      } 
-    }
-  ],
+  "buildCommand": "bash ./vercel-build.sh",
+  "outputDirectory": "front/dist",
   "routes": [
-    { "src": "/(.*)", "dest": "/front/dist/index.html" }
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 } 

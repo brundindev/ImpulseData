@@ -1,13 +1,22 @@
 #!/bin/bash
-# Script personalizado para la construcción en Vercel sin usar el lockfile congelado
+# Script personalizado para la construcción en Vercel sin usar pnpm
 
-# Instalar dependencies usando --no-frozen-lockfile
-echo "Instalando dependencias sin frozen lockfile..."
-pnpm install --no-frozen-lockfile
+echo "Verificando la versión de node y npm..."
+node -v
+npm -v
 
-# Construir la aplicación
+echo "Instalando dependencias con npm..."
+cd front
+npm install
+
 echo "Construyendo la aplicación..."
-pnpm run build
+npm run build
 
-# Si se completa con éxito
-echo "Build completada con éxito." 
+# Verificar que el directorio dist existe
+if [ -d "dist" ]; then
+  echo "Build completada con éxito. Directorio dist creado."
+  ls -la dist
+else
+  echo "Error: No se creó el directorio dist."
+  exit 1
+fi 
