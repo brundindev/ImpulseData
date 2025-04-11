@@ -1,3 +1,19 @@
+/* Variables de color */
+:root {
+  --primary-gradient: linear-gradient(90deg, #00c3ff, #00ff8c);
+  --primary-color: #004698;
+  --primary-hover: #0056b8;
+  --secondary-color: #5175a0;
+  --danger-color: #f44336;
+  --success-color: #4CAF50;
+  --border-color: #e0e0e0;
+  --text-color: #333333;
+  --light-text: #666666;
+  --card-background: #ffffff;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --pale-blue: #e6f7ff;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -27,7 +43,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     left: 0;
     right: 0;
     height: 100%;
-    background: radial-gradient(circle at 15% 15%, rgba(116, 155, 208, 0.1) 0%, transparent 60%);
+    background: radial-gradient(circle at 15% 15%, rgba(0, 195, 255, 0.1) 0%, transparent 60%);
     pointer-events: none;
   }
 
@@ -38,7 +54,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     right: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 85% 85%, rgba(0, 70, 152, 0.15) 0%, transparent 55%);
+    background: radial-gradient(circle at 85% 85%, rgba(0, 255, 140, 0.15) 0%, transparent 55%);
     pointer-events: none;
   }
 
@@ -64,7 +80,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   .sphere-1 {
     width: 500px;
     height: 500px;
-    background: linear-gradient(45deg, #00f7ff, #00b0ff);
+    background: var(--primary-gradient);
     top: -100px;
     left: -100px;
     animation-delay: 0s;
@@ -73,7 +89,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   .sphere-2 {
     width: 600px;
     height: 600px;
-    background: linear-gradient(135deg, #6200ea, #00e676);
+    background: var(--primary-gradient);
     bottom: -200px;
     right: -100px;
     animation-delay: -5s;
@@ -82,7 +98,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   .sphere-3 {
     width: 400px;
     height: 400px;
-    background: linear-gradient(225deg, #00d0ff, #0010f5);
+    background: var(--primary-gradient);
     top: 40%;
     left: 60%;
     animation-delay: -10s;
@@ -94,7 +110,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
   .welcome-particles .particle {
     background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 195, 255, 0.3);
   }
 
   .welcome-waves {
@@ -103,11 +119,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
   .welcome-waves .wave {
     background: linear-gradient(90deg, 
-      rgba(0, 70, 152, 0.1), 
-      rgba(116, 155, 208, 0.2), 
-      rgba(0, 183, 255, 0.1),
-      rgba(0, 212, 255, 0.2),
-      rgba(0, 70, 152, 0.1)
+      rgba(0, 195, 255, 0.1), 
+      rgba(0, 255, 140, 0.2), 
+      rgba(0, 195, 255, 0.1),
+      rgba(0, 255, 140, 0.2),
+      rgba(0, 195, 255, 0.1)
     );
   }
 
@@ -129,7 +145,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   .animated-title {
     position: relative;
     display: inline-block;
-    background: linear-gradient(90deg, #00b0ff, #00b0ff, #0062ff);
+    background: var(--primary-gradient);
     background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -147,11 +163,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   @keyframes pulse {
     0%, 100% {
       transform: scale(1);
-      box-shadow: 0 0 20px rgba(0, 181, 255, 0.3);
+      box-shadow: 0 0 20px rgba(0, 195, 255, 0.3);
     }
     50% {
       transform: scale(1.03);
-      box-shadow: 0 0 30px rgba(0, 181, 255, 0.5);
+      box-shadow: 0 0 30px rgba(0, 195, 255, 0.5);
     }
   }
 
@@ -168,7 +184,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 195, 255, 0.3) 0%, rgba(0, 255, 140, 0.2) 30%, transparent 70%);
     opacity: 0;
     transform: scale(0.5);
     transition: opacity 0.3s, transform 0.5s;
@@ -186,21 +202,42 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     max-width: 1200px;
     margin: 0 auto;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
     height: calc(100vh - 8rem);
     position: relative;
     z-index: 2;
+    justify-content: space-between;
   }
   
   .hero-content {
     flex: 1;
+    max-width: 60%;
+    padding-right: 1rem;
   }
   
   .hero-content h1 {
-    font-size: 2.5rem;
+    font-size: 3rem;
     color: white;
     margin-bottom: 1rem;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: inline-block;
+  }
+  
+  .hero-content h1::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    width: 100px;
+    height: 3px;
+    background: var(--primary-gradient);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  .hero-content:hover h1::after {
+    width: 100%;
   }
   
   .hero-content p {
@@ -208,6 +245,15 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     color: rgba(255, 255, 255, 0.8);
     margin-bottom: 2rem;
     text-align: left;
+    position: relative;
+  }
+  
+  .hero-content p strong {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
   }
   
   .cta-buttons {
@@ -217,7 +263,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   }
   
   .signup-btn {
-    background-color: var(--primary-color);
+    background: var(--primary-gradient);
     color: white;
     padding: 0.5rem 1.5rem;
     border-radius: 4px;
@@ -225,10 +271,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   }
   
   .signup-btn:hover {
-    background-color: var(--primary-hover);
+    background: var(--primary-gradient);
     color: white;
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 70, 152, 0.4);
+    box-shadow: 0 5px 15px rgba(0, 195, 255, 0.4), 0 0 40px rgba(0, 255, 140, 0.3);
   }
   
   .login-btn {
@@ -238,29 +284,73 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     padding: 0.5rem 1.5rem;
     border-radius: 4px;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+  
+  .login-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--primary-gradient);
+    opacity: 0;
+    z-index: -1;
+    transition: all 0.4s ease;
   }
   
   .login-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: transparent;
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 195, 255, 0.3);
+    border-color: rgba(0, 255, 140, 0.5);
+    color: white;
+  }
+  
+  .login-btn:hover::before {
+    left: 0;
+    opacity: 0.2;
   }
   
   .hero-image {
-    flex: 1;
-    box-shadow: var(--shadow);
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
+    flex: 0 0 auto;
+    display: inline-flex;
+    justify-content: center;
     align-items: center;
-    transition: all 0.5s ease;
+    position: relative;
+    margin-left: 0;
+    padding: 0.5rem;
+  }
+  
+  .hero-image::before {
+    content: '';
+    position: absolute;
+    width: 105%;
+    height: 105%;
+    top: -2.5%;
+    left: -2.5%;
+    background: radial-gradient(circle, rgba(0, 195, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: pulseHero 8s infinite ease-in-out;
   }
   
   .hero-image img {
-    width: 100%;
-    height: auto;
+    max-width: 100%;
+    max-height: 300px;
+    filter: drop-shadow(0 10px 20px rgba(0, 195, 255, 0.5));
+    transition: all 0.5s ease;
     display: block;
+    width: auto;
+    height: auto;
     object-fit: contain;
+  }
+  
+  .hero-image:hover img {
+    transform: translateY(-10px);
+    filter: drop-shadow(0 15px 30px rgba(0, 255, 140, 0.7));
   }
     
   /* Responsive */
@@ -268,7 +358,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     .hero-section {
       flex-direction: column;
       padding: 3rem 1rem;
-      height:auto;
+      height: auto;
+    }
+    
+    .hero-content {
+      max-width: 100%;
     }
     
     .hero-content h1 {
@@ -276,12 +370,19 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     }
 
     .hero-image {
-      max-height: 50vh; /* Limita la altura en móviles */
+      margin-left: 0;
+      margin-top: 2rem;
     }
 
     .gradient-sphere {
-      opacity: 0.2;
+      opacity: 0.3;
       filter: blur(70px);
+    }
+
+    .signup-btn, .login-btn {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 1rem;
     }
   }
 
@@ -294,5 +395,178 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     }
     100% {
       background-position: 0% 50%;
+    }
+  }
+
+  @keyframes pulseHero {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+  }
+
+  /* Efecto de estrellas brillantes */
+  .stars-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 5s infinite ease-in-out;
+  }
+
+  .star:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+  .star:nth-child(2) { top: 20%; left: 40%; animation-delay: 1s; }
+  .star:nth-child(3) { top: 30%; left: 70%; animation-delay: 2s; }
+  .star:nth-child(4) { top: 40%; left: 85%; animation-delay: 3s; }
+  .star:nth-child(5) { top: 50%; left: 10%; animation-delay: 4s; }
+  .star:nth-child(6) { top: 60%; left: 30%; animation-delay: 5s; }
+  .star:nth-child(7) { top: 70%; left: 60%; animation-delay: 6s; }
+  .star:nth-child(8) { top: 80%; left: 80%; animation-delay: 7s; }
+  .star:nth-child(9) { top: 90%; left: 50%; animation-delay: 8s; }
+  .star:nth-child(10) { top: 15%; left: 90%; animation-delay: 9s; }
+  .star:nth-child(11) { top: 25%; left: 5%; animation-delay: 10s; }
+  .star:nth-child(12) { top: 35%; left: 55%; animation-delay: 11s; }
+
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 0.2;
+      transform: scale(1);
+      box-shadow: 0 0 2px rgba(0, 195, 255, 0.1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(2);
+      box-shadow: 0 0 8px rgba(0, 255, 140, 0.8), 0 0 12px rgba(255, 255, 255, 0.4);
+    }
+  }
+
+  /* Mejorando las ondas de fondo */
+  .wave-background {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background-repeat: repeat-x;
+    animation: wave-animation 20s linear infinite;
+    opacity: 0.3;
+  }
+
+  .wave:nth-child(1) {
+    bottom: -5%;
+    height: 40%;
+    animation-duration: 20s;
+    opacity: 0.5;
+    background: linear-gradient(90deg, 
+      rgba(0, 195, 255, 0.1), 
+      rgba(0, 255, 140, 0.2), 
+      rgba(0, 195, 255, 0.1),
+      rgba(0, 255, 140, 0.2),
+      rgba(0, 195, 255, 0.1)
+    );
+  }
+
+  .wave:nth-child(2) {
+    bottom: -10%;
+    height: 60%;
+    animation-duration: 25s;
+    animation-direction: reverse;
+    opacity: 0.3;
+    background: linear-gradient(90deg, 
+      rgba(0, 195, 255, 0.1), 
+      rgba(0, 255, 140, 0.2), 
+      rgba(0, 195, 255, 0.1)
+    );
+  }
+
+  .wave:nth-child(3) {
+    bottom: -15%;
+    height: 80%;
+    animation-duration: 30s;
+    opacity: 0.2;
+    background: linear-gradient(90deg, 
+      rgba(0, 255, 140, 0.1), 
+      rgba(0, 195, 255, 0.2), 
+      rgba(0, 255, 140, 0.1)
+    );
+  }
+
+  @keyframes wave-animation {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Mejorando las partículas */
+  .floating-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 195, 255, 0.5), rgba(0, 255, 140, 0.5));
+    box-shadow: 0 0 10px rgba(0, 195, 255, 0.5), 0 0 20px rgba(0, 255, 140, 0.3);
+    animation: float-particle 15s infinite ease-in-out;
+  }
+
+  .particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+  .particle:nth-child(2) { top: 30%; left: 30%; animation-delay: 2s; }
+  .particle:nth-child(3) { top: 50%; left: 20%; animation-delay: 4s; }
+  .particle:nth-child(4) { top: 70%; left: 40%; animation-delay: 6s; }
+  .particle:nth-child(5) { top: 10%; left: 60%; animation-delay: 8s; }
+  .particle:nth-child(6) { top: 40%; left: 80%; animation-delay: 10s; }
+  .particle:nth-child(7) { top: 60%; left: 70%; animation-delay: 12s; }
+  .particle:nth-child(8) { top: 80%; left: 90%; animation-delay: 14s; }
+
+  @keyframes float-particle {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(50px, 50px);
+    }
+    50% {
+      transform: translate(100px, 0);
+    }
+    75% {
+      transform: translate(50px, -50px);
     }
   }

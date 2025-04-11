@@ -7,6 +7,22 @@
         <div class="gradient-sphere sphere-3"></div>
       </div>
       
+      <!-- Estrellas brillantes -->
+      <div class="stars-container">
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+      </div>
+      
       <!-- Partículas flotantes -->
       <div class="floating-particles welcome-particles">
         <div class="particle"></div>

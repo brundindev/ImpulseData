@@ -720,8 +720,8 @@ tbody tr:nth-child(even) {
         <section id="portada" class="page section-portada">
             <div class="portada-content">
                 <div class="logos-portada-top">
-                    <img src="" alt="Logo Impulsalicante" class="image-placeholder logo" style="width: 200px; height: 80px;">
-                    <img src="" alt="Logo Ayuntamiento de Alicante" class="image-placeholder logo" style="width: 150px; height: 70px;">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAADFUlEQVR4nHVUTUhjVxQ+L2ZiiJnEGCVqaWzS2lS0o60/2EJbSqF1ioJQKAUXdlGKQnFRsBulLkQQXHQj4kJciMWFi7pwIVLqoou6KIgVFDQRkxiN5r03mpc3L9/pCWPHRnrgcH/Oub/nnnt+VHieB41GA+x2O9TrdajX62QRCAQUFZH6Pp9PaLVagAooQhAAMIvFQoOh0WhktFptoVqtGkulUs/JycnLm5ubgSyiU8Tj8Q9arfZnEbnk9XrPIpFIbm9vD4xGo2Q2m2V0fnh4qHe73Vc8z99JJBKKTCajR7nkcDhkzPd2d3eFbDar12g0t7QIY4rH43GlUCiMLpdr4Wko9Pb09DSSTCa93d3ddCQIAmiEh3a7/S4QCPxQrVZ3o9HoNxcXF6+XlpZ2CVQB1ul0wsrKSpFUVigURoPBIHR0dFC5ymOq1+v9qXN1dfUjLKEfV1dXv8VnSi0Wi/xsNmsaGBjQTk9P/4SHk7FYTL+5ucnm83nFZrN9gKDvYGkewZfJZEgPD3Ug6eLi4m/I2c+Li4vfUw4V9Bt5AUGvr6+/R/ZMZ2dnyqvV6uft7e3Fvb29B3w+JRrJ0tLSn2dnZ2OlUolNeL3eX5aXl3/DdR8vLCx8vbW19eLW1pYRVUDgsvDo6Oh7ZDlSLBYZr9f7dTabfR4Oh6HZbA4PDw8/wHzR6/XKWCxm6Ow0TuTx8TGtra2N4vPrLpfrevzp/8/Ozv4SDAbfxuPxt4PB4Lf4fM1ms0nokDAZ5SSTyYTJyclvCACnXOHzee3p/Twe+F2mh4eHBxQ0NTU1EQqFvhwbG/uSDhkfH/9ieHj4c3oGXF1dAZ5H16enpxO0Z25u7v3Z2dmP0BrPlUqlEWxTWFhYeJGsQlFPcTEIRVbHORljXq+3ijFKvV7v6OrqSo+OjobOz8+VUCiUQ29S2ICLaJRyxWJRDwaDn2HT38KFtc3NzedoSR91tNGKE3uYTCY5HA7rlUrF3NfXV2AYBiKRSAeDEwg4qIEkQPAOmrSn0WhMYBffW15e/ufPYZFRBm1EnUZZI+IHJAJQw9Q9/QUAAAAASUVORK5CYII=" alt="Logo Impulsalicante" class="image-placeholder logo" style="width: 200px; height: 80px;">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAADFUlEQVR4nHVUTUhjVxQ+L2ZiiJnEGCVqaWzS2lS0o60/2EJbSqF1ioJQKAUXdlGKQnFRsBulLkQQXHQj4kJciMWFi7pwIVLqoou6KIgVFDQRkxiN5r03mpc3L9/pCWPHRnrgcH/Oub/nnnt+VHieB41GA+x2O9TrdajX62QRCAQUFZH6Pp9PaLVagAooQhAAMIvFQoOh0WhktFptoVqtGkulUs/JycnLm5ubgSyiU8Tj8Q9arfZnEbnk9XrPIpFIbm9vD4xGo2Q2m2V0fnh4qHe73Vc8z99JJBKKTCajR7nkcDhkzPd2d3eFbDar12g0t7QIY4rH43GlUCiMLpdr4Wko9Pb09DSSTCa93d3ddCQIAmiEh3a7/S4QCPxQrVZ3o9HoNxcXF6+XlpZ2CVQB1ul0wsrKSpFUVigURoPBIHR0dFC5ymOq1+v9qXN1dfUjLKEfV1dXv8VnSi0Wi/xsNmsaGBjQTk9P/4SHk7FYTL+5ucnm83nFZrN9gKDvYGkewZfJZEgPD3Ug6eLi4m/I2c+Li4vfUw4V9Bt5AUGvr6+/R/ZMZ2dnyqvV6uft7e3Fvb29B3w+JRrJ0tLSn2dnZ2OlUolNeL3eX5aXl3/DdR8vLCx8vbW19eLW1pYRVUDgsvDo6Oh7ZDlSLBYZr9f7dTabfR4Oh6HZbA4PDw8/wHzR6/XKWCxm6Ow0TuTx8TGtra2N4vPrLpfrevzp/8/Ozv4SDAbfxuPxt4PB4Lf4fM1ms0nokDAZ5SSTyYTJyclvCACnXOHzee3p/Twe+F2mh4eHBxQ0NTU1EQqFvhwbG/uSDhkfH/9ieHj4c3oGXF1dAZ5H16enpxO0Z25u7v3Z2dmP0BrPlUqlEWxTWFhYeJGsQlFPcTEIRVbHORljXq+3ijFKvV7v6OrqSo+OjobOz8+VUCiUQ29S2ICLaJRyxWJRDwaDn2HT38KFtc3NzedoSR91tNGKE3uYTCY5HA7rlUrF3NfXV2AYBiKRSAeDEwg4qIEkQPAOmrSn0WhMYBffW15e/ufPYZFRBm1EnUZZI+IHJAJQw9Q9/QUAAAAASUVORK5CYII=" alt="Logo Ayuntamiento de Alicante" class="image-placeholder logo" style="width: 150px; height: 70px;">
           </div>
                 <h1>MEMORIA<br>DE ACTIVIDAD</h1>
                 <div class="year">20<span class="year-highlight">25</span></div>
@@ -1408,7 +1408,7 @@ tbody tr:nth-child(even) {
                 </div>
 
                 <div class="content-block"> <h3>4.4 OFICINA ATRACCIÓN INVERSIONES - ALIA</h3>
-                     <p>Res '21-'23: 74 proy, 65 empl dir, 452M € inv pot.</p>
+                     <p>Res '21-'23: 74 proy, 65 empr dir, 452M € inv pot.</p>
                      <p>Act '23: Informes, 13 Activ dinam, 7 Eventos.</p>
                     <p><a href="#">Anexo 45</a></p>
                 </div>
@@ -1524,11 +1524,13 @@ export async function crearPlantillaPDF() {
     const imagenes = tempDiv.querySelectorAll('img');
     imagenes.forEach(img => {
       // Si la imagen no tiene src, está vacía o intenta cargar desde localhost
-      if (!img.src || 
+      // Pero NO reemplazar imágenes que ya tienen formato base64
+      if ((!img.src || 
           img.src === '' || 
           img.src === 'about:blank' || 
           img.src.startsWith('http://localhost/') ||
-          img.src.startsWith('/')) {
+          img.src.startsWith('/')) && 
+          !img.src.startsWith('data:image')) {
         
         console.log("Corrigiendo imagen con src:", img.src);
         img.src = placeholderImg;
