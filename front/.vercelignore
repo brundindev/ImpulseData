@@ -1,0 +1,7 @@
+node_modules
+.gitignore
+.vscode
+README.md
+.dockerignore
+Dockerfile
+nginx.conf 
