@@ -203,7 +203,7 @@
                 
                 <div class="form-group apple-form-group">
                   <label for="nombreEmpresa">Nombre de la empresa</label>
-                  <div class="apple-input-container">
+                  <div class="apple-input-container input-gemini-container">
                     <input 
                       type="text" 
                       id="nombreEmpresa" 
@@ -212,6 +212,11 @@
                       placeholder="Ej: Acme Corporation"
                       class="apple-input"
                     >
+                    <GeminiButton 
+                      field-name="nombre de empresa"
+                      :current-value="nuevaEmpresa.nombre"
+                      @suggestion="(text) => nuevaEmpresa.nombre = text"
+                    />
                     <div class="input-focus-effect"></div>
                   </div>
                 </div>
@@ -232,7 +237,7 @@
                 
                 <div class="form-group apple-form-group">
                   <label for="descripcionEmpresa">Descripción</label>
-                  <div class="apple-input-container">
+                  <div class="apple-input-container input-gemini-container">
                     <textarea 
                       id="descripcionEmpresa" 
                       v-model="nuevaEmpresa.descripcion" 
@@ -240,6 +245,12 @@
                       placeholder="Describe brevemente la empresa"
                       class="apple-input apple-textarea"
                     ></textarea>
+                    <GeminiButton 
+                      field-name="descripción empresa"
+                      :context="nuevaEmpresa.nombre"
+                      :current-value="nuevaEmpresa.descripcion"
+                      @suggestion="(text) => nuevaEmpresa.descripcion = text"
+                    />
                     <div class="input-focus-effect"></div>
                   </div>
                 </div>
@@ -289,7 +300,7 @@
                     
                     <div class="form-group apple-form-group">
                       <label :for="'nombreDep'+index">Nombre del departamento</label>
-                      <div class="apple-input-container">
+                      <div class="apple-input-container input-gemini-container">
                         <input 
                           type="text" 
                           :id="'nombreDep'+index" 
@@ -298,6 +309,12 @@
                           placeholder="Ej: Empleo y Formación"
                           class="apple-input"
                         >
+                        <GeminiButton 
+                          field-name="nombre de departamento"
+                          :context="nuevaEmpresa.nombre"
+                          :current-value="departamento.nombre"
+                          @suggestion="(text) => departamento.nombre = text"
+                        />
                         <div class="input-focus-effect"></div>
                       </div>
                     </div>
@@ -334,7 +351,7 @@
                     
                     <div class="form-group apple-form-group">
                       <label :for="'nombreCentro'+index">Nombre del centro</label>
-                      <div class="apple-input-container">
+                      <div class="apple-input-container input-gemini-container">
                         <input 
                           type="text" 
                           :id="'nombreCentro'+index" 
@@ -343,13 +360,19 @@
                           placeholder="Ej: Sede Principal"
                           class="apple-input"
                         >
+                        <GeminiButton 
+                          field-name="nombre de centro"
+                          :context="nuevaEmpresa.nombre"
+                          :current-value="centro.nombre"
+                          @suggestion="(text) => centro.nombre = text"
+                        />
                         <div class="input-focus-effect"></div>
                       </div>
                     </div>
                     
                     <div class="form-group apple-form-group">
                       <label :for="'direccionCentro'+index">Dirección</label>
-                      <div class="apple-input-container">
+                      <div class="apple-input-container input-gemini-container">
                         <input 
                           type="text" 
                           :id="'direccionCentro'+index" 
@@ -358,6 +381,12 @@
                           placeholder="Ej: Calle Principal 123"
                           class="apple-input"
                         >
+                        <GeminiButton 
+                          field-name="dirección"
+                          :context="nuevaEmpresa.ciudad || 'Alicante'"
+                          :current-value="centro.direccion"
+                          @suggestion="(text) => centro.direccion = text"
+                        />
                         <div class="input-focus-effect"></div>
                       </div>
                     </div>
@@ -394,7 +423,7 @@
                     
                     <div class="form-group apple-form-group">
                       <label :for="'nombreFormacion'+index">Nombre de la formación</label>
-                      <div class="apple-input-container">
+                      <div class="apple-input-container input-gemini-container">
                         <input 
                           type="text" 
                           :id="'nombreFormacion'+index" 
@@ -403,6 +432,12 @@
                           placeholder="Ej: LABORA"
                           class="apple-input"
                         >
+                        <GeminiButton 
+                          field-name="nombre de formación"
+                          :context="nuevaEmpresa.nombre"
+                          :current-value="formacion.nombre"
+                          @suggestion="(text) => formacion.nombre = text"
+                        />
                         <div class="input-focus-effect"></div>
                       </div>
                     </div>
@@ -742,19 +777,24 @@
     @close="cerrarPreviewPDF" 
     @download="descargarPDFPreview"
   />
+
+  <!-- Componente de depuración Gemini (solo para desarrollo) -->
+  <GeminiConfigDebug v-if="isAdmin" />
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, computed, watch, onUnmounted } from 'vue';
+import { ref, onMounted, reactive, computed, watch, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthService from '../services/AuthService';
 import FirestoreService from '../services/FirestoreService';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import FirebaseAuthService from '../services/FirebaseAuthService';
 import axios from 'axios';
 import AnimatedNumber from '../components/AnimatedNumber.vue';
 import ScrollAnimation from '../components/ScrollAnimation.vue';
 import PDFPreviewModal from '../components/PDFPreviewModal.vue';
+import GeminiButton from '../components/GeminiButton.vue';
+import GeminiConfigDebug from '../components/GeminiConfigDebug.vue';
 // Importar PDFService
 import PDFService from '../services/PDFService';
 // Importar el logo e imágenes
@@ -2261,6 +2301,9 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
     formacionesAnimados.value.push(false);
   }
 });
+
+// Estado de autenticación
+const isAdmin = ref(true); // Temporalmente true para ver el debugger
 </script>
 
 <style src="../assets/Home.css"></style>

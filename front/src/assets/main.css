@@ -78,12 +78,106 @@ button {
 }
 
 /* Estilos para inputs globales */
-input, select, textarea {
+input, select, textarea, .rounded-input {
   font-family: 'Inter', sans-serif;
-  border-radius: 20px;
+  border-radius: 30px;
   padding: 10px 16px;
   border: 1px solid var(--border-color);
   transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus, .rounded-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.2);
+}
+
+/* Contenedor para input con botón Gemini */
+.input-gemini-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Input dentro del contenedor Gemini */
+.input-gemini-container input,
+.input-gemini-container textarea {
+  flex: 1;
+  padding-right: 50px; /* Espacio para el botón */
+}
+
+/* Botón de Gemini */
+.gemini-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+/* Ajuste para textarea */
+.input-gemini-container textarea + .gemini-btn {
+  top: 20px;
+  transform: none;
+}
+
+.gemini-btn:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.input-gemini-container textarea + .gemini-btn:hover {
+  transform: scale(1.05);
+}
+
+.gemini-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.input-gemini-container textarea + .gemini-btn:active {
+  transform: scale(0.95);
+}
+
+.gemini-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.3);
+}
+
+.gemini-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+/* Estado de cargando para el botón de Gemini */
+.gemini-btn.loading {
+  background-color: var(--secondary-color);
+  pointer-events: none;
+}
+
+.gemini-btn .gemini-loading {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Estilos responsivos */
