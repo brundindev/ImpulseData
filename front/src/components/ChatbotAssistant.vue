@@ -1,29 +1,31 @@
 <template>
   <div class="chatbot-container">
-    <!-- Nuevo botón flotante animado para abrir el chat -->
+    <!-- Nuevo botón flotante con diseño renovado -->
     <div class="button-container">
-      <button 
-        class="uiverse" 
+      <div 
+        class="outer-cont flex" 
         @click="toggleChat" 
         :class="{ 'chat-open': isOpen }"
         :aria-label="isOpen ? 'Cerrar asistente' : 'Abrir asistente'"
       >
-        <div class="wrapper">
-          <span class="button-text" :class="{ 'text-change': textChanging }">{{ isOpen ? 'Cerrar' : 'ImpulseAI' }}</span>
-          <div class="circle circle-12"></div>
-          <div class="circle circle-11"></div>
-          <div class="circle circle-10"></div>
-          <div class="circle circle-9"></div>
-          <div class="circle circle-8"></div>
-          <div class="circle circle-7"></div>
-          <div class="circle circle-6"></div>
-          <div class="circle circle-5"></div>
-          <div class="circle circle-4"></div>
-          <div class="circle circle-3"></div>
-          <div class="circle circle-2"></div>
-          <div class="circle circle-1"></div>
-        </div>
-      </button>
+        <svg
+          viewBox="0 0 24 24"
+          height="24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g fill="none">
+            <path
+              d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"
+            ></path>
+            <path
+              d="M9.107 5.448c.598-1.75 3.016-1.803 3.725-.159l.06.16l.807 2.36a4 4 0 0 0 2.276 2.411l.217.081l2.36.806c1.75.598 1.803 3.016.16 3.725l-.16.06l-2.36.807a4 4 0 0 0-2.412 2.276l-.081.216l-.806 2.361c-.598 1.75-3.016 1.803-3.724.16l-.062-.16l-.806-2.36a4 4 0 0 0-2.276-2.412l-.216-.081l-2.36-.806c-1.751-.598-1.804-3.016-.16-3.724l.16-.062l2.36-.806A4 4 0 0 0 8.22 8.025l.081-.216zM11 6.094l-.806 2.36a6 6 0 0 1-3.49 3.649l-.25.091l-2.36.806l2.36.806a6 6 0 0 1 3.649 3.49l.091.25l.806 2.36l.806-2.36a6 6 0 0 1 3.49-3.649l.25-.09l2.36-.807l-2.36-.806a6 6 0 0 1-3.649-3.49l-.09-.25zM19 2a1 1 0 0 1 .898.56l.048.117l.35 1.026l1.027.35a1 1 0 0 1 .118 1.845l-.118.048l-1.026.35l-.35 1.027a1 1 0 0 1-1.845.117l-.048-.117l-.35-1.026l-1.027-.35a1 1 0 0 1-.118-1.845l.118-.048l1.026-.35l.35-1.027A1 1 0 0 1 19 2"
+              fill="currentColor"
+            ></path>
+          </g>
+        </svg>
+        ImpulseAI
+      </div>
     </div>
 
     <!-- Ventana de chat -->
@@ -566,353 +568,115 @@ onUnmounted(() => {
 }
 
 /* Estilos para el nuevo botón */
-.uiverse {
-  --duration: 7s;
-  --easing: linear;
-  --c-color-1: rgba(0, 195, 255, 0.7);
-  --c-color-2: #00c3ff;
-  --c-color-3: #00ff8c;
-  --c-color-4: rgba(0, 255, 140, 0.7);
-  --c-shadow: rgba(0, 195, 255, 0.5);
-  --c-shadow-inset-top: rgba(0, 195, 255, 0.9);
-  --c-shadow-inset-bottom: rgba(0, 255, 140, 0.8);
-  --c-radial-inner: #00c3ff;
-  --c-radial-outer: #00ff8c;
-  --c-color: #fff;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-appearance: none;
-  outline: none;
-  position: relative;
-  cursor: pointer;
+.flex {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.outer-cont {
+  padding: 12px 20px;
   border: none;
-  display: table;
-  border-radius: 24px;
-  padding: 0;
-  margin: 0;
-  text-align: center;
-  font-weight: 600;
-  font-size: 16px;
-  letter-spacing: 0.02em;
-  line-height: 1.5;
-  color: var(--c-color);
-  background: var(--primary-gradient);
-  box-shadow: 0 0 14px var(--c-shadow);
+  font-size: 1rem;
+  cursor: pointer;
+  position: relative;
+  background: linear-gradient(45deg, #00c3ff, #00e1a0, #00ff8c);
+  background-size: 200% 200%;
+  animation: gradientAnimation 8s ease infinite;
+  border-radius: 12px;
+  color: #fff;
+  transition: all 0.3s ease;
+  box-shadow:
+    inset 0px 0px 5px #ffffffa9,
+    inset 0px 35px 30px rgba(0, 0, 0, 0.5),
+    0px 5px 15px rgba(0, 0, 0, 0.6);
+  text-shadow: 1px 1px 1px #000;
   position: fixed;
   bottom: 25px;
   right: 25px;
   z-index: 1001;
-  overflow: hidden;
-  transition: background 0.5s ease;
+  font-weight: 600;
 }
 
-/* Estado cuando el chat está abierto */
-.uiverse.chat-open {
-  --c-radial-inner: #ff4d4d;
-  --c-radial-outer: #ff8080;
-  --c-shadow: rgba(255, 77, 77, 0.5);
-  --c-shadow-inset-top: rgba(255, 77, 77, 0.9);
-  --c-shadow-inset-bottom: rgba(255, 128, 128, 0.8);
-  animation: pulse 0.5s ease-in-out;
+.outer-cont::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 12px;
+  filter: blur(0);
+  z-index: -1;
+  box-shadow: none;
+  background: conic-gradient(
+    #00000000 80deg,
+    #00c3ff,
+    #00e1a0,
+    #00ff8c,
+    #00c3ff,
+    #00000000 280deg
+  );
+  transition: all 0.3s ease;
+  opacity: 0.7;
 }
 
-/* Animación para el cambio de texto del botón */
-.button-text {
-  display: inline-block;
-  position: relative;
-  z-index: 2;
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  min-width: 80px; /* Asegurar que el ancho sea consistente */
-  font-weight: 700;
-  backface-visibility: hidden;
-  perspective: 1000px;
+.outer-cont:hover {
+  background-size: 150% 150%;
+  transform: translateY(-3px);
 }
 
-.button-text.text-change {
-  transform: translateY(-20px) rotateX(90deg);
-  opacity: 0;
+.outer-cont:hover::before {
+  filter: blur(15px);
+  opacity: 1;
 }
 
-@keyframes pulse {
+.outer-cont:active::before {
+  filter: blur(5px);
+  transform: translateY(1px);
+}
+
+.outer-cont:active {
+  box-shadow:
+    inset 0px 0px 5px #ffffffa9,
+    inset 0px 35px 30px rgba(0, 0, 0, 0.5);
+  margin-top: 3px;
+}
+
+.outer-cont.chat-open {
+  background: linear-gradient(45deg, #ff4d4d, #ff6e6e, #ff8080);
+  background-size: 200% 200%;
+  animation: gradientAnimation 8s ease infinite;
+}
+
+.outer-cont.chat-open::before {
+  background: conic-gradient(
+    #00000000 80deg,
+    #ff4d4d,
+    #ff6e6e,
+    #ff8080,
+    #ff4d4d,
+    #00000000 280deg
+  );
+}
+
+@keyframes gradientAnimation {
   0% {
-    transform: scale(1);
+    background-position: 0% 50%;
   }
   50% {
-    transform: scale(1.05);
+    background-position: 100% 50%;
   }
   100% {
-    transform: scale(1);
+    background-position: 0% 50%;
   }
 }
 
-/* Agregar animación de rotación para los círculos cuando el botón está cerrado */
-.uiverse.chat-open .circle {
-  animation-duration: calc(var(--duration) * 0.7) !important;
+/* Animación para el botón cuando se abre o cierra */
+.outer-cont svg {
+  transition: transform 0.3s ease;
 }
 
-.uiverse:before {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  z-index: 3;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 24px;
-  box-shadow:
-    inset 0 3px 12px var(--c-shadow-inset-top),
-    inset 0 -3px 4px var(--c-shadow-inset-bottom);
-}
-
-.uiverse .wrapper {
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-  overflow: hidden;
-  border-radius: 24px;
-  min-width: 132px;
-  padding: 12px 0;
-}
-
-.uiverse .wrapper span {
-  display: inline-block;
-  position: relative;
-  z-index: 1;
-}
-
-.uiverse:hover {
-  --duration: 1400ms;
-}
-
-.uiverse .wrapper .circle {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  filter: blur(var(--blur, 8px));
-  background: var(--background, transparent);
-  transform: translate(var(--x, 0), var(--y, 0)) translateZ(0);
-  animation: var(--animation, none) var(--duration) var(--easing) infinite;
-}
-
-.uiverse .wrapper .circle.circle-1,
-.uiverse .wrapper .circle.circle-9,
-.uiverse .wrapper .circle.circle-10 {
-  --background: var(--c-color-4);
-}
-
-.uiverse .wrapper .circle.circle-3,
-.uiverse .wrapper .circle.circle-4 {
-  --background: var(--c-color-2);
-  --blur: 14px;
-}
-
-.uiverse .wrapper .circle.circle-5,
-.uiverse .wrapper .circle.circle-6 {
-  --background: var(--c-color-3);
-  --blur: 16px;
-}
-
-.uiverse .wrapper .circle.circle-2,
-.uiverse .wrapper .circle.circle-7,
-.uiverse .wrapper .circle.circle-8,
-.uiverse .wrapper .circle.circle-11,
-.uiverse .wrapper .circle.circle-12 {
-  --background: var(--c-color-1);
-  --blur: 12px;
-}
-
-.uiverse .wrapper .circle.circle-1 {
-  --x: 0;
-  --y: -40px;
-  --animation: circle-1;
-}
-
-.uiverse .wrapper .circle.circle-2 {
-  --x: 92px;
-  --y: 8px;
-  --animation: circle-2;
-}
-
-.uiverse .wrapper .circle.circle-3 {
-  --x: -12px;
-  --y: -12px;
-  --animation: circle-3;
-}
-
-.uiverse .wrapper .circle.circle-4 {
-  --x: 80px;
-  --y: -12px;
-  --animation: circle-4;
-}
-
-.uiverse .wrapper .circle.circle-5 {
-  --x: 12px;
-  --y: -4px;
-  --animation: circle-5;
-}
-
-.uiverse .wrapper .circle.circle-6 {
-  --x: 56px;
-  --y: 16px;
-  --animation: circle-6;
-}
-
-.uiverse .wrapper .circle.circle-7 {
-  --x: 8px;
-  --y: 28px;
-  --animation: circle-7;
-}
-
-.uiverse .wrapper .circle.circle-8 {
-  --x: 28px;
-  --y: -4px;
-  --animation: circle-8;
-}
-
-.uiverse .wrapper .circle.circle-9 {
-  --x: 20px;
-  --y: -12px;
-  --animation: circle-9;
-}
-
-.uiverse .wrapper .circle.circle-10 {
-  --x: 64px;
-  --y: 16px;
-  --animation: circle-10;
-}
-
-.uiverse .wrapper .circle.circle-11 {
-  --x: 4px;
-  --y: 4px;
-  --animation: circle-11;
-}
-
-.uiverse .wrapper .circle.circle-12 {
-  --blur: 14px;
-  --x: 52px;
-  --y: 4px;
-  --animation: circle-12;
-}
-
-@keyframes circle-1 {
-  33% {
-    transform: translate(0px, 16px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(12px, 64px) translateZ(0);
-  }
-}
-
-@keyframes circle-2 {
-  33% {
-    transform: translate(80px, -10px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(72px, -48px) translateZ(0);
-  }
-}
-
-@keyframes circle-3 {
-  33% {
-    transform: translate(20px, 12px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(12px, 4px) translateZ(0);
-  }
-}
-
-@keyframes circle-4 {
-  33% {
-    transform: translate(76px, -12px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(112px, -8px) translateZ(0);
-  }
-}
-
-@keyframes circle-5 {
-  33% {
-    transform: translate(84px, 28px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(40px, -32px) translateZ(0);
-  }
-}
-
-@keyframes circle-6 {
-  33% {
-    transform: translate(28px, -16px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(76px, -56px) translateZ(0);
-  }
-}
-
-@keyframes circle-7 {
-  33% {
-    transform: translate(8px, 28px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(20px, -60px) translateZ(0);
-  }
-}
-
-@keyframes circle-8 {
-  33% {
-    transform: translate(32px, -4px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(56px, -20px) translateZ(0);
-  }
-}
-
-@keyframes circle-9 {
-  33% {
-    transform: translate(20px, -12px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(80px, -8px) translateZ(0);
-  }
-}
-
-@keyframes circle-10 {
-  33% {
-    transform: translate(68px, 20px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(100px, 28px) translateZ(0);
-  }
-}
-
-@keyframes circle-11 {
-  33% {
-    transform: translate(4px, 4px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(68px, 20px) translateZ(0);
-  }
-}
-
-@keyframes circle-12 {
-  33% {
-    transform: translate(56px, 0px) translateZ(0);
-  }
-
-  66% {
-    transform: translate(60px, -32px) translateZ(0);
-  }
+.outer-cont:hover svg {
+  transform: rotate(20deg);
 }
 
 /* Título blanco */
