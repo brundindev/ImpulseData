@@ -245,7 +245,7 @@
 }
 
 .stat-card h3 {
-  color: var(--light-text);
+  color: white;
   margin-bottom: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
@@ -502,7 +502,7 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: var(--text-color);
+  color: #000000;
 }
 
 .form-group input::placeholder, 
@@ -2986,4 +2986,11 @@ body:has(.welcome-page) .button2:after,
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 0.5rem;
+}
+
+/* Color específico para el texto del banner */
+.banner-info p {
+  color: #000000 !important;
+  text-shadow: none;
+  font-weight: 500;
 }

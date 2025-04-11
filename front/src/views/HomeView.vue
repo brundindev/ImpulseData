@@ -2399,9 +2399,10 @@ const isAdmin = ref(true); // Temporalmente true para ver el debugger
 .banner-info p {
   font-size: 16px;
   line-height: 1.6;
-  color: #666;
+  color: #000000;
   margin-bottom: 25px;
   max-width: 90%;
+  font-weight: 500;
 }
 
 .banner-action {
@@ -2841,7 +2842,7 @@ const isAdmin = ref(true); // Temporalmente true para ver el debugger
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  color: #000000;
 }
 
 .apple-input-container {
