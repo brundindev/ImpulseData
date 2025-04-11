@@ -2508,6 +2508,12 @@ body:has(.welcome-page) .navbar-container .logout-item .dropdown-icon,
 
 .actividad-item:hover {
   background-color: rgba(0, 70, 152, 0.05);
+  .actividad-title{
+    color:white
+  }
+  .actividad-date{
+    color:rgba(245, 245, 245, 0.87);
+  }
 }
 
 .actividad-icon {
@@ -2541,7 +2547,7 @@ body:has(.welcome-page) .navbar-container .logout-item .dropdown-icon,
 
 /* Color de texto para elementos de actividad reciente con fondo verde */
 .actividad-item.formacion-item .actividad-title {
-  color: #333;
+  color: white;
 }
 
 .actividad-item.formacion-item {
@@ -2888,7 +2894,7 @@ body:has(.welcome-page) .button2:after,
 }
 
 .actividad-title, .actividad-date {
-  color: white !important;
+  /* color: white !important; */
 }
 
 .actividad-icon {
@@ -2907,6 +2913,7 @@ body:has(.welcome-page) .button2:after,
 .actividad-item.formacion-item {
   background: rgba(0, 255, 140, 0.1);
   border-left: 3px solid #00ff8c;
+  color: white !important;
 }
 
 /* Estilos para la tarjeta de perfil */
