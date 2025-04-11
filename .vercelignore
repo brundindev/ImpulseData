@@ -1,0 +1,12 @@
+docs
+.github
+impulsedata
+node_modules
+.git
+.vscode
+*.log
+.gitignore
+.DS_Store
+package-lock.json
+pnpm-lock.yaml
+docker-compose.yml 

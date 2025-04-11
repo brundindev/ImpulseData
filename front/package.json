@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "vercel-build": "vite build",
+    "vercel-build": "chmod +x ./vercel-build.sh && ./vercel-build.sh",
     "preview": "vite preview",
     "format": "prettier --write src/"
   },
