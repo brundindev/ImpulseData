@@ -14,4 +14,13 @@ export default defineConfig({
       'crypto': 'crypto-browserify',
     },
   },
+  base: '/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+    sourcemap: false,
+    minify: 'esbuild',
+    cssMinify: 'esbuild',
+  },
 });
