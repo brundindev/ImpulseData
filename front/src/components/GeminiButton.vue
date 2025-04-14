@@ -6,10 +6,15 @@
       :class="{ 'loading': loading }"
       @click="toggleSidebar"
       :disabled="loading"
-      :title="loading ? 'Generando...' : 'Completar con Gemini AI'"
+      :title="loading ? 'Generando...' : 'Completar con IA'"
     >
       <span v-if="loading" class="gemini-loading"></span>
-      <span v-else>G</span>
+      <svg v-else class="magic-wand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8l1.4 1.4M17.8 6.2l1.4-1.4M17.8 6.2l-1.4-1.4M17.8 11.8l-1.4 1.4M9 15l11-11M5 19l4-4" />
+          <path d="M5.5 8.5L8 11l-2.5 2.5L3 11l2.5-2.5z" stroke="none" fill="currentColor" />
+        </g>
+      </svg>
     </button>
     
     <!-- Capa de fondo para detectar clics fuera -->
@@ -62,7 +67,7 @@
           :disabled="loading || !customPrompt.trim()"
         >
           <span v-if="loading" class="gemini-loading"></span>
-          <span v-else>Generar con Gemini</span>
+          <span v-else>Generar con IA</span>
         </button>
       </div>
     </div>
@@ -111,7 +116,7 @@ const props = defineProps({
 const emit = defineEmits(['suggestion']);
 
 const loading = ref(false);
-const showSidebar = ref(false);
+const showSidebar = ref(false); // Por defecto cerrado
 const customPrompt = ref('');
 const notification = reactive({
   show: false,
@@ -226,7 +231,7 @@ const generateText = async () => {
 </script>
 
 <style scoped>
-/* Estilos existentes para el botón Gemini */
+/* Estilos del botón de IA con varita mágica */
 .gemini-btn {
   display: flex;
   align-items: center;
@@ -234,25 +239,38 @@ const generateText = async () => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #4285f4;
+  background: linear-gradient(135deg, #3498db, #2ecc71);
   color: white;
   font-weight: bold;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .gemini-btn:hover {
-  background-color: #3367d6;
-  transform: scale(1.5);
+  background: linear-gradient(135deg, #4aa3df, #3ddb7f);
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .gemini-btn:disabled {
-  background-color: #a1a1a1;
+  background: #a1a1a1;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
+}
+
+.gemini-container {
+  position: relative;
+  display: inline-block;
+  z-index: 900;
+}
+
+.magic-wand-icon {
+  width: 16px;
+  height: 16px;
 }
 
 /* Animación de carga */
@@ -269,23 +287,29 @@ const generateText = async () => {
   to { transform: rotate(360deg); }
 }
 
-/* Estilos del panel lateral */
-.gemini-container {
-  position: relative;
-  display: inline-block;
-  z-index: 900;
+/* Estilos para el panel lateral */
+.gemini-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  z-index: 940;
+  transition: opacity 0.3s ease;
 }
 
 .gemini-sidebar {
   position: absolute;
   top: -100px; 
   right: calc(100% + 80px);
-  width: 320px;
+  width: 340px;
   height: auto;
-  max-height: 400px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  max-height: 420px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
   z-index: 950;
   transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
   display: flex;
@@ -294,6 +318,7 @@ const generateText = async () => {
   opacity: 0;
   pointer-events: none;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .sidebar-open {
@@ -312,8 +337,8 @@ const generateText = async () => {
   height: 0;
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
-  border-left: 13px solid white; /* Hacemos la flecha más larga */
-  filter: drop-shadow(2px 0px 1px rgba(0, 0, 0, 0.1));
+  border-left: 13px solid rgba(255, 255, 255, 0.95); /* Hacemos la flecha más larga */
+  filter: drop-shadow(2px 0px 2px rgba(0, 0, 0, 0.1));
 }
 
 /* Prevenir que el panel se salga del viewport */
@@ -321,16 +346,17 @@ const generateText = async () => {
   .gemini-sidebar {
     position: fixed;
     top: auto;
-    bottom: 10px;
-    right: 10px;
-    left: 10px;
+    bottom: 20px;
+    right: 20px;
+    left: 20px;
     width: auto;
-    max-width: calc(100vw - 20px);
-    transform: translateY(5px); /* Animación más sutil */
+    max-width: calc(100vw - 40px);
+    transform: translateY(10px) scale(0.98); /* Animación más sutil */
+    backdrop-filter: blur(10px);
   }
   
   .sidebar-open {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
   
   /* Quitar flecha en móviles */
@@ -340,129 +366,153 @@ const generateText = async () => {
 }
 
 .gemini-sidebar-header {
-  padding: 16px;
-  border-bottom: 1px solid #eee;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(41, 128, 185, 0.05));
 }
 
 .gemini-sidebar-header h3 {
   margin: 0;
-  color: #4285f4;
-  font-size: 16px;
+  background: linear-gradient(135deg, #3498db, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
 }
 
 .gemini-sidebar-close {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
   color: #999;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
 
 .gemini-sidebar-close:hover {
   color: #333;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .gemini-sidebar-body {
-  padding: 16px;
+  padding: 20px;
   flex-grow: 1;
   overflow-y: auto;
 }
 
 .field-info, .context-info, .current-value-info {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   font-size: 14px;
+  color: #666;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+}
+
+.field-info strong, .context-info strong, .current-value-info strong {
+  color: #3498db;
+  font-weight: 600;
 }
 
 .form-group {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-weight: 500;
+  color: #444;
+  font-size: 15px;
 }
 
 .gemini-input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
   font-family: inherit;
   font-size: 14px;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
   resize: vertical;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) inset;
 }
 
 .gemini-input:focus {
   outline: none;
-  border-color: #4285f4;
-  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
 }
 
 .hint {
   display: block;
-  margin-top: 5px;
+  margin-top: 8px;
   font-size: 12px;
-  color: #777;
+  color: #888;
+  text-align: right;
 }
 
 .gemini-sidebar-footer {
-  padding: 16px;
-  border-top: 1px solid #eee;
+  padding: 18px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(41, 128, 185, 0.05));
 }
 
 .gemini-cancel-btn, .gemini-generate-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 14px;
 }
 
 .gemini-cancel-btn {
-  background-color: transparent;
-  border: 1px solid #ddd;
-  color: #333;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: none;
+  color: #555;
 }
 
 .gemini-cancel-btn:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .gemini-generate-btn {
-  background-color: #4285f4;
+  background: linear-gradient(135deg, #3498db, #2ecc71);
   border: none;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.4);
+  gap: 8px;
+  min-width: 140px;
 }
 
 .gemini-generate-btn:hover {
-  background-color: #3367d6;
+  background: linear-gradient(135deg, #4aa3df, #3ddb7f);
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.5);
+  transform: translateY(-1px);
 }
 
 .gemini-generate-btn:disabled {
-  background-color: #a1a1a1;
+  background: #a1a1a1;
   cursor: not-allowed;
-}
-
-/* Capa de fondo para detectar clics fuera */
-.gemini-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: transparent;
-  z-index: 940;
+  box-shadow: none;
+  transform: none;
 }
 </style> 
