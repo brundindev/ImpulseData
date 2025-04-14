@@ -777,9 +777,6 @@
     @close="cerrarPreviewPDF" 
     @download="descargarPDFPreview"
   />
-
-  <!-- Componente de depuración Gemini (solo para desarrollo) -->
-  <GeminiConfigDebug v-if="isAdmin" />
 </template>
 
 <script setup>
@@ -794,7 +791,6 @@ import AnimatedNumber from '../components/AnimatedNumber.vue';
 import ScrollAnimation from '../components/ScrollAnimation.vue';
 import PDFPreviewModal from '../components/PDFPreviewModal.vue';
 import GeminiButton from '../components/GeminiButton.vue';
-import GeminiConfigDebug from '../components/GeminiConfigDebug.vue';
 // Importar PDFService
 import PDFService from '../services/PDFService';
 // Importar el logo e imágenes
