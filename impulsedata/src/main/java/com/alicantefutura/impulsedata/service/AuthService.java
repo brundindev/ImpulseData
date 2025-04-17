@@ -42,8 +42,27 @@ public class AuthService {
         try {
             System.out.println("Iniciando registro para: " + request.getEmail());
             String email = request.getEmail();
+            String nombreUsuario = request.getNombreUsuario();
             
-            // 1. Comprobar si el email existe en Firebase Auth
+            // 1. Verificar si el nombre de usuario ya existe en Firestore
+            if (nombreUsuario != null && !nombreUsuario.trim().isEmpty()) {
+                try {
+                    var usuariosConMismoNombre = firestore.collection("usuarios")
+                            .whereEqualTo("nombreUsuario", nombreUsuario)
+                            .get()
+                            .get();
+                    
+                    if (!usuariosConMismoNombre.isEmpty()) {
+                        System.out.println("Nombre de usuario ya existente: " + nombreUsuario);
+                        throw new RuntimeException("El nombre de usuario ya está en uso. Por favor, elige otro.");
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    System.err.println("Error al verificar nombre de usuario: " + e.getMessage());
+                    throw new RuntimeException("Error al verificar disponibilidad del nombre de usuario");
+                }
+            }
+            
+            // 2. Comprobar si el email existe en Firebase Auth
             boolean existeEnAuth = false;
             try {
                 // Intentamos obtener el usuario por email para ver si ya existe en Firebase Auth
@@ -60,7 +79,7 @@ public class AuthService {
                 }
             }
             
-            // 2. Verificar si el usuario ya existe en Firestore
+            // 3. Verificar si el usuario ya existe en Firestore
             var usuarioExistente = firestore.collection("usuarios")
                     .whereEqualTo("email", email)
                     .get()
@@ -70,7 +89,7 @@ public class AuthService {
             boolean existeEnFirestore = !usuarioExistente.isEmpty();
             System.out.println("Usuario existente en Firestore: " + existeEnFirestore);
 
-            // 3. Manejar diferentes casos de existencia
+            // 4. Manejar diferentes casos de existencia
             String uid = null;
             
             if (existeEnAuth && existeEnFirestore) {
