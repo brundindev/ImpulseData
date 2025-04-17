@@ -1,17 +1,14 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://impulsedata.onrender.com';
-// URL con proxy para evitar problemas de CORS
-const PROXY_URL = 'https://corsproxy.io/?';
-const API_URL_WITH_PROXY = `${PROXY_URL}${encodeURIComponent(API_URL)}`;
+// Eliminamos el proxy CORS ya que vamos a configurar el backend correctamente
 
 const api = axios.create({
-  baseURL: API_URL_WITH_PROXY,
+  baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
+    'Content-Type': 'application/json'
   },
-  withCredentials: false // Cambiar a false para evitar problemas de CORS
+  withCredentials: true // Volver a habilitar withCredentials
 });
 
 // Interceptor para añadir el token de autenticación

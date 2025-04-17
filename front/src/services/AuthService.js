@@ -7,18 +7,15 @@ import FirestoreService from './FirestoreService';
 // Configuración de base URL para todas las peticiones
 // Si el backend está en un puerto distinto al frontend, hay que especificar la URL completa
 const API_URL = 'https://impulsedata.onrender.com/api/auth';
-// URL con proxy para evitar problemas de CORS
-const PROXY_URL = 'https://corsproxy.io/?';
-const API_URL_WITH_PROXY = `${PROXY_URL}${encodeURIComponent(API_URL)}`;
+// Eliminamos el proxy CORS ya que vamos a configurar el backend correctamente
 
 // Crear una instancia personalizada de axios para el servicio de autenticación
 // para no afectar a otras partes de la aplicación
 const authAxios = axios.create({
-  baseURL: API_URL_WITH_PROXY,
-  withCredentials: false, // Cambiar a false para evitar problemas de CORS
+  baseURL: API_URL,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
+    'Content-Type': 'application/json'
   }
 });
 
@@ -133,12 +130,12 @@ class AuthService {
       }
       
       // Usar la instancia personalizada de axios para el login
-      console.log("Enviando solicitud de login al backend:", `${API_URL_WITH_PROXY}/login`);
+      console.log("Enviando solicitud de login al backend:", `${API_URL}/login`);
       
-      // Configuración específica para esta solicitud para manejar CORS
+      // Configuración específica para esta solicitud
       const loginConfig = {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         }
       };
       
@@ -276,11 +273,11 @@ class AuthService {
         }
       }
       
-      console.log("Enviando solicitud de registro al backend:", `${API_URL_WITH_PROXY}/registro`);
+      console.log("Enviando solicitud de registro al backend:", `${API_URL}/registro`);
       
       // Primero registramos en Firebase (esto ya debería estar manejado en RegisterView)
       // Y luego registramos en el backend
-      const response = await axios.post(`${API_URL_WITH_PROXY}/registro`, user);
+      const response = await axios.post(`${API_URL}/registro`, user);
       
       console.log("Respuesta del backend:", response.status, response.statusText);
       
