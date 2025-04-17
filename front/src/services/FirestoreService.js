@@ -38,6 +38,54 @@ const EMPRESA_POR_DEFECTO = {
 
 class FirestoreService {
   /**
+   * Crea el documento de usuario en Firestore
+   * Esta función debe ser llamada después de crear un usuario en Firebase Auth
+   * @param {Object} userData - Datos del usuario (uid, email, nombre)
+   * @returns {Promise<string>} - ID del usuario en Firestore
+   */
+  static async crearUsuario(userData) {
+    try {
+      if (!userData || !userData.uid) {
+        console.error("Datos de usuario inválidos para crear en Firestore");
+        return null;
+      }
+      
+      console.log("Creando documento de usuario en Firestore:", userData.email);
+      
+      // Verificar si el usuario ya existe
+      const userRef = doc(db, "usuarios", userData.uid);
+      const userDoc = await getDoc(userRef);
+      
+      if (userDoc.exists()) {
+        console.log("El documento de usuario ya existe en Firestore:", userData.uid);
+        return userData.uid;
+      }
+      
+      // Crear el documento de usuario
+      const userCreationDate = new Date().toISOString();
+      const userDisplayName = userData.displayName || userData.nombre || userData.email.split('@')[0];
+      
+      const userDataToSave = {
+        uid: userData.uid,
+        email: userData.email,
+        nombreUsuario: userDisplayName,
+        fechaCreacion: userCreationDate,
+        fechaUltimoAcceso: userCreationDate,
+        estado: userData.emailVerified ? "verificado" : "pendiente",
+        rol: "usuario"
+      };
+      
+      await setDoc(userRef, userDataToSave);
+      console.log("✅ Documento de usuario creado en Firestore con ID:", userData.uid);
+      
+      return userData.uid;
+    } catch (error) {
+      console.error("Error al crear documento de usuario en Firestore:", error);
+      return null;
+    }
+  }
+
+  /**
    * Crea la empresa por defecto para un usuario específico si no existe ya
    * Esta función se debe llamar después de que un usuario se autentique
    * @returns {Promise<string>} - ID de la empresa por defecto

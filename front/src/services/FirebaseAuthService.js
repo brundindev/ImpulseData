@@ -16,17 +16,48 @@ class FirebaseAuthService {
    * Registrar un nuevo usuario con Firebase
    * @param {string} email - Correo electrónico
    * @param {string} password - Contraseña
+   * @param {string} nombreUsuario - Nombre de usuario (opcional)
    * @returns {Promise} - Datos del usuario
    */
-  async register(email, password) {
+  async register(email, password, nombreUsuario = '') {
     try {
       // Esperar a que Firebase Auth esté inicializado
       await waitForAuthInit();
       
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Si se proporciona nombre, actualizar perfil
+      if (nombreUsuario) {
+        try {
+          await updateProfile(user, {
+            displayName: nombreUsuario
+          });
+          console.log('Perfil actualizado con nombre:', nombreUsuario);
+        } catch (profileError) {
+          console.error('Error al actualizar perfil:', profileError);
+          // No bloqueamos el flujo por este error
+        }
+      }
+      
+      // Crear documento de usuario en Firestore
+      try {
+        console.log("👤 Creando documento de usuario en Firestore...");
+        await FirestoreService.crearUsuario({
+          uid: user.uid,
+          email: user.email,
+          nombre: nombreUsuario || user.email.split('@')[0],
+          emailVerified: user.emailVerified
+        });
+      } catch (firestoreError) {
+        console.error("Error al crear documento de usuario en Firestore:", firestoreError);
+        // No bloqueamos el flujo por este error
+      }
+      
       // Enviar correo de verificación
-      await sendEmailVerification(userCredential.user);
-      return userCredential.user;
+      await sendEmailVerification(user);
+      
+      return user;
     } catch (error) {
       console.error('Error al registrar con Firebase:', error);
       throw error;
@@ -207,6 +238,21 @@ class FirebaseAuthService {
           console.warn("Error al actualizar usuario de Google:", error);
           // No bloqueamos el flujo
         }
+      }
+      
+      // Crear documento de usuario en Firestore
+      try {
+        console.log("👤 Creando documento de usuario Google en Firestore...");
+        await FirestoreService.crearUsuario({
+          uid: user.uid,
+          email: user.email,
+          nombre: user.displayName || user.email.split('@')[0],
+          displayName: user.displayName,
+          emailVerified: true // Los usuarios de Google siempre se consideran verificados
+        });
+      } catch (firestoreError) {
+        console.error("Error al crear documento de usuario Google en Firestore:", firestoreError);
+        // No bloqueamos el flujo por este error
       }
       
       // Crear la empresa por defecto para este usuario
