@@ -388,7 +388,7 @@ const enviarVerificacion = async () => {
       // Si falla Firebase, caemos al método del backend
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/auth/enviar-verificacion?email=${encodeURIComponent(emailToUse)}`
+          `http://https://impulsedata.onrender.com/api/auth/enviar-verificacion?email=${encodeURIComponent(emailToUse)}`
         );
         
         verificacionEnviada.value = true;
@@ -465,7 +465,7 @@ const registerWithGoogle = async () => {
         if (!user.emailVerified) {
           // Forzar marcado como verificado en el backend
           const verificationResponse = await axios.get(
-            `http://localhost:8080/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`
+            `http://https://impulsedata.onrender.com/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`
           );
           
           // Intentar marcar al usuario como verificado también en Firebase

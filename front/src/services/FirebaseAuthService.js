@@ -72,7 +72,7 @@ class FirebaseAuthService {
       // Obtener el nombre de usuario del backend si no está en Firebase
       if (!user.displayName) {
         try {
-          const response = await fetch('http://localhost:8080/api/usuarios/nombre', {
+          const response = await fetch('http://https://impulsedata.onrender.com/api/usuarios/nombre', {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
@@ -180,7 +180,7 @@ class FirebaseAuthService {
           try {
             // Intentar marcar como verificado a través del backend
             const verificationResponse = await fetch(
-              `http://localhost:8080/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`,
+              `http://https://impulsedata.onrender.com/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`,
               { method: 'GET' }
             );
             
