@@ -1,96 +1,68 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+
 import App from './App.vue'
 import router from './router'
-import store from './store'
-import vuetify from './plugins/vuetify'
-import VueApexCharts from 'vue-apexcharts'
-import { waitForAuthInit } from './firebase'
-import './styles.css'
 
-Vue.config.productionTip = false
+import './assets/main.css'
 
-// Registrar componente VueApexCharts
-Vue.component('apexchart', VueApexCharts)
+// Importar Font Awesome
+import '@fortawesome/fontawesome-free/css/all.css';
 
-// Contador para errores CORS relacionados con Firestore
-let firestoreCorsErrors = 0;
-const MAX_CORS_ERRORS = 5;
-
-// Guardar referencia al console.error original
+// Configurar manejador global para ocultar errores de autenticación en consola
 const originalConsoleError = console.error;
-
-// Sobreescribir console.error para capturar y suprimir errores específicos de CORS y Firebase
 console.error = function(...args) {
-  const errorMessage = args.join(' ');
-  
-  // Verificar si es un error CORS relacionado con Firestore
-  if (errorMessage.includes('Cross-Origin') && errorMessage.includes('Firestore')) {
-    firestoreCorsErrors++;
-    console.warn(`Error CORS de Firestore suprimido (${firestoreCorsErrors}/${MAX_CORS_ERRORS})`);
-    
-    // Si excedemos el máximo, mostrar mensaje de advertencia una sola vez
-    if (firestoreCorsErrors === MAX_CORS_ERRORS) {
-      console.warn('Alcanzado número máximo de errores CORS. Se activará modo fallback para solicitudes Firestore.');
+  // Si el mensaje de error contiene información relacionada con error 401 o login,
+  // no lo mostramos en la consola de usuarios
+  const errorString = args.join(' ');
+  if (errorString.includes('401') || 
+      errorString.includes('Unauthorized') || 
+      errorString.includes('login') ||
+      errorString.includes('axios') ||
+      // Nuevos errores a suprimir:
+      errorString.includes('ERR_BLOCKED_BY_CLIENT') ||
+      errorString.includes('Cross-Origin-Opener-Policy') ||
+      errorString.includes('Firestore.Listen') ||
+      errorString.includes('window.close') ||
+      // Errores específicos de Firebase Auth:
+      errorString.includes('auth/invalid-credential') ||
+      errorString.includes('Error al iniciar sesión con Firebase') ||
+      errorString.includes('No se pudo reautenticar con credenciales')) {
+    // En desarrollo, se puede mostrar un mensaje personalizado
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Depuración] Error suprimido:', errorString.substring(0, 50) + '...');
+      // Opcionalmente descomentar para ver el error original en desarrollo
+      // originalConsoleError.apply(console, args);
     }
     return;
   }
   
-  // Suprimir otros errores comunes de Firebase que no afectan la funcionalidad
-  if (errorMessage.includes('Firebase') && 
-      (errorMessage.includes('timeout') || 
-       errorMessage.includes('network error') || 
-       errorMessage.includes('quota exceeded'))) {
-    console.warn('Error de Firebase suprimido:', errorMessage.substring(0, 100) + '...');
-    return;
-  }
-  
-  // Para todos los demás errores, usar el comportamiento original
+  // Para todos los demás errores, usar el comportamiento normal
   originalConsoleError.apply(console, args);
 };
 
-// Guardar referencia al fetch original
-const originalFetch = window.fetch;
-
-// Sobreescribir fetch para manejar solicitudes a Firestore cuando hay errores CORS
-window.fetch = function(...args) {
-  const url = args[0].url || args[0];
+// También capturar errores no manejados en promesas
+window.addEventListener('unhandledrejection', function(event) {
+  const errorMsg = event.reason?.message || String(event.reason);
   
-  // Si es una solicitud a Firestore y hemos alcanzado el máximo de errores CORS
-  if (typeof url === 'string' && 
-      url.includes('firestore.googleapis.com') && 
-      firestoreCorsErrors >= MAX_CORS_ERRORS) {
+  // Si es un error que queremos suprimir, prevenir su propagación
+  if (errorMsg.includes('ERR_BLOCKED_BY_CLIENT') || 
+      errorMsg.includes('Cross-Origin-Opener-Policy') ||
+      errorMsg.includes('Firestore.Listen') ||
+      errorMsg.includes('window.close')) {
+    // Evitar que el error aparezca en la consola
+    event.preventDefault();
+    event.stopPropagation();
     
-    console.warn('Interceptando solicitud a Firestore en modo fallback');
-    
-    // Simular una respuesta exitosa vacía
-    return Promise.resolve(new Response(JSON.stringify({ documents: [] }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    }));
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Depuración] Promesa rechazada suprimida:', errorMsg.substring(0, 50) + '...');
+    }
   }
-  
-  // Para todas las demás solicitudes, usar el comportamiento original
-  return originalFetch.apply(window, args);
-};
+});
 
-// Iniciar la aplicación después de que Firebase Auth esté inicializado
-async function initApp() {
-  try {
-    // Esperar a que Firebase Auth se inicialice
-    await waitForAuthInit();
-    console.log('Firebase Auth inicializado correctamente');
-  } catch (error) {
-    console.warn('Error al inicializar Firebase Auth, continuando de todos modos:', error);
-  }
-  
-  // Iniciar la aplicación Vue
-  new Vue({
-    router,
-    store,
-    vuetify,
-    render: h => h(App)
-  }).$mount('#app');
-}
+const app = createApp(App)
 
-// Iniciar la aplicación
-initApp();
+app.use(createPinia())
+app.use(router)
+
+app.mount('#app')

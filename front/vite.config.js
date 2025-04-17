@@ -23,22 +23,4 @@ export default defineConfig({
     minify: 'esbuild',
     cssMinify: 'esbuild',
   },
-  server: {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-      preflightContinue: false,
-      optionsSuccessStatus: 204,
-      credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-    },
-    proxy: {
-      // Proxy específico para solicitudes de Firestore
-      '/google.firestore.v1.Firestore': {
-        target: 'https://firestore.googleapis.com',
-        changeOrigin: true,
-        secure: true
-      }
-    }
-  }
 });
