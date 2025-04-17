@@ -1,11 +1,14 @@
 // Import Firebase
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, collectionGroup, serverTimestamp } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, collectionGroup, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import app from '../firebase';
+import app, { db } from '../firebase';
 
-// Initialize Firestore
-const db = getFirestore(app);
+// Initialize Firestore (ahora usamos db importado directamente)
+// const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Log para verificar que db se importó correctamente
+console.log("FirestoreService: db importado:", !!db, "auth:", !!auth);
 
 // Definir una empresa por defecto para todos los usuarios
 const EMPRESA_POR_DEFECTO = {
@@ -37,6 +40,92 @@ const EMPRESA_POR_DEFECTO = {
 };
 
 class FirestoreService {
+  /**
+   * Crea el documento de usuario en Firestore
+   * Esta función debe ser llamada después de crear un usuario en Firebase Auth
+   * @param {Object} userData - Datos del usuario (uid, email, nombre)
+   * @returns {Promise<string>} - ID del usuario en Firestore
+   */
+  static async crearUsuario(userData) {
+    try {
+      console.log("🔍 Iniciando método crearUsuario en FirestoreService:", userData);
+      
+      if (!userData || !userData.uid) {
+        console.error("Datos de usuario inválidos para crear en Firestore", userData);
+        return null;
+      }
+      
+      console.log("Creando documento de usuario en Firestore. UID:", userData.uid, "Email:", userData.email);
+      
+      // Verificar que tenemos conexión a Firestore
+      if (!db) {
+        console.error("No hay conexión a Firestore. db es:", db);
+        throw new Error("No hay conexión a Firestore");
+      }
+      
+      // Verificar que la colección usuarios existe
+      try {
+        console.log("Verificando acceso a la colección 'usuarios'");
+        const usuariosRef = collection(db, "usuarios");
+        console.log("Referencia a la colección obtenida:", usuariosRef);
+      } catch (collectionError) {
+        console.error("Error al acceder a la colección 'usuarios':", collectionError);
+        throw collectionError;
+      }
+      
+      // Verificar si el usuario ya existe
+      try {
+        console.log("Verificando si el usuario ya existe en Firestore");
+        const userRef = doc(db, "usuarios", userData.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          console.log("El documento de usuario ya existe en Firestore:", userData.uid);
+          return userData.uid;
+        } else {
+          console.log("El usuario no existe, procediendo a crearlo");
+        }
+      } catch (checkError) {
+        console.error("Error al verificar si el usuario existe:", checkError);
+        throw checkError;
+      }
+      
+      // Crear el documento de usuario
+      try {
+        const userCreationDate = new Date().toISOString();
+        const userDisplayName = userData.displayName || userData.nombre || userData.email.split('@')[0];
+        
+        const userDataToSave = {
+          uid: userData.uid,
+          email: userData.email,
+          nombreUsuario: userDisplayName,
+          fechaCreacion: userCreationDate,
+          fechaUltimoAcceso: userCreationDate,
+          estado: userData.emailVerified ? "verificado" : "pendiente",
+          rol: "usuario"
+        };
+        
+        console.log("Datos preparados para guardar:", userDataToSave);
+        
+        const userRef = doc(db, "usuarios", userData.uid);
+        console.log("Referencia al documento obtenida:", userRef);
+        
+        await setDoc(userRef, userDataToSave);
+        console.log("✅ Documento de usuario creado en Firestore con ID:", userData.uid);
+        
+        return userData.uid;
+      } catch (createError) {
+        console.error("Error específico al crear documento:", createError);
+        console.error("Detalles:", createError.code, createError.message, createError.stack);
+        throw createError;
+      }
+    } catch (error) {
+      console.error("Error general al crear documento de usuario en Firestore:", error);
+      console.error("Detalles:", error.code, error.message, error.stack);
+      return null;
+    }
+  }
+
   /**
    * Crea la empresa por defecto para un usuario específico si no existe ya
    * Esta función se debe llamar después de que un usuario se autentique

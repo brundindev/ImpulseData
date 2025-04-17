@@ -241,37 +241,45 @@ const register = async () => {
   try {
     loading.value = true;
     error.value = '';
+    let firebaseRegistroExitoso = false;
     
     // 1. Crear usuario en Firebase
     try {
       guardandoEnFirebase.value = true;
       // Primero intentamos registrar al usuario con Firebase
-      await FirebaseAuthService.register(email.value, password.value);
+      const user = await FirebaseAuthService.register(email.value, password.value, nombreUsuario.value);
       guardandoEnFirebase.value = false;
       
-      // 2. Crear usuario en el backend
-      guardandoEnBackend.value = true;
-      try {
-      await AuthService.register({
-        nombreUsuario: nombreUsuario.value,
-        email: email.value,
-        password: password.value
-      });
-        
-      guardandoEnBackend.value = false;
+      // Si llegamos aquí, el registro en Firebase fue exitoso
+      firebaseRegistroExitoso = true;
+      console.log("✅ Registro en Firebase exitoso:", user.email);
       
       // Guardar el email para posible reenvío de verificación
       emailRegistrado.value = email.value;
       
-      // Mostrar mensaje de éxito y pedir verificación
-      registroExitoso.value = true;
+      // 2. Crear usuario en el backend - Esto puede fallar pero no debe impedir mostrar éxito
+      guardandoEnBackend.value = true;
+      try {
+        await AuthService.register({
+          nombreUsuario: nombreUsuario.value,
+          email: email.value,
+          password: password.value
+        });
+        
+        guardandoEnBackend.value = false;
+        console.log("✅ Registro en Backend exitoso");
       } catch (backendError) {
         guardandoEnBackend.value = false;
-        console.error("Error en registro de backend:", backendError);
-        throw backendError; // Relanzar para que sea capturado por el catch externo
+        console.warn("⚠️ Error en registro de backend pero continuamos porque Firebase fue exitoso:", backendError);
+        // No relanzamos el error para no interrumpir el flujo exitoso
+      }
+      
+      // Mostrar mensaje de éxito si al menos Firebase fue exitoso
+      if (firebaseRegistroExitoso) {
+        registroExitoso.value = true;
       }
     } catch (firebaseError) {
-      console.error('Error al registrar con Firebase:', firebaseError);
+      console.error('❌ Error al registrar con Firebase:', firebaseError);
       guardandoEnFirebase.value = false;
       
       // Si el email ya existe, mostramos un error específico
@@ -284,7 +292,7 @@ const register = async () => {
       // Si es otro error de Firebase pero no es de email existente, intentamos con el backend
       guardandoEnBackend.value = true;
       try {
-        await AuthService.register({
+        const response = await AuthService.register({
           nombreUsuario: nombreUsuario.value,
           email: email.value,
           password: password.value
@@ -293,10 +301,12 @@ const register = async () => {
         guardandoEnBackend.value = false;
         emailRegistrado.value = email.value;
         
+        // Si llegamos aquí, el registro en el backend fue exitoso aunque Firebase falló
         registroExitoso.value = true;
+        console.log("✅ Registro exitoso en Backend aunque Firebase falló");
       } catch (backendError) {
         guardandoEnBackend.value = false;
-        console.error('Error al registrar con backend:', backendError);
+        console.error('❌ Error al registrar con backend:', backendError);
         
         // Manejamos errores específicos del backend
         if (backendError.response?.data && typeof backendError.response.data === 'string') {
@@ -313,7 +323,7 @@ const register = async () => {
       }
     }
   } catch (err) {
-    console.error('Error general de registro:', err);
+    console.error('❌ Error general de registro:', err);
     guardandoEnFirebase.value = false;
     guardandoEnBackend.value = false;
     
@@ -388,7 +398,7 @@ const enviarVerificacion = async () => {
       // Si falla Firebase, caemos al método del backend
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/auth/enviar-verificacion?email=${encodeURIComponent(emailToUse)}`
+          `http://https://impulsedata.onrender.com/api/auth/enviar-verificacion?email=${encodeURIComponent(emailToUse)}`
         );
         
         verificacionEnviada.value = true;
@@ -465,7 +475,7 @@ const registerWithGoogle = async () => {
         if (!user.emailVerified) {
           // Forzar marcado como verificado en el backend
           const verificationResponse = await axios.get(
-            `http://localhost:8080/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`
+            `http://https://impulsedata.onrender.com/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`
           );
           
           // Intentar marcar al usuario como verificado también en Firebase

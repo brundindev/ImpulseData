@@ -83,11 +83,16 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:5173", // Puerto por defecto de Vite
             "http://localhost",      // Nuevo puerto en Docker
-            "http://localhost:80"    // Especificar explícitamente puerto 80
+            "http://localhost:80",   // Especificar explícitamente puerto 80
+            "https://impulsedata.vercel.app", // Frontend en Vercel
+            "https://impulsedata-git-main-reynalrodriguez.vercel.app", // Posible URL de preview
+            "https://impulsedata-reynalrodriguez.vercel.app"           // Posible URL alternativa
         )); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

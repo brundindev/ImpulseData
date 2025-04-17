@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, connectAuthEmulator, sendEmailVerification } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,6 +20,8 @@ const firebaseConfig = {
 console.log("Inicializando Firebase...");
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+console.log("Firebase inicializado:", app.name, "Auth:", !!auth, "Firestore:", !!db);
 
 // Variable para rastrear el estado de inicialización de Firebase Auth
 let authInitialized = false;
@@ -60,5 +63,5 @@ const waitForAuthInit = () => {
 };
 
 // Exportamos los servicios necesarios
-export { auth, waitForAuthInit, sendEmailVerification };
+export { auth, db, waitForAuthInit, sendEmailVerification };
 export default app; 

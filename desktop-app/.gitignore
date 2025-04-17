@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+
+# Carpeta de distribución
+dist/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+.tmp/
+.temp/
+
+# Entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local 

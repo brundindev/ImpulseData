@@ -597,7 +597,7 @@ const actualizarPasswordEnBackend = async (email) => {
     
     console.log('Usando token JWT almacenado para autenticación');
 
-    const response = await fetch('http://localhost:8080/api/auth/actualizar-password', {
+    const response = await fetch('http://https://impulsedata.onrender.com/api/auth/actualizar-password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -689,7 +689,7 @@ const actualizarPerfil = async () => {
     
     // Actualizar datos en el backend para asegurar sincronización
     console.log('Actualizando perfil en el backend...');
-    const response = await fetch('http://localhost:8080/api/usuarios/actualizar-nombre', {
+    const response = await fetch('http://https://impulsedata.onrender.com/api/usuarios/actualizar-nombre', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
