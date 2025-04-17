@@ -111,7 +111,7 @@ class AuthService {
       console.log("Iniciando proceso de login con credenciales:", credentials.email || credentials.identificador);
       
       // Verificar si tenemos credenciales válidas
-      const identifier = credentials.email || credentials.identificador;
+      const identifier = credentials.email || credentials.identificador || credentials.nombreUsuario;
       if (!identifier) {
         throw new Error('No se proporcionó un email o identificador de usuario válido');
       }
@@ -174,10 +174,21 @@ class AuthService {
           }
         };
         
-        const response = await authAxios.post('/login', {
-          identificador: identifier,
+        // Preparar los datos según el tipo de identificador
+        const loginData = {
           password: credentials.password
-        }, loginConfig);
+        };
+        
+        // Si el identificador es un email, usar 'email', de lo contrario usar 'nombreUsuario'
+        if (identifier.includes('@')) {
+          loginData.email = identifier;
+        } else {
+          loginData.nombreUsuario = identifier;
+        }
+        
+        console.log("Enviando solicitud con datos:", JSON.stringify(loginData));
+        
+        const response = await authAxios.post('/login', loginData, loginConfig);
         
         if (response && response.data) {
           // Verificar que la respuesta es un token JWT válido

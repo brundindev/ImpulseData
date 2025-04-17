@@ -185,6 +185,8 @@ const login = async () => {
     // Intentar inicio de sesión en el backend
     await AuthService.login({
       identificador: identificador.value,
+      nombreUsuario: identificador.value,
+      email: isEmail ? identificador.value : undefined,
       password: password.value
     });
     
