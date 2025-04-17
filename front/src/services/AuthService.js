@@ -7,15 +7,18 @@ import FirestoreService from './FirestoreService';
 // Configuración de base URL para todas las peticiones
 // Si el backend está en un puerto distinto al frontend, hay que especificar la URL completa
 const API_URL = 'https://impulsedata.onrender.com/api/auth';
+// URL con proxy para evitar problemas de CORS
+const PROXY_URL = 'https://corsproxy.io/?';
+const API_URL_WITH_PROXY = `${PROXY_URL}${encodeURIComponent(API_URL)}`;
 
 // Crear una instancia personalizada de axios para el servicio de autenticación
 // para no afectar a otras partes de la aplicación
 const authAxios = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL_WITH_PROXY,
   withCredentials: false, // Cambiar a false para evitar problemas de CORS
   headers: {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*'
+    'X-Requested-With': 'XMLHttpRequest'
   }
 });
 
@@ -130,7 +133,7 @@ class AuthService {
       }
       
       // Usar la instancia personalizada de axios para el login
-      console.log("Enviando solicitud de login al backend:", `${API_URL}/login`);
+      console.log("Enviando solicitud de login al backend:", `${API_URL_WITH_PROXY}/login`);
       
       // Configuración específica para esta solicitud para manejar CORS
       const loginConfig = {
@@ -273,11 +276,11 @@ class AuthService {
         }
       }
       
-      console.log("Enviando solicitud de registro al backend:", `${API_URL}/registro`);
+      console.log("Enviando solicitud de registro al backend:", `${API_URL_WITH_PROXY}/registro`);
       
       // Primero registramos en Firebase (esto ya debería estar manejado en RegisterView)
       // Y luego registramos en el backend
-      const response = await axios.post(`${API_URL}/registro`, user);
+      const response = await axios.post(`${API_URL_WITH_PROXY}/registro`, user);
       
       console.log("Respuesta del backend:", response.status, response.statusText);
       

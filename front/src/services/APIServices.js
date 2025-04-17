@@ -1,12 +1,15 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://impulsedata.onrender.com';
+// URL con proxy para evitar problemas de CORS
+const PROXY_URL = 'https://corsproxy.io/?';
+const API_URL_WITH_PROXY = `${PROXY_URL}${encodeURIComponent(API_URL)}`;
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL_WITH_PROXY,
   headers: {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*'
+    'X-Requested-With': 'XMLHttpRequest'
   },
   withCredentials: false // Cambiar a false para evitar problemas de CORS
 });
