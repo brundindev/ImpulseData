@@ -290,7 +290,7 @@ const loginWithGoogle = async () => {
         if (!user.emailVerified) {
           // Forzar marcado como verificado en el backend
           const verificationResponse = await axios.get(
-            `http://https://impulsedata.onrender.com/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`
+            `https://impulsedata.onrender.com/api/auth/forzar-verificacion?email=${encodeURIComponent(user.email)}`
           );
           console.log("Verificación de email forzada exitosamente:", verificationResponse.data);
           
@@ -441,7 +441,7 @@ const reenviarVerificacion = async () => {
       
       // Si falla Firebase, llamamos al backend
       const response = await axios.get(
-        `http://https://impulsedata.onrender.com/api/auth/enviar-verificacion?email=${encodeURIComponent(identificador.value)}`
+        `https://impulsedata.onrender.com/api/auth/enviar-verificacion?email=${encodeURIComponent(identificador.value)}`
       );
       
       error.value = 'Se ha enviado un nuevo correo de verificación a tu dirección de email.';

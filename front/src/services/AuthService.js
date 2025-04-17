@@ -221,158 +221,151 @@ class AuthService {
         }
       }
       
-      // Usar la instancia personalizada de axios para el login
-      console.log("Enviando solicitud de login al backend a través de proxy:", `${API_URL_WITH_PROXY}/login`);
+      let firebaseUser = null;
+      let token = null;
+      let backendLoginSuccessful = false;
       
-      // Configuración específica para esta solicitud
-      const loginConfig = {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      };
-      
-      let response;
-      let backendError = null;
-      
+      // ---- PASO 1: AUTENTICAR CON FIREBASE ----
       try {
-        // Intentar con el proxy primero
-        response = await authAxios.post('/login', {
+        // Primero autenticamos con Firebase
+        if (isGoogleAuth) {
+          // Para usuarios Google, ya deberían estar autenticados en Firebase
+          firebaseUser = auth.currentUser;
+          if (!firebaseUser) {
+            console.warn("Usuario Google no está autenticado en Firebase");
+          }
+        } else if (identifier.includes('@')) {
+          // Solo intentar login Firebase con email
+          try {
+            firebaseUser = await FirebaseAuthService.login(identifier, credentials.password);
+            console.log("Usuario autenticado en Firebase:", firebaseUser.email);
+          } catch (firebaseLoginError) {
+            console.warn("Error en login con Firebase:", firebaseLoginError);
+            // No interrumpir el flujo si Firebase falla
+          }
+        }
+      } catch (firebaseError) {
+        console.warn("Error al autenticar con Firebase:", firebaseError);
+        // Continuar con backend aunque Firebase falle
+      }
+      
+      // ---- PASO 2: INTENTAR AUTENTICACIÓN EN BACKEND ----
+      try {
+        // Intentar con proxy
+        console.log("Enviando solicitud de login al backend a través de proxy:", `${API_URL_WITH_PROXY}/login`);
+        
+        // Configuración específica para esta solicitud
+        const loginConfig = {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        };
+        
+        const response = await authAxios.post('/login', {
           identificador: identifier,
           password: credentials.password
         }, loginConfig);
-      } catch (proxyError) {
-        console.error("Error al login con proxy, intentando directamente:", proxyError.message);
-        backendError = proxyError;
         
-        try {
-          // Crear una instancia directa como fallback
-          const directAxios = axios.create({
-            baseURL: API_URL,
-            timeout: 15000,
-            headers: { 'Content-Type': 'application/json' }
-          });
+        if (response && response.data) {
+          // Verificar que la respuesta es un token JWT válido
+          if (typeof response.data === 'string' && response.data.includes('.')) {
+            console.log("Backend devolvió un token JWT válido");
+            token = response.data;
+            backendLoginSuccessful = true;
+          } else {
+            console.warn("Respuesta del backend no es un token JWT válido:", response.data);
+          }
+        }
+      } catch (backendError) {
+        console.warn("Error al autenticar con backend:", backendError.message);
+        // Si backend falla, continuamos con Firebase
+      }
+      
+      // ---- PASO 3: USAR FIREBASE COMO ALTERNATIVA SI BACKEND FALLA ----
+      if (!backendLoginSuccessful) {
+        console.log("Login backend falló, usando Firebase como alternativa");
+        
+        // Si no tenemos usuario Firebase y no es login de Google, reintentamos login Firebase
+        if (!firebaseUser && !isGoogleAuth && identifier.includes('@')) {
+          try {
+            console.log("Reintentando autenticación con Firebase");
+            firebaseUser = await FirebaseAuthService.login(identifier, credentials.password);
+          } catch (fbRetryError) {
+            console.error("Error en reintento con Firebase:", fbRetryError);
+            throw new Error('Credenciales incorrectas. Por favor, verifica tu usuario y contraseña.');
+          }
+        }
+        
+        // Si tenemos usuario Firebase, generamos un token local
+        if (firebaseUser) {
+          // Generar un token local para mantener la sesión aunque el backend falle
+          const userToken = await firebaseUser.getIdToken();
+          token = userToken;
           
-          response = await directAxios.post('/login', {
-            identificador: identifier,
-            password: credentials.password
-          });
-        } catch (directError) {
-          console.error("Error al login directo:", directError.message);
+          // Crear un objeto con los datos del usuario
+          const userData = {
+            id: firebaseUser.uid,
+            email: firebaseUser.email,
+            nombre: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+            emailVerificado: firebaseUser.emailVerified
+          };
           
-          // Verificar si el error es por credenciales incorrectas o por CORS
-          if (directError.response && directError.response.status === 401) {
-            throw new Error('Credenciales incorrectas. Verifica tu usuario y contraseña.');
+          // Almacenar datos de usuario
+          localStorage.setItem('userData', JSON.stringify(userData));
+          console.log("Usando Firebase como alternativa, datos de usuario guardados:", userData);
+        } else if (isGoogleAuth) {
+          // Para usuarios Google, podemos intentar recuperar los datos
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          if (userData && userData.email) {
+            console.log("Usando datos de Google almacenados:", userData);
           } else {
-            // Preparar un mensaje de error claro para el usuario
-            const errorMsg = 'Error de conexión con el servidor. El servicio podría estar temporalmente no disponible o existe un problema de configuración CORS.';
-            console.error(errorMsg, {
-              originalError: backendError?.message,
-              directError: directError.message,
-              status: directError.response?.status,
-              data: directError.response?.data
-            });
-            throw new Error(errorMsg);
+            throw new Error('No se pudo autenticar con Google. Por favor, inténtalo nuevamente.');
           }
+        } else {
+          throw new Error('No se pudo autenticar. Verifica tus credenciales o inténtalo más tarde.');
         }
       }
       
-      if (!response || !response.data) {
-        throw new Error('No se recibió respuesta del servidor');
-      }
-      
-      // Verificar que la respuesta es un token JWT válido (debe contener al menos dos puntos '.')
-      if (typeof response.data !== 'string' || !response.data.includes('.')) {
-        console.error('Respuesta recibida no es un token JWT válido:', response.data);
+      // Guardar el token, ya sea del backend o de Firebase
+      if (token) {
+        localStorage.setItem('authToken', token);
+        console.log("Token guardado correctamente");
         
-        // Si recibimos un objeto de error en lugar de un token
-        if (typeof response.data === 'object' && response.data.status === 401) {
-          throw new Error('Credenciales incorrectas. Verifica tu usuario y contraseña.');
-        } else {
-          // Mostrar un mensaje amigable para el usuario, pero loguear los detalles técnicos
-          throw new Error('Error de autenticación. El servidor no devolvió un token válido.');
+        // Si fue token del backend, extraer datos del usuario
+        if (backendLoginSuccessful) {
+          this.storeUserDataFromToken(token);
         }
-      }
-      
-      // Guardar el token JWT y los datos de usuario
-      localStorage.setItem('authToken', response.data);
-      const userData = this.storeUserDataFromToken(response.data);
-      
-      // Para usuarios de Google, verificar si ya están autenticados con Firebase
-      const currentUser = auth.currentUser;
-      
-      if (isGoogleAuth) {
-        if (currentUser) {
-          // Si ya hay sesión de Firebase, verificar si es el mismo usuario
-          const userEmail = credentials.email || credentials.identificador;
-          if (currentUser.email === userEmail) {
-            console.log("Ya existe sesión en Firebase con el mismo usuario:", currentUser.email);
-          } else {
-            console.log("Existe sesión en Firebase pero con un usuario diferente. Actualizando...");
-            // Cerrar sesión primero y luego iniciar con el nuevo usuario
-            try {
-              await signOut(auth);
-              // No iniciamos sesión automáticamente, se manejará en el siguiente paso
-            } catch (signOutError) {
-              console.warn("Error al cerrar sesión previa:", signOutError);
-            }
-          }
-        } else {
-          console.log("No hay sesión activa en Firebase para el usuario de Google");
-        }
-      } else if (!isGoogleAuth && !currentUser) {
-        // Para usuarios normales, intentar recuperar email del token para Firebase
-        try {
-          // Si el identificador es un email, usarlo directamente
-          if (identifier.includes('@')) {
-            console.log("Iniciando sesión en Firebase con email:", identifier);
-            try {
-              const firebaseUser = await FirebaseAuthService.login(identifier, credentials.password);
-              console.log("Usuario autenticado en Firebase:", firebaseUser.email);
-            } catch (firebaseError) {
-              console.warn("Error al iniciar sesión en Firebase con email:", firebaseError);
-            }
-          } else if (userData && userData.email && userData.email.includes('@')) {
-            // Si el identificador NO es email pero obtuvimos email del token, usarlo para Firebase
-            console.log("Iniciando sesión en Firebase con email del token:", userData.email);
-            try {
-              const firebaseUser = await FirebaseAuthService.login(userData.email, credentials.password);
-              console.log("Usuario autenticado en Firebase con email del token:", firebaseUser.email);
-            } catch (firebaseError) {
-              console.warn("Error al iniciar sesión en Firebase con email del token:", firebaseError);
-              // No interrumpimos el flujo si Firebase falla
-            }
-          } else {
-            console.log("No se pudo iniciar sesión en Firebase: no hay email disponible");
-          }
-        } catch (firebaseLoginError) {
-          console.warn("Error al intentar login en Firebase:", firebaseLoginError);
-          // No interrumpimos el flujo principal si Firebase falla
-        }
-      } else if (currentUser) {
-        console.log("Ya existe sesión en Firebase:", currentUser.email);
-      }
-      
-      // Crear la empresa por defecto si no existe
-      try {
-        // Esperar un poco para asegurar que Firebase esté listo
-        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        if (auth.currentUser) {
-          console.log("🏢 Verificando/creando empresa por defecto después del login...");
-          await FirestoreService.crearEmpresaPorDefecto();
-        } else {
-          console.warn("No se pudo crear empresa por defecto: no hay usuario autenticado en Firebase");
+        // Para usuarios de Google, verificar si ya están autenticados con Firebase
+        const currentUser = auth.currentUser;
+        
+        if (isGoogleAuth) {
+          if (currentUser) {
+            console.log("Ya existe sesión en Firebase con Google:", currentUser.email);
+          } else {
+            console.log("No hay sesión activa en Firebase para el usuario de Google");
+          }
         }
-      } catch (empresaError) {
-        console.error("Error al intentar crear empresa por defecto durante login:", empresaError);
-        // No interrumpimos el flujo principal
+        
+        // Crear la empresa por defecto si no existe (solo si tenemos usuario Firebase)
+        if (firebaseUser || currentUser) {
+          try {
+            console.log("🏢 Verificando/creando empresa por defecto después del login...");
+            await FirestoreService.crearEmpresaPorDefecto();
+          } catch (empresaError) {
+            console.error("Error al intentar crear empresa por defecto:", empresaError);
+            // No interrumpimos el flujo principal
+          }
+        }
+        
+        // Disparar evento para actualizar la interfaz
+        window.dispatchEvent(new CustomEvent('auth-state-changed'));
+        
+        return token;
+      } else {
+        throw new Error('No se pudo obtener un token de autenticación válido');
       }
-      
-      // Disparar evento para actualizar la interfaz
-      window.dispatchEvent(new CustomEvent('auth-state-changed'));
-      
-      return response.data;
     } catch (error) {
       console.error("Error en proceso de login:", error);
       
