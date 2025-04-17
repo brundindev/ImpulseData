@@ -54,6 +54,25 @@
           <button @click="showFormModal = true; modoEdicion = false;" class="btn btn-primary btn-create">
             <span class="icon">+</span> Crear empresa
           </button>
+          <button 
+            type="button" 
+            class="apple-btn apple-btn-secondary"
+            @click="$refs.fileInput.click()"
+            :disabled="importando"
+          >
+            <span v-if="importando">Importando...</span>
+            <span v-else>Importar Empresas</span>
+          </button>
+          <input 
+            type="file" 
+            ref="fileInput" 
+            style="display: none" 
+            accept=".csv,.json"
+            @change="importarArchivo"
+          >
+          <div v-if="errorImportacion" class="error-message">
+            {{ errorImportacion }}
+          </div>
         </div>
       </div>
       
@@ -797,6 +816,7 @@ import PDFService from '../services/PDFService';
 import logoUrl from '../assets/img/impulsedata_logo.png';
 import impulsaAlicanteLogo from '../assets/img/impulsaalicante.png';
 import ayuntamientoLogo from '../assets/img/ayuntamiento-alicante.jpg';
+import FileImportService from '../services/FileImportService';
 
 const router = useRouter();
 const auth = getAuth();
@@ -854,6 +874,10 @@ const nuevaEmpresa = reactive({
     }
   ]
 });
+
+// Agregar después de las variables reactivas existentes
+const importando = ref(false);
+const errorImportacion = ref('');
 
 onMounted(() => {
   // Verificar estado de autenticación
@@ -2300,6 +2324,48 @@ watch(() => nuevaEmpresa.formaciones.length, (newLength) => {
 
 // Estado de autenticación
 const isAdmin = ref(true); // Temporalmente true para ver el debugger
+
+// Agregar después de las funciones existentes
+const importarArchivo = async (event) => {
+  try {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    importando.value = true;
+    errorImportacion.value = '';
+
+    let empresas;
+    if (file.name.endsWith('.csv')) {
+      empresas = await FileImportService.importFromCSV(file);
+    } else if (file.name.endsWith('.json')) {
+      empresas = await FileImportService.importFromJSON(file);
+    } else {
+      throw new Error('Formato de archivo no soportado. Use CSV o JSON.');
+    }
+
+    if (empresas.length === 0) {
+      throw new Error('No se encontraron empresas válidas en el archivo.');
+    }
+
+    const empresasGuardadas = await FileImportService.guardarEmpresasImportadas(empresas);
+    
+    if (empresasGuardadas.length > 0) {
+      // Recargar datos
+      await cargarDatos();
+      // Mostrar mensaje de éxito
+      alert(`Se importaron ${empresasGuardadas.length} empresas correctamente.`);
+    } else {
+      throw new Error('No se pudo guardar ninguna empresa.');
+    }
+  } catch (error) {
+    console.error('Error al importar archivo:', error);
+    errorImportacion.value = error.message;
+  } finally {
+    importando.value = false;
+    // Limpiar el input de archivo
+    event.target.value = '';
+  }
+};
 </script>
 
 <style src="../assets/Home.css"></style>
