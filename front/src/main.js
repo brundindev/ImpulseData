@@ -3,98 +3,94 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
-import { waitForAuthInit } from './firebase'
 import VueApexCharts from 'vue-apexcharts'
+import { waitForAuthInit } from './firebase'
 import './styles.css'
 
 Vue.config.productionTip = false
 
-// Registrar ApexCharts
-Vue.use(VueApexCharts)
+// Registrar componente VueApexCharts
 Vue.component('apexchart', VueApexCharts)
 
-// Variables para control de errores CORS
+// Contador para errores CORS relacionados con Firestore
 let firestoreCorsErrors = 0;
 const MAX_CORS_ERRORS = 5;
-const originalFetch = window.fetch;
+
+// Guardar referencia al console.error original
 const originalConsoleError = console.error;
 
-// Interceptar errores de consola para suprimir mensajes específicos de CORS y autenticación
-console.error = (...args) => {
-  const errorMessage = args.length > 0 ? String(args[0]) : '';
+// Sobreescribir console.error para capturar y suprimir errores específicos de CORS y Firebase
+console.error = function(...args) {
+  const errorMessage = args.join(' ');
   
-  // Suprimir errores conocidos de CORS y Firebase
-  if (
-    errorMessage.includes('Failed to fetch') || 
-    errorMessage.includes('NetworkError') ||
-    errorMessage.includes('CORS policy') || 
-    errorMessage.includes('Cross-Origin Request Blocked') ||
-    errorMessage.includes('access control checks') ||
-    errorMessage.includes('Error: Quota exceeded') ||
-    errorMessage.includes('FirebaseError') ||
-    errorMessage.includes('Access to fetch has been blocked') ||
-    errorMessage.includes('Error: aborted due to')
-  ) {
-    // Incrementar contador para errores relacionados con Firestore
-    if (
-      errorMessage.includes('firestore.googleapis.com') || 
-      errorMessage.includes('Listen/channel') ||
-      errorMessage.includes('google.firestore')
-    ) {
-      firestoreCorsErrors++;
-      console.warn(`[Suprimido] Error CORS de Firestore (${firestoreCorsErrors}/${MAX_CORS_ERRORS}): ${errorMessage.substring(0, 100)}...`);
-    } else {
-      console.warn(`[Suprimido] Error similar a CORS: ${errorMessage.substring(0, 100)}...`);
+  // Verificar si es un error CORS relacionado con Firestore
+  if (errorMessage.includes('Cross-Origin') && errorMessage.includes('Firestore')) {
+    firestoreCorsErrors++;
+    console.warn(`Error CORS de Firestore suprimido (${firestoreCorsErrors}/${MAX_CORS_ERRORS})`);
+    
+    // Si excedemos el máximo, mostrar mensaje de advertencia una sola vez
+    if (firestoreCorsErrors === MAX_CORS_ERRORS) {
+      console.warn('Alcanzado número máximo de errores CORS. Se activará modo fallback para solicitudes Firestore.');
     }
     return;
   }
   
-  // Pasar al manejador original para otros errores
+  // Suprimir otros errores comunes de Firebase que no afectan la funcionalidad
+  if (errorMessage.includes('Firebase') && 
+      (errorMessage.includes('timeout') || 
+       errorMessage.includes('network error') || 
+       errorMessage.includes('quota exceeded'))) {
+    console.warn('Error de Firebase suprimido:', errorMessage.substring(0, 100) + '...');
+    return;
+  }
+  
+  // Para todos los demás errores, usar el comportamiento original
   originalConsoleError.apply(console, args);
 };
 
-// Sobrescribir el método fetch para capturar errores CORS específicos de Firestore
-window.fetch = async function(...args) {
-  // Verificar si es una solicitud a Firestore
-  const isFirestoreRequest = args.length > 0 && 
-    typeof args[0] === 'string' && 
-    (args[0].includes('firestore.googleapis.com') || args[0].includes('google.firestore'));
+// Guardar referencia al fetch original
+const originalFetch = window.fetch;
 
-  try {
-    // Intentar la solicitud original
-    return await originalFetch.apply(this, args);
-  } catch (error) {
-    // Si es un error de Firestore y hemos alcanzado el umbral, simular respuesta exitosa
-    if (isFirestoreRequest && firestoreCorsErrors >= MAX_CORS_ERRORS) {
-      console.warn(`[Recuperación] Simulando respuesta exitosa para solicitud Firestore debido a errores CORS recurrentes`);
-      
-      // Simular una respuesta vacía exitosa para evitar que la UI se rompa
-      return new Response(JSON.stringify({ documents: [] }), { 
-        status: 200, 
-        headers: new Headers({ 'Content-Type': 'application/json' })
-      });
-    }
+// Sobreescribir fetch para manejar solicitudes a Firestore cuando hay errores CORS
+window.fetch = function(...args) {
+  const url = args[0].url || args[0];
+  
+  // Si es una solicitud a Firestore y hemos alcanzado el máximo de errores CORS
+  if (typeof url === 'string' && 
+      url.includes('firestore.googleapis.com') && 
+      firestoreCorsErrors >= MAX_CORS_ERRORS) {
     
-    // De lo contrario, propagar el error
-    throw error;
+    console.warn('Interceptando solicitud a Firestore en modo fallback');
+    
+    // Simular una respuesta exitosa vacía
+    return Promise.resolve(new Response(JSON.stringify({ documents: [] }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    }));
   }
+  
+  // Para todas las demás solicitudes, usar el comportamiento original
+  return originalFetch.apply(window, args);
 };
 
-// Esperar a que Firebase Auth esté inicializado antes de montar la aplicación
-waitForAuthInit().then(() => {
+// Iniciar la aplicación después de que Firebase Auth esté inicializado
+async function initApp() {
+  try {
+    // Esperar a que Firebase Auth se inicialice
+    await waitForAuthInit();
+    console.log('Firebase Auth inicializado correctamente');
+  } catch (error) {
+    console.warn('Error al inicializar Firebase Auth, continuando de todos modos:', error);
+  }
+  
+  // Iniciar la aplicación Vue
   new Vue({
     router,
     store,
     vuetify,
     render: h => h(App)
   }).$mount('#app');
-}).catch(error => {
-  console.error('Error al inicializar Firebase Auth:', error);
-  // Iniciar la aplicación de todos modos si hay un error
-  new Vue({
-    router,
-    store,
-    vuetify,
-    render: h => h(App)
-  }).$mount('#app');
-});
+}
+
+// Iniciar la aplicación
+initApp();

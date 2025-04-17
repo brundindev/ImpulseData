@@ -6,6 +6,7 @@ import AuthService from './services/AuthService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import FirebaseAuthService from './services/FirebaseAuthService';
 import ChatbotAssistant from './components/ChatbotAssistant.vue';
+import { auth as firebaseAuth, toggleNetworkMode } from './firebase';
 
 const router = useRouter();
 const auth = getAuth();
@@ -234,13 +235,26 @@ onMounted(async () => {
     await actualizarEstadoUsuario();
   });
   
+  // Configurar eventos para detectar cambios en la conexión
+  window.addEventListener('online', () => {
+    isOnline.value = true;
+    showConnectionMessage.value = true;
+  });
+  
+  window.addEventListener('offline', () => {
+    isOnline.value = false;
+    showConnectionMessage.value = true;
+  });
+  
   // Inicializar estado del usuario
   await actualizarEstadoUsuario();
 });
 
 onUnmounted(() => {
-  // Limpiar event listener cuando el componente se desmonta
+  // Limpiar event listeners cuando el componente se desmonta
   window.removeEventListener('auth-state-changed', actualizarEstadoUsuario);
+  window.removeEventListener('online', () => { isOnline.value = true; });
+  window.removeEventListener('offline', () => { isOnline.value = false; });
 });
 
 // Logout function
@@ -308,6 +322,19 @@ const mostrarChatbot = computed(() => {
   return usuario.value && !rutasPublicas.includes(rutaActual);
 });
 
+const isOnline = ref(navigator.onLine);
+const showConnectionMessage = ref(false);
+
+const toggleNetwork = async () => {
+  try {
+    const newStatus = await toggleNetworkMode();
+    isOnline.value = newStatus;
+    showConnectionMessage.value = true;
+  } catch (error) {
+    console.error('Error al cambiar el modo de red:', error);
+  }
+};
+
 </script>
 
 <template>
@@ -320,6 +347,11 @@ const mostrarChatbot = computed(() => {
       <nav class="main-nav">
         <template v-if="usuario">
           <RouterLink to="/home" class="nav-link">Inicio</RouterLink>
+          <!-- Botón de estado de conexión -->
+          <button @click="toggleNetwork" class="connection-status-button" :class="{ 'online': isOnline, 'offline': !isOnline }">
+            <v-icon v-if="isOnline">mdi-wifi</v-icon>
+            <v-icon v-else>mdi-wifi-off</v-icon>
+          </button>
           <div class="user-dropdown">
             <div class="dropdown-toggle">
               <div class="user-profile-container">
@@ -373,6 +405,24 @@ const mostrarChatbot = computed(() => {
     <RouterView />
     <ChatbotAssistant v-if="mostrarChatbot" />
   </main>
+
+  <!-- Mensaje de estado de conexión -->
+  <v-snackbar
+    v-model="showConnectionMessage"
+    :color="isOnline ? 'success' : 'warning'"
+    top
+    :timeout="3000"
+  >
+    {{ isOnline ? 'Conectado al servidor' : 'Trabajando en modo fuera de línea' }}
+    <template v-slot:actions>
+      <v-btn
+        text
+        @click="showConnectionMessage = false"
+      >
+        Cerrar
+      </v-btn>
+    </template>
+  </v-snackbar>
 </template>
 
 <style src="./assets/App.css">
@@ -418,5 +468,34 @@ body, html {
   padding: 0;
   height: 100%;
   overflow: hidden !important;
+}
+
+/* Estilos para el botón de estado de conexión */
+.connection-status-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  margin-right: 15px;
+  transition: all 0.3s ease;
+}
+
+.connection-status-button.online {
+  background-color: #4caf50;
+  color: white;
+}
+
+.connection-status-button.offline {
+  background-color: #f44336;
+  color: white;
+}
+
+.connection-status-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 </style>
