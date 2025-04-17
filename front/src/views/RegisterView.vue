@@ -241,116 +241,126 @@ const register = async () => {
   try {
     loading.value = true;
     error.value = '';
+    let firebaseRegistroExitoso = false;
     
     // 1. Crear usuario en Firebase
     try {
       guardandoEnFirebase.value = true;
       // Primero intentamos registrar al usuario con Firebase
-      await FirebaseAuthService.register(email.value, password.value, nombreUsuario.value);
+      const user = await FirebaseAuthService.register(email.value, password.value, nombreUsuario.value);
       guardandoEnFirebase.value = false;
       
-      // 2. Crear usuario en el backend
-      guardandoEnBackend.value = true;
-      try {
-      await AuthService.register({
-        nombreUsuario: nombreUsuario.value,
-        email: email.value,
-        password: password.value
-      });
-        
-      guardandoEnBackend.value = false;
+      // Si llegamos aquí, el registro en Firebase fue exitoso
+      firebaseRegistroExitoso = true;
+      console.log("✅ Registro en Firebase exitoso:", user.email);
       
       // Guardar el email para posible reenvío de verificación
       emailRegistrado.value = email.value;
       
-      // Mostrar mensaje de éxito y pedir verificación
-      registroExitoso.value = true;
-    } catch (backendError) {
-      guardandoEnBackend.value = false;
-      console.error("Error en registro de backend:", backendError);
-      throw backendError; // Relanzar para que sea capturado por el catch externo
-    }
-  } catch (firebaseError) {
-    console.error('Error al registrar con Firebase:', firebaseError);
-    guardandoEnFirebase.value = false;
-    
-    // Si el email ya existe, mostramos un error específico
-    if (firebaseError.code === 'auth/email-already-in-use') {
-      error.value = 'Este correo electrónico ya está registrado. Si es tuyo, intenta iniciar sesión.';
-      loading.value = false;
-      return;
-    }
-    
-    // Si es otro error de Firebase pero no es de email existente, intentamos con el backend
-    guardandoEnBackend.value = true;
-    try {
-      await AuthService.register({
-        nombreUsuario: nombreUsuario.value,
-        email: email.value,
-        password: password.value
-      });
+      // 2. Crear usuario en el backend - Esto puede fallar pero no debe impedir mostrar éxito
+      guardandoEnBackend.value = true;
+      try {
+        await AuthService.register({
+          nombreUsuario: nombreUsuario.value,
+          email: email.value,
+          password: password.value
+        });
+        
+        guardandoEnBackend.value = false;
+        console.log("✅ Registro en Backend exitoso");
+      } catch (backendError) {
+        guardandoEnBackend.value = false;
+        console.warn("⚠️ Error en registro de backend pero continuamos porque Firebase fue exitoso:", backendError);
+        // No relanzamos el error para no interrumpir el flujo exitoso
+      }
       
-      guardandoEnBackend.value = false;
-      emailRegistrado.value = email.value;
+      // Mostrar mensaje de éxito si al menos Firebase fue exitoso
+      if (firebaseRegistroExitoso) {
+        registroExitoso.value = true;
+      }
+    } catch (firebaseError) {
+      console.error('❌ Error al registrar con Firebase:', firebaseError);
+      guardandoEnFirebase.value = false;
       
-      registroExitoso.value = true;
-    } catch (backendError) {
-      guardandoEnBackend.value = false;
-      console.error('Error al registrar con backend:', backendError);
+      // Si el email ya existe, mostramos un error específico
+      if (firebaseError.code === 'auth/email-already-in-use') {
+        error.value = 'Este correo electrónico ya está registrado. Si es tuyo, intenta iniciar sesión.';
+        loading.value = false;
+        return;
+      }
       
-      // Manejamos errores específicos del backend
-      if (backendError.response?.data && typeof backendError.response.data === 'string') {
-        if (backendError.response.data.includes('ya está registrado')) {
-          error.value = 'Este correo electrónico ya está registrado. Por favor, inicia sesión o usa otro email.';
-        } else if (backendError.response.data.includes('demasiados intentos')) {
-          error.value = 'Se han realizado demasiados intentos. Por favor, espera unos minutos e inténtalo de nuevo.';
+      // Si es otro error de Firebase pero no es de email existente, intentamos con el backend
+      guardandoEnBackend.value = true;
+      try {
+        const response = await AuthService.register({
+          nombreUsuario: nombreUsuario.value,
+          email: email.value,
+          password: password.value
+        });
+        
+        guardandoEnBackend.value = false;
+        emailRegistrado.value = email.value;
+        
+        // Si llegamos aquí, el registro en el backend fue exitoso aunque Firebase falló
+        registroExitoso.value = true;
+        console.log("✅ Registro exitoso en Backend aunque Firebase falló");
+      } catch (backendError) {
+        guardandoEnBackend.value = false;
+        console.error('❌ Error al registrar con backend:', backendError);
+        
+        // Manejamos errores específicos del backend
+        if (backendError.response?.data && typeof backendError.response.data === 'string') {
+          if (backendError.response.data.includes('ya está registrado')) {
+            error.value = 'Este correo electrónico ya está registrado. Por favor, inicia sesión o usa otro email.';
+          } else if (backendError.response.data.includes('demasiados intentos')) {
+            error.value = 'Se han realizado demasiados intentos. Por favor, espera unos minutos e inténtalo de nuevo.';
+          } else {
+            error.value = backendError.response.data;
+          }
         } else {
-          error.value = backendError.response.data;
+          error.value = 'Error al crear la cuenta. Por favor, inténtalo de nuevo más tarde.';
         }
-      } else {
-        error.value = 'Error al crear la cuenta. Por favor, inténtalo de nuevo más tarde.';
       }
     }
-  }
-} catch (err) {
-  console.error('Error general de registro:', err);
-  guardandoEnFirebase.value = false;
-  guardandoEnBackend.value = false;
-  
-  // Manejar mensajes de error específicos
-  if (err.response?.data && typeof err.response.data === 'string') {
-    // Si el mensaje contiene información sobre demasiados intentos
-    if (err.response.data.includes('demasiados intentos')) {
-      error.value = 'Se han realizado demasiados intentos de registro. Por favor, espera unos minutos antes de intentarlo nuevamente.';
-    } else if (err.response.data.includes('ya está registrado')) {
-      error.value = 'Este correo electrónico ya está registrado. Intenta iniciar sesión o usar otro email.';
+  } catch (err) {
+    console.error('❌ Error general de registro:', err);
+    guardandoEnFirebase.value = false;
+    guardandoEnBackend.value = false;
+    
+    // Manejar mensajes de error específicos
+    if (err.response?.data && typeof err.response.data === 'string') {
+      // Si el mensaje contiene información sobre demasiados intentos
+      if (err.response.data.includes('demasiados intentos')) {
+        error.value = 'Se han realizado demasiados intentos de registro. Por favor, espera unos minutos antes de intentarlo nuevamente.';
+      } else if (err.response.data.includes('ya está registrado')) {
+        error.value = 'Este correo electrónico ya está registrado. Intenta iniciar sesión o usar otro email.';
+      } else {
+        error.value = err.response.data;
+      }
+    } else if (err.code) {
+      // Errores específicos de Firebase
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          error.value = 'Este correo electrónico ya está en uso.';
+          break;
+        case 'auth/invalid-email':
+          error.value = 'El formato del correo electrónico no es válido.';
+          break;
+        case 'auth/weak-password':
+          error.value = 'La contraseña es demasiado débil. Utiliza al menos 6 caracteres.';
+          break;
+        case 'auth/too-many-requests':
+          error.value = 'Se han realizado demasiados intentos. Por favor, espera unos minutos antes de intentarlo nuevamente.';
+          break;
+        default:
+          error.value = 'Error al crear la cuenta. Inténtalo de nuevo más tarde.';
+      }
     } else {
-      error.value = err.response.data;
+      error.value = 'Error al crear la cuenta. Inténtalo de nuevo más tarde.';
     }
-  } else if (err.code) {
-    // Errores específicos de Firebase
-    switch (err.code) {
-      case 'auth/email-already-in-use':
-        error.value = 'Este correo electrónico ya está en uso.';
-        break;
-      case 'auth/invalid-email':
-        error.value = 'El formato del correo electrónico no es válido.';
-        break;
-      case 'auth/weak-password':
-        error.value = 'La contraseña es demasiado débil. Utiliza al menos 6 caracteres.';
-        break;
-      case 'auth/too-many-requests':
-        error.value = 'Se han realizado demasiados intentos. Por favor, espera unos minutos antes de intentarlo nuevamente.';
-        break;
-      default:
-        error.value = 'Error al crear la cuenta. Inténtalo de nuevo más tarde.';
-    }
-  } else {
-    error.value = 'Error al crear la cuenta. Inténtalo de nuevo más tarde.';
+  } finally {
+    loading.value = false;
   }
-} finally {
-  loading.value = false;
-}
 };
 
 const enviarVerificacion = async () => {

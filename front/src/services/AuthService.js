@@ -295,42 +295,75 @@ class AuthService {
    */
   async register(user) {
     try {
-      console.log("Datos de registro:", user.email, user.nombreUsuario);
+      console.log("Iniciando proceso de registro con datos:", user.email, user.nombreUsuario);
       
       // Primero intentar registrarse con Firebase
       let firebaseUser = null;
+      let firebaseRegistroExitoso = false;
       
       try {
         if (user.email && user.password) {
-          firebaseUser = await FirebaseAuthService.register(user.email, user.password);
-          console.log("Usuario registrado en Firebase:", firebaseUser.email);
+          firebaseUser = await FirebaseAuthService.register(user.email, user.password, user.nombreUsuario);
+          console.log("✅ Usuario registrado en Firebase:", firebaseUser.email);
+          firebaseRegistroExitoso = true;
         }
       } catch (firebaseError) {
-        console.warn("Error al registrar en Firebase:", firebaseError);
-        // Continuar con el registro en el backend
+        console.warn("⚠️ Error al registrar en Firebase:", firebaseError);
+        // No detenemos el flujo, continuamos con el registro en el backend
       }
       
       // Luego registrarse en el backend
-      console.log("Enviando solicitud de registro al backend:", `${API_URL}/registro`);
-      
-      // Registrarse en el backend
-      const response = await authAxios.post('/registro', {
-        nombreUsuario: user.nombreUsuario,
-        apellidos: user.apellidos || '',
-        email: user.email,
-        password: user.password,
-        confirmPassword: user.confirmPassword,
-        tipoEmpresa: user.tipoEmpresa
-      });
-      
-      if (response && response.data) {
-        console.log('Registro exitoso en el backend', response.data);
-        return response.data;
-      } else {
-        throw new Error('No se recibió respuesta del servidor');
+      try {
+        console.log("Enviando solicitud de registro al backend:", `${API_URL}/registro`);
+        
+        // Registrarse en el backend
+        const response = await authAxios.post('/registro', {
+          nombreUsuario: user.nombreUsuario,
+          apellidos: user.apellidos || '',
+          email: user.email,
+          password: user.password,
+          confirmPassword: user.confirmPassword,
+          tipoEmpresa: user.tipoEmpresa
+        });
+        
+        if (response && response.data) {
+          console.log('✅ Registro exitoso en el backend', response.data);
+          return response.data;
+        } else {
+          console.warn('⚠️ No se recibió respuesta del servidor');
+          
+          // Si el registro en Firebase fue exitoso, no consideramos esto un error fatal
+          if (firebaseRegistroExitoso) {
+            console.log("Firebase registro fue exitoso, devolviendo datos aún sin respuesta del backend");
+            return { 
+              email: user.email, 
+              nombreUsuario: user.nombreUsuario,
+              registroExitoso: true,
+              mensaje: "Registro completado pero el backend no respondió correctamente" 
+            };
+          }
+          
+          throw new Error('No se recibió respuesta del servidor');
+        }
+      } catch (backendError) {
+        console.error('❌ Error en el registro en el backend:', backendError.response?.data || backendError.message);
+        
+        // Si el registro en Firebase fue exitoso, no consideramos esto un error fatal
+        if (firebaseRegistroExitoso) {
+          console.log("Firebase registro fue exitoso, no propagamos el error del backend");
+          return { 
+            email: user.email, 
+            nombreUsuario: user.nombreUsuario,
+            registroExitoso: true,
+            mensaje: "Registro completado en Firebase pero hubo un error en el backend"
+          };
+        }
+        
+        // Si no tuvimos éxito en Firebase, entonces sí es un error crítico
+        throw backendError;
       }
     } catch (error) {
-      console.error('Error en el registro:', error.response?.data || error.message);
+      console.error('❌ Error general en el registro:', error.response?.data || error.message);
       throw error;
     }
   }
