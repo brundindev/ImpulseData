@@ -233,6 +233,7 @@ class AuthService {
       };
       
       let response;
+      let backendError = null;
       
       try {
         // Intentar con el proxy primero
@@ -242,28 +243,55 @@ class AuthService {
         }, loginConfig);
       } catch (proxyError) {
         console.error("Error al login con proxy, intentando directamente:", proxyError.message);
+        backendError = proxyError;
         
-        // Crear una instancia directa como fallback
-        const directAxios = axios.create({
-          baseURL: API_URL,
-          timeout: 15000,
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        response = await directAxios.post('/login', {
-          identificador: identifier,
-          password: credentials.password
-        });
+        try {
+          // Crear una instancia directa como fallback
+          const directAxios = axios.create({
+            baseURL: API_URL,
+            timeout: 15000,
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          response = await directAxios.post('/login', {
+            identificador: identifier,
+            password: credentials.password
+          });
+        } catch (directError) {
+          console.error("Error al login directo:", directError.message);
+          
+          // Verificar si el error es por credenciales incorrectas o por CORS
+          if (directError.response && directError.response.status === 401) {
+            throw new Error('Credenciales incorrectas. Verifica tu usuario y contraseña.');
+          } else {
+            // Preparar un mensaje de error claro para el usuario
+            const errorMsg = 'Error de conexión con el servidor. El servicio podría estar temporalmente no disponible o existe un problema de configuración CORS.';
+            console.error(errorMsg, {
+              originalError: backendError?.message,
+              directError: directError.message,
+              status: directError.response?.status,
+              data: directError.response?.data
+            });
+            throw new Error(errorMsg);
+          }
+        }
       }
       
       if (!response || !response.data) {
-        throw new Error('No se recibió token JWT del servidor');
+        throw new Error('No se recibió respuesta del servidor');
       }
       
       // Verificar que la respuesta es un token JWT válido (debe contener al menos dos puntos '.')
       if (typeof response.data !== 'string' || !response.data.includes('.')) {
         console.error('Respuesta recibida no es un token JWT válido:', response.data);
-        throw new Error('Formato de token JWT inválido');
+        
+        // Si recibimos un objeto de error en lugar de un token
+        if (typeof response.data === 'object' && response.data.status === 401) {
+          throw new Error('Credenciales incorrectas. Verifica tu usuario y contraseña.');
+        } else {
+          // Mostrar un mensaje amigable para el usuario, pero loguear los detalles técnicos
+          throw new Error('Error de autenticación. El servidor no devolvió un token válido.');
+        }
       }
       
       // Guardar el token JWT y los datos de usuario

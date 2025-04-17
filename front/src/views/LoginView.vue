@@ -212,6 +212,8 @@ const login = async () => {
       // El servidor respondió con un estado diferente de 2xx
       if (err.response.status === 401) {
         error.value = 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
+      } else if (err.response.status === 403) {
+        error.value = 'Error de acceso al servidor. El servicio podría estar temporalmente no disponible.';
       } else if (err.response.data && err.response.data.message) {
         error.value = err.response.data.message;
       } else {
@@ -221,16 +223,32 @@ const login = async () => {
       // La solicitud se realizó pero no se recibió respuesta
       error.value = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
     } else if (err.message) {
-      // Si es un error con mensaje personalizado (como los de Firebase)
-      error.value = err.message;
-      
-      // Manejar error específico de auth/missing-email
-      if (err.code === 'auth/missing-email') {
+      // Si es un error con mensaje personalizado (como los de Firebase o AuthService)
+      if (err.message.includes('CORS') || err.message.includes('conexión con el servidor')) {
+        error.value = 'El servidor no está respondiendo correctamente. Por favor, inténtalo más tarde o contacta con soporte técnico.';
+      } else if (err.message.includes('Credenciales incorrectas')) {
+        error.value = err.message;
+      } else if (err.message.includes('token')) {
+        error.value = 'Error de autenticación. Por favor, inténtalo más tarde.';
+      } else if (err.code === 'auth/missing-email') {
         error.value = 'Por favor, introduce un email válido para iniciar sesión.';
+      } else {
+        error.value = err.message;
       }
     } else {
       // Ocurrió un error al configurar la solicitud
       error.value = 'Error al procesar la solicitud. Por favor, inténtalo de nuevo.';
+    }
+    
+    // Disparar evento para ocultar loader global si estuviera visible
+    const event = new CustomEvent('hide-global-loader');
+    window.dispatchEvent(event);
+    
+    // Añadir una sugerencia si parece un problema técnico
+    if (error.value.includes('servidor') || error.value.includes('conexión') || error.value.includes('temporalmente')) {
+      console.log('Posible problema técnico detectado. Proporcionando sugerencias al usuario.');
+      // Mostrar en consola información para desarrolladores
+      console.info('Información para desarrolladores: Posible problema CORS o de configuración del servidor.');
     }
     
     // Garantizar que loading sea false para todos los errores
