@@ -3,13 +3,20 @@
     <div class="register-card">
       <h1>Regístrate</h1>
       <div v-if="error" class="alert alert-danger">{{ error }}</div>
+      
+      <!-- Debug info (quitar en producción) -->
+      <div v-if="debugMode" class="debug-info">
+        <p>Estado: {{ registroExitoso ? 'Registro Exitoso' : 'No Registrado' }}</p>
+        <p>Email: {{ emailRegistrado }}</p>
+      </div>
+      
       <div v-if="registroExitoso" class="alert alert-success">
         <div class="success-icon">
           <i class="checkmark">✓</i>
         </div>
         <h2>¡Registro exitoso!</h2>
         <p>Hemos enviado un correo de verificación a tu dirección de email.</p>
-        <p><strong>{{ emailRegistrado }}</strong></p>
+        <p><strong>{{ emailRegistrado || email }}</strong></p>
         <p>Por favor, verifica tu email antes de iniciar sesión.</p>
         <div v-if="!verificacionEnviada" class="verification-section">
           <p class="small-text">¿No has recibido el correo de verificación?</p>
@@ -173,7 +180,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import AuthService from '../services/AuthService';
@@ -196,6 +203,7 @@ const verificacionMensaje = ref('');
 const emailRegistrado = ref('');
 const guardandoEnBackend = ref(false);
 const guardandoEnFirebase = ref(false);
+const debugMode = ref(false); // Activar para depuración
 
 // Estados para controlar la visibilidad de las contraseñas
 const showPassword = ref(false);
@@ -276,7 +284,18 @@ const register = async () => {
       
       // Mostrar mensaje de éxito si al menos Firebase fue exitoso
       if (firebaseRegistroExitoso) {
+        console.log("✅✅ Estableciendo registroExitoso = true y emailRegistrado =", email.value);
+        emailRegistrado.value = email.value;
         registroExitoso.value = true;
+        
+        // Log del estado para verificar visibilidad
+        setTimeout(() => {
+          console.log("Estado después de registro exitoso:", {
+            registroExitoso: registroExitoso.value,
+            emailRegistrado: emailRegistrado.value,
+            error: error.value
+          });
+        }, 100);
       }
     } catch (firebaseError) {
       console.error('❌ Error al registrar con Firebase:', firebaseError);
@@ -376,71 +395,48 @@ const enviarVerificacion = async () => {
       return;
     }
     
-    // Primero intentamos usar Firebase directamente
+    console.log("Enviando verificación a:", emailToUse);
+    
+    // Opciones reales de verificación (sin necesidad de contraseña)
     try {
-      // Iniciar sesión con Firebase para obtener el usuario
-      const user = await FirebaseAuthService.login(emailToUse, password.value);
-      
-      // Enviar email de verificación
-      await FirebaseAuthService.sendVerificationEmail(user);
+      console.log("Intentando enviar verificación a través del backend");
+      const response = await axios.get(
+        `https://impulsedata.onrender.com/api/auth/enviar-verificacion?email=${encodeURIComponent(emailToUse)}`
+      );
       
       verificacionEnviada.value = true;
-      verificacionMensaje.value = 'Se ha enviado un correo de verificación. Por favor, revisa tu bandeja de entrada.';
+      verificacionMensaje.value = response.data || 'Se ha enviado un nuevo correo de verificación.';
+      console.log("Verificación enviada exitosamente:", verificacionMensaje.value);
+      return;
+    } catch (backendError) {
+      console.error('Error con backend:', backendError);
       
-    } catch (firebaseError) {
-      console.error('Error al usar Firebase directamente:', firebaseError);
-      
-      if (firebaseError.code === 'auth/wrong-password') {
-        error.value = 'La contraseña es incorrecta para este email.';
-        return;
-      }
-      
-      // Si falla Firebase, caemos al método del backend
+      // Intentar con Firebase como alternativa
       try {
-        const response = await axios.get(
-          `http://https://impulsedata.onrender.com/api/auth/enviar-verificacion?email=${encodeURIComponent(emailToUse)}`
-        );
+        console.log("Intentando enviar verificación con Firebase directamente");
+        // Intentar obtener el usuario actual de Firebase
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
         
-        verificacionEnviada.value = true;
-        verificacionMensaje.value = response.data || 'Se ha enviado un nuevo correo de verificación.';
-      } catch (backendError) {
-        console.error('Error con backend:', backendError);
-        
-        // Si también falla el backend, mostramos un mensaje de error claro
-        if (backendError.response?.data && typeof backendError.response.data === 'string') {
-          if (backendError.response.data.includes('demasiados intentos')) {
-            error.value = 'Se han realizado demasiados intentos de envío. Por favor, espera unos minutos e inténtalo de nuevo.';
-          } else if (backendError.response.data.includes('no se encontró')) {
-            error.value = 'No se encontró ningún usuario con este email en nuestro sistema.';
-          } else {
-            error.value = backendError.response.data;
-          }
+        if (currentUser && currentUser.email === emailToUse) {
+          await FirebaseAuthService.sendVerificationEmail(currentUser);
+          verificacionEnviada.value = true;
+          verificacionMensaje.value = 'Se ha enviado un correo de verificación. Por favor, revisa tu bandeja de entrada.';
+          console.log("Verificación enviada exitosamente con Firebase");
+          return;
         } else {
-          error.value = 'No se pudo enviar el correo de verificación. Por favor, inténtalo más tarde.';
+          console.warn("No se encontró usuario de Firebase para enviar verificación");
         }
+      } catch (firebaseError) {
+        console.error("Error al enviar verificación con Firebase:", firebaseError);
       }
+      
+      // Si ambos métodos fallan
+      error.value = 'No se pudo enviar el correo de verificación. Por favor, inténtalo más tarde.';
     }
   } catch (err) {
     console.error('Error al enviar verificación:', err);
-    
-    if (err.code) {
-      // Errores específicos de Firebase
-      switch (err.code) {
-        case 'auth/user-not-found':
-          error.value = 'No se encontró ningún usuario con este correo electrónico.';
-          break;
-        case 'auth/wrong-password':
-          error.value = 'La contraseña es incorrecta.';
-          break;
-        case 'auth/too-many-requests':
-          error.value = 'Se han realizado demasiados intentos. Por favor, espera unos minutos antes de intentarlo nuevamente.';
-          break;
-        default:
-          error.value = 'No se pudo enviar el correo de verificación.';
-      }
-    } else {
-      error.value = err.response?.data || 'No se pudo enviar el correo de verificación.';
-    }
+    error.value = 'No se pudo enviar el correo de verificación.';
   } finally {
     enviandoVerificacion.value = false;
   }
@@ -653,6 +649,20 @@ const registerWithGoogle = async () => {
     loading.value = false;
   }
 };
+
+// Verificar el estado del componente al montar
+onMounted(() => {
+  console.log("RegisterView montado, estado inicial:", {
+    registroExitoso: registroExitoso.value,
+    emailRegistrado: emailRegistrado.value
+  });
+  
+  // Si hay un parámetro en la URL para depuración
+  if (window.location.search.includes('debug=true')) {
+    debugMode.value = true;
+    console.log("Modo depuración activado");
+  }
+});
 </script>
 
 <style src="../assets/Register.css"></style>
