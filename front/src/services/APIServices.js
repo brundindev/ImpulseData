@@ -18,4 +18,6 @@ api.interceptors.request.use(config => {
   return config;
 });
 
+api.post('/api/auth/login', data)
+
 export default api;
