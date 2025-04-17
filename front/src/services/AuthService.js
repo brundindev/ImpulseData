@@ -8,28 +8,8 @@ import FirestoreService from './FirestoreService';
 // Si el backend está en un puerto distinto al frontend, hay que especificar la URL completa
 const API_URL = 'https://impulsedata.onrender.com/api/auth';
 
-// Configurar varios proxies CORS para intentar con diferentes alternativas
-const CORS_PROXIES = [
-  'https://cors-anywhere.herokuapp.com/',
-  'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.io/?'
-];
-
-// Comenzar con el primer proxy
-let currentProxyIndex = 0;
-let API_URL_WITH_PROXY = `${CORS_PROXIES[currentProxyIndex]}${encodeURIComponent(API_URL)}`;
-
-// Función para cambiar al siguiente proxy disponible
-const switchToNextProxy = () => {
-  currentProxyIndex = (currentProxyIndex + 1) % CORS_PROXIES.length;
-  API_URL_WITH_PROXY = `${CORS_PROXIES[currentProxyIndex]}${encodeURIComponent(API_URL)}`;
-  console.log(`Cambiando a proxy alternativo: ${CORS_PROXIES[currentProxyIndex]}`);
-  
-  // Actualizar la configuración de baseURL en authAxios
-  authAxios.defaults.baseURL = API_URL_WITH_PROXY;
-  
-  return API_URL_WITH_PROXY;
-};
+// Ya no necesitamos proxies CORS porque hemos configurado correctamente CORS en el backend
+const API_URL_WITH_PROXY = API_URL;
 
 // Crear una instancia personalizada de axios para el servicio de autenticación
 // para no afectar a otras partes de la aplicación
@@ -40,7 +20,7 @@ const authAxios = axios.create({
     'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest'
   },
-  withCredentials: false // Los proxies CORS no soportan credentials
+  withCredentials: true // Ahora podemos usar credentials ya que no usamos proxies
 });
 
 // Añadir interceptor para incluir el token en cada solicitud
@@ -95,7 +75,7 @@ axios.interceptors.response.use(
   }
 );
 
-// Interceptor para la instancia personalizada - silencia completamente errores 401
+// Interceptor para la instancia personalizada
 authAxios.interceptors.response.use(
   response => response,
   error => {
@@ -115,74 +95,6 @@ authAxios.interceptors.response.use(
     } else {
       // Para otros errores, mantener el comportamiento normal
       console.error('Error en respuesta HTTP:', error);
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Agregar un interceptor para manejar errores de CORS específicamente
-authAxios.interceptors.response.use(
-  response => response,
-  async error => {
-    // Verificar si es un error de CORS o preflight
-    if (error.message === 'Network Error' || 
-        (error.response && (error.response.status === 0 || error.response.status === 403))) {
-      console.error('Error de CORS detectado:', error.message);
-      
-      // Intentar con el siguiente proxy si hemos intentado menos de 3 veces
-      const maxRetries = 3;
-      const retryCount = error.config._retryCount || 0;
-      
-      if (retryCount < maxRetries) {
-        // Incrementar contador de reintentos
-        error.config._retryCount = retryCount + 1;
-        
-        // Cambiar al siguiente proxy
-        switchToNextProxy();
-        
-        console.log(`Reintentando solicitud con proxy alternativo (intento ${retryCount + 1}/${maxRetries})`);
-        
-        // Esperar un poco antes de reintentar para evitar saturación
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Actualizar la URL en la configuración de la solicitud
-        error.config.baseURL = API_URL_WITH_PROXY;
-        
-        // Eliminar cualquier encabezado Origin que pudiera estar causando problemas
-        if (error.config.headers && error.config.headers.Origin) {
-          delete error.config.headers.Origin;
-        }
-        
-        // Reintento con la nueva configuración
-        return authAxios(error.config);
-      } else {
-        console.error('Se han agotado todos los intentos con diferentes proxies CORS');
-        
-        // Como último recurso, intentar directamente sin proxy
-        if (!error.config._directAttempt) {
-          error.config._directAttempt = true;
-          console.log('Intentando comunicación directa sin proxy como último recurso');
-          
-          // Intentar comunicación directa con el backend
-          try {
-            // Crear una instancia temporal directa
-            const directAxios = axios.create({
-              baseURL: API_URL.replace('/api/auth', ''),
-              timeout: 15000,
-              headers: { 'Content-Type': 'application/json' }
-            });
-            
-            // Intentar la solicitud
-            return directAxios({
-              ...error.config,
-              baseURL: API_URL
-            });
-          } catch (directError) {
-            console.error('Falló el intento directo:', directError.message);
-            return Promise.reject(directError);
-          }
-        }
-      }
     }
     return Promise.reject(error);
   }
@@ -251,8 +163,8 @@ class AuthService {
       
       // ---- PASO 2: INTENTAR AUTENTICACIÓN EN BACKEND ----
       try {
-        // Intentar con proxy
-        console.log("Enviando solicitud de login al backend a través de proxy:", `${API_URL_WITH_PROXY}/login`);
+        // Intentar login directo con el backend
+        console.log("Enviando solicitud de login al backend:", `${API_URL}/login`);
         
         // Configuración específica para esta solicitud
         const loginConfig = {
@@ -383,97 +295,42 @@ class AuthService {
    */
   async register(user) {
     try {
-      console.log("Iniciando proceso de registro con datos:", user.email);
+      console.log("Datos de registro:", user.email, user.nombreUsuario);
       
-      // Detectar si estamos registrando una cuenta de Google
-      const isGoogleAuth = user.password && user.password.startsWith('google-auth-');
-      if (isGoogleAuth) {
-        console.log("Detectado registro para usuario de Google");
-        
-        // Almacenar el UID para posibles recuperaciones de sesión
-        const uid = user.password.replace('google-auth-', '');
-        if (uid) {
-          sessionStorage.setItem('firebaseUid', uid);
-          console.log("UID de Google almacenado para recuperación de sesión:", uid);
+      // Primero intentar registrarse con Firebase
+      let firebaseUser = null;
+      
+      try {
+        if (user.email && user.password) {
+          firebaseUser = await FirebaseAuthService.register(user.email, user.password);
+          console.log("Usuario registrado en Firebase:", firebaseUser.email);
         }
-        
-        // Para usuarios de Google, primero verificar si ya existe intentando login
-        try {
-          console.log("Verificando si el usuario de Google ya existe...");
-          const loginResponse = await this.login({
-            email: user.email,
-            password: user.password
-          });
-          
-          return loginResponse; // Retornar el token de login
-        } catch (loginError) {
-          console.log("Usuario de Google no existe, continuando con registro");
-          // Si el login falla, continuamos con el registro
-        }
+      } catch (firebaseError) {
+        console.warn("Error al registrar en Firebase:", firebaseError);
+        // Continuar con el registro en el backend
       }
       
-      console.log("Enviando solicitud de registro al backend a través de proxy:", `${API_URL_WITH_PROXY}/registro`);
+      // Luego registrarse en el backend
+      console.log("Enviando solicitud de registro al backend:", `${API_URL}/registro`);
       
-      // Primero registramos en Firebase (esto ya debería estar manejado en RegisterView)
-      // Y luego registramos en el backend
-      const response = await authAxios.post('/registro', user);
+      // Registrarse en el backend
+      const response = await authAxios.post('/registro', {
+        nombreUsuario: user.nombreUsuario,
+        apellidos: user.apellidos || '',
+        email: user.email,
+        password: user.password,
+        confirmPassword: user.confirmPassword,
+        tipoEmpresa: user.tipoEmpresa
+      });
       
-      console.log("Respuesta del backend:", response.status, response.statusText);
-      
-      if (response.data) {
-        // Para usuarios de Google, guardar el token JWT inmediatamente ya que no necesitan verificación
-        if (isGoogleAuth) {
-          console.log("Autenticando usuario de Google inmediatamente ya que están verificados");
-          localStorage.setItem('authToken', response.data);
-          this.storeUserDataFromToken(response.data);
-          
-          // Disparar evento para actualizar la interfaz
-          window.dispatchEvent(new CustomEvent('auth-state-changed'));
-        } else {
-          // NO guardar el token automáticamente en registro normal
-          // Lo guardaremos después de que el usuario verifique su email
-          console.log("Token JWT recibido pero no almacenado todavía (pendiente de verificación)");
-          
-          // Guardar temporalmente para recuperación
-          sessionStorage.setItem('tempAuthToken', response.data);
-        }
-        
-        console.log("Registro completado exitosamente");
+      if (response && response.data) {
+        console.log('Registro exitoso en el backend', response.data);
+        return response.data;
+      } else {
+        throw new Error('No se recibió respuesta del servidor');
       }
-      return response.data;
     } catch (error) {
-      console.error("ERROR COMPLETO DE REGISTRO:", error);
-      
-      // Manejo especial para usuarios de Google
-      if (user.password && user.password.startsWith('google-auth-')) {
-        console.error("Error detallado de registro con Google:", {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          message: error.message
-        });
-        
-        // Si el error es 401 o contiene mensajes de "ya existe", intentar login
-        if (error.response?.status === 401 || 
-            (error.response?.data && typeof error.response.data === 'string' && 
-             error.response.data.includes('ya existe'))) {
-          
-          console.log("Usuario parece ya existir, intentando login directo...");
-          try {
-            const loginResponse = await this.login({
-              email: user.email,
-              password: user.password
-            });
-            
-            console.log("Login exitoso después de error de registro");
-            return loginResponse;
-          } catch (loginError) {
-            console.error("Login también falló después de error de registro:", loginError);
-            throw error; // Relanzar el error original si login también falla
-          }
-        }
-      }
-      
+      console.error('Error en el registro:', error.response?.data || error.message);
       throw error;
     }
   }

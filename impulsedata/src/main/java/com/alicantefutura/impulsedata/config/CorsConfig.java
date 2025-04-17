@@ -1,5 +1,7 @@
 package com.alicantefutura.impulsedata.config;
 
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -14,9 +16,16 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("*") // Permitir cualquier origen
+                .allowedOrigins(
+                    "http://localhost:5173",
+                    "http://localhost",
+                    "http://localhost:80",
+                    "https://impulsedata.vercel.app",
+                    "https://impulsedata-git-main-reynalrodriguez.vercel.app",
+                    "https://impulsedata-reynalrodriguez.vercel.app"
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
-                .allowedHeaders("*") // Permitir todos los encabezados
+                .allowedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin")
                 .exposedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin")
                 .allowCredentials(true)
                 .maxAge(3600); // Tiempo de caché de preflight en segundos
@@ -27,15 +36,20 @@ public class CorsConfig implements WebMvcConfigurer {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Permitir todas las solicitudes
-        config.addAllowedOriginPattern("*");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        // Permitir orígenes específicos
+        config.setAllowedOrigins(Arrays.asList(
+            "http://localhost:5173",
+            "http://localhost",
+            "http://localhost:80",
+            "https://impulsedata.vercel.app",
+            "https://impulsedata-git-main-reynalrodriguez.vercel.app",
+            "https://impulsedata-reynalrodriguez.vercel.app"
+        ));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
-        config.addExposedHeader("Authorization");
-        config.addExposedHeader("Content-Type");
-        config.addExposedHeader("Access-Control-Allow-Origin");
         
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);

@@ -10,9 +10,18 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-            .allowedOrigins("http://localhost:5173")
+            .allowedOrigins(
+                "http://localhost:5173",
+                "http://localhost",
+                "http://localhost:80",
+                "https://impulsedata.vercel.app",
+                "https://impulsedata-git-main-reynalrodriguez.vercel.app",
+                "https://impulsedata-reynalrodriguez.vercel.app"
+            )
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            .allowedHeaders("Authorization", "Content-Type")
-            .allowCredentials(true);
+            .allowedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin")
+            .exposedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin")
+            .allowCredentials(true)
+            .maxAge(3600);
     }
 } 
