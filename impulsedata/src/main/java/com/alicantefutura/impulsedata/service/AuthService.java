@@ -235,11 +235,16 @@ public class AuthService {
             
             System.out.println("Buscando usuario por " + tipoDeBusqueda + ": " + valorAbuscar);
             
+            long tiempoInicio = System.currentTimeMillis();
+            
             // Buscar usuario en Firestore
             var querySnapshot = firestore.collection("usuarios")
                     .whereEqualTo(campoAbuscar, valorAbuscar)
                     .get()
                     .get();
+                    
+            long tiempoBusqueda = System.currentTimeMillis() - tiempoInicio;
+            System.out.println("Tiempo de búsqueda en Firestore: " + tiempoBusqueda + "ms");
             
             // Verificar si se encontró algún usuario
             if (querySnapshot.isEmpty()) {
@@ -255,9 +260,31 @@ public class AuthService {
             
             System.out.println("Usuario encontrado: " + usuario.getEmail() + " - ID: " + usuario.getId());
             
-            // Verificar si el email está verificado en Firebase
+            // Autenticar con Firebase/Spring Security primero (esto falla rápido si la contraseña es incorrecta)
             try {
+                long tiempoInicioAuth = System.currentTimeMillis();
+                
+                // Validar a través de Spring Security (que usa Firebase internamente)
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(usuario.getEmail(), request.getPassword()));
+                
+                long tiempoAuth = System.currentTimeMillis() - tiempoInicioAuth;
+                System.out.println("Tiempo de autenticación: " + tiempoAuth + "ms");
+                
+                System.out.println("Autenticación exitosa para: " + usuario.getEmail());
+            } catch (AuthenticationException e) {
+                System.err.println("Error de autenticación: " + e.getMessage());
+                throw new RuntimeException("Credenciales inválidas. Por favor, verifica tu contraseña.", e);
+            }
+            
+            // Ahora verificar si el email está verificado en Firebase
+            try {
+                long tiempoInicioVerif = System.currentTimeMillis();
+                
                 boolean emailVerificadoFirebase = firebaseAuthService.isEmailVerificado(usuario.getEmail());
+                
+                long tiempoVerif = System.currentTimeMillis() - tiempoInicioVerif;
+                System.out.println("Tiempo de verificación de email: " + tiempoVerif + "ms");
                 
                 // Si está verificado en Firebase pero no en nuestra base, actualizamos
                 if (emailVerificadoFirebase && !usuario.isEmailVerificado()) {
@@ -278,18 +305,10 @@ public class AuthService {
                 }
                 throw new RuntimeException("Error de autenticación: " + e.getMessage());
             }
-                
-            // Autenticar con Firebase/Spring Security
-            try {
-                // Validar a través de Spring Security (que usa Firebase internamente)
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(usuario.getEmail(), request.getPassword()));
-                System.out.println("Autenticación exitosa para: " + usuario.getEmail());
-            } catch (AuthenticationException e) {
-                System.err.println("Error de autenticación: " + e.getMessage());
-                throw new RuntimeException("Credenciales inválidas. Por favor, verifica tu contraseña.", e);
-            }
 
+            long tiempoTotal = System.currentTimeMillis() - tiempoInicio;
+            System.out.println("Tiempo total de login: " + tiempoTotal + "ms");
+            
             // Si llegamos aquí, todo está correcto - Generar token JWT
             return jwtService.generateToken(usuario);
         } catch (InterruptedException | ExecutionException e) {

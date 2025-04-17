@@ -1,5 +1,8 @@
 package com.alicantefutura.impulsedata.service;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,10 @@ import com.google.firebase.auth.UserRecord.UpdateRequest;
 public class FirebaseAuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(FirebaseAuthService.class);
+    
+    // Cache para verificación de email (email -> [isVerificado, timestamp])
+    private final Map<String, Object[]> emailVerificadoCache = new ConcurrentHashMap<>();
+    private static final long CACHE_TTL_MS = 60000; // 1 minuto de validez para el caché
 
     /**
      * Crear un usuario en Firebase Authentication
@@ -95,6 +102,14 @@ public class FirebaseAuthService {
                 .setEmailVerified(true);
         
         FirebaseAuth.getInstance().updateUser(request);
+        
+        // Invalidar caché para este usuario
+        try {
+            String email = FirebaseAuth.getInstance().getUser(uid).getEmail();
+            emailVerificadoCache.remove(email);
+        } catch (Exception e) {
+            logger.warn("No se pudo invalidar caché para UID: {}", uid);
+        }
     }
 
     /**
@@ -105,12 +120,38 @@ public class FirebaseAuthService {
      * @throws FirebaseAuthException Si ocurre un error al comprobar el email
      */
     public boolean isEmailVerificado(String email) throws FirebaseAuthException {
+        // Primero intentamos usar el caché
+        if (emailVerificadoCache.containsKey(email)) {
+            Object[] cachedData = emailVerificadoCache.get(email);
+            long timestamp = (long) cachedData[1];
+            long now = System.currentTimeMillis();
+            
+            // Si el caché es reciente (menos de 1 minuto), lo usamos
+            if (now - timestamp < CACHE_TTL_MS) {
+                boolean cachedResult = (boolean) cachedData[0];
+                logger.info("Usando caché para verificación de email {}: {}", email, cachedResult);
+                return cachedResult;
+            } else {
+                // Si ha expirado, lo eliminamos del caché
+                emailVerificadoCache.remove(email);
+            }
+        }
+        
+        // Si no estaba en caché o ha expirado, consultamos a Firebase
         try {
+            long startTime = System.currentTimeMillis();
             UserRecord userRecord = FirebaseAuth.getInstance().getUserByEmail(email);
+            boolean isVerified = userRecord.isEmailVerified();
+            long endTime = System.currentTimeMillis();
+            
+            // Guardamos en caché
+            emailVerificadoCache.put(email, new Object[]{isVerified, System.currentTimeMillis()});
+            
             // Registrar con fines de depuración
-            logger.info("Verificando email para usuario: {} - Estado de verificación: {}", 
-                email, userRecord.isEmailVerified());
-            return userRecord.isEmailVerified();
+            logger.info("Verificando email para usuario: {} - Estado de verificación: {} - Tiempo: {}ms", 
+                email, isVerified, (endTime - startTime));
+                
+            return isVerified;
         } catch (FirebaseAuthException e) {
             logger.error("Error al verificar email: {}", e.getMessage());
             throw e;
