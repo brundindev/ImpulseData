@@ -22,8 +22,9 @@ FROM openjdk:17-jdk-slim
 # Copia el archivo JAR desde la etapa de construcción
 COPY --from=build /app/target/*.jar app.jar
 
-# Copia el archivo de credenciales de Firebase desde la etapa de construcción
-COPY --from=build /app/src/main/resources/impulsedata-alicantefutura-firebase-adminsdk-fbsvc-003919b5ce.json /app/impulsedata-alicantefutura-firebase-adminsdk-fbsvc-003919b5ce.json
+# Crea el directorio de secretos y copia el archivo de credenciales
+RUN mkdir -p /etc/secrets
+COPY --from=build /app/src/main/resources/impulsedata-alicantefutura-firebase-adminsdk-fbsvc-003919b5ce.json /etc/secrets/impulsedata-alicantefutura-firebase-adminsdk-fbsvc-003919b5ce.json
 
 # Expone el puerto 8080
 EXPOSE 8080
