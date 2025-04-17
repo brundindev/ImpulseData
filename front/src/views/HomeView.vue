@@ -56,10 +56,11 @@
           </button>
           <button 
             type="button" 
-            class="apple-btn apple-btn-secondary"
+            class="btn btn-secondary btn-create"
             @click="$refs.fileInput.click()"
             :disabled="importando"
           >
+            <span class="icon">↓</span>
             <span v-if="importando">Importando...</span>
             <span v-else>Importar Empresas</span>
           </button>
@@ -796,6 +797,44 @@
     @close="cerrarPreviewPDF" 
     @download="descargarPDFPreview"
   />
+
+  <!-- Modal de confirmación de importación -->
+  <div v-if="mostrarConfirmacionImportacion" class="modal-overlay">
+    <div class="modal-container modal-small">
+      <div class="modal-header">
+        <h2>{{ resultadoImportacion.exitoso ? 'Importación Exitosa' : 'Error en la Importación' }}</h2>
+        <button class="btn-close" @click="mostrarConfirmacionImportacion = false">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="resultado-importacion">
+          <p :class="{ 'text-success': resultadoImportacion.exitoso, 'text-error': !resultadoImportacion.exitoso }">
+            {{ resultadoImportacion.mensaje }}
+          </p>
+          <div v-if="resultadoImportacion.detalles" class="detalles-importacion">
+            <h3 v-if="resultadoImportacion.exitoso">Empresas importadas:</h3>
+            <ul>
+              <li v-for="(detalle, index) in resultadoImportacion.detalles" :key="index">
+                {{ detalle }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" @click="mostrarConfirmacionImportacion = false">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pantalla de carga durante la importación -->
+  <div v-if="importando" class="loading-overlay">
+    <div class="spinnerContainer">
+      <div class="spinner"></div>
+      <div class="loader">
+        <span class="words">Importando empresas...</span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -877,7 +916,9 @@ const nuevaEmpresa = reactive({
 
 // Agregar después de las variables reactivas existentes
 const importando = ref(false);
-const errorImportacion = ref('');
+const errorImportacion = ref(null);
+const mostrarConfirmacionImportacion = ref(false);
+const resultadoImportacion = ref(null);
 
 onMounted(() => {
   // Verificar estado de autenticación
@@ -2327,43 +2368,41 @@ const isAdmin = ref(true); // Temporalmente true para ver el debugger
 
 // Agregar después de las funciones existentes
 const importarArchivo = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
   try {
-    const file = event.target.files[0];
-    if (!file) return;
-
     importando.value = true;
-    errorImportacion.value = '';
-
     let empresas;
+
     if (file.name.endsWith('.csv')) {
       empresas = await FileImportService.importFromCSV(file);
     } else if (file.name.endsWith('.json')) {
       empresas = await FileImportService.importFromJSON(file);
     } else {
-      throw new Error('Formato de archivo no soportado. Use CSV o JSON.');
+      throw new Error('Formato de archivo no soportado. Use .csv o .json');
     }
 
-    if (empresas.length === 0) {
-      throw new Error('No se encontraron empresas válidas en el archivo.');
-    }
-
-    const empresasGuardadas = await FileImportService.guardarEmpresasImportadas(empresas);
+    const ids = await FileImportService.guardarEmpresasImportadas(empresas);
+    await cargarDatos();
     
-    if (empresasGuardadas.length > 0) {
-      // Recargar datos
-      await cargarDatos();
-      // Mostrar mensaje de éxito
-      alert(`Se importaron ${empresasGuardadas.length} empresas correctamente.`);
-    } else {
-      throw new Error('No se pudo guardar ninguna empresa.');
-    }
+    // Mostrar confirmación después de cargar los datos
+    resultadoImportacion.value = {
+      exitoso: true,
+      mensaje: `Se importaron ${ids.length} empresas correctamente`,
+      detalles: empresas.map(e => e.nombre)
+    };
+    mostrarConfirmacionImportacion.value = true;
   } catch (error) {
-    console.error('Error al importar archivo:', error);
-    errorImportacion.value = error.message;
+    resultadoImportacion.value = {
+      exitoso: false,
+      mensaje: 'Error al importar empresas',
+      detalles: error.message
+    };
+    mostrarConfirmacionImportacion.value = true;
   } finally {
     importando.value = false;
-    // Limpiar el input de archivo
-    event.target.value = '';
+    event.target.value = ''; // Resetear el input
   }
 };
 </script>
@@ -3052,7 +3091,7 @@ const importarArchivo = async (event) => {
 .confirm-message {
   font-size: 16px;
   line-height: 1.6;
-  color: #333;
+  color: white;
   margin-bottom: 10px;
   text-align: center;
 }
@@ -3379,5 +3418,94 @@ const importarArchivo = async (event) => {
 
 .navbar::before {
   content: none;
+}
+
+.text-success {
+  color: #4CAF50;
+}
+
+.text-error {
+  color: #f44336;
+}
+
+.detalles-importacion {
+  margin-top: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.detalles-importacion h3 {
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.detalles-importacion ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.detalles-importacion li {
+  padding: 0.5rem;
+  color: white;
+}
+
+.detalles-importacion li:last-child {
+  border-bottom: none;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-overlay .spinnerContainer {
+  background: transparent;
+  box-shadow: none;
+}
+
+.loading-overlay .loader {
+  color: white;
+}
+
+.loading-overlay .words {
+  color: white;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.text-success {
+  color: #4CAF50;
+}
+
+.text-error {
+  color: #f44336;
+}
+
+.detalles-importacion {
+  margin-top: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.detalles-importacion h3 {
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.detalles-importacion ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.detalles-importacion li {
+  padding: 0.5rem;
+  color: white;
 }
 </style>
