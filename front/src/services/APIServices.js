@@ -1,14 +1,39 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://impulsedata.onrender.com';
-// Eliminamos el proxy CORS ya que vamos a configurar el backend correctamente
+
+// Configurar varios proxies CORS para intentar con diferentes alternativas
+const CORS_PROXIES = [
+  'https://cors-anywhere.herokuapp.com/',
+  'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.io/?'
+];
+
+// Comenzar con el primer proxy
+let currentProxyIndex = 0;
+let API_URL_WITH_PROXY = `${CORS_PROXIES[currentProxyIndex]}${encodeURIComponent(API_URL)}`;
+
+// Función para cambiar al siguiente proxy disponible
+const switchToNextProxy = () => {
+  currentProxyIndex = (currentProxyIndex + 1) % CORS_PROXIES.length;
+  API_URL_WITH_PROXY = `${CORS_PROXIES[currentProxyIndex]}${encodeURIComponent(API_URL)}`;
+  console.log(`Cambiando a proxy alternativo: ${CORS_PROXIES[currentProxyIndex]}`);
+  
+  // Actualizar la configuración de baseURL en api
+  api.defaults.baseURL = API_URL_WITH_PROXY;
+  
+  return API_URL_WITH_PROXY;
+};
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL_WITH_PROXY,
+  timeout: 15000, // 15 segundos de timeout
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    'Origin': 'https://impulsedata.vercel.app'
   },
-  withCredentials: true // Volver a habilitar withCredentials
+  withCredentials: false // El proxy CORS no soporta credentials
 });
 
 // Interceptor para añadir el token de autenticación
@@ -20,12 +45,35 @@ api.interceptors.request.use(config => {
   return config;
 });
 
-// Interceptor para manejar errores de red y CORS
+// Interceptor para manejar errores de red, CORS y otros problemas
 api.interceptors.response.use(
   response => response,
-  error => {
-    if (error.message === 'Network Error' || error.response?.status === 0) {
-      console.error('Error de conexión o CORS. Verificando configuración:', error);
+  async error => {
+    // Verificar si es un error de CORS, network o preflight
+    if (error.message === 'Network Error' || error.response?.status === 0 || error.response?.status === 403) {
+      console.error('Error de CORS o conexión:', error.message);
+      
+      // Intentar con el siguiente proxy si hemos intentado menos de 3 veces
+      const maxRetries = 3;
+      const retryCount = error.config._retryCount || 0;
+      
+      if (retryCount < maxRetries) {
+        // Incrementar contador de reintentos
+        error.config._retryCount = retryCount + 1;
+        
+        // Cambiar al siguiente proxy
+        switchToNextProxy();
+        
+        console.log(`Reintentando solicitud con proxy alternativo (intento ${retryCount + 1}/${maxRetries})`);
+        
+        // Actualizar la URL en la configuración de la solicitud
+        error.config.baseURL = API_URL_WITH_PROXY;
+        
+        // Reintento con la nueva configuración
+        return api(error.config);
+      } else {
+        console.error('Se han agotado todos los intentos con diferentes proxies CORS');
+      }
     }
     return Promise.reject(error);
   }

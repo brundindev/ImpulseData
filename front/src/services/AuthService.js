@@ -7,16 +7,41 @@ import FirestoreService from './FirestoreService';
 // Configuración de base URL para todas las peticiones
 // Si el backend está en un puerto distinto al frontend, hay que especificar la URL completa
 const API_URL = 'https://impulsedata.onrender.com/api/auth';
-// Eliminamos el proxy CORS ya que vamos a configurar el backend correctamente
+
+// Configurar varios proxies CORS para intentar con diferentes alternativas
+const CORS_PROXIES = [
+  'https://cors-anywhere.herokuapp.com/',
+  'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.io/?'
+];
+
+// Comenzar con el primer proxy
+let currentProxyIndex = 0;
+let API_URL_WITH_PROXY = `${CORS_PROXIES[currentProxyIndex]}${encodeURIComponent(API_URL)}`;
+
+// Función para cambiar al siguiente proxy disponible
+const switchToNextProxy = () => {
+  currentProxyIndex = (currentProxyIndex + 1) % CORS_PROXIES.length;
+  API_URL_WITH_PROXY = `${CORS_PROXIES[currentProxyIndex]}${encodeURIComponent(API_URL)}`;
+  console.log(`Cambiando a proxy alternativo: ${CORS_PROXIES[currentProxyIndex]}`);
+  
+  // Actualizar la configuración de baseURL en authAxios
+  authAxios.defaults.baseURL = API_URL_WITH_PROXY;
+  
+  return API_URL_WITH_PROXY;
+};
 
 // Crear una instancia personalizada de axios para el servicio de autenticación
 // para no afectar a otras partes de la aplicación
 const authAxios = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
+  baseURL: API_URL_WITH_PROXY,
+  timeout: 15000, // 15 segundos de timeout
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    'Origin': 'https://impulsedata.vercel.app'
+  },
+  withCredentials: false // Los proxies CORS no soportan credentials
 });
 
 // Añadir interceptor para incluir el token en cada solicitud
@@ -96,6 +121,39 @@ authAxios.interceptors.response.use(
   }
 );
 
+// Agregar un interceptor para manejar errores de CORS específicamente
+authAxios.interceptors.response.use(
+  response => response,
+  async error => {
+    // Verificar si es un error de CORS o preflight
+    if (error.message === 'Network Error' || 
+        (error.response && (error.response.status === 0 || error.response.status === 403))) {
+      console.error('Error de CORS detectado:', error.message);
+      
+      // Intentar con el siguiente proxy si hemos intentado menos de 3 veces
+      const maxRetries = 3;
+      const retryCount = error.config._retryCount || 0;
+      
+      if (retryCount < maxRetries) {
+        // Incrementar contador de reintentos
+        error.config._retryCount = retryCount + 1;
+        
+        // Cambiar al siguiente proxy
+        switchToNextProxy();
+        
+        console.log(`Reintentando solicitud con proxy alternativo (intento ${retryCount + 1}/${maxRetries})`);
+        
+        // Actualizar la URL en la configuración de la solicitud
+        error.config.baseURL = API_URL_WITH_PROXY;
+        
+        // Reintento con la nueva configuración
+        return authAxios(error.config);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 class AuthService {
   /**
    * Iniciar sesión
@@ -130,12 +188,14 @@ class AuthService {
       }
       
       // Usar la instancia personalizada de axios para el login
-      console.log("Enviando solicitud de login al backend:", `${API_URL}/login`);
+      console.log("Enviando solicitud de login al backend a través de proxy:", `${API_URL_WITH_PROXY}/login`);
       
       // Configuración específica para esta solicitud
       const loginConfig = {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Origin': 'https://impulsedata.vercel.app'
         }
       };
       
@@ -273,11 +333,11 @@ class AuthService {
         }
       }
       
-      console.log("Enviando solicitud de registro al backend:", `${API_URL}/registro`);
+      console.log("Enviando solicitud de registro al backend a través de proxy:", `${API_URL_WITH_PROXY}/registro`);
       
       // Primero registramos en Firebase (esto ya debería estar manejado en RegisterView)
       // Y luego registramos en el backend
-      const response = await axios.post(`${API_URL}/registro`, user);
+      const response = await authAxios.post('/registro', user);
       
       console.log("Respuesta del backend:", response.status, response.statusText);
       
