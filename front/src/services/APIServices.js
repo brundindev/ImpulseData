@@ -6,7 +6,8 @@ const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true // Habilitar el envío de cookies para autenticación cross-origin
 });
 
 // Interceptor para añadir el token de autenticación
@@ -18,6 +19,19 @@ api.interceptors.request.use(config => {
   return config;
 });
 
-api.post('/api/auth/login', data)
+// Interceptor para manejar errores de red y CORS
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.message === 'Network Error' || error.response?.status === 0) {
+      console.error('Error de conexión o CORS. Verificando configuración:', error);
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const loginUser = (userData) => {
+  return api.post('/api/auth/login', userData);
+};
 
 export default api;

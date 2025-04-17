@@ -6,7 +6,7 @@ import FirestoreService from './FirestoreService';
 
 // Configuración de base URL para todas las peticiones
 // Si el backend está en un puerto distinto al frontend, hay que especificar la URL completa
-const API_URL = 'http://https://impulsedata.onrender.com/api/auth';
+const API_URL = 'https://impulsedata.onrender.com/api/auth';
 
 // Crear una instancia personalizada de axios para el servicio de autenticación
 // para no afectar a otras partes de la aplicación
