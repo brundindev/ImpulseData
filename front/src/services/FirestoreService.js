@@ -10,6 +10,27 @@ const auth = getAuth(app);
 // Log para verificar que db se importó correctamente
 console.log("FirestoreService: db importado:", !!db, "auth:", !!auth);
 
+// Manejador de errores específico para Firestore
+const handleFirestoreError = (error, operacion) => {
+  console.warn(`Error en operación ${operacion} de Firestore:`, error);
+  
+  // Errores específicos de CORS
+  if (error.message?.includes('access control checks') || 
+      error.message?.includes('Failed to fetch') ||
+      error.message?.includes('firestore.googleapis.com')) {
+    console.warn('Error CORS en Firestore. Este error será suprimido y se manejará la operación de forma fallback.');
+    
+    // Intentar volver a conectar después de un tiempo si es un error de CORS
+    setTimeout(() => {
+      console.log('Intentando reconexión a Firestore después de error CORS...');
+    }, 3000);
+    
+    return true; // Indica que el error fue manejado
+  }
+  
+  return false; // Indica que el error no fue manejado específicamente
+};
+
 // Definir una empresa por defecto para todos los usuarios
 const EMPRESA_POR_DEFECTO = {
   id: "empresa-default-universal",

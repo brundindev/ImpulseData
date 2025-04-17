@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, connectAuthEmulator, sendEmailVerification } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,6 +22,23 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 console.log("Firebase inicializado:", app.name, "Auth:", !!auth, "Firestore:", !!db);
+
+// Habilitar persistencia local para reducir problemas de CORS con solicitudes frecuentes
+try {
+  enableIndexedDbPersistence(db)
+    .then(() => console.log("Persistencia Firestore habilitada correctamente"))
+    .catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn("Persistencia de Firestore no pudo ser habilitada: múltiples pestañas abiertas");
+      } else if (err.code === 'unimplemented') {
+        console.warn("Persistencia de Firestore no es soportada por este navegador");
+      } else {
+        console.error("Error al habilitar persistencia:", err);
+      }
+    });
+} catch (e) {
+  console.error("Error al configurar persistencia:", e);
+}
 
 // Variable para rastrear el estado de inicialización de Firebase Auth
 let authInitialized = false;

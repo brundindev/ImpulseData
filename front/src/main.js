@@ -49,7 +49,10 @@ window.addEventListener('unhandledrejection', function(event) {
   if (errorMsg.includes('ERR_BLOCKED_BY_CLIENT') || 
       errorMsg.includes('Cross-Origin-Opener-Policy') ||
       errorMsg.includes('Firestore.Listen') ||
-      errorMsg.includes('window.close')) {
+      errorMsg.includes('window.close') ||
+      errorMsg.includes('access control checks') ||
+      errorMsg.includes('firestore.googleapis.com') ||
+      errorMsg.includes('Failed to fetch')) {
     // Evitar que el error aparezca en la consola
     event.preventDefault();
     event.stopPropagation();

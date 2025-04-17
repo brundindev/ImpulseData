@@ -2,6 +2,8 @@ package com.alicantefutura.impulsedata.service;
 
 import java.util.concurrent.ExecutionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -20,6 +22,7 @@ import com.google.firebase.auth.UserRecord;
 @Service
 public class AuthService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
     private final Firestore firestore;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -182,10 +185,11 @@ public class AuthService {
             String nombreUsuario = request.getNombreUsuario();
             
             // Para logs y debugging
-            System.out.println("Login solicitado con:" +
-                " identificador=" + (identificador != null ? identificador : "null") +
-                " email=" + (email != null ? email : "null") +
-                " nombreUsuario=" + (nombreUsuario != null ? nombreUsuario : "null"));
+            logger.info("Login solicitado con: " +
+                "identificador={}, email={}, nombreUsuario={}", 
+                (identificador != null ? identificador : "null"),
+                (email != null ? email : "null"),
+                (nombreUsuario != null ? nombreUsuario : "null"));
             
             // Decidir qué campo usar para buscar (prioridad: email, nombreUsuario, identificador)
             String campoAbuscar = null;
@@ -214,7 +218,7 @@ public class AuthService {
                 throw new RuntimeException("Debe proporcionar un email o nombre de usuario para iniciar sesión");
             }
             
-            System.out.println("Buscando usuario por " + tipoDeBusqueda + ": " + valorAbuscar);
+            logger.info("Buscando usuario por {}: {}", tipoDeBusqueda, valorAbuscar);
             
             // Buscar usuario en Firestore
             var querySnapshot = firestore.collection("usuarios")
@@ -224,17 +228,38 @@ public class AuthService {
             
             // Verificar si se encontró algún usuario
             if (querySnapshot.isEmpty()) {
-                System.out.println("No se encontró usuario con " + campoAbuscar + " = " + valorAbuscar);
-                throw new RuntimeException("Usuario no encontrado");
+                logger.warn("No se encontró usuario con {} = {}", campoAbuscar, valorAbuscar);
+                
+                // Si no se encontró con el campo original, intentamos buscar con el otro campo
+                String campoAlternativo = campoAbuscar.equals("email") ? "nombreUsuario" : "email";
+                logger.info("Intentando búsqueda alternativa por {}: {}", campoAlternativo, valorAbuscar);
+                
+                querySnapshot = firestore.collection("usuarios")
+                        .whereEqualTo(campoAlternativo, valorAbuscar)
+                        .get()
+                        .get();
+                        
+                if (querySnapshot.isEmpty()) {
+                    logger.error("Usuario no encontrado con ningún método de búsqueda para: {}", valorAbuscar);
+                    throw new RuntimeException("Usuario no encontrado");
+                } else {
+                    logger.info("Usuario encontrado con búsqueda alternativa por {}", campoAlternativo);
+                }
             }
             
             var usuarioDoc = querySnapshot.getDocuments().get(0);
             var usuario = usuarioDoc.toObject(Usuario.class);
             if (usuario == null) {
+                logger.error("Error al convertir documento a objeto Usuario");
                 throw new RuntimeException("Usuario no encontrado");
             }
             
-            System.out.println("Usuario encontrado: " + usuario.getEmail() + " - ID: " + usuario.getId());
+            // Establecer el ID del documento como ID del usuario
+            String uid = usuarioDoc.getId();
+            usuario.setId(uid);
+            
+            logger.info("Usuario encontrado: email={}, nombreUsuario={}, ID={}", 
+                usuario.getEmail(), usuario.getUsername(), uid);
             
             // Verificar si el email está verificado en Firebase
             try {
@@ -244,7 +269,7 @@ public class AuthService {
                 if (emailVerificadoFirebase && !usuario.isEmailVerificado()) {
                     usuario.setEmailVerificado(true);
                     firestore.collection("usuarios").document(usuario.getId()).update("emailVerificado", true).get();
-                    System.out.println("Email verificado actualizado para usuario: " + usuario.getEmail());
+                    logger.info("Email verificado actualizado para usuario: {}", usuario.getEmail());
                 }
                 
                 // Si no está verificado en Firebase, no permitimos login
@@ -253,7 +278,7 @@ public class AuthService {
                 }
             } catch (FirebaseAuthException e) {
                 // Si el usuario existe en Firestore pero no en Firebase Auth, puede ser un problema de sincronización
-                System.err.println("Error al verificar email en Firebase: " + e.getMessage());
+                logger.error("Error al verificar email en Firebase: {}", e.getMessage());
                 if (e.getMessage().contains("USER_NOT_FOUND")) {
                     throw new RuntimeException("El usuario existe en la base de datos pero no en el sistema de autenticación. Por favor contacte a soporte.");
                 }
@@ -262,18 +287,22 @@ public class AuthService {
                 
             // Autenticar con Firebase/Spring Security
             try {
+                // IMPORTANTE: Siempre autenticar con el EMAIL, independientemente de si el usuario usó nombreUsuario o email
+                logger.info("Intentando autenticar al usuario con email: {}", usuario.getEmail());
+                
                 // Validar a través de Spring Security (que usa Firebase internamente)
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(usuario.getEmail(), request.getPassword()));
-                System.out.println("Autenticación exitosa para: " + usuario.getEmail());
+                logger.info("Autenticación exitosa para: {}", usuario.getEmail());
             } catch (AuthenticationException e) {
-                System.err.println("Error de autenticación: " + e.getMessage());
+                logger.error("Error de autenticación: {}", e.getMessage());
                 throw new RuntimeException("Credenciales inválidas. Por favor, verifica tu contraseña.", e);
             }
 
             // Si llegamos aquí, todo está correcto - Generar token JWT
             return jwtService.generateToken(usuario);
         } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error al acceder a Firestore: {}", e.getMessage());
             throw new RuntimeException("Error al acceder a Firestore: " + e.getMessage(), e);
         }
     }
