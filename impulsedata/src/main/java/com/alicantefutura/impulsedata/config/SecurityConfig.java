@@ -84,33 +84,13 @@ public class SecurityConfig {
             "http://localhost:5173", // Puerto por defecto de Vite
             "http://localhost",      // Nuevo puerto en Docker
             "http://localhost:80",   // Especificar explícitamente puerto 80
-            "https://impulsedata.vercel.app" // Frontend en Vercel
+            "https://impulsedata.vercel.app", // Frontend en Vercel
+            "https://impulsedata-git-main-reynalrodriguez.vercel.app", // Posible URL de preview
+            "https://impulsedata-reynalrodriguez.vercel.app"           // Posible URL alternativa
         )); 
-        // Permitir dominios de Firebase/Firestore para evitar problemas CORS
-        configuration.addAllowedOriginPattern("https://*.googleapis.com");
-        configuration.addAllowedOriginPattern("https://*.firebaseio.com");
-        configuration.addAllowedOriginPattern("https://*.firebase.com");
-        
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // Ampliar lista de encabezados permitidos para Firestore
-        configuration.setAllowedHeaders(Arrays.asList(
-            "Authorization", 
-            "Content-Type", 
-            "Access-Control-Allow-Origin",
-            "X-Requested-With",
-            "X-HTTP-Method-Override",
-            "Accept",
-            "X-Goog-Api-Client",
-            "X-Firebase-Client",
-            "X-Firebase-Auth-Token",
-            "X-Client-Version"
-        ));
-        configuration.setExposedHeaders(Arrays.asList(
-            "Authorization", 
-            "Content-Type", 
-            "Access-Control-Allow-Origin",
-            "X-Firebase-Auth-Token"
-        ));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
