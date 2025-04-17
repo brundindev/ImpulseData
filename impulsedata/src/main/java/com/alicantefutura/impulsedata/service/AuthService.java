@@ -237,32 +237,44 @@ public class AuthService {
             System.out.println("Usuario encontrado: " + usuario.getEmail() + " - ID: " + usuario.getId());
             
             // Verificar si el email está verificado en Firebase
-            boolean emailVerificadoFirebase = firebaseAuthService.isEmailVerificado(usuario.getEmail());
-            
-            // Si está verificado en Firebase pero no en nuestra base, actualizamos
-            if (emailVerificadoFirebase && !usuario.isEmailVerificado()) {
-                usuario.setEmailVerificado(true);
-                firestore.collection("usuarios").document(usuario.getId()).update("emailVerificado", true).get();
-                System.out.println("Email verificado actualizado para usuario: " + usuario.getEmail());
+            try {
+                boolean emailVerificadoFirebase = firebaseAuthService.isEmailVerificado(usuario.getEmail());
+                
+                // Si está verificado en Firebase pero no en nuestra base, actualizamos
+                if (emailVerificadoFirebase && !usuario.isEmailVerificado()) {
+                    usuario.setEmailVerificado(true);
+                    firestore.collection("usuarios").document(usuario.getId()).update("emailVerificado", true).get();
+                    System.out.println("Email verificado actualizado para usuario: " + usuario.getEmail());
+                }
+                
+                // Si no está verificado en Firebase, no permitimos login
+                if (!emailVerificadoFirebase) {
+                    throw new RuntimeException("Por favor, verifica tu dirección de correo electrónico antes de iniciar sesión");
+                }
+            } catch (FirebaseAuthException e) {
+                // Si el usuario existe en Firestore pero no en Firebase Auth, puede ser un problema de sincronización
+                System.err.println("Error al verificar email en Firebase: " + e.getMessage());
+                if (e.getMessage().contains("USER_NOT_FOUND")) {
+                    throw new RuntimeException("El usuario existe en la base de datos pero no en el sistema de autenticación. Por favor contacte a soporte.");
+                }
+                throw new RuntimeException("Error de autenticación: " + e.getMessage());
             }
-            
-            // Si no está verificado en Firebase, no permitimos login
-            if (!emailVerificadoFirebase) {
-                throw new RuntimeException("Por favor, verifica tu dirección de correo electrónico antes de iniciar sesión");
+                
+            // Autenticar con Firebase/Spring Security
+            try {
+                // Validar a través de Spring Security (que usa Firebase internamente)
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(usuario.getEmail(), request.getPassword()));
+                System.out.println("Autenticación exitosa para: " + usuario.getEmail());
+            } catch (AuthenticationException e) {
+                System.err.println("Error de autenticación: " + e.getMessage());
+                throw new RuntimeException("Credenciales inválidas. Por favor, verifica tu contraseña.", e);
             }
 
-            // Autenticar usuario (usando el email real del usuario encontrado)
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(usuario.getEmail(), request.getPassword()));
-
-            // Generar token
+            // Si llegamos aquí, todo está correcto - Generar token JWT
             return jwtService.generateToken(usuario);
-        } catch (AuthenticationException e) {
-            throw new RuntimeException("Credenciales inválidas", e);
-        } catch (FirebaseAuthException e) {
-            throw new RuntimeException("Error de autenticación con Firebase: " + e.getMessage(), e);
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException("Error al acceder a Firestore", e);
+            throw new RuntimeException("Error al acceder a Firestore: " + e.getMessage(), e);
         }
     }
 
