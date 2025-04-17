@@ -11,6 +11,9 @@ import { auth, waitForAuthInit } from '../firebase';
 // Importar el servicio de Firestore para crear la empresa por defecto
 import FirestoreService from './FirestoreService';
 
+// Verificar que FirestoreService se importó correctamente y tiene el método crearUsuario
+console.log('FirestoreService en AuthService:', FirestoreService, 'método crearUsuario:', FirestoreService.crearUsuario);
+
 class FirebaseAuthService {
   /**
    * Registrar un nuevo usuario con Firebase
@@ -21,11 +24,14 @@ class FirebaseAuthService {
    */
   async register(email, password, nombreUsuario = '') {
     try {
+      console.log('Iniciando registro en Firebase Auth con email:', email, 'y nombre:', nombreUsuario);
+      
       // Esperar a que Firebase Auth esté inicializado
       await waitForAuthInit();
       
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      console.log('Usuario creado en Firebase Auth:', user.uid);
       
       // Si se proporciona nombre, actualizar perfil
       if (nombreUsuario) {
@@ -42,13 +48,24 @@ class FirebaseAuthService {
       
       // Crear documento de usuario en Firestore
       try {
-        console.log("👤 Creando documento de usuario en Firestore...");
-        await FirestoreService.crearUsuario({
+        console.log("👤 Creando documento de usuario en Firestore...", "UID:", user.uid, "Email:", user.email);
+        
+        // Verificar nuevamente que FirestoreService está disponible
+        if (!FirestoreService || typeof FirestoreService.crearUsuario !== 'function') {
+          console.error('FirestoreService no está disponible o no tiene el método crearUsuario', FirestoreService);
+          throw new Error('FirestoreService no disponible');
+        }
+        
+        const userData = {
           uid: user.uid,
           email: user.email,
           nombre: nombreUsuario || user.email.split('@')[0],
           emailVerified: user.emailVerified
-        });
+        };
+        console.log('Datos a guardar en Firestore:', userData);
+        
+        await FirestoreService.crearUsuario(userData);
+        console.log('✅ Documento de usuario creado en Firestore con éxito');
       } catch (firestoreError) {
         console.error("Error al crear documento de usuario en Firestore:", firestoreError);
         // No bloqueamos el flujo por este error
@@ -183,6 +200,8 @@ class FirebaseAuthService {
     };
     
     try {
+      console.log('Iniciando login con Google...');
+      
       const provider = new GoogleAuthProvider();
       // Solicitar acceso al perfil de Google para tener más datos
       provider.addScope('profile');
@@ -195,6 +214,7 @@ class FirebaseAuthService {
       
       const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
+      console.log('Login con Google exitoso:', user.uid, user.email);
       
       // Forzar el estado de verificación para usuarios de Google
       // ya que los emails de Google ya están verificados
@@ -242,16 +262,28 @@ class FirebaseAuthService {
       
       // Crear documento de usuario en Firestore
       try {
-        console.log("👤 Creando documento de usuario Google en Firestore...");
-        await FirestoreService.crearUsuario({
+        console.log("👤 Creando documento de usuario Google en Firestore... UID:", user.uid, "Email:", user.email);
+        
+        // Verificar que FirestoreService está disponible
+        if (!FirestoreService || typeof FirestoreService.crearUsuario !== 'function') {
+          console.error('FirestoreService no está disponible o no tiene el método crearUsuario:', FirestoreService);
+          throw new Error('FirestoreService no disponible');
+        }
+        
+        const userData = {
           uid: user.uid,
           email: user.email,
           nombre: user.displayName || user.email.split('@')[0],
           displayName: user.displayName,
           emailVerified: true // Los usuarios de Google siempre se consideran verificados
-        });
+        };
+        console.log('Datos a guardar en Firestore para usuario Google:', userData);
+        
+        await FirestoreService.crearUsuario(userData);
+        console.log('✅ Documento de usuario Google creado en Firestore con éxito');
       } catch (firestoreError) {
         console.error("Error al crear documento de usuario Google en Firestore:", firestoreError);
+        console.error("Detalles del error:", firestoreError.message, firestoreError.stack);
         // No bloqueamos el flujo por este error
       }
       
