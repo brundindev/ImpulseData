@@ -30,6 +30,10 @@ services:
       - ./impulsedata/src:/app/src
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - FIREBASE_TYPE=service_account
+      - FIREBASE_PROJECT_ID=impulsedata-alicantefutura
+      - FIREBASE_PRIVATE_KEY_ID=003919b5ce1ec429adedb8bd6d40db31668be389
+      - FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\\nMIIE....\\n-----END PRIVATE KEY-----\\n
     develop:
       watch:
         - action: sync+restart

@@ -22,8 +22,19 @@ FROM openjdk:17-jdk-slim
 # Copia el archivo JAR desde la etapa de construcción
 COPY --from=build /app/target/*.jar app.jar
 
-# Copia el archivo de credenciales de Firebase desde la etapa de construcción
-COPY --from=build /app/src/main/resources/impulsedata-alicantefutura-firebase-adminsdk-fbsvc-003919b5ce.json /app/impulsedata-alicantefutura-firebase-adminsdk-fbsvc-003919b5ce.json
+# Reemplazar con variables de entorno para Firebase
+ENV FIREBASE_TYPE="service_account"
+ENV FIREBASE_PROJECT_ID="impulsedata-alicantefutura"
+ENV FIREBASE_PRIVATE_KEY_ID="003919b5ce1ec429adedb8bd6d40db31668be389"
+# IMPORTANTE: Para la clave privada, asegúrate de escapar los saltos de línea
+# Reemplaza todos los \n literales con \\n en la cadena
+ENV FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\nMIIE....\\n-----END PRIVATE KEY-----\\n"
+ENV FIREBASE_CLIENT_EMAIL="firebase-adminsdk-fbsvc@impulsedata-alicantefutura.iam.gserviceaccount.com"
+ENV FIREBASE_CLIENT_ID="102546228320055761282"
+ENV FIREBASE_AUTH_URI="https://accounts.google.com/o/oauth2/auth"
+ENV FIREBASE_TOKEN_URI="https://oauth2.googleapis.com/token"
+ENV FIREBASE_AUTH_PROVIDER_X509_CERT_URL="https://www.googleapis.com/oauth2/v1/certs"
+ENV FIREBASE_CLIENT_X509_CERT_URL="https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40impulsedata-alicantefutura.iam.gserviceaccount.com"
 
 # Expone el puerto 8080
 EXPOSE 8080
