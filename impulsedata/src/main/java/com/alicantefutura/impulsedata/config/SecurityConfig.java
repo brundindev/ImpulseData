@@ -84,9 +84,7 @@ public class SecurityConfig {
             "http://localhost:5173", // Puerto por defecto de Vite
             "http://localhost",      // Nuevo puerto en Docker
             "http://localhost:80",   // Especificar explícitamente puerto 80
-            "https://impulsedata.vercel.app", // Frontend en Vercel
-            "https://impulsedata-git-main-reynalrodriguez.vercel.app", // Posible URL de preview
-            "https://impulsedata-reynalrodriguez.vercel.app"           // Posible URL alternativa
+            "https://impulsedata.vercel.app"
         )); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin"));

@@ -1,14 +1,68 @@
 // Import Firebase
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, collectionGroup, serverTimestamp } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, collectionGroup, serverTimestamp, getDocs as getDocsWithOptions, enableNetwork, disableNetwork, setLogLevel } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { db } from '../firebase';
 
-// Initialize Firestore (ahora usamos db importado directamente)
-// const db = getFirestore(app);
+// Initialize Firestore
 const auth = getAuth(app);
 
 // Log para verificar que db se importó correctamente
 console.log("FirestoreService: db importado:", !!db, "auth:", !!auth);
+
+// Configurar nivel de logs para Firestore (reducir errores en consola)
+try {
+  if (process.env.NODE_ENV !== 'development') {
+    // En producción, ocultar logs de Firestore
+    setLogLevel('error');
+  }
+} catch (e) {
+  console.warn("No se pudo configurar el nivel de logs de Firestore:", e);
+}
+
+// Configurar nivel de logs para reducir ruido en consola en producción
+if (process.env.NODE_ENV === 'production') {
+  setLogLevel('error');
+}
+
+// Gestión de reconexión para evitar errores CORS
+let reconnectAttemptTimeout;
+const handleConnectionLoss = async () => {
+  try {
+    console.log("Detectada pérdida de conexión, deshabilitando red temporalmente...");
+    await disableNetwork(db);
+    
+    // Intentar reconectar después de 5 segundos
+    clearTimeout(reconnectAttemptTimeout);
+    reconnectAttemptTimeout = setTimeout(async () => {
+      try {
+        console.log("Intentando reconectar a Firestore...");
+        await enableNetwork(db);
+        console.log("Reconexión a Firestore exitosa");
+      } catch (error) {
+        console.error("Error al reconectar a Firestore:", error);
+        // Reintentar en caso de fallo
+        handleConnectionLoss();
+      }
+    }, 5000);
+  } catch (error) {
+    console.error("Error al manejar la pérdida de conexión:", error);
+  }
+};
+
+// Escuchar eventos de desconexión
+window.addEventListener('offline', handleConnectionLoss);
+
+// Configurar manejo de errores de red para Firestore
+window.addEventListener('unhandledrejection', event => {
+  const error = event.reason;
+  if (error && error.name === 'FirebaseError' && 
+      (error.code === 'failed-precondition' || 
+       error.code === 'unavailable' || 
+       error.message.includes('CORS'))) {
+    handleConnectionLoss();
+    event.preventDefault();
+  }
+});
 
 // Definir una empresa por defecto para todos los usuarios
 const EMPRESA_POR_DEFECTO = {
