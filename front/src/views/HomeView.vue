@@ -3357,4 +3357,27 @@ const importarArchivo = async (event) => {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
 }
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: transparent;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.navbar::before {
+  content: none;
+}
 </style>

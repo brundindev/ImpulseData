@@ -45,6 +45,10 @@
               <i class="fas fa-tachometer-alt dropdown-icon"></i>
               <span>Panel de Control</span>
             </router-link>
+            <router-link to="/soporte" class="dropdown-item">
+              <i class="fas fa-headset dropdown-icon"></i>
+              <span>Soporte Técnico</span>
+            </router-link>
             <a class="dropdown-item logout-item" @click="logout" href="#">
               <i class="fas fa-sign-out-alt dropdown-icon"></i>
               <span>Cerrar Sesión</span>

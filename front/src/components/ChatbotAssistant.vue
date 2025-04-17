@@ -7,12 +7,17 @@
         @click="toggleChat" 
         :class="{ 'chat-open': isOpen }"
         :aria-label="isOpen ? 'Cerrar asistente' : 'Abrir asistente'"
+        role="button"
+        tabindex="0"
+        @keydown.enter="toggleChat"
+        @keydown.space="toggleChat"
       >
         <svg
           viewBox="0 0 24 24"
           height="24"
           width="24"
           xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
         >
           <g fill="none">
             <path
@@ -39,7 +44,7 @@
           <h3 class="title-white">Asistente ImpulseData</h3>
           <div class="status-indicator">
             <span class="status-dot"></span>
-            <span class="status-text">En línea 24/7</span>
+            <span class="status-text">{{ isOffline ? 'Sin conexión' : 'En línea 24/7' }}</span>
           </div>
         </div>
         <button class="close-button" @click="toggleChat" aria-label="Cerrar chat">
@@ -62,9 +67,26 @@
           </div>
         </div>
 
+        <!-- Indicador de estado offline -->
+        <div v-if="isOffline" class="message-wrapper bot-message">
+          <div class="message-content">
+            <div class="message-avatar">
+              <span>🔌</span>
+            </div>
+            <div class="message-bubble isSystemMessage reconnecting-message">
+              <p>No hay conexión a internet. Intentando reconectar...</p>
+              <span class="message-time">{{ new Date().toLocaleTimeString() }}</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Botón destacado para crear empresa -->
         <div v-if="messages.length === 0" class="create-company-button-container">
-          <button @click="handleCrearEmpresa" class="create-company-button">
+          <button 
+            @click="handleCrearEmpresa" 
+            class="create-company-button"
+            aria-label="Crear nueva empresa"
+          >
             <span class="plus-icon">+</span> Crear nueva empresa
           </button>
         </div>
@@ -78,6 +100,7 @@
               @click="selectSuggestion(question)"
               class="question-button"
               :class="{ 'create-question': question.toLowerCase().includes('crear') }"
+              :aria-label="'Preguntar: ' + question"
             >
               {{ question }}
             </button>
@@ -88,6 +111,7 @@
               :key="index + 4"
               @click="selectSuggestion(question)"
               class="question-button"
+              :aria-label="'Preguntar: ' + question"
             >
               {{ question }}
             </button>
@@ -95,6 +119,7 @@
           <button 
             @click="showMoreQuestions = !showMoreQuestions" 
             class="toggle-questions-button"
+            :aria-label="showMoreQuestions ? 'Mostrar menos preguntas' : 'Mostrar más preguntas'"
           >
             {{ showMoreQuestions ? 'Mostrar menos' : 'Mostrar más' }}
           </button>
@@ -110,9 +135,17 @@
           <div class="message-content">
             <div class="message-avatar">
               <span v-if="message.isUser">👤</span>
+              <span v-else-if="message.isError">⚠️</span>
+              <span v-else-if="message.isSystemMessage">ℹ️</span>
               <span v-else>🤖</span>
             </div>
-            <div class="message-bubble">
+            <div class="message-bubble" 
+              :class="{
+                'isError': message.isError,
+                'isSystemMessage': message.isSystemMessage,
+                'isRecovered': message.isRecovered
+              }"
+            >
               <p>{{ message.text }}</p>
               <span class="message-time">{{ message.timestamp }}</span>
             </div>
@@ -142,10 +175,21 @@
           @keyup.enter="sendMessage"
           placeholder="Escribe tu mensaje..."
           aria-label="Mensaje"
+          :disabled="isOffline || errorState.retryCount > errorState.maxRetries"
         />
-        <button @click="sendMessage" class="send-button" aria-label="Enviar mensaje">
+        <button 
+          @click="sendMessage" 
+          class="send-button" 
+          aria-label="Enviar mensaje"
+          :disabled="isOffline || errorState.retryCount > errorState.maxRetries || !userInput.trim()"
+        >
           ➤
         </button>
+      </div>
+      
+      <!-- Indicador persistente de estado offline -->
+      <div v-if="isOffline" class="offline-indicator">
+        Sin conexión a internet
       </div>
     </div>
   </div>
@@ -171,6 +215,15 @@ const showSuggestions = ref(true);
 const chatContainer = ref(null);
 const showMoreQuestions = ref(false);
 const textChanging = ref(false);
+// Sistema de manejo de errores
+const errorState = ref({
+  hasError: false,
+  message: '',
+  retryCount: 0,
+  maxRetries: 3
+});
+const isOffline = ref(false);
+const networkRetryTimeout = ref(null);
 
 // Lista de preguntas sugeridas
 const suggestedQuestions = ref([
@@ -290,12 +343,79 @@ const toggleChat = () => {
     // El chat se va a abrir, preparar el scroll después de que esté visible
     nextTick(() => {
       scrollToBottom();
+      // Limpiar errores previos al abrir chat
+      resetErrorState();
     });
   } else {
     // El chat se va a cerrar, limpiar entradas
     isTyping.value = false;
     userInput.value = '';
   }
+};
+
+// Función para resetear el estado de errores
+const resetErrorState = () => {
+  errorState.value = {
+    hasError: false,
+    message: '',
+    retryCount: 0,
+    maxRetries: 3
+  };
+};
+
+// Función para manejar errores
+const handleError = (error, context = 'general') => {
+  console.error(`Error en ${context}:`, error);
+  
+  // Incrementar contador de reintentos
+  errorState.value.retryCount++;
+  
+  // Comprobar el tipo de error
+  if (!navigator.onLine || error.message?.includes('network') || error.name === 'NetworkError') {
+    isOffline.value = true;
+    errorState.value.message = 'Parece que no tienes conexión a internet. Intentando reconectar...';
+    scheduleNetworkRetry();
+  } else {
+    errorState.value.hasError = true;
+    errorState.value.message = 'Ha ocurrido un error al procesar tu solicitud.';
+  }
+  
+  // Si se han excedido los reintentos, mostrar mensaje de error persistente
+  if (errorState.value.retryCount > errorState.value.maxRetries) {
+    errorState.value.message = 'Hemos tenido problemas para responder. Por favor, inténtalo más tarde.';
+  }
+  
+  return errorState.value.message;
+};
+
+// Programar un reintento de conexión
+const scheduleNetworkRetry = () => {
+  if (networkRetryTimeout.value) {
+    clearTimeout(networkRetryTimeout.value);
+  }
+  
+  const retryTime = Math.min(2000 * Math.pow(2, errorState.value.retryCount - 1), 30000);
+  
+  networkRetryTimeout.value = setTimeout(() => {
+    if (navigator.onLine) {
+      isOffline.value = false;
+      errorState.value.hasError = false;
+      
+      // Notificar al usuario que la conexión se ha restablecido
+      if (isOpen.value) {
+        messages.value.push({
+          id: Date.now(),
+          text: 'La conexión se ha restablecido. ¡Ya puedes seguir usando el asistente!',
+          isUser: false,
+          timestamp: new Date().toLocaleTimeString(),
+          isSystemMessage: true
+        });
+      }
+    } else {
+      // Seguir intentando
+      scheduleNetworkRetry();
+    }
+  }, retryTime);
 };
 
 // Manejar la acción de crear empresa (emite un evento global)
@@ -342,45 +462,70 @@ const setTypingIndicator = (typing) => {
 const sendMessage = async () => {
   if (!userInput.value.trim()) return;
   
+  // Verificar si hay conexión a internet antes de continuar
+  if (!navigator.onLine) {
+    isOffline.value = true;
+    messages.value.push({
+      id: Date.now(),
+      text: 'No se puede enviar el mensaje porque no hay conexión a internet. Intentando reconectar...',
+      isUser: false,
+      timestamp: new Date().toLocaleTimeString(),
+      isSystemMessage: true
+    });
+    scheduleNetworkRetry();
+    return;
+  }
+  
   // Detectar si el usuario quiere crear una empresa
   const userMessageLower = userInput.value.toLowerCase();
   if ((userMessageLower.includes('crear') || userMessageLower.includes('nueva') || userMessageLower.includes('añadir')) 
        && userMessageLower.includes('empresa')) {
     // Si el usuario quiere crear una empresa, disparar la acción directamente
-    handleCrearEmpresa();
-    // Agregar mensaje explicativo
-    messages.value.push({
-      id: Date.now(),
-      text: userInput.value,
-      isUser: true,
-      timestamp: new Date().toLocaleTimeString()
-    });
-    
-    // Mostrar indicador de escritura
-    setTypingIndicator(true);
-    
-    // Esperar 3 segundos para simular escritura
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Agregar mensaje vacío que se irá llenando
-    const botMessageId = Date.now() + 1;
-    const botMessageText = "Abriendo el formulario para crear una nueva empresa...";
-    
-    messages.value.push({
-      id: botMessageId,
-      text: "",
-      isUser: false,
-      timestamp: new Date().toLocaleTimeString()
-    });
-    
-    // Ocultar indicador de escritura
-    setTypingIndicator(false);
-    
-    // Simular escritura palabra por palabra
-    await typeMessageWordByWord(botMessageId, botMessageText);
-    
-    // Limpiar input y salir
-    userInput.value = '';
+    try {
+      handleCrearEmpresa();
+      // Agregar mensaje explicativo
+      messages.value.push({
+        id: Date.now(),
+        text: userInput.value,
+        isUser: true,
+        timestamp: new Date().toLocaleTimeString()
+      });
+      
+      // Mostrar indicador de escritura
+      setTypingIndicator(true);
+      
+      // Esperar 3 segundos para simular escritura
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Agregar mensaje vacío que se irá llenando
+      const botMessageId = Date.now() + 1;
+      const botMessageText = "Abriendo el formulario para crear una nueva empresa...";
+      
+      messages.value.push({
+        id: botMessageId,
+        text: "",
+        isUser: false,
+        timestamp: new Date().toLocaleTimeString()
+      });
+      
+      // Ocultar indicador de escritura
+      setTypingIndicator(false);
+      
+      // Simular escritura palabra por palabra
+      await typeMessageWordByWord(botMessageId, botMessageText);
+      
+      // Limpiar input y salir
+      userInput.value = '';
+    } catch (error) {
+      const errorMessage = handleError(error, 'crear-empresa');
+      messages.value.push({
+        id: Date.now(),
+        text: errorMessage,
+        isUser: false,
+        timestamp: new Date().toLocaleTimeString(),
+        isError: true
+      });
+    }
     return;
   }
   
@@ -426,14 +571,47 @@ const sendMessage = async () => {
     nextTick(() => {
       scrollToBottom();
     });
+    
+    // Si llegamos aquí sin errores, resetear el estado de error
+    resetErrorState();
+    
   } catch (error) {
     console.error('Error al procesar el mensaje:', error);
+    const errorMessage = handleError(error, 'enviar-mensaje');
+    
     messages.value.push({
       id: Date.now(),
-      text: 'Lo siento, ha ocurrido un error. Por favor, intenta de nuevo más tarde.',
+      text: errorMessage,
       isUser: false,
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: new Date().toLocaleTimeString(),
+      isError: true
     });
+    
+    // Programar reintento automático si es apropiado
+    if (errorState.value.retryCount <= errorState.value.maxRetries) {
+      setTimeout(() => {
+        if (isOpen.value && !isOffline.value) {
+          setTypingIndicator(true);
+          getBotResponse(userMessage)
+            .then(response => {
+              const botMessageId = Date.now();
+              messages.value.push({
+                id: botMessageId,
+                text: "",
+                isUser: false,
+                timestamp: new Date().toLocaleTimeString(),
+                isRecovered: true
+              });
+              setTypingIndicator(false);
+              typeMessageWordByWord(botMessageId, response);
+              resetErrorState();
+            })
+            .catch(retryError => {
+              handleError(retryError, 'reintento-mensaje');
+            });
+        }
+      }, 5000);
+    }
   } finally {
     // Ocultar indicador de escritura
     setTypingIndicator(false);
@@ -468,8 +646,23 @@ const typeMessageWordByWord = async (messageId, fullText) => {
 
 // Obtener respuesta de la IA (simulada)
 const getBotResponse = async (message) => {
-  // Simulación para desarrollo
-  return simulateResponse(message);
+  // Verificar conexión a internet
+  if (!navigator.onLine) {
+    throw new Error('NetworkError: Sin conexión a internet');
+  }
+  
+  // Simulación de error aleatorio para pruebas (10% de probabilidad)
+  if (Math.random() < 0.1 && process.env.NODE_ENV === 'development') {
+    throw new Error('Error simulado para pruebas');
+  }
+  
+  try {
+    // Simulación para desarrollo
+    return simulateResponse(message);
+  } catch (error) {
+    console.error('Error en getBotResponse:', error);
+    throw error;
+  }
 };
 
 // Simular respuestas para desarrollo sin consumir API
@@ -545,11 +738,48 @@ onMounted(() => {
 
   // Escuchar el evento personalizado para abrir/cerrar el chatbot
   window.addEventListener('toggle-chatbot', toggleChat);
+  
+  // Monitorear el estado de la conexión
+  window.addEventListener('online', handleOnlineStatus);
+  window.addEventListener('offline', handleOnlineStatus);
 });
 
 onUnmounted(() => {
   window.removeEventListener('toggle-chatbot', toggleChat);
+  window.removeEventListener('online', handleOnlineStatus);
+  window.removeEventListener('offline', handleOnlineStatus);
+  
+  if (networkRetryTimeout.value) {
+    clearTimeout(networkRetryTimeout.value);
+  }
 });
+
+// Manejar cambios en el estado de la conexión
+const handleOnlineStatus = () => {
+  isOffline.value = !navigator.onLine;
+  
+  if (navigator.onLine) {
+    // Si recuperamos la conexión y hay errores, intentar limpiarlos
+    if (errorState.value.hasError && isOpen.value) {
+      messages.value.push({
+        id: Date.now(),
+        text: 'Conexión restablecida. Puedes continuar usando el asistente.',
+        isUser: false,
+        timestamp: new Date().toLocaleTimeString(),
+        isSystemMessage: true
+      });
+      resetErrorState();
+    }
+  } else if (isOpen.value) {
+    messages.value.push({
+      id: Date.now(),
+      text: 'Se ha perdido la conexión a internet. Algunas funciones pueden no estar disponibles.',
+      isUser: false,
+      timestamp: new Date().toLocaleTimeString(),
+      isSystemMessage: true
+    });
+  }
+};
 </script>
 
 <style scoped>
@@ -1145,5 +1375,67 @@ onUnmounted(() => {
   color: white;
   font-size: 12px;
   font-weight: 400;
+}
+
+/* Estilos para mensajes de error y sistema */
+.message-bubble.isError {
+  background: rgba(255, 0, 0, 0.1);
+  border-left: 3px solid #f44336;
+  color: #f44336;
+}
+
+.message-bubble.isSystemMessage {
+  background: rgba(0, 0, 0, 0.05);
+  font-style: italic;
+  color: #666;
+}
+
+.message-bubble.isRecovered {
+  border-left: 3px solid #4CAF50;
+}
+
+/* Estado offline */
+.offline-indicator {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  text-align: center;
+  padding: 5px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-size: 12px;
+  z-index: 10;
+}
+
+/* Mensaje de reconexión */
+.reconnecting-message {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+/* Mejorar accesibilidad de los botones */
+.question-button:focus, 
+.send-button:focus,
+.close-button:focus,
+.create-company-button:focus {
+  outline: 2px solid #00c3ff;
+  outline-offset: 2px;
+}
+
+.outer-cont:focus {
+  outline: 3px solid #00c3ff;
+  outline-offset: 3px;
 }
 </style> 
