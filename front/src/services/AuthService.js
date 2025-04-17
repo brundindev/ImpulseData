@@ -11,7 +11,12 @@ const API_URL = 'https://impulsedata.onrender.com/api/auth';
 // Crear una instancia personalizada de axios para el servicio de autenticación
 // para no afectar a otras partes de la aplicación
 const authAxios = axios.create({
-  baseURL: API_URL
+  baseURL: API_URL,
+  withCredentials: false, // Cambiar a false para evitar problemas de CORS
+  headers: {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*'
+  }
 });
 
 // Añadir interceptor para incluir el token en cada solicitud
@@ -126,10 +131,18 @@ class AuthService {
       
       // Usar la instancia personalizada de axios para el login
       console.log("Enviando solicitud de login al backend:", `${API_URL}/login`);
+      
+      // Configuración específica para esta solicitud para manejar CORS
+      const loginConfig = {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      };
+      
       const response = await authAxios.post('/login', {
         identificador: identifier,
         password: credentials.password
-      });
+      }, loginConfig);
       
       if (!response.data) {
         throw new Error('No se recibió token JWT del servidor');

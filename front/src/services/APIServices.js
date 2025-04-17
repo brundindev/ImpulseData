@@ -5,9 +5,10 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://impulsedata.onrender.co
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*'
   },
-  withCredentials: true // Habilitar el envío de cookies para autenticación cross-origin
+  withCredentials: false // Cambiar a false para evitar problemas de CORS
 });
 
 // Interceptor para añadir el token de autenticación
