@@ -176,22 +176,55 @@ public class AuthService {
 
     public String login(LoginRequest request) {
         try {
-            // Buscar usuario en Firestore primero para evitar múltiples consultas
+            // Identificador puede ser email o nombreUsuario
+            String identificador = request.getIdentificador();
+            String email = request.getEmail();
+            String nombreUsuario = request.getNombreUsuario();
+            
+            // Para logs y debugging
+            System.out.println("Login solicitado con:" +
+                " identificador=" + (identificador != null ? identificador : "null") +
+                " email=" + (email != null ? email : "null") +
+                " nombreUsuario=" + (nombreUsuario != null ? nombreUsuario : "null"));
+            
+            // Decidir qué campo usar para buscar (prioridad: email, nombreUsuario, identificador)
+            String campoAbuscar = null;
+            String valorAbuscar = null;
+            String tipoDeBusqueda = null;
+            
+            if (email != null && !email.trim().isEmpty()) {
+                campoAbuscar = "email";
+                valorAbuscar = email;
+                tipoDeBusqueda = "email";
+            } else if (nombreUsuario != null && !nombreUsuario.trim().isEmpty()) {
+                campoAbuscar = "nombreUsuario";
+                valorAbuscar = nombreUsuario;
+                tipoDeBusqueda = "nombreUsuario";
+            } else if (identificador != null && !identificador.trim().isEmpty()) {
+                // Determinar si identificador es email o nombreUsuario
+                if (identificador.contains("@")) {
+                    campoAbuscar = "email";
+                    tipoDeBusqueda = "email en identificador";
+                } else {
+                    campoAbuscar = "nombreUsuario";
+                    tipoDeBusqueda = "nombreUsuario en identificador";
+                }
+                valorAbuscar = identificador;
+            } else {
+                throw new RuntimeException("Debe proporcionar un email o nombre de usuario para iniciar sesión");
+            }
+            
+            System.out.println("Buscando usuario por " + tipoDeBusqueda + ": " + valorAbuscar);
+            
+            // Buscar usuario en Firestore
             var querySnapshot = firestore.collection("usuarios")
-                    .whereEqualTo("email", request.getIdentificador())
+                    .whereEqualTo(campoAbuscar, valorAbuscar)
                     .get()
                     .get();
-
-            // Si no se encuentra por email, intentar por nombreUsuario
-            if (querySnapshot.isEmpty()) {
-                querySnapshot = firestore.collection("usuarios")
-                        .whereEqualTo("nombreUsuario", request.getIdentificador())
-                        .get()
-                        .get();
-            }
             
             // Verificar si se encontró algún usuario
             if (querySnapshot.isEmpty()) {
+                System.out.println("No se encontró usuario con " + campoAbuscar + " = " + valorAbuscar);
                 throw new RuntimeException("Usuario no encontrado");
             }
             
@@ -200,6 +233,8 @@ public class AuthService {
             if (usuario == null) {
                 throw new RuntimeException("Usuario no encontrado");
             }
+            
+            System.out.println("Usuario encontrado: " + usuario.getEmail() + " - ID: " + usuario.getId());
             
             // Verificar si el email está verificado en Firebase
             boolean emailVerificadoFirebase = firebaseAuthService.isEmailVerificado(usuario.getEmail());

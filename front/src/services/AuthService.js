@@ -17,8 +17,8 @@ const authAxios = axios.create({
   baseURL: API_URL_WITH_PROXY,
   timeout: 15000, // 15 segundos de timeout
   headers: {
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
+    'Content-Type': 'application/json'
+    // Eliminamos 'X-Requested-With': 'XMLHttpRequest' que causa problemas CORS
   },
   withCredentials: true // Ahora podemos usar credentials ya que no usamos proxies
 });
@@ -29,6 +29,10 @@ axios.interceptors.request.use(
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    // Eliminamos el header problemático para CORS
+    if (config.headers['X-Requested-With']) {
+      delete config.headers['X-Requested-With'];
     }
     return config;
   },
@@ -43,6 +47,10 @@ authAxios.interceptors.request.use(
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    // Eliminamos el header problemático para CORS
+    if (config.headers['X-Requested-With']) {
+      delete config.headers['X-Requested-With'];
     }
     return config;
   },
@@ -108,7 +116,7 @@ class AuthService {
    */
   async login(credentials) {
     try {
-      console.log("Iniciando proceso de login con credenciales:", credentials.email || credentials.identificador);
+      console.log("Iniciando proceso de login con credenciales:", credentials.email || credentials.nombreUsuario || credentials.identificador);
       
       // Verificar si tenemos credenciales válidas
       const identifier = credentials.email || credentials.identificador || credentials.nombreUsuario;
@@ -166,11 +174,10 @@ class AuthService {
         // Intentar login directo con el backend
         console.log("Enviando solicitud de login al backend:", `${API_URL}/login`);
         
-        // Configuración específica para esta solicitud
+        // Configuración específica para esta solicitud - eliminamos el header problemático
         const loginConfig = {
           headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'Content-Type': 'application/json'
           }
         };
         
@@ -179,11 +186,13 @@ class AuthService {
           password: credentials.password
         };
         
-        // Si el identificador es un email, usar 'email', de lo contrario usar 'nombreUsuario'
+        // Usar campos específicos sin el identificador general
         if (identifier.includes('@')) {
           loginData.email = identifier;
+          // No enviar nombreUsuario si es un email
         } else {
           loginData.nombreUsuario = identifier;
+          // No enviar email si es un nombre de usuario
         }
         
         console.log("Enviando solicitud con datos:", JSON.stringify(loginData));

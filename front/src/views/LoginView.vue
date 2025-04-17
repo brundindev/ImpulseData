@@ -183,12 +183,24 @@ const login = async () => {
     }
     
     // Intentar inicio de sesión en el backend
-    await AuthService.login({
-      identificador: identificador.value,
-      nombreUsuario: identificador.value,
-      email: isEmail ? identificador.value : undefined,
-      password: password.value
-    });
+    try {
+      console.log(`Iniciando sesión con ${isEmail ? 'email' : 'nombre de usuario'}: ${identificador.value}`);
+      const loginData = {
+        identificador: identificador.value,
+        nombreUsuario: isEmail ? undefined : identificador.value,
+        email: isEmail ? identificador.value : undefined,
+        password: password.value
+      };
+      console.log('Datos de login:', loginData);
+      
+      await AuthService.login(loginData);
+      
+      // Login exitoso
+      console.log('Login exitoso');
+    } catch (loginError) {
+      console.error('Error específico de login:', loginError);
+      throw loginError; // Propagar el error para manejarlo en el catch general
+    }
     
     // Emitir un evento personalizado para notificar que el estado de autenticación ha cambiado
     window.dispatchEvent(new CustomEvent('auth-state-changed'));

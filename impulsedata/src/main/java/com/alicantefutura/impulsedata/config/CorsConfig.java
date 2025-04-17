@@ -25,7 +25,7 @@ public class CorsConfig implements WebMvcConfigurer {
                     "https://impulsedata-reynalrodriguez.vercel.app"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
-                .allowedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin")
+                .allowedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin", "X-Requested-With")
                 .exposedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin")
                 .allowCredentials(true)
                 .maxAge(3600); // Tiempo de caché de preflight en segundos
@@ -45,7 +45,7 @@ public class CorsConfig implements WebMvcConfigurer {
             "https://impulsedata-git-main-reynalrodriguez.vercel.app",
             "https://impulsedata-reynalrodriguez.vercel.app"
         ));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin", "X-Requested-With"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin"));
         config.setAllowCredentials(true);
