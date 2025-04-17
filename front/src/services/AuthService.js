@@ -38,8 +38,7 @@ const authAxios = axios.create({
   timeout: 15000, // 15 segundos de timeout
   headers: {
     'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Origin': 'https://impulsedata.vercel.app'
+    'X-Requested-With': 'XMLHttpRequest'
   },
   withCredentials: false // Los proxies CORS no soportan credentials
 });
@@ -143,11 +142,46 @@ authAxios.interceptors.response.use(
         
         console.log(`Reintentando solicitud con proxy alternativo (intento ${retryCount + 1}/${maxRetries})`);
         
+        // Esperar un poco antes de reintentar para evitar saturación
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         // Actualizar la URL en la configuración de la solicitud
         error.config.baseURL = API_URL_WITH_PROXY;
         
+        // Eliminar cualquier encabezado Origin que pudiera estar causando problemas
+        if (error.config.headers && error.config.headers.Origin) {
+          delete error.config.headers.Origin;
+        }
+        
         // Reintento con la nueva configuración
         return authAxios(error.config);
+      } else {
+        console.error('Se han agotado todos los intentos con diferentes proxies CORS');
+        
+        // Como último recurso, intentar directamente sin proxy
+        if (!error.config._directAttempt) {
+          error.config._directAttempt = true;
+          console.log('Intentando comunicación directa sin proxy como último recurso');
+          
+          // Intentar comunicación directa con el backend
+          try {
+            // Crear una instancia temporal directa
+            const directAxios = axios.create({
+              baseURL: API_URL.replace('/api/auth', ''),
+              timeout: 15000,
+              headers: { 'Content-Type': 'application/json' }
+            });
+            
+            // Intentar la solicitud
+            return directAxios({
+              ...error.config,
+              baseURL: API_URL
+            });
+          } catch (directError) {
+            console.error('Falló el intento directo:', directError.message);
+            return Promise.reject(directError);
+          }
+        }
       }
     }
     return Promise.reject(error);
@@ -194,20 +228,44 @@ class AuthService {
       const loginConfig = {
         headers: {
           'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'Origin': 'https://impulsedata.vercel.app'
+          'X-Requested-With': 'XMLHttpRequest'
         }
       };
       
-      const response = await authAxios.post('/login', {
-        identificador: identifier,
-        password: credentials.password
-      }, loginConfig);
+      let response;
       
-      if (!response.data) {
+      try {
+        // Intentar con el proxy primero
+        response = await authAxios.post('/login', {
+          identificador: identifier,
+          password: credentials.password
+        }, loginConfig);
+      } catch (proxyError) {
+        console.error("Error al login con proxy, intentando directamente:", proxyError.message);
+        
+        // Crear una instancia directa como fallback
+        const directAxios = axios.create({
+          baseURL: API_URL,
+          timeout: 15000,
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        response = await directAxios.post('/login', {
+          identificador: identifier,
+          password: credentials.password
+        });
+      }
+      
+      if (!response || !response.data) {
         throw new Error('No se recibió token JWT del servidor');
       }
-            
+      
+      // Verificar que la respuesta es un token JWT válido (debe contener al menos dos puntos '.')
+      if (typeof response.data !== 'string' || !response.data.includes('.')) {
+        console.error('Respuesta recibida no es un token JWT válido:', response.data);
+        throw new Error('Formato de token JWT inválido');
+      }
+      
       // Guardar el token JWT y los datos de usuario
       localStorage.setItem('authToken', response.data);
       const userData = this.storeUserDataFromToken(response.data);
@@ -482,6 +540,18 @@ class AuthService {
    */
   storeUserDataFromToken(token) {
     try {
+      // Verificar que el token es válido antes de procesarlo
+      if (!token || typeof token !== 'string') {
+        console.error('Token inválido o no es una cadena de texto');
+        return this.storeDefaultUserData();
+      }
+      
+      // Verificar que el token tiene el formato esperado (xxx.yyy.zzz)
+      if (!token.includes('.')) {
+        console.error('Formato de token JWT inválido, no contiene separadores "."');
+        return this.storeDefaultUserData();
+      }
+
       // Extraer la parte del payload del JWT (segunda parte)
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -543,15 +613,22 @@ class AuthService {
       return userData;
     } catch (error) {
       console.error('Error al decodificar el token JWT', error);
-      // En caso de error, guardar datos por defecto para evitar errores en la UI
-      const defaultUserData = {
-        nombre: 'Usuario',
-        email: 'usuario@example.com',
-        displayName: 'Usuario'
-      };
-      localStorage.setItem('userData', JSON.stringify(defaultUserData));
-      return defaultUserData;
+      return this.storeDefaultUserData();
     }
+  }
+
+  /**
+   * Almacena datos de usuario por defecto en caso de error
+   * @returns {object} Datos de usuario por defecto
+   */
+  storeDefaultUserData() {
+    const defaultUserData = {
+      nombre: 'Usuario',
+      email: 'usuario@example.com',
+      displayName: 'Usuario'
+    };
+    localStorage.setItem('userData', JSON.stringify(defaultUserData));
+    return defaultUserData;
   }
 }
 

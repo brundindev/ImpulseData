@@ -30,8 +30,7 @@ const api = axios.create({
   timeout: 15000, // 15 segundos de timeout
   headers: {
     'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Origin': 'https://impulsedata.vercel.app'
+    'X-Requested-With': 'XMLHttpRequest'
   },
   withCredentials: false // El proxy CORS no soporta credentials
 });
@@ -66,13 +65,43 @@ api.interceptors.response.use(
         
         console.log(`Reintentando solicitud con proxy alternativo (intento ${retryCount + 1}/${maxRetries})`);
         
+        // Esperar un poco antes de reintentar para evitar saturación
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         // Actualizar la URL en la configuración de la solicitud
         error.config.baseURL = API_URL_WITH_PROXY;
+        
+        // Eliminar cualquier encabezado Origin que pudiera estar causando problemas
+        if (error.config.headers && error.config.headers.Origin) {
+          delete error.config.headers.Origin;
+        }
         
         // Reintento con la nueva configuración
         return api(error.config);
       } else {
         console.error('Se han agotado todos los intentos con diferentes proxies CORS');
+        
+        // Intentar con comunicación directa como último recurso
+        if (!error.config._directAttempt) {
+          error.config._directAttempt = true;
+          console.log('Intentando comunicación directa como último recurso');
+          
+          // Cambiar a URL directa
+          error.config.baseURL = API_URL;
+          
+          // Esperar un poco antes de reintentar
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Crear una instancia específica para este intento
+          const directApi = axios.create({
+            timeout: 15000,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          return directApi(error.config);
+        }
       }
     }
     return Promise.reject(error);
