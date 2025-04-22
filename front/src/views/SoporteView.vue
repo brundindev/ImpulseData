@@ -418,6 +418,14 @@ onMounted(async () => {
     if (chatContainer.value) {
       scrollToBottom();
     }
+
+    // Verificar si el usuario está autenticado
+    if (isAuthenticated) {
+      console.log("Usuario autenticado en la vista de soporte", userEmail.value);
+    } else {
+      console.log("Usuario no autenticado en la vista de soporte");
+      router.push('/login');
+    }
   } catch (error) {
     console.error('Error al inicializar el chat:', error);
     isConnected.value = false;

@@ -26,14 +26,14 @@
         </nav>
       </div>
       <div class="navbar-right">
-        <div class="auth-buttons" v-if="!isAuthenticated">
+        <div class="auth-buttons" v-if="!isAuthenticated()">
           <router-link to="/login" class="button button2">Iniciar Sesión</router-link>
           <router-link to="/register" class="button button2">Registrarse</router-link>
         </div>
         <div class="user-dropdown" v-else>
           <div class="dropdown-toggle" @click="toggleMenu" ref="dropdownToggle">
             <i class="fas fa-user-circle"></i>
-            <span v-if="usuario">{{ usuario?.nombre || 'Usuario' }}</span>
+            <span v-if="usuario()">{{ usuario()?.nombre || 'Usuario' }}</span>
             <i class="fas fa-caret-down"></i>
           </div>
           <div class="dropdown-menu" v-if="showMenu" ref="dropdownMenu">
@@ -46,7 +46,7 @@
               <span>Panel de Control</span>
             </router-link>
             <router-link to="/soporte" class="dropdown-item">
-              <i class="fas fa-headset dropdown-icon"></i>
+              <i class="fas fa-question-circle dropdown-icon"></i>
               <span>Soporte Técnico</span>
             </router-link>
             <a class="dropdown-item logout-item" @click="logout" href="#">
@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -75,16 +75,20 @@ export default {
     const dropdownMenu = ref(null);
     const closeTimeout = ref(null);
 
+    // Funciones para acceder al estado de autenticación y usuario
     const isAuthenticated = () => {
+      console.log('Auth state:', store.getters.isAuthenticated);
       return store.getters.isAuthenticated;
     };
 
     const usuario = () => {
+      console.log('User state:', store.state.auth.usuario);
       return store.state.auth.usuario;
     };
 
     const toggleMenu = () => {
       showMenu.value = !showMenu.value;
+      console.log('Menu toggled:', showMenu.value);
     };
 
     const handleClickOutside = (event) => {
@@ -127,6 +131,8 @@ export default {
 
     onMounted(() => {
       document.addEventListener('click', handleClickOutside);
+      console.log('NavBar mounted, isAuthenticated:', isAuthenticated());
+      console.log('Current User:', usuario());
     });
 
     onUnmounted(() => {

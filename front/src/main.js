@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import store from './store' // Importar la store Vuex
 
 import App from './App.vue'
 import router from './router'
@@ -64,5 +65,6 @@ const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
+app.use(store) // Usar la store Vuex
 
 app.mount('#app')
