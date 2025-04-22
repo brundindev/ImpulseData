@@ -331,25 +331,19 @@ const mostrarChatbot = computed(() => {
               </div>
               <span class="dropdown-arrow">▼</span>         
             </div>
-            <div class="dropdown-menu">
-              <RouterLink to="/perfil" class="dropdown-item">
-                <svg class="dropdown-icon" viewBox="0 0 24 24">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
-                </svg>
-                Mi Perfil
-              </RouterLink>
-              <RouterLink to="/panel-control" class="dropdown-item">
-                <svg class="dropdown-icon" viewBox="0 0 24 24">
-                  <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path>
-                </svg>
-                Panel de Control
-              </RouterLink>
-              <div class="dropdown-item logout-item" @click="logout">
-                <svg class="dropdown-icon" viewBox="0 0 24 24">
-                  <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"></path>
-                </svg>
-                Cerrar Sesión
-              </div>
+            <div class="dropdown-menu" v-if="showDropdown">
+              <router-link to="/perfil" class="dropdown-item">
+                <i class="fas fa-user dropdown-icon"></i> Mi Perfil
+              </router-link>
+              <router-link to="/panel-control" class="dropdown-item">
+                <i class="fas fa-tachometer-alt dropdown-icon"></i> Panel de Control
+              </router-link>
+              <router-link to="/soporte" class="dropdown-item">
+                <i class="fas fa-question-circle dropdown-icon"></i> Soporte Técnico
+              </router-link>
+              <a href="#" class="dropdown-item logout-item" @click.prevent="logout">
+                <i class="fas fa-sign-out-alt dropdown-icon"></i> Cerrar Sesión
+              </a>
             </div>
           </div>
           <button @click="logout" class="Btn">
