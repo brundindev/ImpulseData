@@ -186,10 +186,10 @@ const login = async () => {
     try {
       console.log(`Iniciando sesión con ${isEmail ? 'email' : 'nombre de usuario'}: ${identificador.value}`);
       const loginData = {
-        identificador: identificador.value,
+      identificador: identificador.value,
         nombreUsuario: isEmail ? undefined : identificador.value,
         email: isEmail ? identificador.value : undefined,
-        password: password.value
+      password: password.value
       };
       console.log('Datos de login:', loginData);
       

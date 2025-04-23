@@ -268,13 +268,13 @@ const register = async () => {
       // 2. Crear usuario en el backend - Esto puede fallar pero no debe impedir mostrar éxito
       guardandoEnBackend.value = true;
       try {
-        await AuthService.register({
-          nombreUsuario: nombreUsuario.value,
-          email: email.value,
-          password: password.value
-        });
+      await AuthService.register({
+        nombreUsuario: nombreUsuario.value,
+        email: email.value,
+        password: password.value
+      });
         
-        guardandoEnBackend.value = false;
+      guardandoEnBackend.value = false;
         console.log("✅ Registro en Backend exitoso");
       } catch (backendError) {
         guardandoEnBackend.value = false;
@@ -407,7 +407,7 @@ const enviarVerificacion = async () => {
       verificacionEnviada.value = true;
       verificacionMensaje.value = response.data || 'Se ha enviado un nuevo correo de verificación.';
       console.log("Verificación enviada exitosamente:", verificacionMensaje.value);
-      return;
+        return;
     } catch (backendError) {
       console.error('Error con backend:', backendError);
       
@@ -420,7 +420,7 @@ const enviarVerificacion = async () => {
         
         if (currentUser && currentUser.email === emailToUse) {
           await FirebaseAuthService.sendVerificationEmail(currentUser);
-          verificacionEnviada.value = true;
+        verificacionEnviada.value = true;
           verificacionMensaje.value = 'Se ha enviado un correo de verificación. Por favor, revisa tu bandeja de entrada.';
           console.log("Verificación enviada exitosamente con Firebase");
           return;
@@ -436,7 +436,7 @@ const enviarVerificacion = async () => {
     }
   } catch (err) {
     console.error('Error al enviar verificación:', err);
-    error.value = 'No se pudo enviar el correo de verificación.';
+          error.value = 'No se pudo enviar el correo de verificación.';
   } finally {
     enviandoVerificacion.value = false;
   }

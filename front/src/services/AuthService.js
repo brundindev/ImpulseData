@@ -334,22 +334,22 @@ class AuthService {
       
       // Luego registrarse en el backend
       try {
-        console.log("Enviando solicitud de registro al backend:", `${API_URL}/registro`);
-        
-        // Registrarse en el backend
-        const response = await authAxios.post('/registro', {
-          nombreUsuario: user.nombreUsuario,
-          apellidos: user.apellidos || '',
-          email: user.email,
-          password: user.password,
-          confirmPassword: user.confirmPassword,
-          tipoEmpresa: user.tipoEmpresa
-        });
-        
-        if (response && response.data) {
+      console.log("Enviando solicitud de registro al backend:", `${API_URL}/registro`);
+      
+      // Registrarse en el backend
+      const response = await authAxios.post('/registro', {
+        nombreUsuario: user.nombreUsuario,
+        apellidos: user.apellidos || '',
+        email: user.email,
+        password: user.password,
+        confirmPassword: user.confirmPassword,
+        tipoEmpresa: user.tipoEmpresa
+      });
+      
+      if (response && response.data) {
           console.log('✅ Registro exitoso en el backend', response.data);
-          return response.data;
-        } else {
+        return response.data;
+      } else {
           console.warn('⚠️ No se recibió respuesta del servidor');
           
           // Si el registro en Firebase fue exitoso, no consideramos esto un error fatal
@@ -363,7 +363,7 @@ class AuthService {
             };
           }
           
-          throw new Error('No se recibió respuesta del servidor');
+        throw new Error('No se recibió respuesta del servidor');
         }
       } catch (backendError) {
         console.error('❌ Error en el registro en el backend:', backendError.response?.data || backendError.message);

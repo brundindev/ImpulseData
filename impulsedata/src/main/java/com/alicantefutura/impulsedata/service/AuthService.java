@@ -242,7 +242,7 @@ public class AuthService {
                     .whereEqualTo(campoAbuscar, valorAbuscar)
                     .get()
                     .get();
-                    
+
             long tiempoBusqueda = System.currentTimeMillis() - tiempoInicio;
             System.out.println("Tiempo de búsqueda en Firestore: " + tiempoBusqueda + "ms");
             
@@ -281,22 +281,22 @@ public class AuthService {
             try {
                 long tiempoInicioVerif = System.currentTimeMillis();
                 
-                boolean emailVerificadoFirebase = firebaseAuthService.isEmailVerificado(usuario.getEmail());
+            boolean emailVerificadoFirebase = firebaseAuthService.isEmailVerificado(usuario.getEmail());
                 
                 long tiempoVerif = System.currentTimeMillis() - tiempoInicioVerif;
                 System.out.println("Tiempo de verificación de email: " + tiempoVerif + "ms");
-                
-                // Si está verificado en Firebase pero no en nuestra base, actualizamos
-                if (emailVerificadoFirebase && !usuario.isEmailVerificado()) {
-                    usuario.setEmailVerificado(true);
-                    firestore.collection("usuarios").document(usuario.getId()).update("emailVerificado", true).get();
-                    System.out.println("Email verificado actualizado para usuario: " + usuario.getEmail());
-                }
-                
-                // Si no está verificado en Firebase, no permitimos login
-                if (!emailVerificadoFirebase) {
-                    throw new RuntimeException("Por favor, verifica tu dirección de correo electrónico antes de iniciar sesión");
-                }
+            
+            // Si está verificado en Firebase pero no en nuestra base, actualizamos
+            if (emailVerificadoFirebase && !usuario.isEmailVerificado()) {
+                usuario.setEmailVerificado(true);
+                firestore.collection("usuarios").document(usuario.getId()).update("emailVerificado", true).get();
+                System.out.println("Email verificado actualizado para usuario: " + usuario.getEmail());
+            }
+            
+            // Si no está verificado en Firebase, no permitimos login
+            if (!emailVerificadoFirebase) {
+                throw new RuntimeException("Por favor, verifica tu dirección de correo electrónico antes de iniciar sesión");
+            }
             } catch (FirebaseAuthException e) {
                 // Si el usuario existe en Firestore pero no en Firebase Auth, puede ser un problema de sincronización
                 System.err.println("Error al verificar email en Firebase: " + e.getMessage());
@@ -308,7 +308,7 @@ public class AuthService {
 
             long tiempoTotal = System.currentTimeMillis() - tiempoInicio;
             System.out.println("Tiempo total de login: " + tiempoTotal + "ms");
-            
+
             // Si llegamos aquí, todo está correcto - Generar token JWT
             return jwtService.generateToken(usuario);
         } catch (InterruptedException | ExecutionException e) {
