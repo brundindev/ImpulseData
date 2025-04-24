@@ -5,7 +5,8 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth, waitForAuthInit } from '../firebase';
 // Importar el servicio de Firestore para crear la empresa por defecto
@@ -521,6 +522,24 @@ class FirebaseAuthService {
       return true;
     } catch (error) {
       console.error('Error al actualizar nombre de usuario:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Envía un correo para restablecer la contraseña
+   * @param {string} email - Correo electrónico del usuario
+   * @returns {Promise<boolean>} - true si se envió correctamente
+   */
+  static async resetPassword(email) {
+    try {
+      // Esperar a que Firebase Auth esté inicializado
+      await waitForAuthInit();
+      
+      await sendPasswordResetEmail(auth, email);
+      return true;
+    } catch (error) {
+      console.error('Error al enviar correo de recuperación de contraseña:', error);
       throw error;
     }
   }

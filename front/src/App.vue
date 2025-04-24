@@ -12,6 +12,7 @@ const auth = getAuth();
 const usuario = ref(null);
 const showDropdown= ref(false);
 const userPhoto = ref('');
+const userEmail = ref('');
 const userInitials = computed(() => {
   if (!usuario.value || !usuario.value.nombre) return '?';
   return usuario.value.nombre
@@ -208,9 +209,11 @@ const actualizarEstadoUsuario = async () => {
   // Actualizar estado según lo que tengamos
   if (currentUser && jwtToken && userData) {
     usuario.value = userData;
+    userEmail.value = currentUser.email || userData.email || '';
     console.log("Sesión activa y sincronizada correctamente");
   } else {
     usuario.value = null;
+    userEmail.value = '';
     
     // Verificar si estamos en una ruta protegida
     const requiresAuth = router.currentRoute.value.meta.requiresAuth;
@@ -340,6 +343,9 @@ const mostrarChatbot = computed(() => {
               </router-link>
               <router-link to="/soporte" class="dropdown-item">
                 <i class="fas fa-question-circle dropdown-icon"></i> Soporte Técnico
+              </router-link>
+              <router-link v-if="userEmail === 'brundindev@gmail.com'" to="/admin/soporte" class="dropdown-item">
+                <i class="fas fa-headset dropdown-icon"></i> Panel de Soporte
               </router-link>
               <a href="#" class="dropdown-item logout-item" @click.prevent="logout">
                 <i class="fas fa-sign-out-alt dropdown-icon"></i> Cerrar Sesión

@@ -25,80 +25,137 @@
           </div>
         </div>
       </div>
-      <form @submit.prevent="login">
-        <div class="form-group">
-          <label for="identificador">Email o nombre de usuario</label>
-          <input
-            type="text"
-            id="identificador"
-            v-model="identificador"
-            class="form-control"
-            required
-            placeholder="Introduce tu email o nombre de usuario"
-            style="color: #333 !important;"
-          />
-        </div>
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <div class="password-field-container">
+      
+      <!-- Formulario de login normal -->
+      <div v-if="!resetPasswordMode">
+        <form @submit.prevent="login">
+          <div class="form-group">
+            <label for="identificador">Email o nombre de usuario</label>
             <input
-              :type="showPassword ? 'text' : 'password'"
-              id="password"
-              v-model="password"
+              type="text"
+              id="identificador"
+              v-model="identificador"
               class="form-control"
               required
-              placeholder="Introduce tu contraseña"
+              placeholder="Introduce tu email o nombre de usuario"
               style="color: #333 !important;"
             />
-            <button 
-              type="button"
-              class="password-toggle-btn"
-              @click="showPassword = !showPassword"
-              tabindex="-1"
-            >
-              <i v-if="showPassword">👁️</i>
-              <i v-else>👁️‍🗨️</i>
+          </div>
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <div class="password-field-container">
+              <input
+                :type="showPassword ? 'text' : 'password'"
+                id="password"
+                v-model="password"
+                class="form-control"
+                required
+                placeholder="Introduce tu contraseña"
+                style="color: #333 !important;"
+              />
+              <button 
+                type="button"
+                class="password-toggle-btn"
+                @click="showPassword = !showPassword"
+                tabindex="-1"
+              >
+                <i v-if="showPassword">👁️</i>
+                <i v-else>👁️‍🗨️</i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <a href="#" @click.prevent="showResetPasswordForm" class="forgot-password">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" :disabled="loading">
+              {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
             </button>
           </div>
-        </div>
-        <div class="actions">
-          <button type="submit" class="btn btn-primary" :disabled="loading">
-            {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
-          </button>
+          
+          <!-- Separador -->
+          <div class="separator">
+            <span>o</span>
+          </div>
+          
+          <!-- Botón de Google -->
+          <div class="social-login">
+            <button type="button" class="btn-google" @click="loginWithGoogle" :disabled="loading">
+              <img src="@/assets/img/google_logo.png" alt="Google Logo" class="google-icon">
+              Iniciar sesión con Google
+            </button>
+          </div>
+          
+          <div class="register-link">
+            ¿No tienes cuenta? <router-link to="/registro">Regístrate</router-link>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Formulario de recuperación de contraseña -->
+      <div v-else class="reset-password-form">
+        <h2>Recuperar Contraseña</h2>
+        
+        <div v-if="resetPasswordSuccess" class="success-message">
+          <p>Hemos enviado un correo electrónico con instrucciones para restablecer tu contraseña.</p>
+          <button @click="cancelResetPassword" class="btn-outline">Volver al login</button>
         </div>
         
-        <!-- Separador -->
-        <div class="separator">
-          <span>o</span>
-        </div>
-        
-        <!-- Botón de Google -->
-        <div class="social-login">
-          <button type="button" class="btn-google" @click="loginWithGoogle" :disabled="loading">
-            <img src="@/assets/img/google_logo.png" alt="Google Logo" class="google-icon">
-            Iniciar sesión con Google
-          </button>
-        </div>
-        
-        <div class="register-link">
-          ¿No tienes cuenta? <router-link to="/registro">Regístrate</router-link>
-        </div>
-      </form>
+        <form v-else @submit.prevent="sendResetPasswordEmail">
+          <p class="reset-instructions">
+            Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+          </p>
+          
+          <div class="form-group">
+            <label for="reset-email">Correo electrónico</label>
+            <input 
+              type="email" 
+              id="reset-email" 
+              v-model="resetPasswordEmail" 
+              placeholder="tu@correo.com"
+              required
+            >
+          </div>
+          
+          <div v-if="resetPasswordError" class="error-message">
+            {{ resetPasswordError }}
+          </div>
+          
+          <div class="form-actions">
+            <button 
+              type="button" 
+              @click="cancelResetPassword" 
+              class="btn-outline"
+              :disabled="loading"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              class="btn-primary" 
+              :disabled="loading"
+            >
+              <span v-if="loading" class="spinner"></span>
+              <span v-else>Enviar correo</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue';
+import { ref, computed, onUnmounted, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth'; // Importar el store de autenticación de Pinia
 import AuthService from '../services/AuthService';
 import axios from 'axios';
 import FirebaseAuthService from '../services/FirebaseAuthService';
 import { getAuth } from 'firebase/auth'; // Importar getAuth para obtener la instancia de auth
-
-// Obtener la instancia de auth
-const auth = getAuth();
+import { auth } from '../firebase';
 
 // Configurar un manejador global para suprimir errores de red en consola
 // Solo para este componente
@@ -137,6 +194,10 @@ const credencialesIncorrectas = computed(() => {
 
 // Estado para controlar la visibilidad de la contraseña
 const showPassword = ref(false);
+const resetPasswordEmail = ref('');
+const resetPasswordMode = ref(false);
+const resetPasswordSuccess = ref(false);
+const resetPasswordError = ref('');
 
 const login = async () => {
   // Validar formulario
@@ -487,6 +548,41 @@ const reenviarVerificacion = async () => {
     } else {
       error.value = err.response?.data || 'No se pudo reenviar el correo de verificación.';
     }
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Función para mostrar el formulario de recuperación de contraseña
+const showResetPasswordForm = () => {
+  resetPasswordMode.value = true;
+  resetPasswordEmail.value = identificador.value; // Pre-rellenar con el email si existe
+  error.value = '';
+};
+
+// Función para cancelar y volver al login
+const cancelResetPassword = () => {
+  resetPasswordMode.value = false;
+  resetPasswordSuccess.value = false;
+  resetPasswordError.value = '';
+};
+
+// Función para enviar correo de recuperación de contraseña
+const sendResetPasswordEmail = async () => {
+  if (!resetPasswordEmail.value) {
+    resetPasswordError.value = 'Por favor, introduce tu correo electrónico';
+    return;
+  }
+  
+  loading.value = true;
+  resetPasswordError.value = '';
+  
+  try {
+    await AuthService.resetPassword(resetPasswordEmail.value);
+    resetPasswordSuccess.value = true;
+  } catch (error) {
+    resetPasswordError.value = 'No se pudo enviar el correo de recuperación. Verifica que el correo sea correcto.';
+    console.error('Error al enviar correo de recuperación:', error);
   } finally {
     loading.value = false;
   }

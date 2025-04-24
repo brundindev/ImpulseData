@@ -549,8 +549,8 @@ class AuthService {
   }
 
   /**
-   * Almacena datos de usuario por defecto en caso de error
-   * @returns {object} Datos de usuario por defecto
+   * Almacena datos básicos de usuario para mantener la sesión
+   * hasta que tengamos la respuesta del backend
    */
   storeDefaultUserData() {
     const defaultUserData = {
@@ -560,6 +560,21 @@ class AuthService {
     };
     localStorage.setItem('userData', JSON.stringify(defaultUserData));
     return defaultUserData;
+  }
+
+  /**
+   * Solicita un correo de recuperación de contraseña
+   * @param {string} email - Email del usuario
+   * @returns {Promise<boolean>} - true si se envió correctamente
+   */
+  async resetPassword(email) {
+    try {
+      // Usamos el método estático de FirebaseAuthService
+      return await FirebaseAuthService.resetPassword(email);
+    } catch (error) {
+      console.error('Error al enviar correo de recuperación de contraseña:', error);
+      throw error;
+    }
   }
 }
 

@@ -7,6 +7,7 @@ import CambiarPasswordView from '../views/CambiarPasswordView.vue'
 import PanelControlView from '../views/PanelControlView.vue'
 import WelcomeView from '../views/WelcomeView.vue'
 import SoporteView from '../views/SoporteView.vue'
+import AdminSoporteView from '../views/AdminSoporteView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,6 +58,12 @@ const router = createRouter({
       path: '/soporte',
       name: 'soporte',
       component: SoporteView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/soporte',
+      name: 'adminSoporte',
+      component: AdminSoporteView,
       meta: { requiresAuth: true }
     }
   ],
