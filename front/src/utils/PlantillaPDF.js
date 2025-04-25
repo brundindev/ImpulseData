@@ -49,6 +49,149 @@ body {
     overflow: hidden;
 }
 
+/* Estilo para todas las páginas excepto la portada */
+.page:not(#portada) {
+    margin: 30mm 15mm; /* Márgenes superiores/inferiores y laterales para todas las páginas excepto la portada */
+}
+
+.page {
+    margin-bottom: 60px; /* Más espacio entre secciones */
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--light-grey-border);
+    /* Variable de color específica de la sección */
+    --section-color: var(--color-default-section);
+    /* Evitar corte de texto entre páginas */
+    page-break-inside: avoid;
+}
+.page:last-child { border-bottom: none; margin-bottom: 0; }
+
+/* Asignación de --section-color */
+.section-agencia { --section-color: var(--color-agencia); }
+.section-empleo { --section-color: var(--color-empleo); }
+.section-promo { --section-color: var(--color-promo); }
+.section-desarrollo { --section-color: var(--color-desarrollo); }
+.section-gestion { --section-color: var(--color-gestion); }
+.section-marketing { --section-color: var(--color-marketing); }
+.section-indice, .section-anexos { --section-color: var(--color-default-section); }
+
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 1.8em;
+    margin-bottom: 1em;
+    font-weight: 600;
+    /* Evitar que los títulos se corten entre páginas */
+    page-break-inside: avoid;
+    page-break-after: avoid;
+}
+
+/* Encabezado principal (H2) usa el color de sección */
+h2 {
+    font-size: 2em;
+    border-bottom: none; /* Quitar borde inferior */
+    color: var(--section-color);
+    padding-bottom: 0.4em;
+    margin-bottom: 1.2em;
+    margin-top: 0;
+    font-weight: 600; /* Semi-bold al estilo Apple */
+    letter-spacing: -0.02em; /* Espaciado de letras ligeramente negativo, típico de Apple */
+}
+/* Ajuste para el H2 de la primera sección después de la portada */
+#indice + section h2, #anexos + section h2 {
+     margin-top: 1.8em;
+}
+
+/* Subtítulos (H3, H4) usan el color de sección */
+h3 { 
+    font-size: 1.5em; 
+    color: var(--section-color); 
+    font-weight: 600; 
+    margin-top: 1.5em;
+    letter-spacing: -0.01em;
+}
+h4 { 
+    font-size: 1.2em; 
+    color: var(--section-color); 
+    font-weight: 500; /* Más ligero */
+    opacity: 0.95; 
+    margin-top: 1.3em;
+    letter-spacing: -0.01em;
+}
+h5 { 
+    font-size: 1.05em; 
+    color: var(--heading-color); 
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+p { 
+    margin-bottom: 1.1em; 
+    line-height: 1.6;
+    color: var(--text-color);
+    /* Evitar que los párrafos se corten entre páginas */
+    page-break-inside: avoid;
+}
+
+/* Enlaces usan el color de sección */
+.page a {
+    color: var(--section-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.page a:hover {
+    text-decoration: none;
+    opacity: 0.8;
+}
+#contraportada a { color: var(--primary-blue); }
+#contraportada a:hover { opacity: 0.8; color: var(--primary-blue); }
+
+
+ul, ol { 
+    margin-bottom: 1.2em; 
+    padding-left: 25px;
+    /* Evitar que las listas se corten entre páginas */
+    page-break-inside: avoid;
+}
+li { 
+    margin-bottom: 0.8em; 
+    line-height: 1.6;
+}
+ul ul, ol ol { padding-left: 30px; }
+.annex-list { list-style: decimal; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.8em;
+    font-size: 0.9em;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    /* Evitar que las tablas se corten entre páginas */
+    page-break-inside: avoid;
+}
+
+/* Forzar salto de página */
+.pagebreak {
+    display: block;
+    clear: both;
+    page-break-after: always;
+}
+
+/* Asegurar que las imágenes no se corten entre páginas */
+img, .image-placeholder {
+    page-break-inside: avoid;
+}
+
+.container {
+    max-width: 1200px; /* Un poco más ancho */
+    margin: 30px auto;
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px; /* Bordes más redondeados al estilo Apple */
+    overflow: hidden;
+}
+
 .page {
     margin-bottom: 60px; /* Más espacio entre secciones */
     padding-bottom: 40px;

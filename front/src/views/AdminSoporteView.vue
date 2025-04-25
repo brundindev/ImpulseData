@@ -40,7 +40,7 @@
               <div class="user-info">
                 <h3>{{ chat.userEmail }}</h3>
                 <div class="chat-meta">
-                  <span class="chat-timestamp">{{ formatDateTimestamp(chat.startedAt) }}</span>
+                <span class="chat-timestamp">{{ formatDateTimestamp(chat.startedAt) }}</span>
                   <span :class="['chat-status', chat.status === 'closed' ? 'status-closed' : 'status-open']">
                     {{ chat.status === 'closed' ? 'Cerrado' : 'Abierto' }}
                   </span>
@@ -214,41 +214,41 @@ const loadChats = async () => {
           const chatMetadata = chatsData[chatId].metadata || {};
           
           // Incluir todos los chats, incluso los inactivos/cerrados
-          // Obtener último mensaje para mostrar en la vista previa
-          let lastMessage = null;
-          let unreadCount = 0;
-          
-          // Verificar si hay mensajes
-          if (chatsData[chatId].messages) {
-            const messagesArray = Object.values(chatsData[chatId].messages);
+            // Obtener último mensaje para mostrar en la vista previa
+            let lastMessage = null;
+            let unreadCount = 0;
             
-            // Ordenar por timestamp
-            messagesArray.sort((a, b) => {
-              const timestampA = a.timestamp || 0;
-              const timestampB = b.timestamp || 0;
-              return timestampB - timestampA;
-            });
-            
-            // Asignar el último mensaje
-            if (messagesArray.length > 0) {
-              lastMessage = messagesArray[0];
+            // Verificar si hay mensajes
+            if (chatsData[chatId].messages) {
+              const messagesArray = Object.values(chatsData[chatId].messages);
+              
+              // Ordenar por timestamp
+              messagesArray.sort((a, b) => {
+                const timestampA = a.timestamp || 0;
+                const timestampB = b.timestamp || 0;
+                return timestampB - timestampA;
+              });
+              
+              // Asignar el último mensaje
+              if (messagesArray.length > 0) {
+                lastMessage = messagesArray[0];
+              }
+              
+              // Contar mensajes no leídos del usuario (no del admin)
+              unreadCount = messagesArray.filter(msg => !msg.isAdmin && !msg.read).length;
             }
             
-            // Contar mensajes no leídos del usuario (no del admin)
-            unreadCount = messagesArray.filter(msg => !msg.isAdmin && !msg.read).length;
-          }
-          
-          // Agregar chat a la lista
-          chatsArray.push({
-            id: chatId,
-            userEmail: chatMetadata.userEmail || 'Usuario Desconocido',
-            adminEmail: chatMetadata.adminEmail || adminEmail,
-            startedAt: chatMetadata.startedAt || null,
-            active: chatMetadata.active !== false,
+            // Agregar chat a la lista
+            chatsArray.push({
+              id: chatId,
+              userEmail: chatMetadata.userEmail || 'Usuario Desconocido',
+              adminEmail: chatMetadata.adminEmail || adminEmail,
+              startedAt: chatMetadata.startedAt || null,
+              active: chatMetadata.active !== false,
             status: chatMetadata.status || 'open',
-            lastMessage,
-            unreadCount
-          });
+              lastMessage,
+              unreadCount
+            });
         }
         
         // Ordenar chats: primero los abiertos, luego por fecha más reciente
