@@ -1,113 +1,196 @@
 <template>
   <div class="soporte-container">
-    <div class="soporte-header">
-      <h1>Soporte Técnico</h1>
-      <p>Conectado con: <span class="support-admin">Administrador</span></p>
+    <!-- Nuevos efectos visuales -->
+    <div class="animated-background">
+      <div class="gradient-sphere sphere-1"></div>
+      <div class="gradient-sphere sphere-2"></div>
+      <div class="gradient-sphere sphere-3"></div>
     </div>
     
-    <!-- Estado de carga inicial -->
-    <div v-if="isInitializing" class="loading-container">
-      <div class="spinner"></div>
-      <p>Conectando con el servicio de soporte...</p>
+    <!-- Partículas flotantes -->
+    <div class="floating-particles welcome-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
     </div>
     
-    <!-- Error de conexión -->
-    <div v-else-if="hasError" class="container">
-      <div class="icon">⚠️</div>
-      <h3>Ticket de soporte</h3>
-      <p>Si quieres abrir un ticket, por favor, dale a este botón y te abriremos un ticket en nuestra plataforma de tickets.</p>
-      <button @click="retryConnection" class="retry-button">
-        Abrir ticket
-      </button>
+    <!-- Estrellas brillantes -->
+    <div class="stars-container">
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
     </div>
     
-    <!-- Chat principal (se muestra cuando no hay errores y se completó la inicialización) -->
-    <div v-else class="chat-container">
-      <div class="ticket-header">
-        <div class="ticket-info">
-          <h3>{{ chatId }}</h3>
-          <span :class="['ticket-status', ticketClosed ? 'status-closed' : 'status-open']">
-            {{ ticketClosed ? 'Cerrado' : 'Abierto' }}
-          </span>
+    <!-- Efecto de ondas -->
+    <div class="wave-background">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
+    
+    <div class="dashboard-container">
+      <!-- Encabezado -->
+      <div class="dashboard-header">
+        <div>
+          <h1 class="welcome-title">Soporte Técnico</h1>
+          <p class="welcome-subtitle">¡Bienvenido al centro de soporte, <span class="user-name">{{ userEmail.split('@')[0] || 'Usuario' }}</span>!</p>
         </div>
       </div>
       
-      <div class="chat-messages" ref="chatContainer">
-        <!-- Mensaje de bienvenida del sistema -->
-        <div class="message system-message">
-          <p>Bienvenido al chat de soporte técnico. Un administrador te atenderá a la brevedad.</p>
-          <span class="timestamp">{{ getCurrentTime() }}</span>
-        </div>
-        
-        <!-- Notificación de ticket cerrado -->
-        <div v-if="ticketClosed" class="message system-message warning-message">
-          <p>Este ticket ha sido cerrado por un administrador. No se pueden enviar más mensajes.</p>
-          <span class="timestamp">{{ getCurrentTime() }}</span>
-        </div>
-        
-        <!-- Mensajes dinámicos -->
-        <div v-for="message in messages" :key="message.id" 
-             :class="['message', message.isAdmin ? 'admin-message' : 'user-message']">
-          <div class="message-header">
-            <span class="admin-name">{{ message.isAdmin ? 'Administrador' : 'Tú' }}</span>
-            <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
-          </div>
-          <div class="message-content">
-            <p>{{ message.text }}</p>
-          </div>
-        </div>
-        
-        <!-- Indicador de escritura -->
-        <div v-if="isAdminTyping" class="message admin-message typing-message">
-          <div class="message-header">
-            <span class="admin-name">Administrador</span>
-          </div>
-          <div class="message-content typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
+      <!-- Estado de carga inicial -->
+      <div v-if="isInitializing" class="loading-container">
+        <div class="spinner"></div>
+        <div class="loader">
+          <p>Conectando</p>
+          <div class="words">
+            <span class="word">servicio</span>
+            <span class="word">soporte</span>
+            <span class="word">ticket</span>
+            <span class="word">sistema</span>
+            <span class="word">servicio</span>
           </div>
         </div>
       </div>
       
-      <div class="chat-input">
-        <textarea 
-          v-model="userInput" 
-          placeholder="Escribe tu mensaje aquí..." 
-          @keyup.enter.prevent="sendMessage"
-          :disabled="isLoading || ticketClosed"
-          ref="messageInput"
-        ></textarea>
-        <div class="input-actions">
-          <div class="connection-status" :class="{ 'online': isConnected, 'offline': !isConnected }">
-            {{ isConnected ? 'Conectado' : 'Desconectado' }}
-          </div>
-          <div>
-            <button 
-              @click="sendMessage" 
-              class="send-button" 
-              :disabled="!userInput.trim() || isLoading || ticketClosed"
-            >
-              Enviar <i class="fas fa-paper-plane"></i>
-            </button>
-          </div>
-        </div>
-        <div v-if="ticketClosed" class="ticket-closed-notice">
-          Este ticket está cerrado. No se pueden enviar más mensajes.
+      <!-- Error de conexión -->
+      <div v-else-if="hasError" class="error-container">
+        <div class="error-content">
+          <div class="error-icon">⚠️</div>
+          <h3>Ticket de soporte</h3>
+          <p>Si quieres abrir un ticket, por favor, dale a este botón y te abriremos un ticket en nuestra plataforma de tickets.</p>
+          <button @click="retryConnection" class="btn btn-primary">
+            Abrir ticket
+          </button>
         </div>
       </div>
-    </div>
-    
-    <div class="additional-actions">
-      <div class="contact-hours">
-        <h3>Horario de atención</h3>
-        <p>Lunes a Viernes: 9:00 - 18:00</p>
-        <p>Sábados: 9:00 - 13:00</p>
-      </div>
-      <div class="alternative-contact">
-        <h3>Otras formas de contacto</h3>
-        <p><i class="fas fa-phone"></i> +34 123 456 789</p>
-        <p><i class="fas fa-envelope"></i> info@impulsedata.es</p>
+      
+      <!-- Chat principal -->
+      <div v-else class="dashboard-content">
+        <div class="alicante-banner-showcase">
+          <div class="banner-content">
+            <div class="banner-image-container">
+              <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image" />
+              <div class="image-glow"></div>
+            </div>
+            <div class="banner-info">
+              <h3>Soporte ImpulseData {{ chatId }}</h3>
+              <div class="ticket-status-banner">
+                <span :class="['ticket-status', ticketClosed ? 'status-closed' : 'status-open']">
+                  {{ ticketClosed ? 'Ticket cerrado' : 'Ticket abierto' }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="banner-accent-shapes">
+            <div class="accent-shape shape-1"></div>
+            <div class="accent-shape shape-2"></div>
+            <div class="accent-shape shape-3"></div>
+          </div>
+        </div>
+        
+        <div class="support-chat-container">
+          <div class="chat-messages" ref="chatContainer">
+            <!-- Mensaje de bienvenida del sistema -->
+            <div class="message system-message">
+              <p>Bienvenido al chat de soporte técnico. Un administrador te atenderá a la brevedad.</p>
+              <span class="timestamp">{{ getCurrentTime() }}</span>
+            </div>
+            
+            <!-- Notificación de ticket cerrado -->
+            <div v-if="ticketClosed" class="message system-message warning-message">
+              <p>Este ticket ha sido cerrado por un administrador. No se pueden enviar más mensajes.</p>
+              <span class="timestamp">{{ getCurrentTime() }}</span>
+            </div>
+            
+            <!-- Mensajes dinámicos -->
+            <div v-for="message in messages" :key="message.id" 
+                :class="['message', message.isAdmin ? 'admin-message' : 'user-message']">
+              <div class="message-header">
+                <span class="admin-name">{{ message.isAdmin ? 'Administrador' : 'Tú' }}</span>
+                <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
+              </div>
+              <div class="message-content">
+                <p>{{ message.text }}</p>
+              </div>
+            </div>
+            
+            <!-- Indicador de escritura -->
+            <div v-if="isAdminTyping" class="message admin-message typing-message">
+              <div class="message-header">
+                <span class="admin-name">Administrador</span>
+              </div>
+              <div class="message-content typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="chat-input">
+            <textarea 
+              v-model="userInput" 
+              placeholder="Escribe tu mensaje aquí..." 
+              @keyup.enter.prevent="sendMessage"
+              :disabled="isLoading || ticketClosed"
+              ref="messageInput"
+            ></textarea>
+            <div class="input-actions">
+              <div class="connection-status" :class="{ 'online': isConnected, 'offline': !isConnected }">
+                {{ isConnected ? 'Conectado' : 'Desconectado' }}
+              </div>
+              <div>
+                <button 
+                  @click="sendMessage" 
+                  class="btn btn-primary" 
+                  :disabled="!userInput.trim() || isLoading || ticketClosed"
+                >
+                  Enviar <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+            <div v-if="ticketClosed" class="ticket-closed-notice">
+              Este ticket está cerrado. No se pueden enviar más mensajes.
+            </div>
+          </div>
+        </div>
+        
+        <!-- Información adicional -->
+        <div class="stats-section">
+          <div class="stat-card">
+            <h3>Horario</h3>
+            <div class="stat-content">
+              <p>Lunes a Viernes: 9:00 - 18:00</p>
+              <p>Sábados: 9:00 - 13:00</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <h3>Contacto</h3>
+            <div class="stat-content">
+              <p><i class="fas fa-phone"></i> +34 123 456 789</p>
+              <p><i class="fas fa-envelope"></i> info@impulsedata.es</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <h3>Estado</h3>
+            <div class="stat-content">
+              <p>Ticket: <strong>{{ chatId }}</strong></p>
+              <p>Estado: <strong>{{ ticketClosed ? 'Cerrado' : 'Abierto' }}</strong></p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -564,154 +647,350 @@ watch(messages, () => {
 
 <style scoped>
 .soporte-container {
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 20px;
-}
-
-.soporte-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.soporte-header h1 {
-  color: #004698;
-  margin-bottom: 10px;
-}
-
-.support-admin {
-  background: linear-gradient(90deg, #00c3ff, #00ff8c);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: bold;
-}
-
-/* Loading container */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  padding: 50px 20px;
-  margin-bottom: 30px;
-  height: 400px;
-}
-
-.loading-container .spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(0, 195, 255, 0.1);
-  border-radius: 50%;
-  border-top: 5px solid #00c3ff;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-container p {
-  font-size: 18px;
-  color: #666;
-}
-
-/* Error container */
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  padding: 50px 20px;
-  margin-bottom: 30px;
-  height: 400px;
-  text-align: center;
-}
-
-.error-icon {
-  font-size: 50px;
-  margin-bottom: 20px;
-}
-
-.error-container h3 {
-  color: #f44336;
-  margin-bottom: 10px;
-  font-size: 22px;
-}
-
-.error-container p {
-  margin-bottom: 25px;
-  color: #666;
-  max-width: 500px;
-}
-
-.retry-button {
-  background: linear-gradient(90deg, #00c3ff, #00ff8c);
-  color: white;
-  border: none;
-  padding: 12px 25px;
-  border-radius: 30px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.retry-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 195, 255, 0.3);
-}
-
-.chat-container {
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  height: 550px;
+  position: relative;
   overflow: hidden;
+  min-height: 100vh;
+  padding-bottom: 30px;
+}
+
+/* Efectos de fondo */
+.animated-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.gradient-sphere {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+}
+
+.sphere-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle at center, rgba(0, 195, 255, 0.4), rgba(0, 195, 255, 0));
+  top: -200px;
+  left: -200px;
+  animation: float1 20s ease-in-out infinite;
+}
+
+.sphere-2 {
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle at center, rgba(0, 255, 140, 0.3), rgba(0, 255, 140, 0));
+  bottom: -300px;
+  right: -300px;
+  animation: float2 25s ease-in-out infinite;
+}
+
+.sphere-3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  bottom: 10%;
+  left: 30%;
+  animation: float3 15s ease-in-out infinite;
+}
+
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(50px, 50px); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-30px, -50px); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, -30px); }
+}
+
+/* Partículas flotantes */
+.floating-particles {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  animation: float-particle 20s linear infinite;
+}
+
+.particle:nth-child(1) { top: 20%; left: 10%; animation-duration: 15s; }
+.particle:nth-child(2) { top: 30%; left: 80%; animation-duration: 18s; }
+.particle:nth-child(3) { top: 70%; left: 20%; animation-duration: 22s; }
+.particle:nth-child(4) { top: 40%; left: 40%; animation-duration: 14s; }
+.particle:nth-child(5) { top: 85%; left: 70%; animation-duration: 19s; }
+.particle:nth-child(6) { top: 15%; left: 60%; animation-duration: 17s; }
+.particle:nth-child(7) { top: 50%; left: 30%; animation-duration: 21s; }
+.particle:nth-child(8) { top: 60%; left: 90%; animation-duration: 16s; }
+
+@keyframes float-particle {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(20px, 20px); }
+  50% { transform: translate(0, 40px); }
+  75% { transform: translate(-20px, 20px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Estrellas brillantes */
+.stars-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background-color: white;
+  border-radius: 50%;
+  animation: twinkle 5s ease-in-out infinite;
+}
+
+.star:nth-child(1) { top: 15%; left: 20%; animation-delay: 0s; }
+.star:nth-child(2) { top: 25%; left: 85%; animation-delay: 0.5s; }
+.star:nth-child(3) { top: 65%; left: 15%; animation-delay: 1s; }
+.star:nth-child(4) { top: 35%; left: 45%; animation-delay: 1.5s; }
+.star:nth-child(5) { top: 75%; left: 75%; animation-delay: 2s; }
+.star:nth-child(6) { top: 10%; left: 55%; animation-delay: 2.5s; }
+.star:nth-child(7) { top: 45%; left: 25%; animation-delay: 3s; }
+.star:nth-child(8) { top: 55%; left: 85%; animation-delay: 3.5s; }
+.star:nth-child(9) { top: 85%; left: 35%; animation-delay: 4s; }
+.star:nth-child(10) { top: 5%; left: 65%; animation-delay: 4.5s; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* Efecto de ondas */
+.wave-background {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(to top, rgba(0, 195, 255, 0.05), transparent);
+  transform-origin: bottom center;
+  animation: wave 20s linear infinite;
+}
+
+.wave:nth-child(2) {
+  height: 140px;
+  animation-delay: 5s;
+  opacity: 0.3;
+}
+
+.wave:nth-child(3) {
+  height: 180px;
+  animation-delay: 10s;
+  opacity: 0.2;
+}
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  50% { transform: scaleY(1.2) translateY(-20px); }
+}
+
+/* Elementos de dashboard */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.dashboard-header {
+  padding: 20px 0;
   margin-bottom: 30px;
-}
-
-.ticket-header {
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  background: white;
-}
-
-.ticket-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.ticket-info h3 {
-  color: #004698;
+.welcome-title {
+  font-size: 2.5rem;
   margin: 0;
-}
-
-.ticket-status {
-  padding: 5px 10px;
-  border-radius: 12px;
+  background: linear-gradient(90deg, #004698, #00c3ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-weight: bold;
 }
 
-.ticket-status.status-closed {
-  background-color: rgba(255, 0, 0, 0.1);
-  color: #e00000;
+.welcome-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin: 5px 0 0;
 }
 
-.ticket-status.status-open {
-  background-color: rgba(0, 200, 0, 0.1);
-  color: #00a000;
+.user-name {
+  color: #004698;
+  font-weight: bold;
+}
+
+/* Componentes de soporte */
+.dashboard-content {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.alicante-banner-showcase {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, rgba(0, 70, 152, 0.05), rgba(0, 195, 255, 0.1));
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.banner-image-container {
+  flex: 0 0 120px;
+  position: relative;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.image-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle at center, rgba(0, 195, 255, 0.3), transparent 70%);
+  z-index: -1;
+}
+
+.banner-info {
+  flex: 1;
+  padding-left: 20px;
+}
+
+.banner-info h3 {
+  margin: 0 0 10px;
+  color: #004698;
+  font-size: 1.5rem;
+}
+
+.banner-accent-shapes {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.accent-shape {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0, 195, 255, 0.1), rgba(0, 255, 140, 0.1));
+}
+
+.shape-1 {
+  width: 100px;
+  height: 100px;
+  top: -30px;
+  right: 10%;
+}
+
+.shape-2 {
+  width: 150px;
+  height: 150px;
+  bottom: -50px;
+  right: -30px;
+}
+
+.shape-3 {
+  width: 80px;
+  height: 80px;
+  bottom: 10px;
+  left: 15%;
+}
+
+.ticket-status-banner {
+  margin-top: 15px;
+}
+
+.ticket-status {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.status-open {
+  background: linear-gradient(to right, #00c3ff, #00ff8c);
+  color: white;
+}
+
+.status-closed {
+  background: linear-gradient(to right, #ff3860, #ff5e3a);
+  color: white;
+}
+
+/* Contenedor del chat */
+.support-chat-container {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 500px;
 }
 
 .chat-messages {
@@ -729,7 +1008,7 @@ watch(messages, () => {
   max-width: 80%;
   border-radius: 12px;
   padding: 12px 15px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .system-message {
@@ -782,6 +1061,7 @@ watch(messages, () => {
   line-height: 1.4;
 }
 
+/* Área de input */
 .chat-input {
   padding: 15px;
   border-top: 1px solid #eee;
@@ -813,92 +1093,36 @@ textarea:focus {
   align-items: center;
 }
 
-button {
+.btn {
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-weight: bold;
 }
 
-.send-button {
+.btn-primary {
   background: linear-gradient(90deg, #00c3ff, #00ff8c);
   color: white;
-  font-weight: bold;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.send-button:hover {
+.btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 195, 255, 0.3);
 }
 
-.send-button:disabled {
+.btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
-.additional-actions {
-  display: flex;
-  gap: 30px;
-}
-
-.contact-hours, .alternative-contact {
-  flex: 1;
-  background-color: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.contact-hours h3, .alternative-contact h3 {
-  color: #004698;
-  margin-top: 0;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-
-/* Indicador de escritura */
-.typing-indicator {
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-}
-
-.typing-indicator span {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background-color: #00c3ff;
-  border-radius: 50%;
-  margin: 0 2px;
-  opacity: 0.6;
-  animation: typing-dot 1.4s infinite ease-in-out both;
-}
-
-.typing-indicator span:nth-child(1) {
-  animation-delay: -0.32s;
-}
-
-.typing-indicator span:nth-child(2) {
-  animation-delay: -0.16s;
-}
-
-@keyframes typing-dot {
-  0%, 80%, 100% { 
-    transform: scale(0);
-  } 
-  40% { 
-    transform: scale(1);
-  }
-}
-
-/* Estado de conexión */
+/* Elementos de estado de conexión */
 .connection-status {
   font-size: 0.8em;
   padding: 5px 10px;
@@ -916,21 +1140,6 @@ button {
   color: #e00000;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .chat-container {
-    height: 70vh;
-  }
-  
-  .additional-actions {
-    flex-direction: column;
-  }
-  
-  .message {
-    max-width: 90%;
-  }
-}
-
 .ticket-closed-notice {
   text-align: center;
   color: #e00000;
@@ -939,5 +1148,178 @@ button {
   margin-top: 10px;
   border-radius: 8px;
   font-size: 0.9em;
+}
+
+/* Tarjetas de estadísticas */
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+  margin: 0 0 15px;
+  color: #004698;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.stat-content {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.stat-content p {
+  margin: 5px 0;
+}
+
+/* Estado de carga */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  padding: 40px 20px;
+  min-height: 400px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(0, 195, 255, 0.1);
+  border-radius: 50%;
+  border-top: 5px solid #00c3ff;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loader p {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #004698;
+}
+
+.words {
+  margin-top: 10px;
+  display: inline-block;
+  position: relative;
+  text-align: center;
+  color: #00c3ff;
+  font-weight: bold;
+}
+
+.word {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  animation: rotateWord 10s linear infinite;
+}
+
+.word:nth-child(2) { animation-delay: 2s; }
+.word:nth-child(3) { animation-delay: 4s; }
+.word:nth-child(4) { animation-delay: 6s; }
+.word:nth-child(5) { animation-delay: 8s; }
+
+@keyframes rotateWord {
+  0%, 20% { opacity: 0; transform: translateY(10px); }
+  25%, 45% { opacity: 1; transform: translateY(0); }
+  50%, 100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Error container */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  padding: 40px 20px;
+  min-height: 400px;
+}
+
+.error-content {
+  max-width: 500px;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 50px;
+  margin-bottom: 20px;
+}
+
+.error-container h3 {
+  color: #004698;
+  margin-bottom: 15px;
+  font-size: 1.8rem;
+}
+
+.error-container p {
+  margin-bottom: 25px;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .support-chat-container {
+    height: 400px;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: center;
+  }
+  
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .banner-image-container {
+    margin-bottom: 15px;
+  }
+  
+  .banner-info {
+    padding-left: 0;
+  }
 }
 </style> 
