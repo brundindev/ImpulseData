@@ -32,14 +32,19 @@
           <div 
             v-for="chat in chats" 
             :key="chat.id"
-            :class="['chat-item', selectedChatId === chat.id ? 'selected' : '']"
+            :class="['chat-item', selectedChatId === chat.id ? 'selected' : '', chat.status === 'closed' ? 'chat-closed' : '']"
             @click="selectChat(chat.id)"
           >
             <div class="chat-user">
               <div class="user-avatar">{{ getUserInitial(chat.userEmail) }}</div>
               <div class="user-info">
                 <h3>{{ chat.userEmail }}</h3>
-                <span class="chat-timestamp">{{ formatDateTimestamp(chat.startedAt) }}</span>
+                <div class="chat-meta">
+                  <span class="chat-timestamp">{{ formatDateTimestamp(chat.startedAt) }}</span>
+                  <span :class="['chat-status', chat.status === 'closed' ? 'status-closed' : 'status-open']">
+                    {{ chat.status === 'closed' ? 'Cerrado' : 'Abierto' }}
+                  </span>
+                </div>
               </div>
             </div>
             <div class="chat-preview">
@@ -48,6 +53,7 @@
                 class="unread-badge"
               >{{ chat.unreadCount }}</span>
               <p>{{ chat.lastMessage?.text || 'Nueva conversación' }}</p>
+              <span class="ticket-id-preview">{{ chat.id }}</span>
             </div>
           </div>
         </div>
@@ -67,8 +73,18 @@
           <div class="chat-header">
             <h2>{{ selectedChat?.userEmail }}</h2>
             <div class="chat-actions">
-              <button class="action-button" title="Marcar como resuelto" @click="markAsResolved">
-                <i class="fas fa-check-circle"></i>
+              <span class="ticket-id">{{ selectedChatId }}</span>
+              <span :class="['ticket-status', selectedChat?.status === 'closed' ? 'status-closed' : 'status-open']">
+                {{ selectedChat?.status === 'closed' ? 'Cerrado' : 'Abierto' }}
+              </span>
+              <button v-if="selectedChat?.status !== 'closed'" class="action-button" title="Cerrar ticket" @click="markAsResolved">
+                <i class="fas fa-check-circle"></i> Cerrar
+              </button>
+              <button v-else class="action-button reopen-button" title="Reabrir ticket" @click="reopenTicket">
+                <i class="fas fa-redo"></i> Reabrir
+              </button>
+              <button class="action-button delete-button" title="Eliminar ticket" @click="deleteTicket">
+                <i class="fas fa-trash"></i> Eliminar
               </button>
             </div>
           </div>
@@ -130,7 +146,8 @@ import {
   query,
   orderByChild,
   update,
-  serverTimestamp 
+  serverTimestamp,
+  remove
 } from 'firebase/database';
 
 import firebaseApp, { auth, waitForAuthInit } from '../firebase';
@@ -196,47 +213,51 @@ const loadChats = async () => {
           // Obtener metadatos del chat
           const chatMetadata = chatsData[chatId].metadata || {};
           
-          // Verificar si el chat está activo
-          if (chatMetadata.active !== false) {
-            // Obtener último mensaje para mostrar en la vista previa
-            let lastMessage = null;
-            let unreadCount = 0;
+          // Incluir todos los chats, incluso los inactivos/cerrados
+          // Obtener último mensaje para mostrar en la vista previa
+          let lastMessage = null;
+          let unreadCount = 0;
+          
+          // Verificar si hay mensajes
+          if (chatsData[chatId].messages) {
+            const messagesArray = Object.values(chatsData[chatId].messages);
             
-            // Verificar si hay mensajes
-            if (chatsData[chatId].messages) {
-              const messagesArray = Object.values(chatsData[chatId].messages);
-              
-              // Ordenar por timestamp
-              messagesArray.sort((a, b) => {
-                const timestampA = a.timestamp || 0;
-                const timestampB = b.timestamp || 0;
-                return timestampB - timestampA;
-              });
-              
-              // Asignar el último mensaje
-              if (messagesArray.length > 0) {
-                lastMessage = messagesArray[0];
-              }
-              
-              // Contar mensajes no leídos del usuario (no del admin)
-              unreadCount = messagesArray.filter(msg => !msg.isAdmin && !msg.read).length;
+            // Ordenar por timestamp
+            messagesArray.sort((a, b) => {
+              const timestampA = a.timestamp || 0;
+              const timestampB = b.timestamp || 0;
+              return timestampB - timestampA;
+            });
+            
+            // Asignar el último mensaje
+            if (messagesArray.length > 0) {
+              lastMessage = messagesArray[0];
             }
             
-            // Agregar chat a la lista
-            chatsArray.push({
-              id: chatId,
-              userEmail: chatMetadata.userEmail || 'Usuario Desconocido',
-              adminEmail: chatMetadata.adminEmail || adminEmail,
-              startedAt: chatMetadata.startedAt || null,
-              active: chatMetadata.active !== false,
-              lastMessage,
-              unreadCount
-            });
+            // Contar mensajes no leídos del usuario (no del admin)
+            unreadCount = messagesArray.filter(msg => !msg.isAdmin && !msg.read).length;
           }
+          
+          // Agregar chat a la lista
+          chatsArray.push({
+            id: chatId,
+            userEmail: chatMetadata.userEmail || 'Usuario Desconocido',
+            adminEmail: chatMetadata.adminEmail || adminEmail,
+            startedAt: chatMetadata.startedAt || null,
+            active: chatMetadata.active !== false,
+            status: chatMetadata.status || 'open',
+            lastMessage,
+            unreadCount
+          });
         }
         
-        // Ordenar chats por fecha de último mensaje (más reciente primero)
+        // Ordenar chats: primero los abiertos, luego por fecha más reciente
         chatsArray.sort((a, b) => {
+          // Primero ordenar por estado (abierto antes que cerrado)
+          if (a.status === 'open' && b.status === 'closed') return -1;
+          if (a.status === 'closed' && b.status === 'open') return 1;
+          
+          // Luego por fecha de último mensaje
           const timeA = a.lastMessage?.timestamp || a.startedAt || 0;
           const timeB = b.lastMessage?.timestamp || b.startedAt || 0;
           return timeB - timeA;
@@ -349,6 +370,12 @@ const selectChat = async (chatId) => {
 const sendAdminReply = async () => {
   if (!adminReply.value.trim() || isReplying.value || !selectedChatId.value) return;
   
+  // Verificar si el ticket está cerrado
+  if (selectedChat.value?.status === 'closed') {
+    alert('No se pueden enviar mensajes a un ticket cerrado. Debes reabrirlo primero.');
+    return;
+  }
+  
   try {
     isReplying.value = true;
     
@@ -390,20 +417,24 @@ const sendAdminReply = async () => {
   }
 };
 
-// Marcar chat como resuelto (inactivo)
+// Marcar chat como resuelto (cerrar ticket)
 const markAsResolved = async () => {
   if (!selectedChatId.value) return;
   
-  if (confirm('¿Estás seguro de marcar esta conversación como resuelta?')) {
+  if (confirm('¿Estás seguro de cerrar este ticket? El usuario no podrá enviar más mensajes.')) {
     try {
       const metadataRef = dbRef(database, `chats/${selectedChatId.value}/metadata`);
-      await update(metadataRef, { active: false });
+      await update(metadataRef, { 
+        status: 'closed',
+        closedAt: serverTimestamp(),
+        closedBy: adminEmail.includes(auth.currentUser?.email) ? auth.currentUser.email : adminEmail[0]
+      });
       
       // Enviar mensaje del sistema
       const messagesRef = dbRef(database, `chats/${selectedChatId.value}/messages`);
       const systemMessage = {
         id: Date.now().toString(),
-        text: 'Chat marcado como resuelto por el administrador.',
+        text: 'Ticket cerrado por el administrador.',
         isAdmin: true,
         sender: 'sistema',
         timestamp: serverTimestamp(),
@@ -412,8 +443,66 @@ const markAsResolved = async () => {
       
       await push(messagesRef, systemMessage);
       
+      // Recargar lista de chats
+      loadChats();
+      
+    } catch (error) {
+      console.error('Error al cerrar ticket:', error);
+      alert('Error al cerrar el ticket: ' + error.message);
+    }
+  }
+};
+
+// Reabrir un ticket cerrado
+const reopenTicket = async () => {
+  if (!selectedChatId.value) return;
+  
+  try {
+    const metadataRef = dbRef(database, `chats/${selectedChatId.value}/metadata`);
+    await update(metadataRef, { 
+      status: 'open',
+      reopenedAt: serverTimestamp(),
+      reopenedBy: adminEmail.includes(auth.currentUser?.email) ? auth.currentUser.email : adminEmail[0]
+    });
+    
+    // Enviar mensaje del sistema
+    const messagesRef = dbRef(database, `chats/${selectedChatId.value}/messages`);
+    const systemMessage = {
+      id: Date.now().toString(),
+      text: 'Ticket reabierto por el administrador.',
+      isAdmin: true,
+      sender: 'sistema',
+      timestamp: serverTimestamp(),
+      isSystemMessage: true
+    };
+    
+    await push(messagesRef, systemMessage);
+    
+    // Recargar lista de chats
+    loadChats();
+    
+  } catch (error) {
+    console.error('Error al reabrir ticket:', error);
+    alert('Error al reabrir el ticket: ' + error.message);
+  }
+};
+
+// Eliminar un ticket
+const deleteTicket = async () => {
+  if (!selectedChatId.value) return;
+  
+  if (confirm('¿Estás seguro de ELIMINAR este ticket? Esta acción no se puede deshacer.')) {
+    try {
+      // Eliminar el ticket de la base de datos
+      const chatRef = dbRef(database, `chats/${selectedChatId.value}`);
+      await remove(chatRef);
+      
+      // Eliminar también la referencia del usuario al ticket
+      const userTicketRef = dbRef(database, `userTickets/${selectedChatId.value}`);
+      await remove(userTicketRef);
+      
       // Seleccionar otro chat si hay disponible
-      const otherChat = chats.value.find(chat => chat.id !== selectedChatId.value && chat.active);
+      const otherChat = chats.value.find(chat => chat.id !== selectedChatId.value);
       
       if (otherChat) {
         selectChat(otherChat.id);
@@ -426,8 +515,8 @@ const markAsResolved = async () => {
       loadChats();
       
     } catch (error) {
-      console.error('Error al marcar como resuelto:', error);
-      alert('Error al marcar la conversación como resuelta: ' + error.message);
+      console.error('Error al eliminar ticket:', error);
+      alert('Error al eliminar el ticket: ' + error.message);
     }
   }
 };
@@ -652,6 +741,10 @@ onUnmounted(() => {
   border-left: 3px solid #004698;
 }
 
+.chat-item.chat-closed {
+  background-color: #f9f9f9;
+}
+
 .chat-user {
   display: flex;
   align-items: center;
@@ -683,9 +776,29 @@ onUnmounted(() => {
   text-overflow: ellipsis;
 }
 
+.chat-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .chat-timestamp {
   font-size: 12px;
   color: #888;
+}
+
+.chat-status {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 5px;
+}
+
+.ticket-id-preview {
+  font-size: 12px;
+  color: #888;
+  display: block;
+  margin-top: 5px;
 }
 
 .chat-preview {
@@ -889,10 +1002,49 @@ button {
   font-size: 16px;
   padding: 5px 10px;
   border-radius: 4px;
+  margin-left: 5px;
 }
 
 .action-button:hover {
   background-color: rgba(0, 70, 152, 0.1);
+}
+
+.delete-button {
+  color: #ff3860;
+}
+
+.delete-button:hover {
+  background-color: rgba(255, 56, 96, 0.1);
+}
+
+.reopen-button {
+  color: #00c3ff;
+}
+
+.reopen-button:hover {
+  background-color: rgba(0, 195, 255, 0.1);
+}
+
+.ticket-id {
+  font-weight: bold;
+  color: #004698;
+}
+
+.ticket-status {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status-closed {
+  background-color: #ff3860;
+  color: white;
+}
+
+.status-open {
+  background-color: #00ff8c;
+  color: white;
 }
 
 /* Responsive */

@@ -23,10 +23,25 @@
     
     <!-- Chat principal (se muestra cuando no hay errores y se completó la inicialización) -->
     <div v-else class="chat-container">
+      <div class="ticket-header">
+        <div class="ticket-info">
+          <h3>{{ chatId }}</h3>
+          <span :class="['ticket-status', ticketClosed ? 'status-closed' : 'status-open']">
+            {{ ticketClosed ? 'Cerrado' : 'Abierto' }}
+          </span>
+        </div>
+      </div>
+      
       <div class="chat-messages" ref="chatContainer">
         <!-- Mensaje de bienvenida del sistema -->
         <div class="message system-message">
           <p>Bienvenido al chat de soporte técnico. Un administrador te atenderá a la brevedad.</p>
+          <span class="timestamp">{{ getCurrentTime() }}</span>
+        </div>
+        
+        <!-- Notificación de ticket cerrado -->
+        <div v-if="ticketClosed" class="message system-message warning-message">
+          <p>Este ticket ha sido cerrado por un administrador. No se pueden enviar más mensajes.</p>
           <span class="timestamp">{{ getCurrentTime() }}</span>
         </div>
         
@@ -60,7 +75,7 @@
           v-model="userInput" 
           placeholder="Escribe tu mensaje aquí..." 
           @keyup.enter.prevent="sendMessage"
-          :disabled="isLoading"
+          :disabled="isLoading || ticketClosed"
           ref="messageInput"
         ></textarea>
         <div class="input-actions">
@@ -71,11 +86,14 @@
             <button 
               @click="sendMessage" 
               class="send-button" 
-              :disabled="!userInput.trim() || isLoading"
+              :disabled="!userInput.trim() || isLoading || ticketClosed"
             >
               Enviar <i class="fas fa-paper-plane"></i>
             </button>
           </div>
+        </div>
+        <div v-if="ticketClosed" class="ticket-closed-notice">
+          Este ticket está cerrado. No se pueden enviar más mensajes.
         </div>
       </div>
     </div>
@@ -107,7 +125,8 @@ import {
   onValue, 
   onChildAdded, 
   onDisconnect,
-  serverTimestamp
+  serverTimestamp,
+  get
 } from 'firebase/database';
 
 // Importar la instancia existente de Firebase
@@ -128,6 +147,7 @@ const chatId = ref('');
 const userId = ref('');
 const userEmail = ref('');
 const adminEmail = ['brundindev@gmail.com', 'adrianreynauclaramunt2@gmail.com']; // Emails de administradores
+const ticketClosed = ref(false); // Nuevo estado para controlar si el ticket está cerrado
 
 // Estado de la aplicación
 const isInitializing = ref(true);
@@ -168,15 +188,82 @@ const getUserInfo = () => {
       console.log('Usando usuario invitado:', userEmail.value);
     }
     
-    // Crear ID de chat único para este usuario
-    chatId.value = 'chat_' + userId.value;
+    // Verificar si el usuario ya tiene un ticket asignado
+    checkExistingTicket();
     
     console.log('Información de usuario obtenida:', { userId: userId.value, userEmail: userEmail.value });
   } catch (error) {
     console.error('Error al obtener información del usuario:', error);
     userId.value = 'guest_' + Date.now().toString();
     userEmail.value = 'usuario_invitado@impulsedata.es';
-    chatId.value = 'chat_' + userId.value;
+    checkExistingTicket();
+  }
+};
+
+// Verificar si el usuario ya tiene un ticket asignado
+const checkExistingTicket = async () => {
+  try {
+    if (!database) return;
+    
+    // Buscar tickets asociados al usuario actual
+    const userTicketsRef = dbRef(database, 'userTickets');
+    const snapshot = await get(userTicketsRef);
+    
+    if (snapshot.exists()) {
+      const userTickets = snapshot.val();
+      // Buscar ticket por email de usuario
+      for (const ticketId in userTickets) {
+        if (userTickets[ticketId].userEmail === userEmail.value) {
+          // El usuario ya tiene un ticket
+          chatId.value = ticketId;
+          console.log('Ticket existente encontrado:', chatId.value);
+          return;
+        }
+      }
+    }
+    
+    // Si no se encontró un ticket, crear uno nuevo
+    generateNewTicketId();
+  } catch (error) {
+    console.error('Error al verificar tickets existentes:', error);
+    generateNewTicketId();
+  }
+};
+
+// Generar un nuevo ID de ticket
+const generateNewTicketId = async () => {
+  try {
+    if (!database) return;
+    
+    // Obtener el último número de ticket
+    const ticketCounterRef = dbRef(database, 'ticketCounter');
+    const snapshot = await get(ticketCounterRef);
+    
+    let ticketNumber = 1;
+    if (snapshot.exists()) {
+      ticketNumber = snapshot.val() + 1;
+    }
+    
+    // Formatear el número con ceros a la izquierda
+    const formattedNumber = String(ticketNumber).padStart(3, '0');
+    chatId.value = `ticket-${formattedNumber}`;
+    
+    // Guardar el nuevo contador
+    await set(ticketCounterRef, ticketNumber);
+    
+    // Registrar la relación usuario-ticket
+    const userTicketRef = dbRef(database, `userTickets/${chatId.value}`);
+    await set(userTicketRef, {
+      userEmail: userEmail.value,
+      userId: userId.value,
+      createdAt: serverTimestamp()
+    });
+    
+    console.log('Nuevo ticket generado:', chatId.value);
+  } catch (error) {
+    console.error('Error al generar nuevo ticket:', error);
+    // Fallback: generar ID con timestamp
+    chatId.value = `ticket-${Date.now()}`;
   }
 };
 
@@ -258,12 +345,31 @@ const connectToChat = () => {
       }
     });
     
-    // Configurar metadatos del chat
-    set(dbRef(database, `chats/${chatId.value}/metadata`), {
-      userEmail: userEmail.value,
-      adminEmail: adminEmail,
-      startedAt: serverTimestamp(),
-      active: true
+    // Verificar si el ticket está cerrado
+    const statusRef = dbRef(database, `chats/${chatId.value}/metadata/status`);
+    onValue(statusRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const status = snapshot.val();
+        ticketClosed.value = status === 'closed';
+        console.log(`Estado del ticket: ${status}`);
+      } else {
+        ticketClosed.value = false;
+      }
+    });
+    
+    // Configurar metadatos del chat si no existen
+    get(dbRef(database, `chats/${chatId.value}/metadata`)).then((snapshot) => {
+      if (!snapshot.exists()) {
+        // Si no existen metadatos, es un chat nuevo
+        set(dbRef(database, `chats/${chatId.value}/metadata`), {
+          userEmail: userEmail.value,
+          adminEmail: adminEmail,
+          ticketId: chatId.value,
+          startedAt: serverTimestamp(),
+          active: true,
+          status: 'open'
+        });
+      }
     });
     
     // Establecer un estado "online" y limpiarlo al desconectarse
@@ -304,7 +410,7 @@ const retryConnection = () => {
 
 // Función para enviar un mensaje
 const sendMessage = async () => {
-  if (!userInput.value.trim() || isLoading.value || !isConnected.value) return;
+  if (!userInput.value.trim() || isLoading.value || !isConnected.value || ticketClosed.value) return;
   
   try {
     // Verificar si la base de datos está disponible
@@ -440,8 +546,8 @@ onUnmounted(() => {
   // Cerrar conexiones de Firebase
   try {
     if (database && chatId.value) {
-      // Marcar chat como inactivo al salir
-      set(dbRef(database, `chats/${chatId.value}/metadata/active`), false);
+      // Solo establecer conexión como false, pero mantener el chat activo
+      set(dbRef(database, `chats/${chatId.value}/connection`), false);
     }
   } catch (error) {
     console.error('Error al desconectar:', error);
@@ -575,6 +681,39 @@ watch(messages, () => {
   margin-bottom: 30px;
 }
 
+.ticket-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  background: white;
+}
+
+.ticket-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticket-info h3 {
+  color: #004698;
+  margin: 0;
+}
+
+.ticket-status {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.ticket-status.status-closed {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #e00000;
+}
+
+.ticket-status.status-open {
+  background-color: rgba(0, 200, 0, 0.1);
+  color: #00a000;
+}
+
 .chat-messages {
   flex: 1;
   padding: 20px;
@@ -601,6 +740,12 @@ watch(messages, () => {
   font-style: italic;
   max-width: 100%;
   margin: 0 auto 20px;
+}
+
+.warning-message {
+  background-color: rgba(255, 200, 100, 0.2);
+  border: 1px solid rgba(255, 200, 100, 0.4);
+  color: #9b7300;
 }
 
 .admin-message {
@@ -784,5 +929,15 @@ button {
   .message {
     max-width: 90%;
   }
+}
+
+.ticket-closed-notice {
+  text-align: center;
+  color: #e00000;
+  background-color: rgba(255, 0, 0, 0.05);
+  padding: 8px;
+  margin-top: 10px;
+  border-radius: 8px;
+  font-size: 0.9em;
 }
 </style> 
