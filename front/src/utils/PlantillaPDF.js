@@ -60,8 +60,8 @@ body {
     border-bottom: 1px solid var(--light-grey-border);
     /* Variable de color específica de la sección */
     --section-color: var(--color-default-section);
-    /* Evitar corte de texto entre páginas */
-    page-break-inside: avoid;
+    /* Permitir que las secciones se dividan entre páginas para el índice */
+    page-break-inside: auto;
 }
 .page:last-child { border-bottom: none; margin-bottom: 0; }
 
@@ -127,7 +127,7 @@ p {
     margin-bottom: 1.1em; 
     line-height: 1.6;
     color: var(--text-color);
-    /* Evitar que los párrafos se corten entre páginas */
+    /* Evitar que los párrafos se corten entre páginas, excepto en índice y anexos */
     page-break-inside: avoid;
 }
 
@@ -149,12 +149,14 @@ p {
 ul, ol { 
     margin-bottom: 1.2em; 
     padding-left: 25px;
-    /* Evitar que las listas se corten entre páginas */
-    page-break-inside: avoid;
+    /* Permitir que las listas se dividan si son largas */
+    page-break-inside: auto;
 }
 li { 
     margin-bottom: 0.8em; 
     line-height: 1.6;
+    /* Evitar que los elementos individuales se corten */
+    page-break-inside: avoid;
 }
 ul ul, ol ol { padding-left: 30px; }
 .annex-list { list-style: decimal; }
@@ -855,6 +857,32 @@ tbody tr:nth-child(even) {
 }
 .page-number {
     text-align: center;
+}
+
+/* Sección especial para el índice */
+#indice {
+    page-break-inside: auto; /* Permitir que el índice se divida entre páginas */
+}
+
+#indice ul, #indice ol, #anexos ul, #anexos ol {
+    page-break-inside: auto; /* Permitir que las listas de índice y anexos se dividan entre páginas */
+}
+
+#indice li, #anexos li {
+    page-break-inside: avoid; /* Evitar que los elementos individuales se corten */
+}
+
+/* Definición CSS para control de saltos de página según HTML2PDF */
+.html2pdf__page-break {
+    height: 0;
+    page-break-after: always;
+    margin: 0;
+    border-top: none;
+}
+
+/* Asegurarse de que la primera parte del índice después de la portada mantiene los márgenes */
+.page:first-of-type:not(#portada) {
+    margin-top: 30mm;
 }
     </style>
 </head>
