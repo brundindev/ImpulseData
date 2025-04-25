@@ -108,7 +108,7 @@ label {
   cursor: not-allowed;
 }
 
-.alert {
+.alert-danger {
   padding: 1rem;
   margin-bottom: 1.5rem;
   border-radius: 8px;
