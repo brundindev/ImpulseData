@@ -911,7 +911,17 @@ const nuevaEmpresa = reactive({
       tipo: 'presencial',
       duracion: 8
     }
+  ],
+  contratos: [
+    {
+      nombre: '',
+      fechaInicio: '',
+      fechaFin: '',
+      tipo: 'presencial',
+      duracion: 8
+    }
   ]
+
 });
 
 // Agregar después de las variables reactivas existentes
