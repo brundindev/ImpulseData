@@ -13,7 +13,7 @@
       </div>
       
       <!-- Mensaje de error estándar -->
-      <div v-else-if="error" class="alert alert-danger">
+      <div v-else-if="error" class="alert-danger">
         <p>{{ error }}</p>
         <div v-if="emailNoVerificado" class="email-verification">
           <p>Por favor, verifica tu dirección de correo electrónico antes de iniciar sesión.</p>
