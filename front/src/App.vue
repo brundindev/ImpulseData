@@ -239,10 +239,16 @@ onMounted(async () => {
   
   // Inicializar estado del usuario
   await actualizarEstadoUsuario();
+
+  // Agregar event listener para cerrar el dropdown
+  document.addEventListener('click', closeDropdown);
 });
+
+
 
 onUnmounted(() => {
   // Limpiar event listener cuando el componente se desmonta
+  document.removeEventListener('click', closeDropdown);
   window.removeEventListener('auth-state-changed', actualizarEstadoUsuario);
 });
 
@@ -323,7 +329,7 @@ const mostrarChatbot = computed(() => {
       <nav class="main-nav">
         <template v-if="usuario">
           <RouterLink to="/home" class="nav-link">Inicio</RouterLink>
-          <div class="user-dropdown">
+          <div class="user-dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <div class="dropdown-toggle">
               <div class="user-profile-container">
                 <div class="user-avatar">
@@ -334,7 +340,7 @@ const mostrarChatbot = computed(() => {
               </div>
               <span class="dropdown-arrow">▼</span>         
             </div>
-            <div class="dropdown-menu" v-if="showDropdown">
+            <div class="dropdown-menu" v-show="showDropdown">
               <router-link to="/perfil" class="dropdown-item">
                 <i class="fas fa-user dropdown-icon"></i> Mi Perfil
               </router-link>
@@ -418,5 +424,29 @@ body, html {
   padding: 0;
   height: 100%;
   overflow: hidden !important;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  padding: 8px 0;
+  z-index: 100;
+  margin-top: 5px;
+  border: 1px solid #eaeaea;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+.user-dropdown:hover .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 </style>
