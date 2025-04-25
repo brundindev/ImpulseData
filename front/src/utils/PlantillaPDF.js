@@ -1084,6 +1084,8 @@ tbody tr:nth-child(even) {
               </div>
         </section>
 
+        <div class="pagebreak"></div>
+
         <section id="empleo-formacion" class="page section-empleo">
              <div class="image-collage-promo">
                 <img src="" alt="Placeholder Imagen 23" class="image-placeholder" style="width: 48%; height: 250px;">
@@ -1262,7 +1264,10 @@ tbody tr:nth-child(even) {
                         <div class="otro-item"><h4>2.7.4 Red Entidades Empleo</h4><p>44 Entid. Mesas...</p> <img src="" alt="Logo Alicante Futura" class="image-placeholder logo-small" style="width: 120px; height: 40px;"></div>
                     </div>
                 </div>
-             </div> </section>
+             </div> 
+        </section>
+
+        <div class="pagebreak"></div>
 
          <section id="promocion-economica" class="page section-promo">
              <div class="image-collage-promo">
@@ -1379,8 +1384,10 @@ tbody tr:nth-child(even) {
                          <li>8ª Alicante Fashion Week (Oct-Nov). <a href="#">Anexo 34</a></li>
                   </ul>
               </div>
-             </div> </section>
+             </div> 
+        </section>
 
+        <div class="pagebreak"></div>
 
         <section id="desarrollo-estrategico" class="page section-desarrollo">
             <img src="" alt="Placeholder Imagen 78 - Foto grande" class="image-placeholder full-width" style="height: 400px;">
@@ -1442,8 +1449,10 @@ tbody tr:nth-child(even) {
                          <li>Redel y Foro Ciudades.</li>
                   </ul>
               </div>
-            </div> </section>
+            </div> 
+        </section>
 
+        <div class="pagebreak"></div>
 
         <section id="gestion" class="page section-gestion">
               <img src="" alt="Placeholder Imagen 80" class="image-placeholder full-width" style="height: 400px;">
@@ -1467,6 +1476,8 @@ tbody tr:nth-child(even) {
               </div>
           </div>
         </section>
+
+        <div class="pagebreak"></div>
 
          <section id="marketing" class="page section-marketing">
             <h2>6. DEPARTAMENTO DE MARKETING Y COMUNICACIÓN</h2>
@@ -1507,12 +1518,15 @@ tbody tr:nth-child(even) {
           </div>
         </section>
 
+        <div class="pagebreak"></div>
+
         <section id="contraportada" class="page section-contraportada center-content">
               <img src="" alt="Logo Impulsalicante" class="image-placeholder logo" style="width: 200px; height: 80px;">
              <p><a href="http://www.impulsalicante.es">www.impulsalicante.es</a></p>
         </section>
 
-    </div> </body>
+    </div> 
+    </body>
 </html>`
 
 // Función auxiliar para crear la plantilla HTML con el contenido personalizado
