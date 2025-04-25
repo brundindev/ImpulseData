@@ -13,11 +13,10 @@
     
     <!-- Error de conexión -->
     <div v-else-if="hasError" class="error-container">
-      <div class="error-icon">⚠️</div>
-      <h3>No se pudo establecer conexión</h3>
-      <p>{{ errorMessage }}</p>
+      <div>⚠️</div>
+      <h3>Si quieres abrir un ticket, por favor, dale a este botón y te abriremos un ticket en nuestra plataforma de tickets.</h3>
       <button @click="retryConnection" class="retry-button">
-        Intentar nuevamente
+        Abrir ticket
       </button>
     </div>
     
