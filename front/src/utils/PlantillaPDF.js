@@ -27,6 +27,17 @@ const html = `<!DOCTYPE html>
   --color-gestion: #00B9C3; /* Cian Apple */
   --color-marketing: #64D2FF; /* Azul claro Apple */
   --color-default-section: #8E8E93; /* Gris Apple */
+  
+  /* Márgenes fijos para todas las páginas */
+  --margin-top: 30mm;
+  --margin-bottom: 30mm;
+  --margin-left: 20mm;
+  --margin-right: 20mm;
+}
+
+/* Estilos globales para forzar márgenes en todas las páginas */
+@page {
+  margin: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
 }
 
 body {
@@ -42,11 +53,217 @@ body {
 
 .container {
     max-width: 1200px; /* Un poco más ancho */
-    margin: 30px auto;
+    margin: 0 auto;
     background-color: #ffffff;
-    padding: 30px 40px;
+    padding: 0;
     border-radius: 12px; /* Bordes más redondeados al estilo Apple */
     overflow: hidden;
+}
+
+/* Estilos específicos para la portada - sin márgenes */
+#portada {
+    margin: 0;
+    padding: 60px 20px;
+    page-break-after: always;
+}
+
+.page {
+    margin-bottom: 40px; /* Más espacio entre secciones */
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--light-grey-border);
+    /* Variable de color específica de la sección */
+    --section-color: var(--color-default-section);
+}
+
+.page:last-child { 
+    border-bottom: none; 
+    margin-bottom: 0; 
+}
+
+/* Asignación de --section-color */
+.section-agencia { --section-color: var(--color-agencia); }
+.section-empleo { --section-color: var(--color-empleo); }
+.section-promo { --section-color: var(--color-promo); }
+.section-desarrollo { --section-color: var(--color-desarrollo); }
+.section-gestion { --section-color: var(--color-gestion); }
+.section-marketing { --section-color: var(--color-marketing); }
+.section-indice, .section-anexos { --section-color: var(--color-default-section); }
+
+/* Sección especial para el índice */
+#indice, #anexos {
+    page-break-inside: auto; /* Permitir que el índice se divida entre páginas */
+}
+
+#indice ul, #indice ol, #anexos ul, #anexos ol {
+    page-break-inside: auto; /* Permitir que las listas de índice se dividan entre páginas */
+    margin-top: 0;
+    padding-top: 0;
+}
+
+#indice li, #anexos li {
+    page-break-inside: avoid; /* Evitar que los elementos individuales se corten */
+    margin-bottom: 5px; /* Reducir espacio entre elementos de lista en el índice */
+}
+
+/* Evitar espacios grandes innecesarios */
+#indice h2 + ul, #indice h2 + ol, #anexos h2 + ul, #anexos h2 + ol {
+    margin-top: 10px; /* Reducir espacio después del título del índice */
+}
+
+/* Títulos de secciones principales del índice */
+#indice h2, #anexos h2 {
+    margin-bottom: 15px;
+    page-break-after: avoid; /* Evitar que el título quede separado de su contenido */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    font-weight: 600;
+    /* Evitar que los títulos se corten entre páginas */
+    page-break-inside: avoid;
+    page-break-after: avoid;
+}
+
+/* Encabezado principal (H2) usa el color de sección */
+h2 {
+    font-size: 2em;
+    border-bottom: none; /* Quitar borde inferior */
+    color: var(--section-color);
+    padding-bottom: 0.4em;
+    margin-bottom: 1em;
+    margin-top: 0;
+    font-weight: 600; /* Semi-bold al estilo Apple */
+    letter-spacing: -0.02em; /* Espaciado de letras ligeramente negativo, típico de Apple */
+}
+
+/* Subtítulos (H3, H4) usan el color de sección */
+h3 { 
+    font-size: 1.5em; 
+    color: var(--section-color); 
+    font-weight: 600; 
+    margin-top: 1.2em;
+    letter-spacing: -0.01em;
+}
+
+h4 { 
+    font-size: 1.2em; 
+    color: var(--section-color); 
+    font-weight: 500; /* Más ligero */
+    opacity: 0.95; 
+    margin-top: 1em;
+    letter-spacing: -0.01em;
+}
+
+h5 { 
+    font-size: 1.05em; 
+    color: var(--heading-color); 
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+p { 
+    margin-bottom: 1em; 
+    line-height: 1.6;
+    color: var(--text-color);
+    /* Evitar que los párrafos se corten entre páginas, excepto en índice y anexos */
+    page-break-inside: avoid;
+}
+
+/* Enlaces usan el color de sección */
+.page a {
+    color: var(--section-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.page a:hover {
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+#contraportada a { color: var(--primary-blue); }
+#contraportada a:hover { opacity: 0.8; color: var(--primary-blue); }
+
+/* Para listas generales */
+ul, ol { 
+    margin-bottom: 1.2em; 
+    padding-left: 25px;
+    /* Permitir que las listas se dividan si son largas */
+    page-break-inside: auto;
+}
+
+li { 
+    margin-bottom: 0.8em; 
+    line-height: 1.6;
+    /* Evitar que los elementos individuales se corten */
+    page-break-inside: avoid;
+}
+
+ul ul, ol ol { padding-left: 30px; }
+.annex-list { list-style: decimal; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.8em;
+    font-size: 0.9em;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    /* Evitar que las tablas se corten entre páginas */
+    page-break-inside: avoid;
+}
+
+/* Forzar salto de página */
+.pagebreak {
+    display: block;
+    clear: both;
+    page-break-after: always;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+/* Definición CSS para control de saltos de página según HTML2PDF */
+.html2pdf__page-break {
+    height: 0;
+    page-break-after: always;
+    margin: 0;
+    border-top: none;
+}
+
+/* Asegurar que las imágenes no se corten entre páginas */
+img, .image-placeholder {
+    page-break-inside: avoid;
+}
+
+/* Estilos específicos para documentos PDF */
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .container {
+        margin: 0;
+        padding: 0;
+        max-width: none;
+        width: 100%;
+    }
+    
+    .page:not(#portada) {
+        margin: 0;
+        padding: 0;
+    }
+    
+    #portada {
+        margin: 0;
+        padding: 60px 20px;
+        page-break-after: always;
+    }
 }
 
 /* Estilo para todas las páginas excepto la portada */
