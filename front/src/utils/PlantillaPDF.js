@@ -738,6 +738,8 @@ tbody tr:nth-child(even) {
           </div>
         </section>
 
+        <div class="pagebreak"></div>
+
         <section class="page">
              <img src="" alt="Placeholder Imagen 1" class="image-placeholder full-width" style="width: 100%; height: 400px;">
         </section>
@@ -751,6 +753,8 @@ tbody tr:nth-child(even) {
           </div>
               <img src="" alt="Logo Ayuntamiento de Alicante" class="image-placeholder logo" style="width: 150px; height: 70px;">
          </section>
+
+         <div class="pagebreak"></div>
 
          <section class="page">
              <div class="image-gallery-3">
@@ -875,6 +879,8 @@ tbody tr:nth-child(even) {
             </div>
         </section>
 
+        <div class="pagebreak"></div>
+
         <section id="anexos" class="page section-anexos">
             <h2>Anexos</h2>
              <ol class="annex-list columns-3"> <li>Memoria Entre Castillos 2024-2025.</li>
@@ -933,6 +939,8 @@ tbody tr:nth-child(even) {
                 <li>Noticias publicadas en la web 2025.</li>
             </ol>
         </section>
+
+        <div class="pagebreak"></div>
 
         <section id="agencia-local" class="page section-agencia">
             <h2>1. AGENCIA LOCAL DE DESARROLLO ECONÓMICO Y SOCIAL</h2>
