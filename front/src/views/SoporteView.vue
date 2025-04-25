@@ -13,7 +13,7 @@
     
     <!-- Error de conexión -->
     <div v-else-if="hasError" class="error-container">
-      <div>⚠️</div>
+      <div>🧾</div>
       <h3>Si quieres abrir un ticket, por favor, dale a este botón y te abriremos un ticket en nuestra plataforma de tickets.</h3>
       <button @click="retryConnection" class="retry-button">
         Abrir ticket
