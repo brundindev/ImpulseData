@@ -142,7 +142,7 @@ const store = useStore();
 const isLoading = ref(true);
 const hasError = ref(false);
 const errorMessage = ref('');
-const adminEmail = 'brundindev@gmail.com'; // Email del administrador
+const adminEmail = ['brundindev@gmail.com', 'adrianreynauclaramunt2@gmail.com'];
 
 // Estado de chats
 const chats = ref([]);
@@ -483,7 +483,7 @@ const cleanupChatListeners = () => {
 const checkIsAdmin = () => {
   const user = store.getters.getUser || auth.currentUser;
   
-  if (!user || user.email !== adminEmail) {
+  if (!user || !adminEmail.includes(user.email)) {
     alert('Acceso restringido. Solo el administrador puede acceder a esta página.');
     router.push('/');
     return false;

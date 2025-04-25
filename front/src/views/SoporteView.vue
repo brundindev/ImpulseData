@@ -127,7 +127,7 @@ const isConnected = ref(false);
 const chatId = ref('');
 const userId = ref('');
 const userEmail = ref('');
-const adminEmail = 'brundindev@gmail.com'; // Email del administrador
+const adminEmail = ['brundindev@gmail.com', 'adrianreynauclaramunt2@gmail.com']; // Emails de administradores
 
 // Estado de la aplicación
 const isInitializing = ref(true);
@@ -367,7 +367,7 @@ const sendMessage = async () => {
 const notifyAdmin = async (messageText) => {
   // En un entorno real, esto debería implementarse en el backend
   // Aquí solo simulamos la funcionalidad
-  console.log(`Notificación para ${adminEmail}: Nuevo mensaje de ${userEmail.value}`);
+  console.log(`Notificación para ${adminEmail.join(', ')}: Nuevo mensaje de ${userEmail.value}`);
   
   // Podrías implementar un webhook o servicio para enviar realmente un correo
   // Por ejemplo, usando un servicio como EmailJS o una función serverless

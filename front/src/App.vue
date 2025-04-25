@@ -344,7 +344,7 @@ const mostrarChatbot = computed(() => {
               <router-link to="/soporte" class="dropdown-item">
                 <i class="fas fa-question-circle dropdown-icon"></i> Soporte Técnico
               </router-link>
-              <router-link v-if="userEmail === 'brundindev@gmail.com'" to="/admin/soporte" class="dropdown-item">
+              <router-link v-if="userEmail === 'brundindev@gmail.com' || userEmail === 'adrianreynauclaramunt2@gmail.com'" to="/admin/soporte" class="dropdown-item">
                 <i class="fas fa-headset dropdown-icon"></i> Panel de Soporte
               </router-link>
               <a href="#" class="dropdown-item logout-item" @click.prevent="logout">
