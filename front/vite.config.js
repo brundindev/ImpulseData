@@ -22,5 +22,13 @@ export default defineConfig({
     sourcemap: false,
     minify: 'esbuild',
     cssMinify: 'esbuild',
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: {
+          'cloudinary': ['@cloudinary/url-gen', 'cloudinary-core']
+        }
+      }
+    }
   },
 });
