@@ -20,9 +20,7 @@ public class CorsConfig implements WebMvcConfigurer {
                     "http://localhost:5173",
                     "http://localhost",
                     "http://localhost:80",
-                    "https://impulsedata.vercel.app",
-                    "https://impulsedata-git-main-reynalrodriguez.vercel.app",
-                    "https://impulsedata-reynalrodriguez.vercel.app"
+                    "https://impulsedata.vercel.app"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin", "X-Requested-With")
@@ -41,9 +39,7 @@ public class CorsConfig implements WebMvcConfigurer {
             "http://localhost:5173",
             "http://localhost",
             "http://localhost:80",
-            "https://impulsedata.vercel.app",
-            "https://impulsedata-git-main-reynalrodriguez.vercel.app",
-            "https://impulsedata-reynalrodriguez.vercel.app"
+            "https://impulsedata.vercel.app"
         ));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Access-Control-Allow-Origin", "X-Requested-With"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
