@@ -1,6 +1,5 @@
 <template>
-    <div class="welcome-page">
-      <!-- Nuevos efectos visuales -->
+    <div class="welcome-page fullscreen">
       <div class="animated-background">
         <div class="gradient-sphere sphere-1"></div>
         <div class="gradient-sphere sphere-2"></div>
@@ -65,11 +64,53 @@
 
   onMounted(() => {
     emit('set-welcome-page', true)
+    document.body.classList.add('welcome-open')
   })
 
   onBeforeUnmount(() => {
     emit('set-welcome-page', false)
+    document.body.classList.remove('welcome-open')
   })
   </script>
   
   <style src="../assets/Welcome.css"></style>
+  
+  <style scoped>
+  .fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    z-index: 1000;
+    overflow: hidden;
+  }
+  
+  .welcome-page {
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+  }
+  
+  .hero-section {
+    padding-top: 10rem;
+  }
+
+  /* Ocultar/difuminar elementos de la parte inferior */
+  .wave-background {
+    opacity: 0.1; /* Casi invisible */
+  }
+  
+  .wave {
+    opacity: 0.1; /* Casi invisible */
+    filter: blur(15px); /* Muy difuminado */
+  }
+  
+  /* Difuminar esferas inferiores */
+  .sphere-2 {
+    opacity: 0.1;
+    filter: blur(80px);
+  }
+  </style>

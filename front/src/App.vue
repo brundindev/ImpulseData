@@ -28,6 +28,11 @@ const estaEnRegistro = computed(() => {
   return router.currentRoute.value.path === '/registro';
 });
 
+// Verificar si estamos en la página de bienvenida
+const estaEnWelcome = computed(() => {
+  return router.currentRoute.value.path === '/';
+});
+
 // Función para cerrar el dropdown cuando se hace clic fuera de él
 const closeDropdown = (event) => {
   if (!event.target.closest('.user-dropdown')) {
@@ -320,7 +325,7 @@ const mostrarChatbot = computed(() => {
 </script>
 
 <template>
-  <header class="app-header navbar-container">
+  <header class="app-header navbar-container" v-if="!estaEnWelcome">
     <div class="header-container">
       <div class="logo-container">
         <img src="@/assets/img/impulsedata_logo.png" alt="Impulsa Alicante" class="impulsa-logo" />
@@ -375,7 +380,7 @@ const mostrarChatbot = computed(() => {
     </div>
   </header>
 
-  <main class="main-content">
+  <main class="main-content" :class="{ 'fullscreen-welcome': estaEnWelcome }">
     <RouterView />
     <ChatbotAssistant v-if="mostrarChatbot" />
   </main>
@@ -448,5 +453,15 @@ body, html {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+}
+
+.fullscreen-welcome {
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  min-height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
 }
 </style>
