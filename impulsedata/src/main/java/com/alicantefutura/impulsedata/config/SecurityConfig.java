@@ -52,8 +52,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**",
-                                "/api/images/**")
+                                "/webjars/**")
                         .permitAll()
                         .requestMatchers("/api/auth/**") // Proteger otros endpoints de autenticación
                         .authenticated()
