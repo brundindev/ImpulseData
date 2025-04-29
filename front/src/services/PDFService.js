@@ -1,5 +1,8 @@
 import { crearPlantillaPDF } from '../utils/PlantillaPDF';
 import html2pdf from 'html2pdf.js';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import CloudinaryService from './CloudinaryService';
 
 class PDFService {
   constructor() {
@@ -641,6 +644,142 @@ class PDFService {
       console.error("Error al guardar el PDF:", error);
       // Asegurarnos de ocultar el overlay en caso de error
       this.ocultarOverlayGeneracion();
+      throw error;
+    }
+  }
+
+  /**
+   * Genera un PDF a partir de una plantilla HTML
+   * @param {HTMLElement} element - Elemento HTML a convertir en PDF
+   * @param {Object} options - Opciones del PDF
+   * @returns {Promise<Blob>} - El PDF generado como Blob
+   */
+  async generatePdfFromTemplate(element, options = {}) {
+    const { 
+      filename = 'documento.pdf', 
+      format = 'a4', 
+      orientation = 'portrait',
+      margin = 10
+    } = options;
+
+    try {
+      // Convertir el HTML a un canvas
+      const canvas = await html2canvas(element, {
+        scale: 2, // Mejor resolución
+        useCORS: true, // Permitir cargar imágenes de otros dominios (como Cloudinary)
+        logging: false,
+        allowTaint: true
+      });
+
+      // Crear el PDF
+      const pdf = new jsPDF({
+        orientation,
+        unit: 'mm',
+        format
+      });
+
+      // Calcular dimensiones
+      const imgWidth = pdf.internal.pageSize.getWidth() - (margin * 2);
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      // Añadir la imagen del canvas al PDF
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+
+      // Guardar el PDF
+      pdf.save(filename);
+
+      // También devolvemos el Blob para otros usos
+      return pdf.output('blob');
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Prepara una imagen de Cloudinary para su uso en un PDF
+   * @param {string} publicId - ID público de la imagen en Cloudinary
+   * @returns {string} - URL de la imagen optimizada para PDF
+   */
+  getImageForPdf(publicId) {
+    return CloudinaryService.getImageUrlForPdf(publicId);
+  }
+
+  /**
+   * Genera un PDF con múltiples imágenes de Cloudinary
+   * @param {Array<string>} imagePublicIds - Array de IDs públicos de imágenes
+   * @param {Object} options - Opciones del PDF
+   * @returns {Promise<Blob>} - El PDF generado como Blob
+   */
+  async generatePdfWithImages(imagePublicIds, options = {}) {
+    const { 
+      filename = 'imagenes.pdf', 
+      format = 'a4', 
+      orientation = 'portrait',
+      margin = 10,
+      title = ''
+    } = options;
+
+    try {
+      // Crear el PDF
+      const pdf = new jsPDF({
+        orientation,
+        unit: 'mm',
+        format
+      });
+
+      // Añadir título si se proporciona
+      if (title) {
+        pdf.setFontSize(16);
+        pdf.text(title, margin, margin + 10);
+      }
+
+      // Calcular dimensiones disponibles
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const contentWidth = pageWidth - (margin * 2);
+      
+      let yPosition = title ? margin + 20 : margin;
+
+      // Añadir cada imagen al PDF
+      for (let i = 0; i < imagePublicIds.length; i++) {
+        const publicId = imagePublicIds[i];
+        const imageUrl = CloudinaryService.getImageUrlForPdf(publicId);
+        
+        // Crear una imagen temporal para obtener dimensiones
+        const img = new Image();
+        img.src = imageUrl;
+        
+        // Esperar a que cargue la imagen
+        await new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve; // Resolver incluso si hay error
+        });
+        
+        // Calcular alto proporcional
+        const imgHeight = (img.height * contentWidth) / img.width;
+        
+        // Si la imagen no cabe en el espacio restante, crear nueva página
+        if (yPosition + imgHeight > pageHeight - margin) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+        
+        // Añadir la imagen al PDF
+        pdf.addImage(imageUrl, 'PNG', margin, yPosition, contentWidth, imgHeight);
+        
+        // Actualizar la posición Y para la siguiente imagen
+        yPosition += imgHeight + 10; // 10mm de espacio entre imágenes
+      }
+
+      // Guardar el PDF
+      pdf.save(filename);
+
+      // También devolvemos el Blob para otros usos
+      return pdf.output('blob');
+    } catch (error) {
+      console.error('Error al generar el PDF con imágenes:', error);
       throw error;
     }
   }

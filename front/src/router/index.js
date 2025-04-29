@@ -8,6 +8,8 @@ import PanelControlView from '../views/PanelControlView.vue'
 import WelcomeView from '../views/WelcomeView.vue'
 import SoporteView from '../views/SoporteView.vue'
 import AdminSoporteView from '../views/AdminSoporteView.vue'
+import PdfExampleView from '../views/PdfExampleView.vue'
+import CloudinaryTestView from '../views/CloudinaryTestView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,7 +67,13 @@ const router = createRouter({
       name: 'adminSoporte',
       component: AdminSoporteView,
       meta: { requiresAuth: true }
-    }
+    },
+    {
+      path: '/pdf',
+      name: 'pdf',
+      component: PdfExampleView,
+      meta: { requiresAuth: true }
+    },
   ],
 })
 

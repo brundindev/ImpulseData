@@ -1,5 +1,3 @@
-import { logoAyuntamientoBase64 } from './imageBase64';
-
 const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
