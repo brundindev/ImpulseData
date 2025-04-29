@@ -1,60 +1,37 @@
-<PDFPreviewModal 
-  :show="mostrarPdfPreview" 
-  :pdf-url="pdfUrl" 
-  :pdf-bytes="pdfBytes"
-  :nombre-archivo="`informe_${empresa?.nombre || 'empresa'}.pdf`"
-  @close="mostrarPdfPreview = false" 
-  @download="descargarPDF" 
-/>
-
 <template>
   <!-- ... existing template code ... -->
 </template>
 
 <script>
 import PDFService from '../services/PDFService';
+import { useRouter } from 'vue-router';
 
 export default {
+  setup() {
+    const router = useRouter();
+    return { router };
+  },
+  
   data() {
     return {
-      mostrarPdfPreview: false,
-      pdfUrl: '',
-      pdfBytes: null,
       generandoPDF: false,
     };
   },
 
   methods: {
     /**
-     * Genera el PDF y muestra el modal de previsualización
+     * Redirige a la página de PDF con la empresa actual
      */
-    async generarPDF() {
+    generarPDF() {
       try {
-        this.generandoPDF = true;
-        const pdfBytes = await PDFService.generarInformeEmpresa(this.empresa);
-        this.pdfBytes = pdfBytes; // Guardar los bytes para descargar después
+        // Almacenar los datos de la empresa en localStorage para recuperarlos en la página PDF
+        localStorage.setItem('empresa_pdf', JSON.stringify(this.empresa));
         
-        // Crear blob y URL para previsualización
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        this.pdfUrl = URL.createObjectURL(blob);
-        
-        this.mostrarPdfPreview = true;
+        // Redirigir a la página /pdf
+        this.router.push('/pdf');
       } catch (error) {
-        console.error('Error al generar PDF:', error);
-        this.$toast.error('Error al generar el PDF. Por favor, inténtelo de nuevo.');
-      } finally {
-        this.generandoPDF = false;
-      }
-    },
-
-    /**
-     * Descarga el PDF generado
-     */
-    descargarPDF() {
-      if (this.pdfBytes) {
-        PDFService.guardarPDF(this.pdfBytes, `informe_${this.empresa?.nombre || 'empresa'}.pdf`);
-      } else {
-        this.$toast.error('No hay un PDF disponible para descargar. Por favor, genérelo primero.');
+        console.error('Error al redirigir a la página PDF:', error);
+        this.$toast.error('Error al abrir la página de PDF. Por favor, inténtelo de nuevo.');
       }
     },
   },

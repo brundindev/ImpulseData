@@ -576,7 +576,7 @@
                 <span class="action-icon">✏️</span>
                 <span class="action-text">Editar</span>
               </button>
-              <button class="apple-action-btn pdf-btn" @click="previsualizarPDF()">
+              <button class="apple-action-btn pdf-btn" @click="irAPaginaPDF()">
                 <span class="action-icon">📄</span>
                 <span class="action-text">PDF</span>
               </button>
@@ -788,15 +788,7 @@
   </div>
   
   <!-- Modal para previsualizar PDF -->
-  <PDFPreviewModal 
-    v-if="showPDFPreview" 
-    :show="showPDFPreview" 
-    :pdfUrl="pdfPreviewUrl"
-    :pdfBytes="pdfBytes"
-    :nombre-archivo="`informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`"
-    @close="cerrarPreviewPDF" 
-    @download="descargarPDFPreview"
-  />
+  
 
   <!-- Modal de confirmación de importación -->
   <div v-if="mostrarConfirmacionImportacion" class="modal-overlay">
@@ -847,7 +839,6 @@ import FirebaseAuthService from '../services/FirebaseAuthService';
 import axios from 'axios';
 import AnimatedNumber from '../components/AnimatedNumber.vue';
 import ScrollAnimation from '../components/ScrollAnimation.vue';
-import PDFPreviewModal from '../components/PDFPreviewModal.vue';
 import GeminiButton from '../components/GeminiButton.vue';
 // Importar PDFService
 import PDFService from '../services/PDFService';
@@ -2226,95 +2217,19 @@ const descargarWord = () => {
   }
 };
 
-const pdfPreviewUrl = ref('');
-const pdfBytes = ref(null);
-const showPDFPreview = ref(false);
-
 // Función para previsualizar un PDF con manejo de errores mejorado
-const previsualizarPDF = async () => {
+const previsualizarPDF = () => {
   try {
-    // Indicar que estamos cargando
-    guardando.value = true;
-    
-    // Cerrar el modal de vista antes de mostrar la previsualización
+    // Cerrar el modal de vista
     showViewModal.value = false;
     
-    // Limpiar cualquier URL previa
-    if (pdfPreviewUrl.value) {
-      URL.revokeObjectURL(pdfPreviewUrl.value);
-      pdfPreviewUrl.value = null;
-    }
+    // Almacenar los datos de la empresa actual en localStorage para recuperarlos en la página PDF
+    localStorage.setItem('empresa_pdf', JSON.stringify(empresaActual));
     
-    // Generar el PDF - directamente descargar en lugar de previsualizar si hay error
-    try {
-      const pdfBytesData = await PDFService.generarInformeEmpresa(empresaActual);
-      // Guardar los bytes para la descarga posterior
-      pdfBytes.value = pdfBytesData;
-      
-      // Intentar crear URL para previsualización
-      try {
-        // Crear blob y url
-        const blob = new Blob([pdfBytesData], { type: 'application/pdf' });
-        pdfPreviewUrl.value = URL.createObjectURL(blob);
-        
-        // Mostrar el modal de previsualización
-        showPDFPreview.value = true;
-      } catch (previewError) {
-        console.error("Error al crear previsualización, descargando directamente:", previewError);
-        
-        // Si falla la previsualización, descargar directamente
-        PDFService.guardarPDF(pdfBytesData, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
-        alert("No se pudo generar la previsualización. El PDF se ha descargado directamente.");
-      }
-    } catch (pdfError) {
-      console.error("Error grave al generar el PDF:", pdfError);
-      alert("Error al generar el PDF. Por favor, inténtelo de nuevo más tarde.");
-    }
-    
-    // Finalizar carga
-    guardando.value = false;
-  } catch (generalError) {
-    console.error("Error inesperado en previsualizarPDF:", generalError);
-    guardando.value = false;
-    alert("Ha ocurrido un error inesperado. Por favor, inténtelo de nuevo.");
-  }
-};
-
-// Función para descargar el PDF después de la previsualización
-const descargarPDF = async () => {
-  try {
-    // Comprobar si ya tenemos los bytes del PDF
-    if (pdfBytes.value && pdfBytes.value.length > 0) {
-      // Usar los bytes ya generados para descargar
-      PDFService.guardarPDF(pdfBytes.value, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
-      
-      // Limpiar después de la descarga
-      URL.revokeObjectURL(pdfPreviewUrl.value);
-      pdfPreviewUrl.value = null;
-      pdfBytes.value = null;
-      showPDFPreview.value = false;
-      
-      return;
-    }
-    
-    // Si no tenemos bytes, generar el PDF nuevamente
-    guardando.value = true;
-    
-    try {
-      const pdfBytesData = await PDFService.generarInformeEmpresa(empresaActual);
-      PDFService.guardarPDF(pdfBytesData, `informe_${empresaActual.nombre.replace(/\s+/g, '_')}.pdf`);
-    } catch (error) {
-      console.error("Error al generar o descargar el PDF:", error);
-      alert("No se pudo descargar el PDF. Por favor, inténtelo de nuevo más tarde.");
-    } finally {
-      guardando.value = false;
-      
-      // Cerrar modales
-      showPDFPreview.value = false;
-      showViewModal.value = false;
-    }
+    // Redirigir a la página /pdf
+    router.push('/pdf');
   } catch (error) {
-    console.error("Error inesperado al descargar el PDF:", error);
+    console.error("Error al redirigir a la página PDF:", error);
     alert("Ha ocurrido un error inesperado. Por favor, inténtelo de nuevo.");
   }
 };
@@ -2414,6 +2329,18 @@ const importarArchivo = async (event) => {
     importando.value = false;
     event.target.value = ''; // Resetear el input
   }
+};
+
+// Función para ir a la página de PDF
+const irAPaginaPDF = () => {
+  // Cerrar el modal de vista
+  showViewModal.value = false;
+  
+  // Almacenar los datos de la empresa actual en localStorage para recuperarlos en la página PDF
+  localStorage.setItem('empresa_pdf', JSON.stringify(empresaActual));
+  
+  // Redirigir a la página /pdf
+  router.push('/pdf');
 };
 </script>
 

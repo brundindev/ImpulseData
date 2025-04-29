@@ -1,6 +1,6 @@
 <template>
   <div class="pdf-example-view">
-    <h1>Ejemplo de generación de PDF con Cloudinary</h1>
+    <h1>Generación de PDF de {{ empresa ? empresa.nombre : 'Empresa' }}</h1>
     
     <div class="options-panel">
       <h2>Opciones del PDF</h2>
@@ -30,11 +30,11 @@
       <div class="form-group">
         <label>Logo:</label>
         <div class="logo-selector">
-          <SimpleCloudinaryImage 
+          <img 
             v-if="pdfOptions.logoPublicId" 
-            :publicId="pdfOptions.logoPublicId" 
-            width="100" 
+            :src="getCloudinaryUrl(pdfOptions.logoPublicId, {width: 100})" 
             alt="Logo" 
+            class="preview-image"
           />
           <button @click="selectImage('logo')" class="btn-select">Seleccionar Logo</button>
         </div>
@@ -45,10 +45,10 @@
         <label>Imágenes:</label>
         <div class="images-list">
           <div v-for="(image, index) in pdfOptions.images" :key="index" class="image-item">
-            <SimpleCloudinaryImage 
-              :publicId="image.publicId" 
-              width="100" 
+            <img 
+              :src="getCloudinaryUrl(image.publicId, {width: 100})" 
               :alt="image.alt || 'Imagen'" 
+              class="preview-image"
             />
             <div class="image-item-controls">
               <input v-model="image.caption" placeholder="Título de la imagen" />
@@ -92,20 +92,20 @@
       </div>
     </div>
     
-    <!-- Vista previa de la plantilla -->
+    <!-- Vista previa con la plantilla de PlantillaPDF -->
     <div class="preview-panel">
       <h2>Vista Previa</h2>
-      <PdfTemplate 
-        :title="pdfOptions.title"
-        :subtitle="pdfOptions.subtitle"
-        :description="pdfOptions.description"
-        :logoPublicId="pdfOptions.logoPublicId"
-        :tableHeaders="pdfOptions.tableHeaders"
-        :tableData="pdfOptions.tableData"
-        :images="pdfOptions.images"
-        :footerText="pdfOptions.footerText"
-        :filename="pdfOptions.filename"
-      />
+      <div ref="pdfTemplate" class="pdf-template">
+        <!-- Contenedor para insertar la plantilla de PlantillaPDF -->
+        <div id="plantilla-container" v-html="plantillaHTML"></div>
+      </div>
+    </div>
+    
+    <!-- Botón para generar el PDF -->
+    <div class="action-buttons">
+      <button @click="generatePdf" class="pdf-button">
+        Generar PDF
+      </button>
     </div>
     
     <!-- Diálogo para seleccionar imágenes -->
@@ -128,10 +128,10 @@
           <h4>Imágenes disponibles:</h4>
           <div class="images-grid">
             <div v-for="image in availableImages" :key="image.publicId" class="grid-item">
-              <SimpleCloudinaryImage 
-                :publicId="image.publicId" 
-                width="100" 
+              <img 
+                :src="getCloudinaryUrl(image.publicId, {width: 100})" 
                 alt="Imagen disponible" 
+                class="preview-image"
                 @click="selectAvailableImage(image.publicId)"
               />
             </div>
@@ -143,45 +143,106 @@
         </div>
       </div>
     </div>
+
+    <!-- Añadir un indicador de carga en lugar del alert -->
+    <div class="loading-overlay" v-if="isGenerating">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">{{ loadingMessage }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import PdfTemplate from '../components/PdfTemplate.vue';
-import SimpleCloudinaryImage from '../components/SimpleCloudinaryImage.vue';
+import { ref, reactive, onMounted, computed, watch } from 'vue';
+import { crearPlantillaPDF, html } from '../utils/PlantillaPDF';
+import html2canvas from 'html2canvas';
 import SimpleCloudinaryService from '../services/SimpleCloudinaryService';
+import jsPDF from 'jspdf';
+
+// Referencias a elementos del DOM
+const pdfTemplate = ref(null);
+const fileInput = ref(null);
+
+// Datos de la empresa
+const empresa = ref(null);
+
+// Plantilla HTML generada a partir de PlantillaPDF.js
+const plantillaHTML = ref("");
 
 // Opciones del PDF
 const pdfOptions = reactive({
-  title: 'Informe de Proyecto',
+  title: 'Informe de Empresa',
   subtitle: 'Resumen de actividades',
-  description: 'Este informe contiene el resumen de las actividades realizadas durante el proyecto.',
+  description: 'Este informe contiene el resumen de las actividades de la empresa.',
   logoPublicId: '', // ID público del logo en Cloudinary
   tableHeaders: ['ID', 'Nombre', 'Fecha', 'Estado'],
   tableData: [
-    ['001', 'Tarea 1', '01/05/2023', 'Completada'],
-    ['002', 'Tarea 2', '15/05/2023', 'En progreso'],
-    ['003', 'Tarea 3', '30/05/2023', 'Pendiente']
+    ['001', 'Tarea 1', '01/05/2025', 'Completada'],
+    ['002', 'Tarea 2', '15/05/2025', 'En progreso'],
+    ['003', 'Tarea 3', '30/05/2025', 'Pendiente']
   ],
   images: [], // Array de objetos {publicId, alt, caption, width, height}
-  footerText: '© 2023 ImpulseData. Todos los derechos reservados.',
-  filename: 'informe-proyecto.pdf'
+  footerText: '© 2025 ImpulseData. Todos los derechos reservados.',
+  filename: 'informe-empresa.pdf'
 });
 
 // Estado del selector de imágenes
 const showImageSelector = ref(false);
 const currentImageType = ref(''); // 'logo' o 'pdf'
 const uploadStatus = ref('');
-const fileInput = ref(null);
 
-// Imágenes disponibles (corregidas para usar imágenes reales de Cloudinary)
+// Imágenes disponibles
 const availableImages = ref([
   { publicId: 'sample', alt: 'Muestra general' },
   { publicId: 'samples/landscapes/nature-mountains', alt: 'Montañas' },
   { publicId: 'samples/food/pot-mussels', alt: 'Comida' },
   { publicId: 'samples/ecommerce/accessories-bag', alt: 'Producto' }
 ]);
+
+// Dentro del script, añadir estas variables reactivas
+const isGenerating = ref(false);
+const loadingMessage = ref('');
+
+// Función para obtener URL de Cloudinary
+const getCloudinaryUrl = (publicId, options = {}) => {
+  if (!publicId) return '';
+  
+  const { width, height, format, quality } = options;
+  
+  // URL base de Cloudinary
+  let url = `https://res.cloudinary.com/drqt6gd5v/image/upload`;
+  
+  // Transformaciones
+  const transformations = [];
+  if (width) transformations.push(`w_${width}`);
+  if (height) transformations.push(`h_${height}`);
+  if (format && format !== 'auto') transformations.push(`f_${format}`);
+  if (quality && quality !== 'auto') transformations.push(`q_${quality}`);
+  else transformations.push('q_auto');
+  
+  // Añadir transformaciones a la URL
+  if (transformations.length > 0) {
+    url += `/${transformations.join(',')}`;
+  }
+  
+  // Añadir el ID público a la URL
+  url += `/${publicId}`;
+  
+  return url;
+};
+
+// Cargar la plantilla HTML
+const loadPlantillaHTML = async () => {
+  try {
+    plantillaHTML.value = await crearPlantillaPDF();
+    console.log("Plantilla HTML cargada correctamente");
+  } catch (error) {
+    console.error("Error al cargar la plantilla HTML:", error);
+    plantillaHTML.value = html; // Usar el HTML base como fallback
+  }
+};
 
 // Abrir selector de imágenes
 const selectImage = (type) => {
@@ -289,6 +350,302 @@ const addTableColumn = () => {
     row.push('');
   });
 };
+
+// Método para generar el PDF a partir de la plantilla HTML mostrada en la vista previa
+const generatePdf = async () => {
+  try {
+    // Activar indicador de carga
+    isGenerating.value = true;
+    loadingMessage.value = 'Preparando la plantilla...';
+    
+    // Asegurarse de que la plantilla esté actualizada
+    await loadPlantillaHTML();
+    
+    // Dar tiempo al DOM para actualizarse antes de la captura
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Usar un enfoque más directo con jsPDF
+    loadingMessage.value = 'Generando PDF...';
+    
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    // Añadir título y subtítulo directamente
+    doc.setFontSize(22);
+    doc.setTextColor(0, 70, 152); // Color azul corporativo
+    doc.text(pdfOptions.title, 20, 20);
+    
+    doc.setFontSize(16);
+    doc.setTextColor(81, 117, 160); // Color azul más claro
+    doc.text(pdfOptions.subtitle, 20, 30);
+    
+    // Añadir descripción
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0); // Negro
+    const splitDescription = doc.splitTextToSize(pdfOptions.description, 170);
+    doc.text(splitDescription, 20, 40);
+    
+    // Agregar logo si existe
+    let currentY = 55;
+    if (pdfOptions.logoPublicId) {
+      try {
+        loadingMessage.value = 'Agregando logo...';
+        const logoUrl = getCloudinaryUrl(pdfOptions.logoPublicId, {width: 100, format: 'png'});
+        
+        // Añadir logo con método que evita problemas CORS
+        doc.addImage(logoUrl, 'PNG', 20, currentY, 40, 20);
+        currentY += 30;
+      } catch (logoError) {
+        console.error('Error al añadir logo, continuando sin él:', logoError);
+        // Continuar sin logo
+      }
+    }
+    
+    // Añadir la tabla
+    if (pdfOptions.tableHeaders.length > 0 && pdfOptions.tableData.length > 0) {
+      loadingMessage.value = 'Generando tabla...';
+      
+      // Crear tabla con autoTable (si está disponible) o implementar manualmente
+      try {
+        // Configuración manual de la tabla
+        const tableWidth = 170;
+        const colWidth = tableWidth / pdfOptions.tableHeaders.length;
+        
+        // Dibujar encabezados
+        doc.setFillColor(240, 240, 240);
+        doc.setDrawColor(200, 200, 200);
+        
+        pdfOptions.tableHeaders.forEach((header, index) => {
+          // Celda de encabezado
+          doc.rect(20 + (index * colWidth), currentY, colWidth, 10, 'FD');
+          
+          // Texto de encabezado
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(0, 0, 0);
+          doc.text(header, 20 + (index * colWidth) + (colWidth / 2), currentY + 5, {
+            align: 'center'
+          });
+        });
+        
+        currentY += 10;
+        
+        // Dibujar filas
+        pdfOptions.tableData.forEach((row, rowIndex) => {
+          // Alternar colores
+          if (rowIndex % 2 === 0) {
+            doc.setFillColor(250, 250, 250);
+          } else {
+            doc.setFillColor(245, 245, 245);
+          }
+          
+          // Comprobar si necesitamos una nueva página
+          if (currentY > 250) {
+            doc.addPage();
+            currentY = 20;
+          }
+          
+          row.forEach((cell, cellIndex) => {
+            // Dibujar celda
+            doc.rect(20 + (cellIndex * colWidth), currentY, colWidth, 8, 'FD');
+            
+            // Texto de la celda
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(60, 60, 60);
+            
+            // Truncar si es necesario
+            let cellText = String(cell || '');
+            if (cellText.length > 20) {
+              cellText = cellText.substring(0, 18) + '...';
+            }
+            
+            doc.text(cellText, 20 + (cellIndex * colWidth) + (colWidth / 2), currentY + 4, {
+              align: 'center'
+            });
+          });
+          
+          currentY += 8;
+        });
+      } catch (tableError) {
+        console.error('Error al generar tabla:', tableError);
+        doc.text("Error al generar la tabla de datos", 20, currentY);
+        currentY += 10;
+      }
+    }
+    
+    // Añadir imágenes
+    if (pdfOptions.images.length > 0) {
+      loadingMessage.value = 'Agregando imágenes...';
+      currentY += 10;
+      
+      // Variables para la disposición de imágenes
+      const imagesPerRow = 2;
+      const imgWidth = 80;
+      const imgHeight = 60;
+      
+      for (let i = 0; i < pdfOptions.images.length; i++) {
+        try {
+          const image = pdfOptions.images[i];
+          if (!image.publicId) continue;
+          
+          const row = Math.floor(i / imagesPerRow);
+          const col = i % imagesPerRow;
+          const xPos = 20 + (col * (imgWidth + 10));
+          const yPos = currentY + (row * (imgHeight + 30));
+          
+          // Si estamos cerca del final de la página, agregar nueva página
+          if (yPos > 250) {
+            doc.addPage();
+            currentY = 20;
+            i--; // Retroceder para procesar la misma imagen en la nueva página
+            continue;
+          }
+          
+          // Obtener URL de la imagen y añadirla directamente
+          const imgUrl = getCloudinaryUrl(image.publicId, {
+            width: 800,
+            height: 600,
+            format: 'jpg',
+            quality: 90
+          });
+          
+          doc.addImage(imgUrl, 'JPEG', xPos, yPos, imgWidth, imgHeight);
+          
+          // Agregar leyenda si existe
+          if (image.caption) {
+            doc.setFontSize(9);
+            doc.setTextColor(80, 80, 80);
+            doc.text(image.caption, xPos + (imgWidth / 2), yPos + imgHeight + 5, {
+              align: 'center'
+            });
+          }
+          
+          // Actualizar currentY para la siguiente sección si es necesario
+          if (i === pdfOptions.images.length - 1) {
+            currentY = yPos + imgHeight + 15;
+          }
+        } catch (imgError) {
+          console.error(`Error al añadir imagen ${i}:`, imgError);
+          // Continuar con las siguientes imágenes
+        }
+      }
+    }
+    
+    // Añadir pie de página
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      
+      // Número de página
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(`Página ${i} de ${pageCount}`, 190, 285, { align: 'right' });
+      
+      // Texto de pie de página
+      doc.text(pdfOptions.footerText || '© 2025 ImpulseData', 105, 290, { align: 'center' });
+    }
+    
+    loadingMessage.value = 'Descargando PDF...';
+    
+    // Nombre del archivo
+    const filename = pdfOptions.filename.endsWith('.pdf') ? 
+                     pdfOptions.filename : 
+                     `${pdfOptions.filename}.pdf`;
+    
+    // Descargar el PDF
+    doc.save(filename);
+    
+    loadingMessage.value = '¡PDF generado con éxito!';
+    
+    // Cerrar indicador de carga
+    setTimeout(() => {
+      isGenerating.value = false;
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Error al generar el PDF:', error);
+    
+    // Intentar un último recurso con html2pdf.js si está disponible
+    try {
+      loadingMessage.value = 'Intentando método alternativo...';
+      
+      // Crear un elemento nuevo para el contenido
+      const contentElement = document.createElement('div');
+      contentElement.innerHTML = `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h1 style="color: #004698;">${pdfOptions.title}</h1>
+          <h2 style="color: #5175a0;">${pdfOptions.subtitle}</h2>
+          <p>${pdfOptions.description}</p>
+        </div>
+      `;
+      
+      // Agregar al DOM temporalmente
+      document.body.appendChild(contentElement);
+      
+      // Crear el PDF del elemento simple
+      const pdf = new jsPDF();
+      
+      // Añadir texto simple
+      pdf.setFontSize(22);
+      pdf.text(pdfOptions.title, 20, 20);
+      pdf.setFontSize(16);
+      pdf.text(pdfOptions.subtitle, 20, 30);
+      pdf.setFontSize(12);
+      pdf.text('Se ha generado una versión simplificada del informe debido a un error técnico.', 20, 40);
+      
+      // Guardar
+      pdf.save(pdfOptions.filename);
+      
+      // Limpiar
+      document.body.removeChild(contentElement);
+      
+      loadingMessage.value = 'Se ha generado una versión simplificada del PDF';
+      setTimeout(() => {
+        isGenerating.value = false;
+      }, 1000);
+      
+    } catch (fallbackError) {
+      console.error('Error también en el método alternativo:', fallbackError);
+      alert(`Error al generar el PDF: ${error.message || 'Error desconocido'}. Por favor, inténtalo de nuevo.`);
+      isGenerating.value = false;
+    }
+  }
+};
+
+// Al montar el componente, recuperar los datos de la empresa y cargar la plantilla
+onMounted(async () => {
+  try {
+    // Obtener datos de empresa desde localStorage
+    const empresaData = localStorage.getItem('empresa_pdf');
+    if (empresaData) {
+      empresa.value = JSON.parse(empresaData);
+      console.log('Datos de empresa recuperados:', empresa.value);
+      
+      // Rellenar opciones del PDF con datos de la empresa
+      pdfOptions.title = `Informe de ${empresa.value.nombre}`;
+      pdfOptions.subtitle = `Datos principales de ${empresa.value.nombre}`;
+      pdfOptions.description = empresa.value.descripcion || 'Informe detallado de la empresa.';
+      pdfOptions.filename = `informe_${empresa.value.nombre.replace(/\s+/g, '_')}.pdf`;
+    } else {
+      console.warn('No se encontraron datos de empresa en localStorage');
+    }
+    
+    // Cargar la plantilla HTML
+    await loadPlantillaHTML();
+    
+  } catch (error) {
+    console.error('Error al inicializar componente:', error);
+  }
+});
+
+// Actualizar la plantilla cuando cambian las opciones
+watch(pdfOptions, async () => {
+  await loadPlantillaHTML();
+}, { deep: true });
 </script>
 
 <style scoped>
@@ -353,6 +710,13 @@ input, textarea {
   display: flex;
   flex-direction: column;
   gap: 5px;
+}
+
+.preview-image {
+  max-width: 100px;
+  max-height: 100px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
 .editable-table {
@@ -496,5 +860,79 @@ input, textarea {
 
 .preview-panel {
   margin-top: 30px;
+}
+
+.pdf-template {
+  width: 210mm; /* Tamaño A4 */
+  margin: 0 auto;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.pdf-button {
+  background: linear-gradient(90deg, #00c3ff, #00ff8c);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.pdf-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 80%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #004698;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+.loading-text {
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style> 
