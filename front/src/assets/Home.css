@@ -105,14 +105,18 @@
 } */
 
 .dashboard-container {
-  width:100%;
-  width: 100%;
-  padding:20px;
-  display:flex;
-  flex-direction: column;
-  padding-bottom: 100px;
+  flex: 1;
+  padding: 6rem 3rem 3rem;
   position: relative;
   z-index: 2;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow-y: visible; /* Permitir que el contenido sea desplazable */
 }
 
 .forms-section, .stats-section, .dashboard-header, .alicante-banner-showcase {
@@ -1661,15 +1665,14 @@ button.noselect:hover .text {
 
 /* Estilos para el WelcomeView aplicados a todas las páginas */
 .welcome-page {
-  min-height: calc(100vh - 4.2em);
+  min-height: 100vh;
   background: linear-gradient(180deg, #1D2024 0%, black 50%, black 100%);
   color: white;
   position: relative;
-  /* cambios para el scrollbar */
-  overflow-y:auto;
-  /* cambios para que se vea en toda la pagina */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  height: 100vh; /* Asegurarse de que ocupa toda la altura de la ventana */
 }
 
 .welcome-page::before {

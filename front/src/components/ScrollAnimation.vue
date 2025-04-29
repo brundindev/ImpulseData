@@ -22,27 +22,28 @@ const animatedElements = [
 let observer = null;
 
 onMounted(() => {
-  // Configurar el observador con un margen para que la animación comience un poco antes
-  const options = {
-    root: null, // viewport
-    rootMargin: '0px 0px -100px 0px', // cuando el elemento está a 100px de entrar en el viewport
-    threshold: 0.1 // 10% del elemento visible
-  };
-
-  // Crear el observador
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        // Si el elemento es visible, añadir la clase para mostrar
-        entry.target.classList.add('visible');
-        // Dejar de observar este elemento una vez que ya se ha mostrado
-        observer.unobserve(entry.target);
-      }
-    });
-  }, options);
-
-  // Primero aplicamos las clases fade-up-element a todos los elementos
+  // Esperar un momento antes de inicializar para evitar problemas con el scroll
   setTimeout(() => {
+    // Configurar el observador con un margen para que la animación comience un poco antes
+    const options = {
+      root: null, // viewport
+      rootMargin: '0px 0px -100px 0px', // cuando el elemento está a 100px de entrar en el viewport
+      threshold: 0.1 // 10% del elemento visible
+    };
+
+    // Crear el observador
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Si el elemento es visible, añadir la clase para mostrar
+          entry.target.classList.add('visible');
+          // Dejar de observar este elemento una vez que ya se ha mostrado
+          observer.unobserve(entry.target);
+        }
+      });
+    }, options);
+
+    // Aplicamos las clases fade-up-element a todos los elementos que queremos animar
     animatedElements.forEach(selector => {
       document.querySelectorAll(selector).forEach((element, index) => {
         // Añadir la clase base de animación
@@ -64,7 +65,7 @@ onMounted(() => {
       element.classList.add(`fade-delay-${(index % 5) + 1}`);
       observer.observe(element);
     });
-  }, 100);
+  }, 300); // Aumentamos el retraso para asegurar que los elementos estén renderizados
 });
 
 onUnmounted(() => {
@@ -73,4 +74,26 @@ onUnmounted(() => {
     observer.disconnect();
   }
 });
-</script> 
+</script>
+
+<style>
+/* Estilos para las animaciones de entrada */
+.fade-up-element {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  will-change: opacity, transform;
+}
+
+.fade-up-element.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Retardos para escalonar las animaciones */
+.fade-delay-1 { transition-delay: 0.1s; }
+.fade-delay-2 { transition-delay: 0.2s; }
+.fade-delay-3 { transition-delay: 0.3s; }
+.fade-delay-4 { transition-delay: 0.4s; }
+.fade-delay-5 { transition-delay: 0.5s; }
+</style> 
