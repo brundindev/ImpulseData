@@ -637,6 +637,25 @@ onMounted(async () => {
     // Cargar la plantilla HTML
     await loadPlantillaHTML();
     
+    // Cargar imágenes disponibles desde Cloudinary a través del backend
+    try {
+      loadingMessage.value = 'Cargando imágenes disponibles...';
+      isGenerating.value = true;
+      
+      const images = await SimpleCloudinaryService.getAllImages(50);
+      if (images && images.length > 0) {
+        availableImages.value = images;
+      }
+      
+      console.log('Imágenes cargadas correctamente:', availableImages.value.length);
+    } catch (imageError) {
+      console.error('Error al cargar imágenes:', imageError);
+      // Mantenemos las imágenes por defecto
+    } finally {
+      loadingMessage.value = '';
+      isGenerating.value = false;
+    }
+    
   } catch (error) {
     console.error('Error al inicializar componente:', error);
   }

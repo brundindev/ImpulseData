@@ -3,6 +3,9 @@ import axios from 'axios';
 // Crear instancia de Axios sin interceptores para evitar conflictos CORS
 const cloudinaryAxios = axios.create();
 
+// Base URL para API del backend (ajustar según corresponda)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+
 /**
  * Servicio simplificado para Cloudinary sin usar el SDK oficial
  */
@@ -95,6 +98,31 @@ class SimpleCloudinaryService {
     } catch (error) {
       console.error('Error al subir imagen a Cloudinary:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Obtiene todas las imágenes disponibles en Cloudinary a través del backend
+   * @param {number} maxResults - Número máximo de resultados a obtener
+   * @returns {Promise<Array>} - Promise con la lista de imágenes
+   */
+  async getAllImages(maxResults = 100) {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/cloudinary/images`, {
+        params: { maxResults }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener imágenes de Cloudinary:', error);
+      
+      // Si hay error, intentar obtener algunas imágenes por defecto
+      return [
+        { publicId: 'sample', alt: 'Muestra general' },
+        { publicId: 'samples/landscapes/nature-mountains', alt: 'Montañas' },
+        { publicId: 'samples/food/pot-mussels', alt: 'Comida' },
+        { publicId: 'samples/ecommerce/accessories-bag', alt: 'Producto' }
+      ];
     }
   }
 }
