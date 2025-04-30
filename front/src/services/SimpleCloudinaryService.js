@@ -4,7 +4,8 @@ import axios from 'axios';
 const cloudinaryAxios = axios.create();
 
 // Base URL para API del backend (ajustar según corresponda)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://impulsedata.onrender.com';
+const API_PATH = `${API_BASE_URL}/api`;
 
 /**
  * Servicio simplificado para Cloudinary sin usar el SDK oficial
@@ -108,7 +109,7 @@ class SimpleCloudinaryService {
    */
   async getAllImages(maxResults = 100) {
     try {
-      const response = await axios.get(`${API_BASE_URL}/cloudinary/images`, {
+      const response = await axios.get(`${API_PATH}/cloudinary/images`, {
         params: { maxResults }
       });
       
