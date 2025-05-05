@@ -388,8 +388,8 @@ const generatePdf = async () => {
     
     // Crear un iframe temporal para renderizar correctamente la plantilla con estilos
     const iframe = document.createElement('iframe');
-    iframe.style.width = '210mm';  // Ancho A4
-    iframe.style.height = '297mm'; // Alto A4
+    iframe.style.width = '793px';  // Ancho A4 en px (210mm)
+    iframe.style.height = '1122px'; // Alto A4 en px (297mm)
     iframe.style.position = 'absolute';
     iframe.style.top = '-9999px';
     iframe.style.left = '-9999px';
@@ -398,7 +398,59 @@ const generatePdf = async () => {
     // Copiar todo el contenido de la plantilla al iframe
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     iframeDoc.open();
-    iframeDoc.write(plantillaHTML.value);
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>PDF</title>
+          <style>
+            body { 
+              margin: 0; 
+              padding: 0; 
+              background: white; 
+              font-family: Arial, sans-serif;
+              color: #000;
+            }
+            * { box-sizing: border-box; }
+            .page { 
+              page-break-after: always; 
+              break-after: page;
+              margin: 0;
+              padding: 0;
+              width: 100%;
+              background: white;
+              border: none;
+              box-shadow: none;
+              min-height: 1122px;
+              height: auto;
+              position: relative;
+              overflow: hidden;
+            }
+            .page:last-child {
+              page-break-after: auto;
+              break-after: auto;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+              display: block;
+            }
+            /* Evitar elementos huérfanos al final de una página */
+            p, h1, h2, h3, h4, h5, h6 {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            /* Evitar saltos de página dentro de secciones críticas */
+            .no-break {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+          </style>
+        </head>
+        <body>${plantillaHTML.value}</body>
+      </html>
+    `);
     iframeDoc.close();
     
     // Dar tiempo para que el iframe renderice completamente
@@ -477,15 +529,13 @@ const generatePdf = async () => {
         
         // Capturar la página actual con html2canvas
         const canvas = await html2canvas(page, {
-          scale: 1.5,          // Bajar calidad para mejor rendimiento
-          useCORS: true,      // Permitir imágenes de otros dominios
-          logging: false,     // Desactivar logs
-          allowTaint: true,   // Permitir contenido potencialmente no seguro
+          scale: 2, // Mayor calidad (estaba en 1.5)
+          useCORS: true,
+          logging: false,
+          allowTaint: true,
           backgroundColor: '#ffffff',
-          windowWidth: 1200,
-          windowHeight: 1600,
+          // Quitar windowWidth y windowHeight para usar dimensiones naturales
           ignoreElements: (element) => {
-            // Ignorar elementos vacíos o pagebreaks
             return element.classList.contains('pagebreak') ||
                   (element.tagName === 'DIV' && !element.textContent.trim() && !element.getElementsByTagName('img').length);
           }
@@ -510,57 +560,15 @@ const generatePdf = async () => {
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
         
-        // Calcular dimensiones preservando la relación de aspecto
-        const canvasRatio = canvas.width / canvas.height;
-        
-        // Validar que canvasRatio no sea NaN o infinito
-        if (!isFinite(canvasRatio) || canvasRatio <= 0) {
-          console.warn(`Relación de aspecto inválida en página ${index + 1}, usando valor por defecto`);
-          // Añadir página en blanco o con texto básico
-          pdf.setFontSize(12);
-          pdf.text(`[Página ${index + 1}]`, 20, 20);
-          setTimeout(() => processPage(index + 1), 50);
-          return;
-        }
-        
-        // Definir margen y área imprimible
-        const margin = 10;
-        const printWidth = pageWidth - (margin * 2);
-        const printHeight = pageHeight - (margin * 2);
-        
-        // Calcular las dimensiones finales manteniendo la proporción
-        let imgWidth, imgHeight;
-        
-        if (canvasRatio > (printWidth / printHeight)) {
-          // La imagen es más ancha que la página
-          imgWidth = printWidth;
-          imgHeight = imgWidth / canvasRatio;
-        } else {
-          // La imagen es más alta que la página
-          imgHeight = printHeight;
-          imgWidth = imgHeight * canvasRatio;
-        }
-        
-        // Verificar que las dimensiones calculadas sean válidas
-        if (!isFinite(imgWidth) || !isFinite(imgHeight) || imgWidth <= 0 || imgHeight <= 0) {
-          console.warn(`Dimensiones inválidas calculadas para página ${index + 1}, usando valores por defecto`);
-          imgWidth = printWidth;
-          imgHeight = printHeight;
-        }
-        
-        // Centrar en la página
-        const xOffset = margin + (printWidth - imgWidth) / 2;
-        const yOffset = margin + (printHeight - imgHeight) / 2;
-        
-        // Agregar imagen al PDF usando método simplificado
-        try {
-          pdf.addImage(imgData, 'JPEG', xOffset, yOffset, imgWidth, imgHeight);
-        } catch (addImageError) {
-          console.error(`Error al añadir imagen de página ${index + 1}:`, addImageError);
-          // Añadir texto alternativo si la imagen falla
-          pdf.setFontSize(12);
-          pdf.text(`[Contenido de página ${index + 1} no disponible]`, 20, 20);
-        }
+        // Usar dimensiones fijas de página PDF, sin comprimir el contenido
+        pdf.addImage(
+          imgData, 
+          'JPEG', 
+          0, // x - sin márgenes
+          0, // y - sin márgenes
+          pageWidth, // Ancho completo de la página
+          pageHeight // Alto completo de la página
+        );
         
         // Procesar la siguiente página
         setTimeout(() => processPage(index + 1), 50);
@@ -587,57 +595,86 @@ const generatePdf = async () => {
     
     loadingMessage.value = 'Error al generar el PDF. Intentando método alternativo...';
     
-    // Intentar el método alternativo más simple
+    // Intentar usar un método alternativo basado en html2pdf.js
     try {
       // Crear un iframe temporal
       const iframe = document.createElement('iframe');
+      iframe.style.width = '793px'; // Ancho A4 en px (210mm)
+      iframe.style.height = '1122px'; // Alto A4 en px (297mm)
       iframe.style.position = 'absolute';
       iframe.style.top = '-9999px';
+      iframe.style.left = '-9999px';
       document.body.appendChild(iframe);
       
       // Cargar la plantilla en el iframe
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       iframeDoc.open();
-      iframeDoc.write(plantillaHTML.value);
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>PDF</title>
+            <style>
+              @page {
+                margin: 15mm;
+                size: A4 portrait;
+              }
+              body { 
+                margin: 0; 
+                padding: 0; 
+                background: white; 
+                font-family: Arial, sans-serif;
+                color: #000;
+              }
+              * { box-sizing: border-box; }
+              .page, .pagebreak { 
+                page-break-after: always; 
+                break-after: page;
+              }
+              .page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+              }
+            </style>
+          </head>
+          <body>${plantillaHTML.value}</body>
+        </html>
+      `);
       iframeDoc.close();
       
-      // Usar iframe2pdf (si está disponible, o fallback a jsPDF)
-      setTimeout(() => {
-        try {
-          // Nombre del archivo
-          const filename = pdfOptions.filename.endsWith('.pdf') ? 
-                          pdfOptions.filename : 
-                          `${pdfOptions.filename}.pdf`;
-          
-          // Crear PDF simplificado solo con el título y mensaje
-          const pdf = new jsPDF();
-          pdf.setFontSize(18);
-          pdf.setTextColor(0, 70, 152);
-          pdf.text('Memoria de Actividad - Impulsalicante', 20, 20);
-          
-          pdf.setFontSize(12);
-          pdf.setTextColor(0, 0, 0);
-          pdf.text('La plantilla es demasiado compleja para convertir directamente.', 20, 40);
-          pdf.text('Por favor, utilice la función de impresión del navegador para', 20, 50);
-          pdf.text('guardar la vista previa como PDF.', 20, 60);
-          
-          // Guardar PDF
-          pdf.save(filename);
-          
-          // Limpiar
-          document.body.removeChild(iframe);
-          
-          loadingMessage.value = 'Se ha generado una versión básica. Para mejores resultados, imprima la vista previa.';
-        } catch (innerError) {
-          console.error('Error en método alternativo:', innerError);
-          // Informar al usuario
-          loadingMessage.value = 'No se pudo generar el PDF. Por favor, utilice la función de impresión del navegador.';
-        }
+      // Esperar a que el contenido se cargue
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Nombre del archivo
+      const filename = pdfOptions.filename.endsWith('.pdf') ? 
+                      pdfOptions.filename : 
+                      `${pdfOptions.filename}.pdf`;
+      
+      // Crear PDF simplificado si todo lo anterior falló
+      if (!iframeDoc.body.textContent.trim()) {
+        const pdf = new jsPDF();
+        pdf.setFontSize(18);
+        pdf.setTextColor(0, 70, 152);
+        pdf.text('Memoria de Actividad - Impulsalicante', 20, 20);
         
-        setTimeout(() => {
-          isGenerating.value = false;
-        }, 2000);
-      }, 500);
+        pdf.setFontSize(12);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text('La plantilla es demasiado compleja para convertir directamente.', 20, 40);
+        pdf.text('Por favor, utilice la función de impresión del navegador para', 20, 50);
+        pdf.text('guardar la vista previa como PDF.', 20, 60);
+        
+        // Guardar PDF
+        pdf.save(filename);
+      }
+      
+      // Limpiar
+      document.body.removeChild(iframe);
+      
+      loadingMessage.value = 'Se ha generado una versión básica del PDF.';
+      setTimeout(() => {
+        isGenerating.value = false;
+      }, 2000);
       
     } catch (fallbackError) {
       console.error('Error también en el método alternativo:', fallbackError);
