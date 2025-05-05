@@ -398,19 +398,20 @@ const generatePdf = async () => {
     // Copiar todo el contenido de la plantilla al iframe
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     iframeDoc.open();
-    iframeDoc.write(plantillaHTML.value);
+    
+    // Modificar el HTML antes de escribirlo para mejorar el flujo del contenido
+    let modifiedHTML = plantillaHTML.value;
+    
+    // Eliminar clases 'page' y conservar solo las de 'pagebreak' para forzar saltos de página
+    modifiedHTML = modifiedHTML.replace(/class="page/g, 'class="content-section');
+    
+    iframeDoc.write(modifiedHTML);
     iframeDoc.close();
     
     // Dar tiempo para que el iframe renderice completamente
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Crear el PDF con html2canvas para cada página
-    loadingMessage.value = 'Capturando la plantilla para el PDF...';
-    
-    // Obtener todas las secciones que deben ser páginas separadas
-    const pages = iframeDoc.querySelectorAll('.page, .pagebreak');
-    
-    // Crear el documento PDF
+    // Crear el PDF con jsPDF
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -418,169 +419,90 @@ const generatePdf = async () => {
       compress: true
     });
     
-    // Procesar cada página
-    let pageIndex = 0;
+    // Obtener solo los elementos que deben forzar nueva página (pagebreak)
+    const pagebreaks = iframeDoc.querySelectorAll('.pagebreak, .html2pdf__page-break');
+    const contentElements = iframeDoc.body.children;
     
-    // Función para procesar páginas secuencialmente
-    const processPage = async (index) => {
-      if (index >= pages.length) {
-        // Todas las páginas procesadas, terminar
-        loadingMessage.value = 'Finalizando PDF...';
-        
-        // Nombre del archivo
-        const filename = pdfOptions.filename.endsWith('.pdf') ? 
-                        pdfOptions.filename : 
-                        `${pdfOptions.filename}.pdf`;
-        
-        loadingMessage.value = 'Descargando PDF...';
-        
-        // Descargar el PDF
-        pdf.save(filename);
-        
-        // Limpiar
-        document.body.removeChild(iframe);
-        
-        loadingMessage.value = '¡PDF generado con éxito!';
-        
-        // Cerrar indicador de carga
-        setTimeout(() => {
-          isGenerating.value = false;
-        }, 1000);
-        
-        return;
-      }
-      
-      const page = pages[index];
-      
-      // Verificar si es un elemento .pagebreak sin contenido (solo generar nueva página)
-      if (page.classList.contains('pagebreak') || 
-          (page.tagName === 'DIV' && page.clientHeight < 10)) {
-        // Si es solo un separador de página, añadir nueva página y continuar
-        if (index > 0) {
-          pdf.addPage();
-        }
-        
-        // Procesar la siguiente página
-        setTimeout(() => processPage(index + 1), 50);
-        return;
-      }
-      
-      loadingMessage.value = `Procesando página ${index + 1} de ${pages.length}...`;
-      
-      try {
-        // Asegurarse que la página tenga dimensiones válidas
-        if (!page.offsetWidth || !page.offsetHeight) {
-          console.warn(`Página ${index + 1} tiene dimensiones inválidas, saltando...`);
-          setTimeout(() => processPage(index + 1), 50);
-          return;
-        }
-        
-        // Capturar la página actual con html2canvas
-        const canvas = await html2canvas(page, {
-          scale: 1.5,          // Bajar calidad para mejor rendimiento
-          useCORS: true,      // Permitir imágenes de otros dominios
-          logging: false,     // Desactivar logs
-          allowTaint: true,   // Permitir contenido potencialmente no seguro
-          backgroundColor: '#ffffff',
-          windowWidth: 1200,
-          windowHeight: 1600,
-          ignoreElements: (element) => {
-            // Ignorar elementos vacíos o pagebreaks
-            return element.classList.contains('pagebreak') ||
-                  (element.tagName === 'DIV' && !element.textContent.trim() && !element.getElementsByTagName('img').length);
-          }
-        });
-        
-        // Verificar que el canvas tenga dimensiones válidas
-        if (canvas.width < 10 || canvas.height < 10) {
-          console.warn(`Canvas para página ${index + 1} tiene dimensiones demasiado pequeñas, saltando...`);
-          setTimeout(() => processPage(index + 1), 50);
-          return;
-        }
-        
-        // Si no es la primera página, añadir una nueva
-        if (index > 0) {
-          pdf.addPage();
-        }
-        
-        // Convertir canvas a imagen y añadir al PDF
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        
-        // Ajustar la imagen al tamaño de la página A4
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        
-        // Calcular dimensiones preservando la relación de aspecto
-        const canvasRatio = canvas.width / canvas.height;
-        
-        // Validar que canvasRatio no sea NaN o infinito
-        if (!isFinite(canvasRatio) || canvasRatio <= 0) {
-          console.warn(`Relación de aspecto inválida en página ${index + 1}, usando valor por defecto`);
-          // Añadir página en blanco o con texto básico
-          pdf.setFontSize(12);
-          pdf.text(`[Página ${index + 1}]`, 20, 20);
-          setTimeout(() => processPage(index + 1), 50);
-          return;
-        }
-        
-        // Definir margen y área imprimible
-        const margin = 10;
-        const printWidth = pageWidth - (margin * 2);
-        const printHeight = pageHeight - (margin * 2);
-        
-        // Calcular las dimensiones finales manteniendo la proporción
-        let imgWidth, imgHeight;
-        
-        if (canvasRatio > (printWidth / printHeight)) {
-          // La imagen es más ancha que la página
-          imgWidth = printWidth;
-          imgHeight = imgWidth / canvasRatio;
-        } else {
-          // La imagen es más alta que la página
-          imgHeight = printHeight;
-          imgWidth = imgHeight * canvasRatio;
-        }
-        
-        // Verificar que las dimensiones calculadas sean válidas
-        if (!isFinite(imgWidth) || !isFinite(imgHeight) || imgWidth <= 0 || imgHeight <= 0) {
-          console.warn(`Dimensiones inválidas calculadas para página ${index + 1}, usando valores por defecto`);
-          imgWidth = printWidth;
-          imgHeight = printHeight;
-        }
-        
-        // Centrar en la página
-        const xOffset = margin + (printWidth - imgWidth) / 2;
-        const yOffset = margin + (printHeight - imgHeight) / 2;
-        
-        // Agregar imagen al PDF usando método simplificado
-        try {
-          pdf.addImage(imgData, 'JPEG', xOffset, yOffset, imgWidth, imgHeight);
-        } catch (addImageError) {
-          console.error(`Error al añadir imagen de página ${index + 1}:`, addImageError);
-          // Añadir texto alternativo si la imagen falla
-          pdf.setFontSize(12);
-          pdf.text(`[Contenido de página ${index + 1} no disponible]`, 20, 20);
-        }
-        
-        // Procesar la siguiente página
-        setTimeout(() => processPage(index + 1), 50);
-      } catch (error) {
-        console.error(`Error al procesar página ${index + 1}:`, error);
-        
-        // Añadir una página en blanco en caso de error
-        if (index > 0) {
-          pdf.addPage();
-        }
-        pdf.setFontSize(12);
-        pdf.text(`[Error en página ${index + 1}]`, 20, 20);
-        
-        // Continuar con la siguiente página
-        setTimeout(() => processPage(index + 1), 50);
-      }
-    };
+    loadingMessage.value = 'Capturando el contenido para el PDF...';
     
-    // Iniciar el procesamiento de páginas
-    processPage(0);
+    // Capturar todo el documento como una sola imagen
+    const canvas = await html2canvas(iframeDoc.body, {
+      scale: 1.5,
+      useCORS: true,
+      logging: false,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      windowWidth: 210 * 3.78, // Ancho A4 en píxeles (aproximado)
+      windowHeight: 297 * 3.78 // Alto A4 en píxeles (aproximado)
+    });
+    
+    // Convertir canvas a imagen
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    
+    // Calcular dimensiones para el PDF
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    
+    // Dividir la imagen en páginas basadas en proporciones A4
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    
+    // Calcular proporción entre altura real y altura de página PDF
+    const ratio = imgWidth / pageWidth;
+    
+    // Altura de una página completa en la escala de la imagen
+    const pageHeightInImg = pageHeight * ratio;
+    
+    // Número de páginas necesarias
+    const totalPages = Math.ceil(imgHeight / pageHeightInImg);
+    
+    for (let i = 0; i < totalPages; i++) {
+      // Si no es la primera página, añadir nueva página
+      if (i > 0) {
+        pdf.addPage();
+      }
+      
+      // Calcular qué parte de la imagen mostrar en esta página
+      const srcY = i * pageHeightInImg;
+      const srcHeight = Math.min(pageHeightInImg, imgHeight - srcY);
+      
+      // Altura proporcional en el PDF
+      const pdfHeight = srcHeight / ratio;
+      
+      // Añadir la porción de imagen correspondiente
+      pdf.addImage(
+        imgData, 
+        'JPEG', 
+        0, // X
+        0, // Y
+        pageWidth, // Ancho
+        pdfHeight, // Alto
+        null, // Alias
+        'FAST', // Compresión
+        0, // Rotación
+        srcY // Punto de inicio Y en imagen origen
+      );
+    }
+    
+    // Nombre del archivo
+    const filename = pdfOptions.filename.endsWith('.pdf') ? 
+                    pdfOptions.filename : 
+                    `${pdfOptions.filename}.pdf`;
+    
+    loadingMessage.value = 'Descargando PDF...';
+    
+    // Descargar el PDF
+    pdf.save(filename);
+    
+    // Limpiar
+    document.body.removeChild(iframe);
+    
+    loadingMessage.value = '¡PDF generado con éxito!';
+    
+    // Cerrar indicador de carga
+    setTimeout(() => {
+      isGenerating.value = false;
+    }, 1000);
     
   } catch (error) {
     console.error('Error al generar el PDF:', error);
@@ -591,35 +513,95 @@ const generatePdf = async () => {
     try {
       // Crear un iframe temporal
       const iframe = document.createElement('iframe');
+      iframe.style.width = '210mm';  // Ancho A4
+      iframe.style.height = '297mm'; // Alto A4
       iframe.style.position = 'absolute';
       iframe.style.top = '-9999px';
+      iframe.style.left = '-9999px';
       document.body.appendChild(iframe);
       
       // Cargar la plantilla en el iframe
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       iframeDoc.open();
-      iframeDoc.write(plantillaHTML.value);
+      
+      // Modificar el HTML antes de escribirlo para mejorar el flujo del contenido
+      let modifiedHTML = plantillaHTML.value;
+      modifiedHTML = modifiedHTML.replace(/class="page/g, 'class="content-section');
+      
+      iframeDoc.write(modifiedHTML);
       iframeDoc.close();
       
-      // Usar iframe2pdf (si está disponible, o fallback a jsPDF)
-      setTimeout(() => {
+      // Dar tiempo para que el iframe renderice completamente
+      setTimeout(async () => {
         try {
           // Nombre del archivo
           const filename = pdfOptions.filename.endsWith('.pdf') ? 
                           pdfOptions.filename : 
                           `${pdfOptions.filename}.pdf`;
           
-          // Crear PDF simplificado solo con el título y mensaje
-          const pdf = new jsPDF();
-          pdf.setFontSize(18);
-          pdf.setTextColor(0, 70, 152);
-          pdf.text('Memoria de Actividad - Impulsalicante', 20, 20);
+          // Crear PDF con contenido del iframe
+          const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+          });
           
-          pdf.setFontSize(12);
-          pdf.setTextColor(0, 0, 0);
-          pdf.text('La plantilla es demasiado compleja para convertir directamente.', 20, 40);
-          pdf.text('Por favor, utilice la función de impresión del navegador para', 20, 50);
-          pdf.text('guardar la vista previa como PDF.', 20, 60);
+          // Capturar todo el documento como una sola imagen
+          const canvas = await html2canvas(iframeDoc.body, {
+            scale: 1.5,
+            useCORS: true,
+            logging: false,
+            allowTaint: true,
+            backgroundColor: '#ffffff'
+          });
+          
+          // Convertir canvas a imagen y añadir al PDF
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          
+          // Calcular dimensiones para el PDF
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          
+          // Dividir la imagen en páginas basadas en proporciones A4
+          const imgWidth = canvas.width;
+          const imgHeight = canvas.height;
+          
+          // Calcular proporción entre altura real y altura de página PDF
+          const ratio = imgWidth / pageWidth;
+          
+          // Altura de una página completa en la escala de la imagen
+          const pageHeightInImg = pageHeight * ratio;
+          
+          // Número de páginas necesarias
+          const totalPages = Math.ceil(imgHeight / pageHeightInImg);
+          
+          for (let i = 0; i < totalPages; i++) {
+            // Si no es la primera página, añadir nueva página
+            if (i > 0) {
+              pdf.addPage();
+            }
+            
+            // Calcular qué parte de la imagen mostrar en esta página
+            const srcY = i * pageHeightInImg;
+            const srcHeight = Math.min(pageHeightInImg, imgHeight - srcY);
+            
+            // Altura proporcional en el PDF
+            const pdfHeight = srcHeight / ratio;
+            
+            // Añadir la porción de imagen correspondiente
+            pdf.addImage(
+              imgData, 
+              'JPEG', 
+              0, // X
+              0, // Y
+              pageWidth, // Ancho
+              pdfHeight, // Alto
+              null, // Alias
+              'FAST', // Compresión
+              0, // Rotación
+              srcY // Punto de inicio Y en imagen origen
+            );
+          }
           
           // Guardar PDF
           pdf.save(filename);
@@ -627,7 +609,7 @@ const generatePdf = async () => {
           // Limpiar
           document.body.removeChild(iframe);
           
-          loadingMessage.value = 'Se ha generado una versión básica. Para mejores resultados, imprima la vista previa.';
+          loadingMessage.value = '¡PDF generado con éxito!';
         } catch (innerError) {
           console.error('Error en método alternativo:', innerError);
           // Informar al usuario
@@ -637,7 +619,7 @@ const generatePdf = async () => {
         setTimeout(() => {
           isGenerating.value = false;
         }, 2000);
-      }, 500);
+      }, 1000);
       
     } catch (fallbackError) {
       console.error('Error también en el método alternativo:', fallbackError);
@@ -740,6 +722,8 @@ input, textarea {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  color: #333;
+  background-color: #fff;
 }
 
 .logo-selector, .images-list {
@@ -787,11 +771,13 @@ input, textarea {
   border: 1px solid transparent;
   background: transparent;
   padding: 4px;
+  color: #333;
 }
 
 .editable-table input:focus {
   border-color: #00c3ff;
   background: white;
+  color: #333;
 }
 
 .empty-table-message {
@@ -811,16 +797,15 @@ input, textarea {
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
+  color: white;
 }
 
 .btn-select, .btn-add, .btn-upload {
   background: linear-gradient(90deg, #00c3ff, #00ff8c);
-  color: white;
 }
 
 .btn-remove, .btn-cancel {
   background: #ff5252;
-  color: white;
 }
 
 .btn-add-sm, .btn-remove-sm {
@@ -830,12 +815,10 @@ input, textarea {
 
 .btn-add-sm {
   background: #00c3ff;
-  color: white;
 }
 
 .btn-remove-sm {
   background: #ff5252;
-  color: white;
 }
 
 /* Selector de imágenes */
