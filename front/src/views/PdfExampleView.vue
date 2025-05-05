@@ -378,7 +378,7 @@ const generatePdf = async () => {
     // Dar tiempo al DOM para actualizarse antes de la captura
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    loadingMessage.value = 'Generando PDF desde la plantilla HTML...';
+    loadingMessage.value = 'Generando PDF...';
     
     // Obtener el elemento que contiene la plantilla HTML
     const plantillaContainer = document.getElementById('plantilla-container');
@@ -399,19 +399,38 @@ const generatePdf = async () => {
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     iframeDoc.open();
     
-    // Modificar el HTML antes de escribirlo para mejorar el flujo del contenido
+    // Modificar el HTML para mejorar el flujo del contenido
+    // 1. Mantener los saltos de página explícitos (.pagebreak)
+    // 2. Pero eliminar los saltos automáticos por clase .page
     let modifiedHTML = plantillaHTML.value;
     
-    // Eliminar clases 'page' y conservar solo las de 'pagebreak' para forzar saltos de página
-    modifiedHTML = modifiedHTML.replace(/class="page/g, 'class="content-section');
+    // Conservar los pagebreaks originales pero quitar comportamiento de page para permitir flujo natural
+    modifiedHTML = modifiedHTML.replace(/class="page/g, 'class="pdf-section');
     
-    iframeDoc.write(modifiedHTML);
+    // Escribir el contenido modificado en el iframe
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { margin: 0; font-family: Arial, sans-serif; }
+          .pdf-section { margin-bottom: 20px; padding: 10px; }
+          .pagebreak { page-break-after: always; height: 0; }
+          table { width: 100%; border-collapse: collapse; }
+          img { max-width: 100%; height: auto; }
+        </style>
+      </head>
+      <body>
+        ${modifiedHTML}
+      </body>
+      </html>
+    `);
     iframeDoc.close();
     
     // Dar tiempo para que el iframe renderice completamente
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Crear el PDF con jsPDF
+    // Crear el PDF
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -419,69 +438,138 @@ const generatePdf = async () => {
       compress: true
     });
     
-    // Obtener solo los elementos que deben forzar nueva página (pagebreak)
-    const pagebreaks = iframeDoc.querySelectorAll('.pagebreak, .html2pdf__page-break');
-    const contentElements = iframeDoc.body.children;
-    
-    loadingMessage.value = 'Capturando el contenido para el PDF...';
-    
-    // Capturar todo el documento como una sola imagen
-    const canvas = await html2canvas(iframeDoc.body, {
-      scale: 1.5,
-      useCORS: true,
-      logging: false,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      windowWidth: 210 * 3.78, // Ancho A4 en píxeles (aproximado)
-      windowHeight: 297 * 3.78 // Alto A4 en píxeles (aproximado)
-    });
-    
-    // Convertir canvas a imagen
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    
-    // Calcular dimensiones para el PDF
+    // Dimensiones de página A4
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     
-    // Dividir la imagen en páginas basadas en proporciones A4
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
+    // En vez de intentar capturar todo el documento como una sola imagen,
+    // usaremos un enfoque híbrido:
+    // 1. Encontrar todos los elementos .pagebreak para respetar saltos explícitos
+    // 2. Para el resto, vamos a permitir que el contenido fluya naturalmente
     
-    // Calcular proporción entre altura real y altura de página PDF
-    const ratio = imgWidth / pageWidth;
+    loadingMessage.value = 'Procesando contenido del documento...';
     
-    // Altura de una página completa en la escala de la imagen
-    const pageHeightInImg = pageHeight * ratio;
+    // Obtener todos los elementos en orden del DOM
+    const allElements = Array.from(iframeDoc.body.children);
     
-    // Número de páginas necesarias
-    const totalPages = Math.ceil(imgHeight / pageHeightInImg);
+    // Agrupar elementos entre pagebreaks
+    const pages = [];
+    let currentPage = [];
     
-    for (let i = 0; i < totalPages; i++) {
+    // Recorrer todos los elementos y agruparlos por pagebreaks
+    for (const element of allElements) {
+      if (element.classList.contains('pagebreak') || 
+          element.classList.contains('html2pdf__page-break')) {
+        // Si hay elementos en la página actual, guardarlos
+        if (currentPage.length > 0) {
+          pages.push([...currentPage]);
+          currentPage = [];
+        }
+        // Incluir el pagebreak como una página separada
+        pages.push([element]);
+      } else {
+        // Agregar elemento a la página actual
+        currentPage.push(element);
+      }
+    }
+    
+    // Agregar la última página si hay elementos pendientes
+    if (currentPage.length > 0) {
+      pages.push(currentPage);
+    }
+    
+    // Procesar cada página (conjunto de elementos)
+    for (let i = 0; i < pages.length; i++) {
+      const pageElements = pages[i];
+      
       // Si no es la primera página, añadir nueva página
       if (i > 0) {
         pdf.addPage();
       }
       
-      // Calcular qué parte de la imagen mostrar en esta página
-      const srcY = i * pageHeightInImg;
-      const srcHeight = Math.min(pageHeightInImg, imgHeight - srcY);
+      loadingMessage.value = `Procesando página ${i + 1} de ${pages.length}...`;
       
-      // Altura proporcional en el PDF
-      const pdfHeight = srcHeight / ratio;
+      // Verificar si esta página solo contiene un pagebreak
+      if (pageElements.length === 1 && 
+         (pageElements[0].classList.contains('pagebreak') || 
+          pageElements[0].classList.contains('html2pdf__page-break'))) {
+        // Esta página es solo un marcador de salto, no hay que renderizar nada
+        continue;
+      }
       
-      // Añadir la porción de imagen correspondiente
-      pdf.addImage(
-        imgData, 
-        'JPEG', 
-        0, // X
-        0, // Y
-        pageWidth, // Ancho
-        pdfHeight, // Alto
-        null, // Alias
-        'FAST', // Compresión
-        0, // Rotación
-        srcY // Punto de inicio Y en imagen origen
-      );
+      // Crear un contenedor temporal para esta página
+      const pageContainer = document.createElement('div');
+      pageContainer.style.width = '210mm';
+      pageContainer.style.minHeight = '10mm';
+      pageContainer.style.backgroundColor = '#ffffff';
+      pageContainer.style.position = 'relative';
+      pageContainer.style.overflow = 'hidden';
+      
+      // Añadir todos los elementos de esta página al contenedor
+      for (const element of pageElements) {
+        const clone = element.cloneNode(true);
+        pageContainer.appendChild(clone);
+      }
+      
+      // Añadir el contenedor al cuerpo del documento para renderizarlo
+      document.body.appendChild(pageContainer);
+      
+      try {
+        // Renderizar esta página con html2canvas
+        const canvas = await html2canvas(pageContainer, {
+          scale: 2, // Mayor escala para mejor calidad
+          useCORS: true,
+          logging: false,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        });
+        
+        // Convertir canvas a imagen
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        
+        // Calcular dimensiones preservando la relación de aspecto
+        const canvasRatio = canvas.width / canvas.height;
+        
+        // Definir margen
+        const margin = 0;
+        const printWidth = pageWidth - (margin * 2);
+        const printHeight = pageHeight - (margin * 2);
+        
+        // Calcular dimensiones finales manteniendo la proporción
+        let imgWidth, imgHeight;
+        
+        if (canvasRatio > (printWidth / printHeight)) {
+          // La imagen es más ancha que la página
+          imgWidth = printWidth;
+          imgHeight = imgWidth / canvasRatio;
+        } else {
+          // La imagen es más alta que la página
+          imgHeight = Math.min(printHeight, canvas.height * (printWidth / canvas.width));
+          imgWidth = imgHeight * canvasRatio;
+        }
+        
+        // Centrar en la página
+        const xOffset = margin + (printWidth - imgWidth) / 2;
+        const yOffset = margin;
+        
+        // Añadir imagen al PDF
+        pdf.addImage(
+          imgData, 
+          'JPEG', 
+          xOffset, 
+          yOffset, 
+          imgWidth, 
+          imgHeight
+        );
+      } catch (error) {
+        console.error(`Error al procesar página ${i + 1}:`, error);
+        // Añadir texto alternativo si la imagen falla
+        pdf.setFontSize(12);
+        pdf.text(`[Error en página ${i + 1}]`, 20, 20);
+      } finally {
+        // Eliminar el contenedor temporal
+        document.body.removeChild(pageContainer);
+      }
     }
     
     // Nombre del archivo
@@ -509,125 +597,37 @@ const generatePdf = async () => {
     
     loadingMessage.value = 'Error al generar el PDF. Intentando método alternativo...';
     
-    // Intentar el método alternativo más simple
+    // Método alternativo simplificado
     try {
-      // Crear un iframe temporal
-      const iframe = document.createElement('iframe');
-      iframe.style.width = '210mm';  // Ancho A4
-      iframe.style.height = '297mm'; // Alto A4
-      iframe.style.position = 'absolute';
-      iframe.style.top = '-9999px';
-      iframe.style.left = '-9999px';
-      document.body.appendChild(iframe);
+      // Nombre del archivo
+      const filename = pdfOptions.filename.endsWith('.pdf') ? 
+                     pdfOptions.filename : 
+                     `${pdfOptions.filename}.pdf`;
       
-      // Cargar la plantilla en el iframe
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-      iframeDoc.open();
+      // Crear PDF básico
+      const pdf = new jsPDF();
+      pdf.setFontSize(16);
+      pdf.setTextColor(0, 0, 200);
+      pdf.text('Memoria de Actividad - Impulsalicante', 20, 20);
       
-      // Modificar el HTML antes de escribirlo para mejorar el flujo del contenido
-      let modifiedHTML = plantillaHTML.value;
-      modifiedHTML = modifiedHTML.replace(/class="page/g, 'class="content-section');
+      pdf.setFontSize(12);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('Error al generar el PDF completo. Se ha creado una versión simplificada.', 20, 30);
+      pdf.text('Para obtener el documento completo, utilice la función de impresión', 20, 40);
+      pdf.text('del navegador para guardar la vista previa como PDF.', 20, 50);
       
-      iframeDoc.write(modifiedHTML);
-      iframeDoc.close();
+      // Guardar PDF
+      pdf.save(filename);
       
-      // Dar tiempo para que el iframe renderice completamente
-      setTimeout(async () => {
-        try {
-          // Nombre del archivo
-          const filename = pdfOptions.filename.endsWith('.pdf') ? 
-                          pdfOptions.filename : 
-                          `${pdfOptions.filename}.pdf`;
-          
-          // Crear PDF con contenido del iframe
-          const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-          });
-          
-          // Capturar todo el documento como una sola imagen
-          const canvas = await html2canvas(iframeDoc.body, {
-            scale: 1.5,
-            useCORS: true,
-            logging: false,
-            allowTaint: true,
-            backgroundColor: '#ffffff'
-          });
-          
-          // Convertir canvas a imagen y añadir al PDF
-          const imgData = canvas.toDataURL('image/jpeg', 0.95);
-          
-          // Calcular dimensiones para el PDF
-          const pageWidth = pdf.internal.pageSize.getWidth();
-          const pageHeight = pdf.internal.pageSize.getHeight();
-          
-          // Dividir la imagen en páginas basadas en proporciones A4
-          const imgWidth = canvas.width;
-          const imgHeight = canvas.height;
-          
-          // Calcular proporción entre altura real y altura de página PDF
-          const ratio = imgWidth / pageWidth;
-          
-          // Altura de una página completa en la escala de la imagen
-          const pageHeightInImg = pageHeight * ratio;
-          
-          // Número de páginas necesarias
-          const totalPages = Math.ceil(imgHeight / pageHeightInImg);
-          
-          for (let i = 0; i < totalPages; i++) {
-            // Si no es la primera página, añadir nueva página
-            if (i > 0) {
-              pdf.addPage();
-            }
-            
-            // Calcular qué parte de la imagen mostrar en esta página
-            const srcY = i * pageHeightInImg;
-            const srcHeight = Math.min(pageHeightInImg, imgHeight - srcY);
-            
-            // Altura proporcional en el PDF
-            const pdfHeight = srcHeight / ratio;
-            
-            // Añadir la porción de imagen correspondiente
-            pdf.addImage(
-              imgData, 
-              'JPEG', 
-              0, // X
-              0, // Y
-              pageWidth, // Ancho
-              pdfHeight, // Alto
-              null, // Alias
-              'FAST', // Compresión
-              0, // Rotación
-              srcY // Punto de inicio Y en imagen origen
-            );
-          }
-          
-          // Guardar PDF
-          pdf.save(filename);
-          
-          // Limpiar
-          document.body.removeChild(iframe);
-          
-          loadingMessage.value = '¡PDF generado con éxito!';
-        } catch (innerError) {
-          console.error('Error en método alternativo:', innerError);
-          // Informar al usuario
-          loadingMessage.value = 'No se pudo generar el PDF. Por favor, utilice la función de impresión del navegador.';
-        }
-        
-        setTimeout(() => {
-          isGenerating.value = false;
-        }, 2000);
-      }, 1000);
-      
+      loadingMessage.value = 'Se ha generado una versión alternativa. Para ver el informe completo, imprima la vista previa.';
     } catch (fallbackError) {
       console.error('Error también en el método alternativo:', fallbackError);
       loadingMessage.value = 'Error al generar el PDF. Por favor, utilice la función de impresión del navegador.';
-      setTimeout(() => {
-        isGenerating.value = false;
-      }, 2000);
     }
+    
+    setTimeout(() => {
+      isGenerating.value = false;
+    }, 2000);
   }
 };
 
