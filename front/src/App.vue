@@ -393,6 +393,7 @@ const mostrarChatbot = computed(() => {
 .main-content {
   overflow-y: auto !important;
   min-height: 100vh;
+  height: auto;
   position: relative;
   scrollbar-width: thin;
   scrollbar-color: #004698 #f1f1f1;
@@ -403,7 +404,7 @@ body, html {
   padding: 0;
   height: 100%;
   overflow-x: hidden; /* Solo oculta overflow horizontal */
-  overflow-y: auto; /* Permite scroll vertical */
+  overflow-y: auto !important; /* Permite scroll vertical con !important para priorizar */
 }
 
 .main-content::-webkit-scrollbar {
@@ -419,16 +420,25 @@ body, html {
   border-radius: 4px;
 }
 
+/* Aplicar overflow:hidden solo a la página de bienvenida y no afectar el resto */
 .welcome-page {
   overflow: hidden !important;
   min-height: 100vh;
 }
 
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+/* Remover la regla global que causaba el problema */
+body.welcome-open {
   overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* El resto de las páginas debe tener scroll normal */
+body:not(.welcome-open) {
+  overflow-y: auto !important;
+  height: auto !important;
+  position: static !important;
 }
 
 .dropdown-menu {

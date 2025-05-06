@@ -1,5 +1,5 @@
 <template>
-  <div class="soporte-container">
+  <div class="soporte-container soporte-page">
     <!-- Nuevos efectos visuales -->
     <div class="animated-background">
       <div class="gradient-sphere sphere-1"></div>

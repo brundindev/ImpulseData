@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-soporte-container">
+  <div class="admin-soporte-container admin-soporte-page">
     <h1 class="admin-title">Panel de Soporte - Administrador</h1>
     
     <!-- Estado de carga inicial -->

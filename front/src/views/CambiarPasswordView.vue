@@ -1,5 +1,5 @@
 <template>
-  <div class="welcome-page">
+  <div class="perfil-page">
     <!-- Nuevos efectos visuales -->
     <div class="animated-background">
       <div class="gradient-sphere sphere-1"></div>

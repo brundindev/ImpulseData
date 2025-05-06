@@ -2,11 +2,37 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+}
+
+/* Regla específica para la página de bienvenida */
+body.welcome-open {
   overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* Regla para todas las demás páginas */
+body:not(.welcome-open) {
+  overflow-y: auto !important;
+  height: auto !important;
+  position: static !important;
 }
 
 body::-webkit-scrollbar {
-  display: none;
+  width: 8px;
+  background-color: #f1f1f1;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #004698;
+  border-radius: 4px;
+}
+
+body::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
 }
 
 .app-header {
@@ -164,11 +190,30 @@ body::-webkit-scrollbar {
 }
 
   .main-content {
-    overflow-y: auto !important;
-    height: 100vh;
+    height: auto !important;
+    min-height: calc(100vh - 80px); /* Altura del viewport menos altura del header */
     position: relative;
     scrollbar-width: thin;
     scrollbar-color: #004698 #f1f1f1;
+    overflow-y: auto !important;
+  }
+  
+  /* Estilos para la página de inicio */
+  .home-page {
+    min-height: 100vh;
+    position: relative;
+    overflow-y: auto !important;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  .home-page .animated-background,
+  .home-page .floating-particles,
+  .home-page .stars-container,
+  .home-page .wave-background {
+    position: fixed;
+    pointer-events: none;
   }
   
   /* Responsive styles */
@@ -514,3 +559,45 @@ body::-webkit-scrollbar {
     position: relative;
     z-index: 10000;
   }
+
+/* Reglas para las páginas específicas */
+.panel-control-page,
+.perfil-page,
+.soporte-page,
+.admin-soporte-page {
+  min-height: 100vh;
+  position: relative;
+  overflow-y: auto !important;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.panel-control-page .animated-background,
+.perfil-page .animated-background,
+.soporte-page .animated-background,
+.admin-soporte-page .animated-background,
+.panel-control-page .floating-particles,
+.perfil-page .floating-particles,
+.soporte-page .floating-particles,
+.admin-soporte-page .floating-particles,
+.panel-control-page .wave-background,
+.perfil-page .wave-background,
+.soporte-page .wave-background,
+.admin-soporte-page .wave-background,
+.panel-control-page .stars-container,
+.perfil-page .stars-container,
+.soporte-page .stars-container,
+.admin-soporte-page .stars-container {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.panel-control-page .dashboard-container,
+.perfil-page .profile-container,
+.soporte-page .dashboard-container,
+.admin-soporte-page .admin-content {
+  position: relative;
+  z-index: 1;
+}
