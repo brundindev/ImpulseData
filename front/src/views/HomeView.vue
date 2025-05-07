@@ -3468,24 +3468,80 @@ const irAPaginaPDF = () => {
   z-index: 1000;
   overflow-y: auto;
   padding: 2rem;
+  margin: 0;
 }
 
 /* Estilos para el scrollbar personalizado */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 0;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: transparent;
+}
+
+/* Asegura que el footer sea el límite inferior sin espacio adicional */
+.home-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Ajustes para la estructura general del contenido */
+.dashboard-container {
+  flex: 1;
+  overflow-y: visible;
+  padding-bottom: 0; /* Eliminar el padding inferior si existe */
+}
+
+/* Ajustes para el footer */
+.app-footer {
+  width: 100%;
+  position: relative;
+  margin-top: auto; /* Empuja el footer al final del contenedor */
+  z-index: 10;
+}
+
+/* Elimina cualquier espacio adicional después del footer */
+.app-footer::after {
+  content: none;
+}
+
+/* Ajustes para la estructura completa */
+.main-content, 
+.home-page, 
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.footer-container {
+  padding-bottom: 0;
+}
+
+.footer-bottom {
+  margin-bottom: 0;
+  padding-bottom: 1rem;
 }
 </style>

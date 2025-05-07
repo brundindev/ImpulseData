@@ -418,3 +418,43 @@
       transform: translateY(-400%);
     }
   }
+
+  /* Ocultar scrollbar pero mantener funcionalidad */
+  ::-webkit-scrollbar {
+    width: 0;
+    display: none;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: transparent;
+  }
+
+  /* Ajustes para evitar espacios en blanco al final de la página */
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .dashboard-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Asegurar que los elementos ocupen todo el espacio vertical disponible */
+  .charts-grid, .recent-activity {
+    flex: 1;
+  }

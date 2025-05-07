@@ -390,6 +390,47 @@ const mostrarChatbot = computed(() => {
 </style>
 
 <style>
+:root {
+  --primary-color: #1a73e8;
+  --accent-color: #00ff8c;
+  --warning-color: #ffc107;
+  --danger-color: #f44336;
+  --success-color: #4CAF50;
+  --text-color: #212121;
+  --text-secondary: #757575;
+  --background-color: #ffffff;
+  --card-background: #ffffff;
+  --border-color: #e0e0e0;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Sistema de scrollbar invisible pero funcional */
+html {
+  scrollbar-width: none; /* Para Firefox */
+  -ms-overflow-style: none; /* Para Internet Explorer y Edge */
+}
+
+html::-webkit-scrollbar {
+  width: 0; /* Para Chrome, Safari y Opera */
+  display: none;
+}
+
+body::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+/* Resto de estilos globales */
 .main-content {
   overflow-y: auto !important;
   min-height: 100vh;
@@ -473,5 +514,28 @@ body:not(.welcome-open) {
   min-height: 100vh !important;
   max-height: 100vh !important;
   overflow: hidden !important;
+}
+
+.user-name {
+  color: #000000 !important;
+  font-weight: 600;
+}
+
+.user-name:hover {
+  color: #000000 !important;
+}
+
+.transparent-header .user-name,
+.app-header .user-name,
+.user-profile-container .user-name,
+.dropdown-toggle .user-name {
+  color: #000000 !important;
+}
+
+.transparent-header .user-name:hover,
+.app-header .user-name:hover,
+.user-profile-container .user-name:hover,
+.dropdown-toggle .user-name:hover {
+  color: #000000 !important;
 }
 </style>
