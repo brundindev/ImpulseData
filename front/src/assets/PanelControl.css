@@ -418,3 +418,34 @@
       transform: translateY(-400%);
     }
   }
+  .panel-control-page {
+    min-height: 100vh;
+    height: 100vh;
+    background: linear-gradient(180deg, #1D2024 0%, black 50%, black 100%);
+    color: white;
+    position: relative;
+    margin: 0;
+    padding: 0;
+  }
+    
+  .panel-control-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: radial-gradient(circle at 15% 15%, rgba(0, 195, 255, 0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  
+  .panel-control-page::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 85% 85%, rgba(0, 255, 140, 0.15) 0%, transparent 55%);
+    pointer-events: none;
+  }

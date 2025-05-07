@@ -1,47 +1,9 @@
 <template>
   <div class="home-page">
-    <!-- Nuevos efectos visuales -->
-    <div class="animated-background">
-      <div class="gradient-sphere sphere-1"></div>
-      <div class="gradient-sphere sphere-2"></div>
-      <div class="gradient-sphere sphere-3"></div>
-    </div>
-    
-    <!-- Partículas flotantes -->
-    <div class="floating-particles welcome-particles">
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-    </div>
-    
-    <!-- Estrellas brillantes -->
-    <div class="stars-container">
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-    </div>
-    
-    <!-- Efecto de ondas -->
-    <div class="wave-background">
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-    </div>
+    <!-- Componente de animación de fondo -->
+    <AnimatedBackground />
     
     <!-- Componente de animación de scroll -->
-    <ScrollAnimation />
     
     <div class="dashboard-container">
       <!-- Encabezado del dashboard -->
@@ -837,6 +799,7 @@ import FirestoreService from '../services/FirestoreService';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import FirebaseAuthService from '../services/FirebaseAuthService';
 import axios from 'axios';
+import AnimatedBackground from '../components/AnimatedBackground.vue';
 import AnimatedNumber from '../components/AnimatedNumber.vue';
 import ScrollAnimation from '../components/ScrollAnimation.vue';
 import GeminiButton from '../components/GeminiButton.vue';

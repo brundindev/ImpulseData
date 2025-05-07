@@ -1,30 +1,7 @@
 <template>
   <div class="panel-control-page">
     <!-- Nuevos efectos visuales -->
-    <div class="animated-background">
-      <div class="gradient-sphere sphere-1"></div>
-      <div class="gradient-sphere sphere-2"></div>
-      <div class="gradient-sphere sphere-3"></div>
-    </div>
-    
-    <!-- Partículas flotantes -->
-    <div class="floating-particles welcome-particles">
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-    </div>
-    
-    <!-- Efecto de ondas -->
-    <div class="wave-background welcome-waves">
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-    </div>
+    <AnimatedBackground />
     
     <div class="dashboard-container">
       <div class="dashboard-header">
@@ -160,7 +137,7 @@ import { ref, onMounted, computed } from 'vue';
 import Chart from 'chart.js/auto';
 import { getAuth } from 'firebase/auth';
 import FirestoreService from '../services/FirestoreService';
-
+import AnimatedBackground from '../components/AnimatedBackground.vue';
 // Referencias a los canvas de los gráficos
 const departamentosChart = ref(null);
 const centrosChart = ref(null);

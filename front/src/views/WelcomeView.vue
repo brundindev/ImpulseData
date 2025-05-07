@@ -1,45 +1,6 @@
 <template>
     <div class="welcome-page fullscreen">
-      <div class="animated-background">
-        <div class="gradient-sphere sphere-1"></div>
-        <div class="gradient-sphere sphere-2"></div>
-        <div class="gradient-sphere sphere-3"></div>
-      </div>
-      
-      <!-- Estrellas brillantes -->
-      <div class="stars-container">
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-      </div>
-      
-      <!-- Partículas flotantes -->
-      <div class="floating-particles welcome-particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-      </div>
-      
-      <!-- Efecto de ondas -->
-      <div class="wave-background welcome-waves">
-        <div class="wave"></div>
-        <div class="wave"></div>
-        <div class="wave"></div>
-      </div>
+      <AnimatedBackground />
       
       <div class="hero-section">
         <div class="hero-content">
@@ -59,7 +20,7 @@
   
   <script setup>
   import { onMounted, onBeforeUnmount } from 'vue'
-
+  import AnimatedBackground from '../components/AnimatedBackground.vue';
   const emit = defineEmits(['set-welcome-page'])
 
   onMounted(() => {

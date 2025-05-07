@@ -1,30 +1,7 @@
 <template>
   <div class="perfil-page">
     <!-- Nuevos efectos visuales -->
-    <div class="animated-background">
-      <div class="gradient-sphere sphere-1"></div>
-      <div class="gradient-sphere sphere-2"></div>
-      <div class="gradient-sphere sphere-3"></div>
-    </div>
-    
-    <!-- Partículas flotantes -->
-    <div class="floating-particles welcome-particles">
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-      <div class="particle"></div>
-    </div>
-    
-    <!-- Efecto de ondas -->
-    <div class="wave-background welcome-waves">
-      <div class="wave"></div>
-      <div class="wave"></div>
-      <div class="wave"></div>
-    </div>
+    <AnimatedBackground />
     
     <div class="profile-container">
       <div class="profile-card">
@@ -241,7 +218,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'fire
 import FirebaseAuthService from '../services/FirebaseAuthService';
 import AuthService from '../services/AuthService';
 import { waitForAuthInit } from '../firebase';
-
+import AnimatedBackground from '../components/AnimatedBackground.vue';
 const router = useRouter();
 const auth = getAuth();
 const storage = getStorage();
