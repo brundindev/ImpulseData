@@ -810,19 +810,23 @@ import logoUrl from '../assets/img/impulsedata_logo.png';
 import impulsaAlicanteLogo from '../assets/img/impulsaalicante.png';
 import ayuntamientoLogo from '../assets/img/ayuntamiento-alicante.jpg';
 import FileImportService from '../services/FileImportService';
+import {
+  cargarDatos,
+  cargando,
+  error,
+  empresas,
+  empresasCount,
+  departamentosCount,
+  centrosCount,
+  formacionesCount
+} from '../services/DataService';
 
 const router = useRouter();
 const auth = getAuth();
 const usuario = ref(null);
 const showFormModal = ref(false);
 const showViewModal = ref(false);
-const empresasCount = ref(0);
-const departamentosCount = ref(0);
-const centrosCount = ref(0);
-const formacionesCount = ref(0);
-const cargando = ref(true);
 const guardando = ref(false);
-const error = ref(null);
 const mostrarConfirmacion = ref(false);
 const empresaAEliminar = ref(null);
 const eliminando = ref(false);
@@ -840,7 +844,6 @@ const empresaActual = reactive({
 });
 
 // Lista de empresas
-const empresas = ref([]);
 
 // Datos para nueva empresa
 const nuevaEmpresa = reactive({
@@ -885,7 +888,8 @@ const mostrarConfirmacionImportacion = ref(false);
 const resultadoImportacion = ref(null);
 
 onMounted(() => {
-  // Verificar estado de autenticación
+    cargarDatos();
+// Verificar estado de autenticación
   onAuthStateChanged(auth, (user) => {
     if (user) {
       usuario.value = AuthService.getCurrentUser();
@@ -911,121 +915,6 @@ onUnmounted(() => {
   window.removeEventListener('abrir-modal-empresa', abrirModalEmpresa);
 });
 
-// Cargar datos desde Firestore
-const cargarDatos = async () => {
-  try {
-    cargando.value = true;
-    error.value = null;
-    
-    // Limpiar datos previos para evitar mostrar datos de otro usuario
-    empresas.value = [];
-    
-    // Verificar doble autenticación (Firebase y JWT)
-    const user = auth.currentUser;
-    const jwtToken = localStorage.getItem('authToken');
-    const userData = AuthService.getCurrentUser();
-    
-    console.log("Estado de autenticación:", {
-      "Firebase auth": user ? "Activo" : "Inactivo",
-      "JWT": jwtToken ? "Presente" : "Ausente", 
-      "userData": userData
-    });
-    
-    // Si hay JWT pero no hay usuario Firebase, intentar iniciar sesión con Firebase
-    if (!user && jwtToken && userData) {
-      console.warn("HomeView - Hay JWT pero no hay sesión en Firebase. Intentando recuperar sesión...");
-      
-      try {
-        // Intentar iniciar sesión silenciosamente usando credenciales guardadas
-        // Esto es solo para sincronizar Firebase, no para mostrar UI
-        await FirebaseAuthService.reautenticar();
-        
-        // Verificar si ahora tenemos usuario Firebase
-        const userAfterReauth = auth.currentUser;
-        
-        if (userAfterReauth) {
-          // Intentar cargar datos otra vez
-          setTimeout(() => cargarDatos(), 500);
-          return;
-        }
-      } catch (error) {
-        console.error("Error al recuperar sesión Firebase:", error);
-      }
-    }
-    
-    // Si no hay usuario Firebase pero sí hay JWT, podemos continuar igualmente
-    // ya que las empresas se filtran por el ID de usuario en el backend
-    if (!user && jwtToken) {
-      console.log("Continuando con JWT sin autenticación de Firebase");
-      
-      try {
-        // Obtener contadores
-        const contadores = await FirestoreService.obtenerContadores();
-        empresasCount.value = parseInt(contadores.empresasCount) || 0;
-        departamentosCount.value = parseInt(contadores.departamentosCount) || 0;
-        centrosCount.value = parseInt(contadores.centrosCount) || 0;
-        formacionesCount.value = parseInt(contadores.formacionesCount) || 0;
-        
-        // Obtener empresas usando solo el JWT
-        const empresasRecibidas = await FirestoreService.obtenerEmpresas();
-        empresas.value = empresasRecibidas;
-        
-        cargando.value = false;
-        return;
-      } catch (err) {
-        console.error("Error al cargar datos con solo JWT:", err);
-        // Continuamos con el flujo normal para intentar otra estrategia
-      }
-    }
-    
-    // Si no hay token JWT, mostrar error
-    if (!jwtToken) {
-      console.error("HomeView - No hay JWT");
-      
-      error.value = 'No se pudo verificar tu autenticación. Por favor, inicia sesión de nuevo.';
-      cargando.value = false;
-      
-      // Esperar un momento antes de redirigir
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-      
-      return;
-    }
-    
-    // Obtener contadores
-    const contadores = await FirestoreService.obtenerContadores();
-    empresasCount.value = parseInt(contadores.empresasCount) || 0;
-    departamentosCount.value = parseInt(contadores.departamentosCount) || 0;
-    centrosCount.value = parseInt(contadores.centrosCount) || 0;
-    formacionesCount.value = parseInt(contadores.formacionesCount) || 0;
-    
-    // Obtener empresas
-    const empresasRecibidas = await FirestoreService.obtenerEmpresas();
-    
-    // Si hay usuario de Firebase, filtrar por su UID
-    if (user) {
-      // Triple verificación: solo mostrar empresas del usuario actual
-      empresas.value = empresasRecibidas.filter(empresa => {
-        const perteneceAlUsuario = empresa.creadoPor === user.uid;
-        if (!perteneceAlUsuario) {
-          console.warn(`⚠️ SEGURIDAD: Se detectó empresa que no pertenece al usuario actual: ${empresa.nombre}`);
-        }
-        return perteneceAlUsuario;
-      });
-    } else {
-      // Si no hay usuario Firebase pero llegamos aquí, mostrar todas las empresas recibidas
-      // ya que el backend ya filtrará por el JWT
-      empresas.value = empresasRecibidas;
-    }
-    
-  } catch (err) {
-    console.error("Error al cargar datos en HomeView:", err);
-    error.value = 'No se pudieron cargar los datos. Por favor, inténtalo de nuevo.';
-  } finally {
-    cargando.value = false;
-  }
-};
 
 // Formatear fecha
 const formatDate = (date) => {
@@ -1152,20 +1041,8 @@ const actualizarEmpresaExistente = async () => {
 const editarEmpresa = (empresa) => {
   modoEdicion.value = true;
   empresaEditandoId.value = empresa.id;
-  
-  // Cargar datos de la empresa en el formulario
-  nuevaEmpresa.nombre = empresa.nombre || '';
-  nuevaEmpresa.fechaCreacion = empresa.fechaCreacion || '';
-  nuevaEmpresa.descripcion = empresa.descripcion || '';
-  nuevaEmpresa.ciudad = empresa.ciudad || '';
-  
-  // Cargar departamentos, centros y formaciones
-  cargarSubcolecciones(empresa.id);
-  
-  // Mostrar el modal
-  showFormModal.value = true;
 };
-
+  
 // Cargar subcolecciones para edición
 const cargarSubcolecciones = async (empresaId) => {
   try {
@@ -1294,27 +1171,7 @@ const verEmpresa = async (empresa) => {
     }
   });
   
-  // Cargar datos básicos de la empresa
-  empresaActual.id = empresa.id;
-  empresaActual.nombre = empresa.nombre || '';
-  empresaActual.fechaCreacion = empresa.fechaCreacion || '';
-  empresaActual.descripcion = empresa.descripcion || '';
-  empresaActual.ciudad = empresa.ciudad || '';
   
-  // Mostrar el modal y cargar subcolecciones
-  showViewModal.value = true;
-  cargando.value = true;
-  
-  try {
-    // Cargar subcolecciones
-    await cargarSubcoleccionesParaVista(empresa.id);
-  } catch (error) {
-    console.error("Error al cargar datos para vista:", error);
-  } finally {
-    cargando.value = false;
-  }
-};
-
 // Cargar subcolecciones para la vista de detalles
 const cargarSubcoleccionesParaVista = async (empresaId) => {
   try {
@@ -2304,7 +2161,7 @@ const irAPaginaPDF = () => {
   
   // Redirigir a la página /pdf
   router.push('/pdf');
-};
+}; };
 </script>
 
 <style src="../assets/Home.css"></style>
