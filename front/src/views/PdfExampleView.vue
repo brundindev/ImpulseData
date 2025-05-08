@@ -372,11 +372,11 @@ const generatePdf = async () => {
     isGenerating.value = true;
     loadingMessage.value = 'Preparando la plantilla...';
     
-    // Asegurarse de que la plantilla esté actualizada (sin personalizar)
+    // Asegurarse de que la plantilla esté actualizada
     await loadPlantillaHTML();
     
     // Dar tiempo al DOM para actualizarse antes de la captura
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     loadingMessage.value = 'Generando PDF desde la plantilla HTML...';
     
@@ -388,14 +388,15 @@ const generatePdf = async () => {
     
     // Crear un iframe temporal para renderizar correctamente la plantilla con estilos
     const iframe = document.createElement('iframe');
-    iframe.style.width = '793px';  // Ancho A4 en px (210mm)
-    iframe.style.height = '1122px'; // Alto A4 en px (297mm)
+    iframe.style.width = '210mm';  // Ancho A4 exacto
+    iframe.style.height = '297mm'; // Alto A4 exacto
     iframe.style.position = 'absolute';
     iframe.style.top = '-9999px';
     iframe.style.left = '-9999px';
+    iframe.style.border = 'none';
     document.body.appendChild(iframe);
     
-    // Copiar todo el contenido de la plantilla al iframe
+    // Copiar todo el contenido de la plantilla al iframe con los estilos correctos
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     iframeDoc.open();
     iframeDoc.write(`
@@ -403,50 +404,71 @@ const generatePdf = async () => {
       <html>
         <head>
           <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>PDF</title>
           <style>
+            @page {
+              size: A4;
+              margin: 0;
+            }
             body { 
               margin: 0; 
               padding: 0; 
               background: white; 
-              font-family: Arial, sans-serif;
+              font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
               color: #000;
+              width: 210mm;
+              height: 297mm;
             }
             * { box-sizing: border-box; }
+            
             .page { 
               page-break-after: always; 
               break-after: page;
-              margin: 0;
-              padding: 0;
-              width: 100%;
-              background: white;
-              border: none;
-              box-shadow: none;
-              min-height: 1122px;
-              height: auto;
+              width: 210mm;
+              min-height: 297mm;
               position: relative;
+              padding: 0;
+              margin: 0;
+              background: white;
               overflow: hidden;
             }
-            .page:last-child {
+            
+            .pagebreak {
+              display: block;
+              clear: both;
+              page-break-after: always;
+              break-after: page;
+              height: 0;
+              margin: 0;
+              padding: 0;
+              border: 0;
+            }
+            
+            .page:last-child,
+            #contraportada {
               page-break-after: auto;
               break-after: auto;
             }
+            
             img {
               max-width: 100%;
               height: auto;
               display: block;
             }
-            /* Evitar elementos huérfanos al final de una página */
+            
             p, h1, h2, h3, h4, h5, h6 {
               page-break-inside: avoid;
               break-inside: avoid;
             }
-            /* Evitar saltos de página dentro de secciones críticas */
+            
             .no-break {
               page-break-inside: avoid;
               break-inside: avoid;
             }
           </style>
+          <!-- Copiar los estilos originales de la plantilla -->
+          <style>${iframeDoc.styleSheets[0]?.cssRules ? Array.from(iframeDoc.styleSheets[0].cssRules).map(rule => rule.cssText).join('\n') : ''}</style>
         </head>
         <body>${plantillaHTML.value}</body>
       </html>
@@ -454,13 +476,26 @@ const generatePdf = async () => {
     iframeDoc.close();
     
     // Dar tiempo para que el iframe renderice completamente
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Crear el PDF con html2canvas para cada página
-    loadingMessage.value = 'Capturando la plantilla para el PDF...';
+    // Identificar todas las páginas de la plantilla
+    loadingMessage.value = 'Identificando páginas del documento...';
     
-    // Obtener todas las secciones que deben ser páginas separadas
-    const pages = iframeDoc.querySelectorAll('.page, .pagebreak');
+    // Obtener todos los elementos que deben ser páginas separadas
+    // Incluye divs de clase 'page', divs de id específicos como 'portada', 'contraportada', etc.,
+    // y elementos con clase 'pagebreak'
+    const pageElements = iframeDoc.querySelectorAll('.page, #portada, #contraportada, #indice, .section-agencia, .section-empleo, .section-promo, .section-desarrollo, .section-gestion, .section-marketing, .section-anexos, .pagebreak');
+    
+    // Si no hay elementos de página, usar todo el body como una sola página
+    let pages = [];
+    if (pageElements.length === 0) {
+      pages.push(iframeDoc.body);
+    } else {
+      // Filtrar elementos vacíos o muy pequeños
+      pages = Array.from(pageElements).filter(el => {
+        return el.offsetHeight > 20 || el.classList.contains('pagebreak');
+      });
+    }
     
     // Crear el documento PDF
     const pdf = new jsPDF({
@@ -470,143 +505,139 @@ const generatePdf = async () => {
       compress: true
     });
     
-    // Procesar cada página
-    let pageIndex = 0;
-    
-    // Función para procesar páginas secuencialmente
-    const processPage = async (index) => {
-      if (index >= pages.length) {
-        // Todas las páginas procesadas, terminar
-        loadingMessage.value = 'Finalizando PDF...';
-        
-        // Nombre del archivo
-        const filename = pdfOptions.filename.endsWith('.pdf') ? 
-                        pdfOptions.filename : 
-                        `${pdfOptions.filename}.pdf`;
-        
-        loadingMessage.value = 'Descargando PDF...';
-        
-        // Descargar el PDF
-        pdf.save(filename);
-        
-        // Limpiar
-        document.body.removeChild(iframe);
-        
-        loadingMessage.value = '¡PDF generado con éxito!';
-        
-        // Cerrar indicador de carga
-        setTimeout(() => {
-          isGenerating.value = false;
-        }, 1000);
-        
-        return;
-      }
-      
-      const page = pages[index];
-      
-      // Verificar si es un elemento .pagebreak sin contenido (solo generar nueva página)
-      if (page.classList.contains('pagebreak') || 
-          (page.tagName === 'DIV' && page.clientHeight < 10)) {
-        // Si es solo un separador de página, añadir nueva página y continuar
-        if (index > 0) {
-          pdf.addPage();
-        }
-        
-        // Procesar la siguiente página
-        setTimeout(() => processPage(index + 1), 50);
-        return;
-      }
-      
-      loadingMessage.value = `Procesando página ${index + 1} de ${pages.length}...`;
-      
-      try {
-        // Asegurarse que la página tenga dimensiones válidas
-        if (!page.offsetWidth || !page.offsetHeight) {
-          console.warn(`Página ${index + 1} tiene dimensiones inválidas, saltando...`);
-          setTimeout(() => processPage(index + 1), 50);
-          return;
-        }
-        
-        // Capturar la página actual con html2canvas
-        const canvas = await html2canvas(page, {
-          scale: 2, // Mayor calidad (estaba en 1.5)
-          useCORS: true,
-          logging: false,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          // Quitar windowWidth y windowHeight para usar dimensiones naturales
-          ignoreElements: (element) => {
-            return element.classList.contains('pagebreak') ||
-                  (element.tagName === 'DIV' && !element.textContent.trim() && !element.getElementsByTagName('img').length);
-          }
+    // Configuración para html2canvas optimizada para calidad
+    const html2canvasOptions = {
+      scale: 2, // Mayor escala para mejor calidad
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+      onclone: (clonedDoc) => {
+        // Asegurarse que los elementos con pagebreak tengan altura cero
+        const pagebreaks = clonedDoc.querySelectorAll('.pagebreak');
+        pagebreaks.forEach(pb => {
+          pb.style.height = '0px';
+          pb.style.display = 'block';
         });
-        
-        // Verificar que el canvas tenga dimensiones válidas
-        if (canvas.width < 10 || canvas.height < 10) {
-          console.warn(`Canvas para página ${index + 1} tiene dimensiones demasiado pequeñas, saltando...`);
-          setTimeout(() => processPage(index + 1), 50);
-          return;
-        }
-        
-        // Si no es la primera página, añadir una nueva
-        if (index > 0) {
-          pdf.addPage();
-        }
-        
-        // Convertir canvas a imagen y añadir al PDF
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        
-        // Ajustar la imagen al tamaño de la página A4
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        
-        // Usar dimensiones fijas de página PDF, sin comprimir el contenido
-        pdf.addImage(
-          imgData, 
-          'JPEG', 
-          0, // x - sin márgenes
-          0, // y - sin márgenes
-          pageWidth, // Ancho completo de la página
-          pageHeight // Alto completo de la página
-        );
-        
-        // Procesar la siguiente página
-        setTimeout(() => processPage(index + 1), 50);
-      } catch (error) {
-        console.error(`Error al procesar página ${index + 1}:`, error);
-        
-        // Añadir una página en blanco en caso de error
-        if (index > 0) {
-          pdf.addPage();
-        }
-        pdf.setFontSize(12);
-        pdf.text(`[Error en página ${index + 1}]`, 20, 20);
-        
-        // Continuar con la siguiente página
-        setTimeout(() => processPage(index + 1), 50);
       }
     };
     
-    // Iniciar el procesamiento de páginas
-    processPage(0);
+    // Procesar cada página secuencialmente
+    loadingMessage.value = 'Capturando páginas...';
+    
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      
+      // Actualizar mensaje de carga
+      loadingMessage.value = `Procesando página ${i + 1} de ${pages.length}...`;
+      
+      // Si es solo un pagebreak, añadir nueva página y continuar
+      if (page.classList.contains('pagebreak')) {
+        if (i > 0) { // No añadir página en blanco si es el primer elemento
+          pdf.addPage();
+        }
+        continue;
+      }
+      
+      try {
+        // Asegurarse que la página sea visible durante la captura
+        page.style.display = 'block';
+        
+        // Capturar la página como imagen
+        const canvas = await html2canvas(page, html2canvasOptions);
+        
+        // Si no es la primera página, añadir una nueva página al PDF
+        if (i > 0) {
+          pdf.addPage();
+        }
+        
+        // Convertir canvas a imagen
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        
+        // Dimensiones del PDF
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        
+        // Calcular proporción para mantener el aspecto
+        const canvasAspectRatio = canvas.width / canvas.height;
+        const pageAspectRatio = pageWidth / pageHeight;
+        
+        let imgWidth = pageWidth;
+        let imgHeight = imgWidth / canvasAspectRatio;
+        
+        // Si la imagen es más alta que la página, ajustar altura
+        if (imgHeight > pageHeight) {
+          imgHeight = pageHeight;
+          imgWidth = imgHeight * canvasAspectRatio;
+        }
+        
+        // Centrar imagen si no ocupa todo el ancho
+        const xOffset = (pageWidth - imgWidth) / 2;
+        
+        // Añadir imagen al PDF
+        pdf.addImage(
+          imgData,
+          'JPEG',
+          xOffset,
+          0,
+          imgWidth,
+          imgHeight
+        );
+      } catch (error) {
+        console.error(`Error al procesar página ${i + 1}:`, error);
+        
+        // Añadir página en blanco con mensaje de error
+        if (i > 0) {
+          pdf.addPage();
+        }
+        pdf.setFontSize(12);
+        pdf.text(`[Error en página ${i + 1}]`, 20, 20);
+      }
+    }
+    
+    // Finalizar y descargar el PDF
+    loadingMessage.value = 'Finalizando y descargando PDF...';
+    
+    // Nombre del archivo
+    const filename = pdfOptions.filename.endsWith('.pdf') ? 
+                     pdfOptions.filename : 
+                     `${pdfOptions.filename}.pdf`;
+    
+    // Guardar PDF
+    pdf.save(filename);
+    
+    // Limpiar
+    document.body.removeChild(iframe);
+    
+    loadingMessage.value = '¡PDF generado con éxito!';
+    setTimeout(() => {
+      isGenerating.value = false;
+    }, 1500);
     
   } catch (error) {
     console.error('Error al generar el PDF:', error);
     
-    loadingMessage.value = 'Error al generar el PDF. Intentando método alternativo...';
+    // Intentar método alternativo si falla el principal
+    loadingMessage.value = 'Intentando método alternativo...';
     
-    // Intentar usar un método alternativo basado en html2pdf.js
     try {
-      // Crear un iframe temporal
+      // Método alternativo usando html2pdf.js
+      const plantillaHTML = document.getElementById('plantilla-container');
+      
+      if (!plantillaHTML) {
+        throw new Error('No se pudo encontrar la plantilla HTML');
+      }
+      
+      // Crear iframe temporal para capturar toda la plantilla de una vez
       const iframe = document.createElement('iframe');
-      iframe.style.width = '793px'; // Ancho A4 en px (210mm)
-      iframe.style.height = '1122px'; // Alto A4 en px (297mm)
+      iframe.style.width = '210mm';
+      iframe.style.height = '297mm';
       iframe.style.position = 'absolute';
       iframe.style.top = '-9999px';
       iframe.style.left = '-9999px';
       document.body.appendChild(iframe);
       
-      // Cargar la plantilla en el iframe
+      // Copiar el contenido al iframe
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       iframeDoc.open();
       iframeDoc.write(`
@@ -616,72 +647,57 @@ const generatePdf = async () => {
             <meta charset="UTF-8">
             <title>PDF</title>
             <style>
-              @page {
-                margin: 15mm;
-                size: A4 portrait;
-              }
+              @page { size: A4; margin: 0; }
               body { 
                 margin: 0; 
                 padding: 0; 
-                background: white; 
-                font-family: Arial, sans-serif;
-                color: #000;
+                font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
               }
-              * { box-sizing: border-box; }
-              .page, .pagebreak { 
-                page-break-after: always; 
-                break-after: page;
-              }
-              .page:last-child {
-                page-break-after: auto;
-                break-after: auto;
-              }
+              .page { page-break-after: always; }
+              .page:last-child { page-break-after: auto; }
+              .pagebreak { page-break-after: always; height: 0; }
             </style>
           </head>
-          <body>${plantillaHTML.value}</body>
+          <body>${plantillaHTML.innerHTML}</body>
         </html>
       `);
       iframeDoc.close();
       
-      // Esperar a que el contenido se cargue
+      // Dar tiempo para renderizar
       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Capturar el documento completo
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
       
       // Nombre del archivo
       const filename = pdfOptions.filename.endsWith('.pdf') ? 
                       pdfOptions.filename : 
                       `${pdfOptions.filename}.pdf`;
       
-      // Crear PDF simplificado si todo lo anterior falló
-      if (!iframeDoc.body.textContent.trim()) {
-        const pdf = new jsPDF();
-        pdf.setFontSize(18);
-        pdf.setTextColor(0, 70, 152);
-        pdf.text('Memoria de Actividad - Impulsalicante', 20, 20);
-        
-        pdf.setFontSize(12);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text('La plantilla es demasiado compleja para convertir directamente.', 20, 40);
-        pdf.text('Por favor, utilice la función de impresión del navegador para', 20, 50);
-        pdf.text('guardar la vista previa como PDF.', 20, 60);
-        
-        // Guardar PDF
-        pdf.save(filename);
-      }
+      // Mensaje para el usuario
+      pdf.setFontSize(16);
+      pdf.text('La vista previa no pudo ser capturada correctamente.', 20, 30);
+      pdf.setFontSize(12);
+      pdf.text('Recomendamos usar la función de impresión del navegador:', 20, 50);
+      pdf.text('1. Haga clic derecho en la vista previa', 20, 70);
+      pdf.text('2. Seleccione "Imprimir"', 20, 80);
+      pdf.text('3. Elija "Guardar como PDF"', 20, 90);
+      
+      pdf.save(filename);
       
       // Limpiar
       document.body.removeChild(iframe);
       
-      loadingMessage.value = 'Se ha generado una versión básica del PDF.';
-      setTimeout(() => {
-        isGenerating.value = false;
-      }, 2000);
-      
     } catch (fallbackError) {
-      console.error('Error también en el método alternativo:', fallbackError);
-      loadingMessage.value = 'Error al generar el PDF. Por favor, utilice la función de impresión del navegador.';
-      setTimeout(() => {
-        isGenerating.value = false;
-      }, 2000);
+      console.error('Error en método alternativo:', fallbackError);
+      alert('No se pudo generar el PDF. Por favor, use la función de impresión del navegador para guardar la vista previa como PDF.');
+    } finally {
+      loadingMessage.value = '';
+      isGenerating.value = false;
     }
   }
 };
