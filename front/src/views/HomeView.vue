@@ -1,10 +1,6 @@
 <template>
   <div class="home-page">
-    <!-- Componente de animación de fondo -->
     <AnimatedBackground />
-    
-    <!-- Componente de animación de scroll -->
-    <ScrollAnimation />
     <div class="dashboard-container">
       <!-- Encabezado del dashboard -->
       <div class="dashboard-header">
@@ -37,51 +33,18 @@
             {{ errorImportacion }}
           </div>
         </div>
-      </div>
-      
+      </div>    
       <!-- Banner de Alicante destacado -->
-      <div class="alicante-banner-showcase">
-        <div class="banner-content">
-          <div class="banner-image-container">
-            <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image" />
-            <div class="image-glow"></div>
-          </div>
-          <div class="banner-info">
-            <h3>ImpulseData - Alicante Futura</h3>
-            <p>Plataforma digital de gestión de datos para la innovación y el desarrollo sostenible de Alicante.</p>
-            <div class="banner-action">
-              <button class="btn-apple" @click="openChatbot">Explorar <span class="arrow">→</span></button>
-            </div>
-          </div>
-        </div>
-        <div class="banner-accent-shapes">
-          <div class="accent-shape shape-1"></div>
-          <div class="accent-shape shape-2"></div>
-          <div class="accent-shape shape-3"></div>
-        </div>
-      </div>
-      
+      <AlicanteBanner />
       <!-- Contenido principal -->
       <div class="dashboard-content">
         <!-- Panel de estadísticas -->
-        <div class="stats-section">
-          <div class="stat-card">
-            <h3>Empresas</h3>
-            <div class="stat-value"><AnimatedNumber :number="empresasCount" /></div>
-          </div>
-          <div class="stat-card">
-            <h3>Departamentos</h3>
-            <div class="stat-value"><AnimatedNumber :number="departamentosCount" /></div>
-          </div>
-          <div class="stat-card">
-            <h3>Centros</h3>
-            <div class="stat-value"><AnimatedNumber :number="centrosCount" /></div>
-          </div>
-          <div class="stat-card">
-            <h3>Formaciones</h3>
-            <div class="stat-value"><AnimatedNumber :number="formacionesCount" /></div>
-          </div>
-        </div>
+        <StatsPanel 
+          :empresasCount="empresasCount"
+          :departamentosCount="departamentosCount"
+          :centrosCount="centrosCount"
+          :formacionesCount="formacionesCount"
+        />
         
         <!-- Loader para estados de carga -->
         <div v-if="cargando" class="spinnerContainer">
@@ -686,67 +649,7 @@
     </div>
     
     <!-- Footer -->
-    <footer class="app-footer" style="position: relative; z-index: 10;">
-      <div class="footer-difuminado" style="position: absolute; top: -150px; left: 0; right: 0; height: 150px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.6) 70%, rgba(0, 0, 0, 0.85) 100%); z-index: -1; pointer-events: none;"></div>
-      <div class="footer-container">
-        <div class="footer-column logo-column">
-          <img src="@/assets/img/impulsedata_logo.png" alt="ImpulseData Logo" class="footer-logo" />
-          <h3>ImpulseData</h3>
-          <p>✨ Transformando datos en conocimiento, donde la excelencia se hace realidad.</p>
-        </div>
-        
-        <div class="footer-column links-column">
-          <h4>Enlaces</h4>
-          <ul>
-            <li><a href="/home">Inicio</a></li>
-            <li><a href="/perfil">Mi Perfil</a></li>
-            <li><a href="/panel-control">Panel de Control</a></li>
-          </ul>
-        </div>
-        
-        <div class="footer-column contact-column">
-          <h4>Contacto</h4>
-          <p><i class="location-icon">📍</i> Plaza del Ayuntamiento, Alicante</p>
-          <p><i class="phone-icon">📞</i> +34 965 123 456</p>
-          <p><i class="email-icon">✉️</i> info@impulsedata.es</p>
-        </div>
-        
-        <div class="footer-column social-column">
-          <h4>Síguenos</h4>
-          <div class="social-icons">
-            <a href="https://www.facebook.com/impulsedata" target="_blank" class="social-icon">
-              <svg viewBox="0 0 24 24" class="facebook-icon">
-                <path d="M9.19795 21.5H13.198V13.4901H16.8021L17.198 9.50977H13.198V7.5C13.198 6.94772 13.6457 6.5 14.198 6.5H17.198V2.5H14.198C11.4365 2.5 9.19795 4.73858 9.19795 7.5V9.50977H7.19795L6.80206 13.4901H9.19795V21.5Z"></path>
-              </svg>
-            </a>
-            <a href="https://twitter.com/impulsedata" target="_blank" class="social-icon">
-              <svg viewBox="0 0 24 24" class="twitter-icon">
-                <path d="M22.162 5.65593C21.3986 5.99362 20.589 6.2154 19.76 6.31393C20.6337 5.79136 21.2877 4.96894 21.6 3.99993C20.78 4.48793 19.881 4.82993 18.944 5.01493C18.3146 4.34151 17.4804 3.89489 16.5709 3.74451C15.6615 3.59413 14.7279 3.74842 13.9153 4.18338C13.1026 4.61834 12.4564 5.30961 12.0771 6.14972C11.6978 6.98983 11.6067 7.93171 11.818 8.82893C10.1551 8.74558 8.52832 8.31345 7.04328 7.56059C5.55823 6.80773 4.24812 5.75097 3.198 4.45893C2.82629 5.09738 2.63095 5.82315 2.631 6.56193C2.631 8.01193 3.37 9.29293 4.492 10.0429C3.82801 10.022 3.17863 9.84271 2.598 9.51993V9.57193C2.5982 10.5376 2.93237 11.4735 3.54385 12.221C4.15533 12.9684 5.00647 13.4814 5.953 13.6729C5.33661 13.84 4.69031 13.8646 4.063 13.7449C4.32987 14.5762 4.85001 15.3031 5.55059 15.824C6.25118 16.345 7.09712 16.6337 7.97 16.6499C7.10249 17.3313 6.10917 17.8349 5.04680 18.1321C3.98442 18.4293 2.87412 18.5142 1.779 18.3819C3.6907 19.6114 5.91599 20.264 8.189 20.2619C15.882 20.2619 20.089 13.889 20.089 8.36193C20.089 8.18193 20.084 7.99993 20.076 7.82193C20.8949 7.2301 21.6016 6.49695 22.163 5.65693L22.162 5.65593Z"></path>
-              </svg>
-            </a>
-            <a href="https://www.instagram.com/impulsedata/" target="_blank" class="social-icon">
-              <svg viewBox="0 0 24 24" class="instagram-icon">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path>
-              </svg>
-            </a>
-            <a href="https://www.linkedin.com/company/impulsedata" target="_blank" class="social-icon">
-              <svg viewBox="0 0 24 24" class="linkedin-icon">
-                <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"></path>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
-      
-      <div class="footer-bottom">
-        <p>&copy; 2025 ImpulseData - Alicante Futura. Todos los derechos reservados.</p>
-        <div class="footer-bottom-links">
-          <a href="#">Políticas de Privacidad</a>
-          <a href="#">Términos de Servicio</a>
-          <a href="#">Mapa del Sitio</a>
-        </div>
-      </div>
-    </footer>
+    <AppFooter />
   </div>
   
   <!-- Modal para previsualizar PDF -->
@@ -802,6 +705,9 @@ import axios from 'axios';
 import AnimatedBackground from '../components/AnimatedBackground.vue';
 import AnimatedNumber from '../components/AnimatedNumber.vue';
 import ScrollAnimation from '../components/ScrollAnimation.vue';
+import AlicanteBanner from '../components/home/AlicanteBanner.vue';
+import StatsPanel from '../components/home/StatsPanel.vue';
+import AppFooter from '../components/home/AppFooter.vue';
 import GeminiButton from '../components/GeminiButton.vue';
 // Importar PDFService
 import PDFService from '../services/PDFService';
@@ -2310,106 +2216,6 @@ const irAPaginaPDF = () => {
 <style src="../assets/Home.css"></style>
 
 <style>
-/* Estilos del banner al estilo Apple */
-.alicante-banner-showcase {
-  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,240,247,0.9) 100%);
-  border-radius: 18px;
-  margin: 20px 0 40px;
-  padding: 0;
-  /* overflow: hidden; */
-  position: relative;
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05), 
-              0 1px 3px rgba(0,0,0,0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  transition: transform 0.5s ease, box-shadow 0.5s ease;
-}
-
-.alicante-banner-showcase:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 30px 60px -12px rgba(0,0,0,0.1),
-              0 4px 25px -2px rgba(0,0,0,0.06),
-              0 2px 6px rgba(0,0,0,0.1);
-}
-
-.banner-content {
-  display: flex;
-  align-items: center;
-  padding: 40px;
-  position: relative;
-  z-index: 2;
-}
-
-.banner-image-container {
-  flex: 0 0 40%;
-  position: relative;
-  transform-style: preserve-3d;
-  perspective: 1000px;
-}
-
-.banner-image {
-  width: 100%;
-  border-radius: 12px;
-  transform: translateZ(20px) rotateY(-5deg);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-.alicante-banner-showcase:hover .banner-image {
-  transform: translateZ(40px) rotateY(-8deg);
-}
-
-.image-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), transparent 70%);
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  pointer-events: none;
-}
-
-.alicante-banner-showcase:hover .image-glow {
-  opacity: 0.8;
-}
-
-.banner-info {
-  flex: 1;
-  padding-left: 40px;
-  transform: translateZ(0);
-  transition: transform 0.4s ease;
-}
-
-.alicante-banner-showcase:hover .banner-info {
-  transform: translateZ(10px);
-}
-
-.banner-info h3 {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 15px;
-  background: linear-gradient(90deg, #007AFF, #34AADC);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -0.5px;
-}
-
-.banner-info p {
-  font-size: 16px;
-  line-height: 1.6;
-  color: #000000;
-  margin-bottom: 25px;
-  max-width: 90%;
-  font-weight: 500;
-}
-
-.banner-action {
-  margin-top: 20px;
-}
-
 .btn-apple {
   background: linear-gradient(90deg, #007AFF, #34AADC);
   color: white;
@@ -2437,60 +2243,6 @@ const irAPaginaPDF = () => {
 
 .btn-apple:hover .arrow {
   transform: translateX(4px);
-}
-
-.banner-accent-shapes {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.accent-shape {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.4;
-  background: linear-gradient(135deg, #007AFF, #34AADC);
-  filter: blur(40px);
-}
-
-.shape-1 {
-  width: 300px;
-  height: 300px;
-  top: -150px;
-  right: -100px;
-  animation: float-slow 10s ease-in-out infinite alternate;
-}
-
-.shape-2 {
-  width: 200px;
-  height: 200px;
-  bottom: -100px;
-  left: 40%;
-  background: linear-gradient(135deg, #5856D6, #AF52DE);
-  animation: float-slow 7s ease-in-out infinite alternate-reverse;
-}
-
-.shape-3 {
-  width: 150px;
-  height: 150px;
-  top: 40%;
-  left: -50px;
-  background: linear-gradient(135deg, #FF9500, #FF2D55);
-  animation: float-slow 12s ease-in-out infinite alternate;
-}
-
-@keyframes float-slow {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(20px, 20px);
-  }
 }
 
 /* Estilos para modales al estilo Apple */
@@ -3270,33 +3022,6 @@ const irAPaginaPDF = () => {
   }
 }
 
-/* Estilos para las estrellas brillantes */
-.stars-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.star {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: #fff;
-  border-radius: 50%;
-  opacity: 0.5;
-  animation: twinkle 1s infinite ease-in-out;
-}
-
-@keyframes twinkle {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-
 .navbar {
   position: fixed;
   top: 0;
@@ -3452,7 +3177,6 @@ const irAPaginaPDF = () => {
   background: transparent;
 }
 
-/* Asegura que el footer sea el límite inferior sin espacio adicional */
 .home-page {
   min-height: 100vh;
   display: flex;
@@ -3477,19 +3201,6 @@ body {
   padding-bottom: 0; /* Eliminar el padding inferior si existe */
 }
 
-/* Ajustes para el footer */
-.app-footer {
-  width: 100%;
-  position: relative;
-  margin-top: 3rem; /* Empuja el footer al final del contenedor */
-  z-index: 10;
-}
-
-/* Elimina cualquier espacio adicional después del footer */
-.app-footer::after {
-  content: none;
-}
-
 /* Ajustes para la estructura completa */
 .main-content, 
 .home-page, 
@@ -3497,14 +3208,5 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
-
-.footer-container {
-  padding-bottom: 0;
-}
-
-.footer-bottom {
-  margin-bottom: 0;
-  padding-bottom: 1rem;
 }
 </style>
