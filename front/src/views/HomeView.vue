@@ -4,7 +4,7 @@
     <AnimatedBackground />
     
     <!-- Componente de animación de scroll -->
-    
+    <ScrollAnimation />
     <div class="dashboard-container">
       <!-- Encabezado del dashboard -->
       <div class="dashboard-header">
@@ -2316,7 +2316,7 @@ const irAPaginaPDF = () => {
   border-radius: 18px;
   margin: 20px 0 40px;
   padding: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
   position: relative;
   box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05), 
               0 1px 3px rgba(0,0,0,0.05);
@@ -3481,7 +3481,7 @@ body {
 .app-footer {
   width: 100%;
   position: relative;
-  margin-top: auto; /* Empuja el footer al final del contenedor */
+  margin-top: 3rem; /* Empuja el footer al final del contenedor */
   z-index: 10;
 }
 

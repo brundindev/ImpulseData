@@ -116,7 +116,8 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  overflow-y: visible; /* Permitir que el contenido sea desplazable */
+  overflow-y: visible;
+  min-height: calc(100vh - 100px); /* Asegurar altura mínima */
 }
 
 .forms-section, .stats-section, .dashboard-header, .alicante-banner-showcase {
@@ -1685,15 +1686,13 @@ body:has(.welcome-page) .navbar-container .brand-name {
 /* Estilos para el footer */
 .app-footer {
   position: relative;
-  z-index: 10 !important;
-  background: rgba(0, 0, 0, 0.85);
+  width: 100%;
+  background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   color: white;
-  padding: 3rem 0 1rem;
-  margin-top: 5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  pointer-events: auto; /* Asegurar que el footer captura eventos */
+  padding: 3rem 0 0;
+  margin-top: 3rem;
+  z-index: 1;
 }
 
 /* Efecto de difuminado para la transición entre home y footer */
@@ -2532,12 +2531,12 @@ body:has(.welcome-page) .button2:after,
 
 .home-page {
   min-height: 100vh;
-  height: 100vh;
-  background: linear-gradient(180deg, #1D2024 0%, black 50%, black 100%);
-  color: white;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  margin: 0;
-  padding: 0;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: white;
 }
   
 .home-page::before {
