@@ -26,9 +26,9 @@
             <li>100MB espacio libre</li>
           </ul>
         </div>
-        <a href="/descargar/ImpulseData-Setup.exe" class="download-button">
+        <button @click="handleDownload('/descargar/ImpulseData-Setup.exe', 'ImpulseData-Setup.exe')" class="download-button">
           <i class="fas fa-download"></i> Descargar para Windows
-        </a>
+        </button>
       </div>
 
       <div class="download-card">
@@ -45,9 +45,9 @@
             <li>100MB espacio libre</li>
           </ul>
         </div>
-        <a href="/descargar/ImpulseData 1.0.0.dmg" class="download-button">
+        <button @click="handleDownload('/descargar/ImpulseData-1.0.0.dmg', 'ImpulseData-1.0.0.dmg')" class="download-button">
           <i class="fas fa-download"></i> Descargar para macOS
-        </a>
+        </button>
       </div>
     </div>
 
@@ -67,7 +67,7 @@
       <div class="instruction-card">
         <h3>macOS</h3>
         <ol>
-          <li>Descarga el archivo <strong>ImpulseData.dmg</strong></li>
+          <li>Descarga el archivo <strong>ImpulseData-1.0.0.dmg</strong></li>
           <li>Haz doble clic en el archivo descargado para montarlo</li>
           <li>Arrastra el icono de ImpulseData a la carpeta Aplicaciones</li>
           <li>Abre la aplicación desde el Launchpad o la carpeta Aplicaciones</li>
@@ -117,6 +117,18 @@ import { onMounted } from 'vue';
 onMounted(() => {
   document.title = 'Descargar App - ImpulseData';
 });
+
+// Función para manejar las descargas directamente
+const handleDownload = (filePath, fileName) => {
+  // Crear un enlace temporal y simular clic en él
+  const link = document.createElement('a');
+  link.href = filePath;
+  link.download = fileName;
+  link.target = '_blank';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 </script>
 
 <style scoped>
