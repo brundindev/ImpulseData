@@ -282,6 +282,10 @@ const empresa = ref(null);
 // Plantilla HTML generada a partir de PlantillaPDF.js
 const plantillaHTML = ref("");
 
+// Dentro del script, añadir estas variables reactivas
+const isGenerating = ref(false);
+const loadingMessage = ref('');
+
 // Verificar que la sesión se mantiene activa
 const tokenInicial = localStorage.getItem('authToken');
 if (tokenInicial) {
@@ -301,10 +305,37 @@ const verificarSesion = () => {
 // Verificar la sesión periódicamente mientras se usa la vista PDF
 const intervaloVerificacion = setInterval(verificarSesion, 5000);
 
+// Función para formatear fechas
+const formatDate = (dateString) => {
+  if (!dateString) return 'No especificada';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString;
+    
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (error) {
+    console.error('Error al formatear fecha:', error);
+    return dateString;
+  }
+};
+
 // Limpiar el intervalo cuando se desmonta el componente
 onMounted(() => {
   console.log("Componente PDF montado correctamente");
   verificarSesion();
+  
+  // Cargar imágenes inmediatamente
+  loadAvailableImages();
+  
+  // Después cargar la plantilla HTML
+  setTimeout(() => {
+    loadPlantillaHTML();
+  }, 500);
 });
 
 onUnmounted(() => {
@@ -334,7 +365,15 @@ const showImageSelector = ref(false);
 const currentImageType = ref(''); // 'logo' o 'pdf'
 const uploadStatus = ref('');
 
-// Imágenes disponibles
+// Paginación y filtrado
+const allAvailableImages = ref([]);
+const imageFilter = ref('');
+const currentPage = ref(1);
+const imagesPerPage = ref(24); // Mostrar 24 imágenes por página (4x6 grid)
+const isLoadingImages = ref(false);
+const imageLoadErrors = ref({});
+
+// Imágenes disponibles por defecto (fallback)
 const availableImages = ref([
   { publicId: 'sample', alt: 'Muestra general' },
   { publicId: 'samples/landscapes/nature-mountains', alt: 'Montañas' },
@@ -342,168 +381,109 @@ const availableImages = ref([
   { publicId: 'samples/ecommerce/accessories-bag', alt: 'Producto' }
 ]);
 
-// Dentro del script, añadir estas variables reactivas
-const isGenerating = ref(false);
-const loadingMessage = ref('');
+// Filtrar imágenes basado en el texto de búsqueda
+const filteredImages = computed(() => {
+  if (!imageFilter.value.trim()) {
+    return allAvailableImages.value.length > 0 ? allAvailableImages.value : availableImages.value;
+  }
+  
+  const searchTerm = imageFilter.value.toLowerCase().trim();
+  const images = allAvailableImages.value.length > 0 ? allAvailableImages.value : availableImages.value;
+  
+  return images.filter(img => {
+    return (img.alt && img.alt.toLowerCase().includes(searchTerm)) || 
+           (img.publicId && img.publicId.toLowerCase().includes(searchTerm));
+  });
+});
 
-// Función para obtener URL de Cloudinary
+// Calcular el total de páginas
+const totalPages = computed(() => {
+  return Math.ceil(filteredImages.value.length / imagesPerPage.value);
+});
+
+// Obtener las imágenes de la página actual
+const paginatedImages = computed(() => {
+  const startIndex = (currentPage.value - 1) * imagesPerPage.value;
+  const endIndex = startIndex + imagesPerPage.value;
+  return filteredImages.value.slice(startIndex, endIndex);
+});
+
+// Resetear a la primera página cuando cambia el filtro
+const filterImages = () => {
+  currentPage.value = 1;
+};
+
+// Función para obtener URL de Cloudinary con manejo de errores
 const getCloudinaryUrl = (publicId, options = {}) => {
-  if (!publicId) return '';
+  if (!publicId) return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
   
-  const { width, height, format, quality } = options;
-  
-  // URL base de Cloudinary
-  let url = `https://res.cloudinary.com/drqt6gd5v/image/upload`;
-  
-  // Transformaciones
-  const transformations = [];
-  if (width) transformations.push(`w_${width}`);
-  if (height) transformations.push(`h_${height}`);
-  if (format && format !== 'auto') transformations.push(`f_${format}`);
-  if (quality && quality !== 'auto') transformations.push(`q_${quality}`);
-  else transformations.push('q_auto');
-  
-  // Añadir transformaciones a la URL
-  if (transformations.length > 0) {
-    url += `/${transformations.join(',')}`;
-  }
-  
-  // Añadir el ID público a la URL
-  url += `/${publicId}`;
-  
-  return url;
-};
-
-// Cargar la plantilla HTML
-const loadPlantillaHTML = async () => {
   try {
-    // Obtener el HTML de la plantilla sin modificar
-    const htmlTemplate = await crearPlantillaPDF();
-    
-    // Actualizar la variable reactiva directamente sin personalizar
-    plantillaHTML.value = htmlTemplate;
-    
-    console.log("Plantilla HTML cargada correctamente");
-    
-    // Asegurarse de que el contenedor se actualice correctamente
-    setTimeout(() => {
-      const container = document.getElementById('plantilla-container');
-      if (container) {
-        // Forzar la actualización del DOM con el contenido original
-        container.innerHTML = htmlTemplate;
-      }
-    }, 100);
+    return SimpleCloudinaryService.getImageUrl(publicId, options);
   } catch (error) {
-    console.error("Error al cargar la plantilla HTML:", error);
-    plantillaHTML.value = html; // Usar el HTML base como fallback
+    console.error('Error al generar URL de Cloudinary:', error);
+    return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
   }
 };
 
-// Abrir selector de imágenes
-const selectImage = (type) => {
-  currentImageType.value = type;
-  showImageSelector.value = true;
+// Cargar imágenes disponibles desde Cloudinary
+const loadAvailableImages = () => {
+  isLoadingImages.value = true;
+  
+  SimpleCloudinaryService.getAllImages()
+    .then(images => {
+      console.log('Imágenes cargadas:', images.length);
+      // Guardar en allAvailableImages para mantener las originales
+      allAvailableImages.value = images;
+    })
+    .catch(error => {
+      console.error('Error al cargar imágenes:', error);
+      // Usar las imágenes de fallback si hay error
+      allAvailableImages.value = [...availableImages.value];
+    })
+    .finally(() => {
+      isLoadingImages.value = false;
+    });
 };
 
 // Seleccionar una imagen disponible
 const selectAvailableImage = (publicId) => {
-  if (currentImageType.value === 'logo') {
-    pdfOptions.logoPublicId = publicId;
-  } else {
-    pdfOptions.images.push({
-      publicId,
-      alt: 'Imagen',
-      caption: 'Descripción de la imagen',
-      width: null,
-      height: null
-    });
-  }
-  showImageSelector.value = false;
-};
-
-// Eliminar una imagen
-const removeImage = (index) => {
-  pdfOptions.images.splice(index, 1);
-};
-
-// Manejar la selección de archivo
-const handleFileSelect = async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  
   try {
-    uploadStatus.value = 'Subiendo imagen...';
+    console.log(`Seleccionando imagen: ${publicId}`);
     
-    // Usar el servicio simplificado para subir la imagen
-    const result = await SimpleCloudinaryService.uploadImage(file);
-    
-    if (result && result.public_id) {
-      // Añadir la imagen a nuestra lista
-      const publicId = result.public_id;
+    if (currentImageType.value === 'logo') {
+      pdfOptions.logoPublicId = publicId;
+    } else {
+      // Buscar la imagen en las disponibles para obtener el alt
+      const source = allAvailableImages.value.length > 0 ? allAvailableImages.value : availableImages.value;
+      const imagen = source.find(img => img.publicId === publicId);
+      const alt = imagen ? imagen.alt : 'Imagen';
       
-      if (currentImageType.value === 'logo') {
-        pdfOptions.logoPublicId = publicId;
-      } else {
-        pdfOptions.images.push({
-          publicId,
-          alt: file.name,
-          caption: 'Imagen subida',
-          width: null,
-          height: null
-        });
-      }
-      
-      uploadStatus.value = 'Imagen subida correctamente.';
-      
-      // También añadir a las disponibles
-      availableImages.value.push({
+      pdfOptions.images.push({
         publicId,
-        alt: file.name
+        alt,
+        caption: `Descripción de ${alt}`,
+        width: null,
+        height: null
       });
-      
-      setTimeout(() => {
-        showImageSelector.value = false;
-        uploadStatus.value = '';
-      }, 1500);
-    } else {
-      throw new Error('La respuesta no contiene el ID público de la imagen');
     }
+    showImageSelector.value = false;
   } catch (error) {
-    console.error('Error al subir la imagen:', error);
-    if (error.response && error.response.data) {
-      console.error('Error de Cloudinary:', error.response.data);
-      uploadStatus.value = `Error: ${error.response.data.error?.message || 'Verifica tu upload_preset en Cloudinary'}`;
-    } else {
-      uploadStatus.value = 'Error al subir la imagen. Verifica que hayas creado un upload preset público.';
-    }
+    console.error('Error al seleccionar imagen:', error);
+    alert('Hubo un problema al seleccionar la imagen. Por favor, intenta con otra.');
   }
 };
 
-// Funciones para la tabla
-const addTableRow = () => {
-  // Crear una nueva fila con celdas vacías según las columnas actuales
-  const newRow = pdfOptions.tableHeaders.map(() => '');
-  pdfOptions.tableData.push(newRow);
+// Manejar error de carga de imagen
+const handleImageLoadError = (event) => {
+  // Reemplazar la imagen que falló con una imagen de reemplazo
+  const alt = event.target.alt || 'imagen';
+  console.warn(`Error al cargar la imagen: ${alt}`);
   
-  // Si no hay encabezados, añadir uno por defecto
-  if (pdfOptions.tableHeaders.length === 0) {
-    pdfOptions.tableHeaders.push('Columna 1');
-  }
-};
-
-const removeTableRow = (index) => {
-  pdfOptions.tableData.splice(index, 1);
-};
-
-const addTableColumn = () => {
-  // Añadir una nueva columna al encabezado
-  const columnIndex = pdfOptions.tableHeaders.length;
-  pdfOptions.tableHeaders.push(`Columna ${columnIndex + 1}`);
+  // Usar una imagen de fallback que existe en la cuenta del usuario
+  event.target.src = 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
   
-  // Añadir celda vacía a cada fila existente
-  pdfOptions.tableData.forEach(row => {
-    row.push('');
-  });
+  // Registrar el error para evitar reintentos
+  imageLoadErrors.value[alt] = true;
 };
 
 // Método para generar el PDF a partir de la plantilla HTML mostrada en la vista previa
@@ -839,6 +819,105 @@ const generatePdf = async () => {
     } finally {
       loadingMessage.value = '';
       isGenerating.value = false;
+    }
+  }
+};
+
+// Cargar la plantilla HTML
+const loadPlantillaHTML = async () => {
+  try {
+    // Obtener el HTML de la plantilla sin modificar
+    const htmlTemplate = await crearPlantillaPDF();
+    
+    // Actualizar la variable reactiva directamente sin personalizar
+    plantillaHTML.value = htmlTemplate;
+    
+    console.log("Plantilla HTML cargada correctamente");
+    
+    // Asegurarse de que el contenedor se actualice correctamente
+    setTimeout(() => {
+      const container = document.getElementById('plantilla-container');
+      if (container) {
+        // Forzar la actualización del DOM con el contenido original
+        container.innerHTML = htmlTemplate;
+      }
+    }, 100);
+  } catch (error) {
+    console.error("Error al cargar la plantilla HTML:", error);
+    plantillaHTML.value = html; // Usar el HTML base como fallback
+  }
+};
+
+// Abrir selector de imágenes
+const selectImage = (type) => {
+  currentImageType.value = type;
+  uploadStatus.value = ''; // Limpiar cualquier mensaje de error anterior
+  isLoadingImages.value = true; // Mostrar indicador de carga
+  
+  // Si no tenemos imágenes cargadas aún, cargarlas ahora
+  if (allAvailableImages.value.length === 0) {
+    loadAvailableImages();
+  } else {
+    isLoadingImages.value = false;
+  }
+  
+  showImageSelector.value = true;
+};
+
+// Eliminar una imagen
+const removeImage = (index) => {
+  pdfOptions.images.splice(index, 1);
+};
+
+// Manejar la selección de archivo
+const handleFileSelect = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  try {
+    uploadStatus.value = 'Subiendo imagen...';
+    
+    // Usar el servicio simplificado para subir la imagen
+    const result = await SimpleCloudinaryService.uploadImage(file);
+    
+    if (result && result.public_id) {
+      // Añadir la imagen a nuestra lista
+      const publicId = result.public_id;
+      
+      if (currentImageType.value === 'logo') {
+        pdfOptions.logoPublicId = publicId;
+      } else {
+        pdfOptions.images.push({
+          publicId,
+          alt: file.name,
+          caption: 'Imagen subida',
+          width: null,
+          height: null
+        });
+      }
+      
+      uploadStatus.value = 'Imagen subida correctamente.';
+      
+      // También añadir a las disponibles
+      allAvailableImages.value.push({
+        publicId,
+        alt: file.name
+      });
+      
+      setTimeout(() => {
+        showImageSelector.value = false;
+        uploadStatus.value = '';
+      }, 1500);
+    } else {
+      throw new Error('La respuesta no contiene el ID público de la imagen');
+    }
+  } catch (error) {
+    console.error('Error al subir la imagen:', error);
+    if (error.response && error.response.data) {
+      console.error('Error de Cloudinary:', error.response.data);
+      uploadStatus.value = `Error: ${error.response.data.error?.message || 'Verifica tu upload_preset en Cloudinary'}`;
+    } else {
+      uploadStatus.value = 'Error al subir la imagen. Verifica que hayas creado un upload preset público.';
     }
   }
 };
