@@ -300,39 +300,97 @@ const getCloudinaryUrl = (publicId, options = {}) => {
 // Cargar la plantilla HTML
 const loadPlantillaHTML = async () => {
   try {
-    // Obtener el HTML de la plantilla sin modificar
-    const htmlTemplate = await crearPlantillaPDF();
+    console.log("Iniciando carga de la plantilla HTML completa...");
     
-    // Actualizar la variable reactiva directamente sin personalizar
-    plantillaHTML.value = htmlTemplate;
+    // Obtener el HTML completo de la plantilla (el HTML raw, no el procesado)
+    // Usamos directamente la constante 'html' del archivo PlantillaPDF
+    const rawHtmlTemplate = html;
     
-    console.log("Plantilla HTML cargada correctamente");
+    // Actualizar la variable reactiva
+    plantillaHTML.value = rawHtmlTemplate;
     
     // Asegurarse de que el contenedor se actualice correctamente
     setTimeout(() => {
       const container = document.getElementById('plantilla-container');
       if (container) {
-        // Forzar la actualización del DOM con el contenido original
-        container.innerHTML = htmlTemplate;
+        // Crear un iframe para aislar el documento completo y preservar todos los estilos
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%'; 
+        iframe.style.border = 'none';
+        iframe.style.overflow = 'visible';
         
-        // Asegurarse de que todos los estilos se apliquen correctamente
-        const pages = container.querySelectorAll('.page');
-        pages.forEach(page => {
-          page.style.width = '100%';
-          page.style.minHeight = 'auto';
-          page.style.position = 'relative';
-          page.style.overflow = 'hidden';
-          page.style.backgroundColor = 'white';
-          page.style.margin = '0';
-          page.style.padding = '0';
-        });
+        // Limpiar cualquier contenido previo
+        container.innerHTML = '';
+        container.appendChild(iframe);
+        
+        // Acceder al documento del iframe
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        
+        // Establecer el contenido del iframe con el HTML completo
+        iframeDoc.open();
+        iframeDoc.write(rawHtmlTemplate);
+        iframeDoc.close();
+        
+        // Ajustar la altura del iframe para que muestre todo el contenido
+        setTimeout(() => {
+          const body = iframeDoc.body;
+          if (body) {
+            iframe.style.height = `${body.scrollHeight}px`;
+          }
+          
+          // Aplicar ajustes adicionales si es necesario
+          adjustPageDisplay(iframeDoc);
+        }, 300);
+        
+        console.log("Plantilla HTML cargada correctamente en iframe");
       }
-    }, 100);
+    }, 200);
   } catch (error) {
     console.error("Error al cargar la plantilla HTML:", error);
-    plantillaHTML.value = html; // Usar el HTML base como fallback
+    const container = document.getElementById('plantilla-container');
+    if (container) {
+      container.innerHTML = '<div class="error-message">Error al cargar la plantilla</div>';
+    }
   }
 };
+
+// Función para ajustar la visualización de páginas dentro del iframe
+const adjustPageDisplay = (doc) => {
+  // Ajustar todas las imágenes para asegurar que tengan contenido
+  const images = doc.querySelectorAll('img');
+  images.forEach(img => {
+    if (!img.src || img.src === '' || img.src === 'about:blank') {
+      // Usar un placeholder para imágenes vacías
+      img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAyCAYAAACqNX6+AAAACXBIWXMAAAsTAAALEwEAmpwYAAAEOklEQVR4nO2cW27bMBCGp4/tqkBOIJ+gQBYoeoKgJ0ib9LHICdKcoMgJmhO06QnSnCDNCdrnAn1q0RMUaFFUHiRbHJJDUpTlhUX9AwZsLNnk/OTMcGZIhyASiUQikUgkEolEIpFIJBIJGQC3AewA+ExEFRHVeATnOwBeArhTluUrpZRCYMqyxPl85iTG87wvRVG8BvDQNAullDiV1lpXSu2I6BOAt7Zt22GapnUQBOcAbpmmWRVF8SMIgg8AntByJ87X67XUdd3wOF8sFnA9DMPwptPpewBvbJ9xPp9Dr74Z3/fb0+lUl2UJ9r+UUsi9RpIkCIKgZbquqyiKQoQwRkEQFGEYVnEcV2w8Ho8ZNKSvubdwbNu2V2maXs9msz7nQRB8DcOwStO0SpKkbttW7eJFmmYvgzRNw/d9HXM+m80wHo8RRVH3dxiGKIpiy9jsMHEcFy7P7JthmiYejwej6aNlU8AZx1GD5yYZZ/oZTbmxyzXbtgMAK+YSAJ9d181cAq5WK+R5jrqudcZ93zdKszzvvM/zHEopY64cDAZ6jTzPUVUVkiS5fq7neTfcn5vNJhaLBZIkQZqmOtRxcUzT1BhKoijq5tJsNkMYhtfWjeO4832e57Bt276vj9bzDMNQuLYoCtR1jfl83pnb8zydmPM813/jue99jPP5HGVZGkGaptVoNMJ0OsVkMukSfxAE2rtc+2dZpkE+nU4Nj+TCnKbptQewx7Ixf5bCNrZarYxnHEKAKIrqXc/uDftbfZ2/1+Gfv9e29dgmjdHb29Z6z+uFHFpbWVWVMWfUdd0Zwxb+8G39Lmvc1qvfFw67lWmaOmx1eOHN3/D4tv2Mvu+39/X8IYRbzDRtbP/sMmzbNnrP42LNZKIoCjFYE1qWpXMYyPNcex7P8ZozGAwwHA61l7TZF7WKQ0N7XVmWsG0bWutdszyluztN0yBJEjx6Bq7VYV0FjhXGLr7BVWy+7/J1vqZpGq5Xw3VdreVf+UJR6z4nk8lRnmDbtl4D1zE7RJvN5ufKWblc7lu/0xxZlv242Gw2Z7VWL9brNd4DuNh33fF4/LFt20daa6SXl/h0B0CWZZfX/ZjF9/0zz/POLcu6hcNNWqc+1ut1q5TaAri8q/HiOP7ouq5mE4bhrWVZr3dd53neudZ6DeDxnzbnE631h9VqhbeMw3AThqH2CsZdxnQ6RV8Gd5V0NptBa90J2uXlJebz+d7wF4YhkiTRibxvTsuy+o5PuOXuqxZt2z6zbdto8PaVf1mWbTrUXQqKfrXJ11xVk4aN4V1N4b7yvq+87Hv+vtptX9PXtc8xjd9Vfai27P8aR7fOl2XZjSAIHpRluX848y5clPXvvI2zzp+/ZXkL4P6h+0QikUgkEolEIpFIJBKJRCLRb9UvkR6lzA/rWkAAAAAASUVORK5CYII=';
+    }
+  });
+  
+  // Añadir números de página
+  const pages = doc.querySelectorAll('.page');
+  pages.forEach((page, index) => {
+    // Añadir un indicador de página
+    const pageIndicator = doc.createElement('div');
+    pageIndicator.textContent = `Página ${index + 1}`;
+    pageIndicator.style.position = 'absolute';
+    pageIndicator.style.bottom = '5mm';
+    pageIndicator.style.right = '10mm';
+    pageIndicator.style.fontSize = '8pt';
+    pageIndicator.style.color = '#999';
+    page.appendChild(pageIndicator);
+  });
+  
+  // Visualizar saltos de página con líneas punteadas
+  const pagebreaks = doc.querySelectorAll('.pagebreak');
+  pagebreaks.forEach(pb => {
+    const marker = doc.createElement('div');
+    marker.innerHTML = '<hr style="border: none; border-top: 1px dashed #ccc; margin: 20px 0;">';
+    
+    if (pb.parentNode) {
+      pb.parentNode.insertBefore(marker, pb);
+    }
+  });
+}
 
 // Abrir selector de imágenes
 const selectImage = (type) => {
@@ -458,132 +516,75 @@ const generatePdf = async () => {
     isGenerating.value = true;
     loadingMessage.value = 'Preparando la plantilla...';
     
-    // Asegurarse de que la plantilla esté actualizada
-    await loadPlantillaHTML();
-    
-    // Dar tiempo al DOM para actualizarse antes de la captura
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    loadingMessage.value = 'Generando PDF desde la plantilla HTML...';
-    
-    // Obtener el elemento que contiene la plantilla HTML
-    const plantillaContainer = document.getElementById('plantilla-container');
-    if (!plantillaContainer) {
+    // Obtener iframe con la plantilla
+    const container = document.getElementById('plantilla-container');
+    if (!container) {
       throw new Error('No se encontró el contenedor de la plantilla');
     }
     
-    // Crear un iframe temporal para renderizar correctamente la plantilla con estilos
-    const iframe = document.createElement('iframe');
-    iframe.style.width = '210mm';  // Ancho A4 exacto
-    iframe.style.height = '297mm'; // Alto A4 exacto
-    iframe.style.position = 'absolute';
-    iframe.style.top = '-9999px';
-    iframe.style.left = '-9999px';
-    iframe.style.border = 'none';
-    document.body.appendChild(iframe);
-    
-    // Copiar todo el contenido de la plantilla al iframe con los estilos correctos
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-    iframeDoc.open();
-    iframeDoc.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>PDF</title>
-          <style>
-            @page {
-              size: A4;
-              margin: 0;
-            }
-            body { 
-              margin: 0; 
-              padding: 0; 
-              background: white; 
-              font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-              color: #000;
-              width: 210mm;
-              height: 297mm;
-            }
-            * { box-sizing: border-box; }
-            
-            .page { 
-              page-break-after: always; 
-              break-after: page;
-              width: 210mm;
-              min-height: 297mm;
-              position: relative;
-              padding: 0;
-              margin: 0;
-              background: white;
-              overflow: hidden;
-            }
-            
-            .pagebreak {
-              display: block;
-              clear: both;
-              page-break-after: always;
-              break-after: page;
-              height: 0;
-              margin: 0;
-              padding: 0;
-              border: 0;
-            }
-            
-            .page:last-child,
-            #contraportada {
-              page-break-after: auto;
-              break-after: auto;
-            }
-            
-            img {
-              max-width: 100%;
-              height: auto;
-              display: block;
-            }
-            
-            p, h1, h2, h3, h4, h5, h6 {
-              page-break-inside: avoid;
-              break-inside: avoid;
-            }
-            
-            .no-break {
-              page-break-inside: avoid;
-              break-inside: avoid;
-            }
-          </style>
-          <!-- Copiar los estilos originales de la plantilla -->
-          <style>${iframeDoc.styleSheets[0]?.cssRules ? Array.from(iframeDoc.styleSheets[0].cssRules).map(rule => rule.cssText).join('\n') : ''}</style>
-        </head>
-        <body>${plantillaHTML.value}</body>
-      </html>
-    `);
-    iframeDoc.close();
-    
-    // Dar tiempo para que el iframe renderice completamente
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Identificar todas las páginas de la plantilla
-    loadingMessage.value = 'Identificando páginas del documento...';
-    
-    // Obtener todos los elementos que deben ser páginas separadas
-    // Incluye divs de clase 'page', divs de id específicos como 'portada', 'contraportada', etc.,
-    // y elementos con clase 'pagebreak'
-    const pageElements = iframeDoc.querySelectorAll('.page, #portada, #contraportada, #indice, .section-agencia, .section-empleo, .section-promo, .section-desarrollo, .section-gestion, .section-marketing, .section-anexos, .pagebreak');
-    
-    // Si no hay elementos de página, usar todo el body como una sola página
-    let pages = [];
-    if (pageElements.length === 0) {
-      pages.push(iframeDoc.body);
-    } else {
-      // Filtrar elementos vacíos o muy pequeños
-      pages = Array.from(pageElements).filter(el => {
-        return el.offsetHeight > 20 || el.classList.contains('pagebreak');
-      });
+    // Obtener el iframe dentro del contenedor
+    const iframe = container.querySelector('iframe');
+    if (!iframe) {
+      throw new Error('No se encontró el iframe con la plantilla');
     }
     
-    // Crear el documento PDF
+    // Acceder al documento del iframe
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    if (!iframeDoc || !iframeDoc.body) {
+      throw new Error('No se pudo acceder al contenido del iframe');
+    }
+    
+    loadingMessage.value = 'Generando PDF desde la plantilla HTML...';
+    
+    // Crear un iframe temporal para la generación del PDF (sin afectar la visualización)
+    const tempIframe = document.createElement('iframe');
+    tempIframe.style.position = 'absolute';
+    tempIframe.style.top = '-9999px';
+    tempIframe.style.left = '-9999px';
+    tempIframe.style.width = '210mm';
+    tempIframe.style.height = '297mm';
+    tempIframe.style.border = 'none';
+    document.body.appendChild(tempIframe);
+    
+    // Configurar el documento temporal con estilos optimizados para PDF
+    const tempDoc = tempIframe.contentDocument || tempIframe.contentWindow.document;
+    tempDoc.open();
+    tempDoc.write(`
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>Memoria de Actividad - Impulsalicante</title>
+        <style>
+          @page {
+            size: A4;
+            margin: 0;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          }
+          ${Array.from(iframeDoc.querySelectorAll('style')).map(style => style.innerHTML).join('\n')}
+        </style>
+      </head>
+      <body>${iframeDoc.body.innerHTML}</body>
+      </html>
+    `);
+    tempDoc.close();
+    
+    // Eliminar elementos de UI que no deberían estar en el PDF
+    const pageIndicators = tempDoc.querySelectorAll('[style*="position: absolute"][style*="bottom: 5mm"]');
+    pageIndicators.forEach(el => el.parentNode.removeChild(el));
+    
+    // Esperar a que todo el contenido se cargue
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Configuración para jsPDF
+    loadingMessage.value = 'Creando documento PDF...';
+    
+    // Crear PDF con la biblioteca jsPDF
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -591,98 +592,71 @@ const generatePdf = async () => {
       compress: true
     });
     
-    // Configuración para html2canvas optimizada para calidad
+    // Obtener las páginas del documento
+    const pages = tempDoc.querySelectorAll('.page, #portada, #contraportada, #indice, .section-agencia, .section-empleo, .section-promo, .section-desarrollo, .section-gestion, .section-marketing, .section-anexos');
+    
+    // Si no encontramos páginas, usar el body completo
+    const elements = pages.length > 0 ? Array.from(pages) : [tempDoc.body];
+    
+    // Configuración para html2canvas
     const html2canvasOptions = {
-      scale: 2, // Mayor escala para mejor calidad
+      scale: 2,
       useCORS: true,
       allowTaint: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      onclone: (clonedDoc) => {
-        // Asegurarse que los elementos con pagebreak tengan altura cero
-        const pagebreaks = clonedDoc.querySelectorAll('.pagebreak');
-        pagebreaks.forEach(pb => {
-          pb.style.height = '0px';
-          pb.style.display = 'block';
-        });
-      }
+      backgroundColor: '#FFFFFF',
+      logging: false
     };
     
-    // Procesar cada página secuencialmente
-    loadingMessage.value = 'Capturando páginas...';
-    
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
+    // Procesar cada página
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
       
-      // Actualizar mensaje de carga
-      loadingMessage.value = `Procesando página ${i + 1} de ${pages.length}...`;
-      
-      // Si es solo un pagebreak, añadir nueva página y continuar
-      if (page.classList.contains('pagebreak')) {
-        if (i > 0) { // No añadir página en blanco si es el primer elemento
-          pdf.addPage();
-        }
-        continue;
-      }
+      loadingMessage.value = `Procesando página ${i + 1} de ${elements.length}...`;
       
       try {
-        // Asegurarse que la página sea visible durante la captura
-        page.style.display = 'block';
+        // Convertir la página a canvas
+        const canvas = await html2canvas(element, html2canvasOptions);
         
-        // Capturar la página como imagen
-        const canvas = await html2canvas(page, html2canvasOptions);
-        
-        // Si no es la primera página, añadir una nueva página al PDF
+        // Si no es la primera página, agregar una nueva
         if (i > 0) {
           pdf.addPage();
         }
         
-        // Convertir canvas a imagen
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        
-        // Dimensiones del PDF
+        // Obtener dimensiones de la página PDF
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
         
-        // Calcular proporción para mantener el aspecto
-        const canvasAspectRatio = canvas.width / canvas.height;
-        const pageAspectRatio = pageWidth / pageHeight;
+        // Calcular relación de aspecto para mantener proporciones
+        const canvasRatio = canvas.width / canvas.height;
+        const pageRatio = pageWidth / pageHeight;
         
         let imgWidth = pageWidth;
-        let imgHeight = imgWidth / canvasAspectRatio;
+        let imgHeight = imgWidth / canvasRatio;
         
         // Si la imagen es más alta que la página, ajustar altura
         if (imgHeight > pageHeight) {
           imgHeight = pageHeight;
-          imgWidth = imgHeight * canvasAspectRatio;
+          imgWidth = imgHeight * canvasRatio;
         }
         
-        // Centrar imagen si no ocupa todo el ancho
+        // Centrar la imagen si es más estrecha que la página
         const xOffset = (pageWidth - imgWidth) / 2;
         
-        // Añadir imagen al PDF
-        pdf.addImage(
-          imgData,
-          'JPEG',
-          xOffset,
-          0,
-          imgWidth,
-          imgHeight
-        );
-      } catch (error) {
-        console.error(`Error al procesar página ${i + 1}:`, error);
+        // Convertir canvas a imagen y añadir al PDF
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        pdf.addImage(imgData, 'JPEG', xOffset, 0, imgWidth, imgHeight);
+      } catch (pageError) {
+        console.error(`Error al procesar página ${i + 1}:`, pageError);
         
-        // Añadir página en blanco con mensaje de error
+        // Si hay error, añadir página con mensaje de error
         if (i > 0) {
           pdf.addPage();
         }
-        pdf.setFontSize(12);
-        pdf.text(`[Error en página ${i + 1}]`, 20, 20);
+        
+        pdf.setFontSize(14);
+        pdf.text(`Error al procesar página ${i + 1}`, 20, 20);
       }
     }
-    
-    // Finalizar y descargar el PDF
-    loadingMessage.value = 'Finalizando y descargando PDF...';
     
     // Nombre del archivo
     const filename = pdfOptions.filename.endsWith('.pdf') ? 
@@ -690,10 +664,11 @@ const generatePdf = async () => {
                      `${pdfOptions.filename}.pdf`;
     
     // Guardar PDF
+    loadingMessage.value = 'Guardando PDF...';
     pdf.save(filename);
     
     // Limpiar
-    document.body.removeChild(iframe);
+    document.body.removeChild(tempIframe);
     
     loadingMessage.value = '¡PDF generado con éxito!';
     setTimeout(() => {
@@ -712,88 +687,11 @@ const generatePdf = async () => {
       return;
     }
     
-    // Intentar método alternativo si falla el principal
-    loadingMessage.value = 'Intentando método alternativo...';
-    
-    try {
-      // Método alternativo usando html2pdf.js
-      const plantillaHTML = document.getElementById('plantilla-container');
-      
-      if (!plantillaHTML) {
-        throw new Error('No se pudo encontrar la plantilla HTML');
-      }
-      
-      // Crear iframe temporal para capturar toda la plantilla de una vez
-      const iframe = document.createElement('iframe');
-      iframe.style.width = '210mm';
-      iframe.style.height = '297mm';
-      iframe.style.position = 'absolute';
-      iframe.style.top = '-9999px';
-      iframe.style.left = '-9999px';
-      document.body.appendChild(iframe);
-      
-      // Copiar el contenido al iframe
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-      iframeDoc.open();
-      iframeDoc.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="UTF-8">
-            <title>PDF</title>
-            <style>
-              @page { size: A4; margin: 0; }
-              body { 
-                margin: 0; 
-                padding: 0; 
-                font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-              }
-              .page { page-break-after: always; }
-              .page:last-child { page-break-after: auto; }
-              .pagebreak { page-break-after: always; height: 0; }
-            </style>
-          </head>
-          <body>${plantillaHTML.innerHTML}</body>
-        </html>
-      `);
-      iframeDoc.close();
-      
-      // Dar tiempo para renderizar
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Capturar el documento completo
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      // Nombre del archivo
-      const filename = pdfOptions.filename.endsWith('.pdf') ? 
-                      pdfOptions.filename : 
-                      `${pdfOptions.filename}.pdf`;
-      
-      // Mensaje para el usuario
-      pdf.setFontSize(16);
-      pdf.text('La vista previa no pudo ser capturada correctamente.', 20, 30);
-      pdf.setFontSize(12);
-      pdf.text('Recomendamos usar la función de impresión del navegador:', 20, 50);
-      pdf.text('1. Haga clic derecho en la vista previa', 20, 70);
-      pdf.text('2. Seleccione "Imprimir"', 20, 80);
-      pdf.text('3. Elija "Guardar como PDF"', 20, 90);
-      
-      pdf.save(filename);
-      
-      // Limpiar
-      document.body.removeChild(iframe);
-      
-    } catch (fallbackError) {
-      console.error('Error en método alternativo:', fallbackError);
-      alert('No se pudo generar el PDF. Por favor, use la función de impresión del navegador para guardar la vista previa como PDF.');
-    } finally {
-      loadingMessage.value = '';
+    // Mostrar mensaje de error
+    loadingMessage.value = `Error: ${error.message}`;
+    setTimeout(() => {
       isGenerating.value = false;
-    }
+    }, 3000);
   }
 };
 
@@ -1191,29 +1089,81 @@ input, textarea {
 }
 
 .pdf-wrapper {
-  width: 210mm; /* Tamaño A4 */
+  width: 100%;
   margin: 0 auto;
-  background-color: white;
+  background-color: #f5f5f5;
   position: relative;
   overflow: visible;
-  padding: 0;
-  max-width: 100%;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
 }
 
 .pdf-template {
-  width: 210mm; /* Tamaño A4 */
+  width: 100%;
   margin: 0 auto;
-  background-color: white;
+  background-color: #f5f5f5;
   position: relative;
-  overflow: visible;
+  overflow-y: auto;
+  max-height: 80vh;
   padding: 0;
-  max-width: 100%;
   box-sizing: border-box;
 }
 
+.a4-container {
+  width: 210mm;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  background-color: white;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  box-sizing: border-box;
+  transform-origin: top center;
+  overflow: hidden;
+}
+
+/* Aseguramos que se renderice correctamente la plantilla HTML completa */
+.a4-container .container {
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.template-wrapper {
+  width: 100%;
+  margin: 0 auto;
+  background-color: white;
+  position: relative;
+}
+
+/* Estilos para simular páginas de papel */
+.template-wrapper .page {
+  width: 100%;
+  margin-bottom: 20px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Estilo para el marcador de salto de página */
+.page-break-marker {
+  border-top: 1px dashed #999;
+  margin: 20px 0;
+  padding: 5px 0;
+  text-align: center;
+  color: #999;
+  font-size: 10px;
+}
+
+/* Controles de zoom */
 .preview-controls {
   margin-top: 20px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
   gap: 10px;
