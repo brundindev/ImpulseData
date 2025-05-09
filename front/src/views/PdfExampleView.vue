@@ -1602,4 +1602,121 @@ h3 {
     width: 100%;
   }
 }
+
+/* Estilos para los botones de selección de logo y añadir imágenes */
+.btn-select, .btn-add, .btn-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #00c3ff, #00ff8c);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s;
+  box-shadow: 0 4px 10px rgba(0, 195, 255, 0.2);
+}
+
+.btn-select:hover, .btn-add:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 195, 255, 0.3);
+}
+
+.btn-select:active, .btn-add:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0, 195, 255, 0.2);
+}
+
+.btn-select::before {
+  content: "🖼️";
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.btn-add::before {
+  content: "+";
+  margin-right: 8px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.btn-remove {
+  background: linear-gradient(90deg, #ff5e62, #ff9966);
+  box-shadow: 0 4px 10px rgba(255, 94, 98, 0.2);
+}
+
+.btn-remove:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 94, 98, 0.3);
+}
+
+.btn-remove:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(255, 94, 98, 0.2);
+}
+
+.btn-remove::before {
+  content: "×";
+  margin-right: 8px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Estilos para la lista de imágenes */
+.images-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.image-item {
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+}
+
+.image-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 70, 152, 0.1);
+  transform: translateY(-2px);
+}
+
+.preview-image {
+  max-width: 120px;
+  max-height: 100px;
+  object-fit: contain;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  padding: 5px;
+}
+
+.image-item-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Estilos para inputs en controles de imágenes */
+.image-item-controls input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.image-item-controls input:focus {
+  border-color: #00a0ff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 160, 255, 0.15);
+}
 </style> 
