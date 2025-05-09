@@ -14,6 +14,16 @@ class SimpleCloudinaryService {
   constructor() {
     this.cloudName = 'drqt6gd5v';
     this.defaultUploadPreset = 'impulsedata';
+    
+    // Lista de imágenes de muestra directamente desde Cloudinary
+    this.sampleImages = [
+      { publicId: 'samples/cloudinary-icon', alt: 'Logo Cloudinary' },
+      { publicId: 'samples/smile', alt: 'Sonrisa' },
+      { publicId: 'samples/animals/kitten-playing', alt: 'Gatito jugando' },
+      { publicId: 'samples/landscapes/beach-boat', alt: 'Playa con barco' },
+      { publicId: 'samples/food/spices', alt: 'Especias' },
+      { publicId: 'samples/ecommerce/accessories-bag', alt: 'Bolso' }
+    ];
   }
 
   /**
@@ -23,7 +33,7 @@ class SimpleCloudinaryService {
    * @returns {string} - URL de la imagen
    */
   getImageUrl(publicId, options = {}) {
-    if (!publicId) return '';
+    if (!publicId) return 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg';
     
     const { width, height, format, quality } = options;
     
@@ -46,7 +56,24 @@ class SimpleCloudinaryService {
     // Añadir el ID público a la URL
     url += `/${publicId}`;
     
+    console.log("URL generada para Cloudinary:", url);
     return url;
+  }
+
+  /**
+   * Verifica si una imagen de Cloudinary existe
+   * @param {string} publicId - ID público de la imagen
+   * @returns {Promise<boolean>} - Promise que resuelve a true si existe
+   */
+  async checkImageExists(publicId) {
+    try {
+      const url = this.getImageUrl(publicId);
+      const response = await fetch(url, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.error(`Error al verificar imagen ${publicId}:`, error);
+      return false;
+    }
   }
 
   /**
@@ -103,28 +130,18 @@ class SimpleCloudinaryService {
   }
 
   /**
-   * Obtiene todas las imágenes disponibles en Cloudinary a través del backend
-   * @param {number} maxResults - Número máximo de resultados a obtener
+   * Obtiene todas las imágenes disponibles en Cloudinary
+   * @param {number} maxResults - Número máximo de resultados a obtener (no usado)
    * @returns {Promise<Array>} - Promise con la lista de imágenes
    */
   async getAllImages(maxResults = 100) {
     try {
-      const response = await axios.get(`${API_PATH}/cloudinary/images`, {
-        params: { maxResults }
-      });
-      
-      return response.data;
+      // Para evitar errores de API, siempre devolvemos las imágenes de muestra
+      console.log("Devolviendo imágenes de muestra de Cloudinary");
+      return this.sampleImages;
     } catch (error) {
       console.error('Error al obtener imágenes de Cloudinary:', error);
-      
-      // Imágenes de muestra actualizadas y verificadas en Cloudinary
-      return [
-        { publicId: 'samples/people/smiling-man', alt: 'Persona sonriente' },
-        { publicId: 'samples/landscapes/beach-boat', alt: 'Playa con barco' },
-        { publicId: 'samples/food/dessert', alt: 'Postre' },
-        { publicId: 'samples/animals/cat', alt: 'Gato' },
-        { publicId: 'samples/ecommerce/leather-bag-gray', alt: 'Bolso de cuero' }
-      ];
+      return this.sampleImages;
     }
   }
 }
