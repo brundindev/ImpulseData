@@ -1955,7 +1955,34 @@ export async function crearPlantillaPDF() {
         img.removeAttribute('srcset');
         img.removeAttribute('data-src');
       }
+      
+      // Añadir un título para mejorar la UX
+      img.title = "Haz clic para cambiar esta imagen";
+      
+      // Asegurarse de que la imagen sea visible
+      img.style.opacity = "1";
+      img.style.visibility = "visible";
+      img.style.display = "inline-block";
     });
+    
+    // Tratamiento especial para la sección de logos en la parte inferior de la portada
+    const logosPortadaBottom = tempDiv.querySelector('.logos-portada-bottom');
+    if (logosPortadaBottom) {
+      const logosImg = logosPortadaBottom.querySelectorAll('img');
+      logosImg.forEach((img, idx) => {
+        // Asegurar que estas imágenes específicas se muestren correctamente
+        img.style.display = "inline-block";
+        img.style.margin = "5px 10px";
+        img.style.maxWidth = "90px";
+        img.style.opacity = "1";
+        
+        // Añadir z-index para asegurarse de que estén por encima de otros elementos
+        img.style.position = "relative";
+        img.style.zIndex = "5";
+        
+        console.log(`Ajustando imagen de logos-portada-bottom ${idx}: ${img.alt}`);
+      });
+    }
     
     // También remover cualquier URL relativa de enlaces
     const enlaces = tempDiv.querySelectorAll('a');

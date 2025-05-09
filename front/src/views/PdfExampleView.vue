@@ -267,6 +267,12 @@
         <div class="loading-text">{{ loadingMessage }}</div>
       </div>
     </div>
+
+    <!-- Añadir en el template, justo encima del contenedor de la plantilla -->
+    <div class="image-tooltip">
+      <i class="fas fa-info-circle"></i> 
+      Haz clic en cualquier imagen de la plantilla para cambiarla por una de tu biblioteca.
+    </div>
   </div>
 </template>
 
@@ -505,7 +511,7 @@ const loadAvailableImages = () => {
 
 // Variables para las imágenes de la plantilla
 const currentTemplateImageId = ref(null);
-const selectedImages = ref({});  // Almacena las imágenes seleccionadas por ID
+const selectedImages = ref(JSON.parse(localStorage.getItem('templateImageSelections') || '{}'));
 
 // Cargar la plantilla HTML
 const loadPlantillaHTML = async () => {
@@ -540,8 +546,19 @@ const setupImageListeners = () => {
   const container = document.getElementById('plantilla-container');
   if (!container) return;
   
-  const images = container.querySelectorAll('.selectable-image');
-  images.forEach(img => {
+  const images = container.querySelectorAll('img');
+  images.forEach((img, index) => {
+    // Asegurarse de que la imagen tenga la clase selectable-image
+    img.classList.add('selectable-image');
+    
+    // Asegurarse de que tiene un data-image-id
+    if (!img.hasAttribute('data-image-id')) {
+      img.setAttribute('data-image-id', `img-${index}`);
+    }
+    
+    // Añadir cursor pointer para mejorar UX
+    img.style.cursor = 'pointer';
+    
     img.addEventListener('click', (event) => {
       // Guardar el ID de la imagen actual
       currentTemplateImageId.value = event.target.getAttribute('data-image-id');
@@ -563,7 +580,9 @@ const setupImageListeners = () => {
     });
     
     img.addEventListener('mouseleave', () => {
-      img.style.boxShadow = '';
+      if (!img.classList.contains('image-selected')) {
+        img.style.boxShadow = '';
+      }
     });
     
     // Si esta imagen ya tiene una selección, aplicarla
@@ -617,13 +636,33 @@ const selectAvailableImage = (publicId) => {
       if (container) {
         const imgElement = container.querySelector(`[data-image-id="${currentTemplateImageId.value}"]`);
         if (imgElement) {
-          imgElement.src = getCloudinaryUrl(publicId);
+          // Establecer src directamente y como atributo para asegurar la actualización
+          const imageUrl = getCloudinaryUrl(publicId);
+          imgElement.src = imageUrl;
+          imgElement.setAttribute('src', imageUrl);
           imgElement.alt = alt;
+          
+          // Forzar refresh de la imagen
+          imgElement.style.opacity = '0.99';
+          setTimeout(() => {
+            imgElement.style.opacity = '1';
+          }, 50);
         }
       }
       
       // Guardar las selecciones en localStorage para persistencia
       localStorage.setItem('templateImageSelections', JSON.stringify(selectedImages.value));
+      
+      // Forzar actualización de la plantilla
+      setTimeout(() => {
+        const img = new Image();
+        img.onload = () => {
+          // Trigger para avisar que una imagen ha sido actualizada
+          const event = new CustomEvent('image-updated', { detail: { id: currentTemplateImageId.value } });
+          document.dispatchEvent(event);
+        };
+        img.src = getCloudinaryUrl(publicId);
+      }, 100);
     } else {
       // Caso normal para añadir imagen a la lista
       pdfOptions.images.push({
@@ -1110,6 +1149,63 @@ watch(empresa, async () => {
     pdfOptions.filename = `informe_${empresa.value.nombre.replace(/\s+/g, '_')}.pdf`;
   }
 }, { deep: true });
+
+// Asegurarnos que la función setupImageListeners() aplique las selecciones guardadas
+const applySelectedImages = () => {
+  const container = document.getElementById('plantilla-container');
+  if (!container) return;
+  
+  // Aplicar las imágenes seleccionadas guardadas
+  Object.entries(selectedImages.value).forEach(([imageId, selection]) => {
+    const imgElement = container.querySelector(`[data-image-id="${imageId}"]`);
+    if (imgElement && selection && selection.publicId) {
+      imgElement.src = getCloudinaryUrl(selection.publicId);
+      imgElement.alt = selection.alt || 'Imagen';
+      imgElement.classList.add('image-selected');
+      console.log(`Aplicada imagen guardada para ${imageId}: ${selection.publicId}`);
+    }
+  });
+};
+
+// Modificar initPlantillaContainer
+const initPlantillaContainer = async () => {
+  try {
+    const container = document.getElementById('plantilla-container');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const htmlContent = await crearPlantillaPDF();
+    container.innerHTML = htmlContent;
+    
+    // Esperar a que el DOM se actualice
+    setTimeout(() => {
+      setupImageListeners();
+      applySelectedImages();
+      console.log("Plantilla inicializada y selecciones aplicadas");
+    }, 300);
+  } catch (error) {
+    console.error('Error al inicializar plantilla:', error);
+  }
+};
+
+// Modificar onMounted para usar initPlantillaContainer
+onMounted(async () => {
+  try {
+    // Cargar imágenes disponibles
+    await loadAvailableImages();
+    
+    // Inicializar el contenedor de la plantilla
+    await initPlantillaContainer();
+    
+    // Añadir escucha para eventos de actualización de imagen
+    document.addEventListener('image-updated', (event) => {
+      console.log('Imagen actualizada:', event.detail.id);
+      // Podríamos hacer algo adicional aquí si es necesario
+    });
+  } catch (error) {
+    console.error('Error al inicializar componente:', error);
+  }
+});
 </script>
 
 <style scoped>
@@ -1825,11 +1921,15 @@ h3 {
 }
 
 .selectable-image {
-  transition: all 0.3s ease;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  border: 2px solid transparent !important;
 }
 
 .selectable-image:hover {
-  opacity: 0.9;
+  box-shadow: 0 0 15px rgba(0, 160, 255, 0.8) !important;
+  transform: scale(1.02) !important;
+  z-index: 10 !important;
 }
 
 #plantilla-container .selectable-image {
@@ -1855,5 +1955,26 @@ h3 {
   margin: 8px 0;
   font-size: 14px;
   color: #333;
+}
+
+/* Estilos específicos para las imágenes de .logos-portada-bottom */
+.logos-portada-bottom img {
+  display: inline-block !important;
+  margin: 5px 10px !important;
+  max-width: 90px !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+/* Instrucción para las imágenes */
+.image-tooltip {
+  background-color: rgba(33, 150, 243, 0.2);
+  color: #333;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid #2196F3;
+  text-align: center;
 }
 </style> 
