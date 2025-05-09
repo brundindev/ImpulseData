@@ -6,7 +6,7 @@ const cloudinary = new Cloudinary({
     cloudName: 'drqt6gd5v'
   },
   url: {
-    secure: true // Usar HTTPS
+    secure: true
   }
 });
 
