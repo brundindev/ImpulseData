@@ -947,6 +947,23 @@ const actualizarEmpresaExistente = async () => {
 const editarEmpresa = (empresa) => {
   modoEdicion.value = true;
   empresaEditandoId.value = empresa.id;
+  
+  // Asignar datos básicos a la estructura nuevaEmpresa
+  nuevaEmpresa.nombre = empresa.nombre;
+  nuevaEmpresa.fechaCreacion = empresa.fechaCreacion;
+  nuevaEmpresa.descripcion = empresa.descripcion || '';
+  nuevaEmpresa.ciudad = empresa.ciudad || '';
+  
+  // Cargar subcolecciones para edición
+  cargarSubcolecciones(empresa.id)
+    .then(() => {
+      // Mostrar el modal de edición
+      showFormModal.value = true;
+    })
+    .catch(err => {
+      console.error("Error al preparar datos para edición:", err);
+      // Mostrar mensaje de error si es necesario
+    });
 };
   
 // Cargar subcolecciones para edición
@@ -1068,16 +1085,34 @@ const logout = () => {
 
 // Ver detalles de empresa
 const verEmpresa = async (empresa) => {
-  // Limpiar datos previos
-  Object.keys(empresaActual).forEach(key => {
-    if (Array.isArray(empresaActual[key])) {
-      empresaActual[key] = [];
-    } else {
-      empresaActual[key] = '';
-    }
-  });
-  
-  
+  try {
+    // Limpiar datos previos
+    Object.keys(empresaActual).forEach(key => {
+      if (Array.isArray(empresaActual[key])) {
+        empresaActual[key] = [];
+      } else {
+        empresaActual[key] = '';
+      }
+    });
+    
+    // Asignar propiedades básicas
+    empresaActual.id = empresa.id;
+    empresaActual.nombre = empresa.nombre;
+    empresaActual.fechaCreacion = empresa.fechaCreacion;
+    empresaActual.descripcion = empresa.descripcion || '';
+    empresaActual.ciudad = empresa.ciudad || '';
+    
+    // Cargar subcolecciones
+    await cargarSubcoleccionesParaVista(empresa.id);
+    
+    // Mostrar modal
+    showViewModal.value = true;
+  } catch (error) {
+    console.error("Error al cargar detalles de la empresa:", error);
+    // Mostrar mensaje de error si es necesario
+  }
+};
+
 // Cargar subcolecciones para la vista de detalles
 const cargarSubcoleccionesParaVista = async (empresaId) => {
   try {
@@ -2067,7 +2102,7 @@ const irAPaginaPDF = () => {
   
   // Redirigir a la página /pdf
   router.push('/pdf');
-}; };
+};
 </script>
 
 <style src="../assets/Home.css"></style>
