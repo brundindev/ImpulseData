@@ -243,13 +243,13 @@ const imageLoadErrors = ref({});
 
 // Función para obtener URL de Cloudinary con manejo de errores
 const getCloudinaryUrl = (publicId, options = {}) => {
-  if (!publicId) return 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg';
+  if (!publicId) return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
   
   try {
     return SimpleCloudinaryService.getImageUrl(publicId, options);
   } catch (error) {
     console.error('Error al generar URL de Cloudinary:', error);
-    return 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg';
+    return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
   }
 };
 
@@ -735,16 +735,41 @@ const generatePdf = async () => {
 
 // Cargar imágenes disponibles desde Cloudinary sin esperar
 const loadAvailableImages = () => {
-  loadingMessage.value = 'Cargando imágenes...';
+  loadingMessage.value = 'Cargando imágenes de Cloudinary...';
   isGenerating.value = true;
   
   SimpleCloudinaryService.getAllImages()
     .then(images => {
-      console.log('Imágenes cargadas:', images.length);
-      availableImages.value = images;
+      console.log('Imágenes cargadas desde el backend:', images.length);
+      
+      // Si no hay imágenes, mostrar mensaje de error
+      if (!images || images.length === 0) {
+        console.warn('No se encontraron imágenes en Cloudinary');
+        alert('No se pudieron cargar las imágenes de Cloudinary. Se usarán imágenes de respaldo.');
+      }
+      
+      // Asegurarse de que las imágenes tengan el formato correcto
+      const formattedImages = images.map(img => {
+        // Si la imagen ya tiene el formato correcto, usarla como está
+        if (img.publicId && (img.alt || img.caption)) {
+          return {
+            publicId: img.publicId,
+            alt: img.alt || img.caption || 'Imagen sin título'
+          };
+        }
+        
+        // Si la imagen viene con otra estructura, adaptarla
+        const publicId = img.publicId || img.public_id || '';
+        const alt = img.alt || img.caption || publicId.split('/').pop() || 'Imagen';
+        
+        return { publicId, alt };
+      });
+      
+      availableImages.value = formattedImages;
     })
     .catch(error => {
       console.error('Error al cargar imágenes:', error);
+      alert('Error al cargar imágenes de Cloudinary. Se mostrarán imágenes de respaldo.');
     })
     .finally(() => {
       loadingMessage.value = '';
@@ -808,8 +833,8 @@ const handleImageLoadError = (event) => {
   const alt = event.target.alt || 'imagen';
   console.warn(`Error al cargar la imagen: ${alt}`);
   
-  // Usar una imagen de fallback de demo que siempre funciona
-  event.target.src = 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg';
+  // Usar una imagen de fallback que existe en la cuenta del usuario
+  event.target.src = 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
   
   // Registrar el error para evitar reintentos
   imageLoadErrors.value[alt] = true;

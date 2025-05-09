@@ -15,14 +15,14 @@ class SimpleCloudinaryService {
     this.cloudName = 'drqt6gd5v';
     this.defaultUploadPreset = 'impulsedata';
     
-    // Lista de imágenes de muestra directamente desde Cloudinary
-    this.sampleImages = [
-      { publicId: 'samples/cloudinary-icon', alt: 'Logo Cloudinary' },
-      { publicId: 'samples/smile', alt: 'Sonrisa' },
-      { publicId: 'samples/animals/kitten-playing', alt: 'Gatito jugando' },
-      { publicId: 'samples/landscapes/beach-boat', alt: 'Playa con barco' },
-      { publicId: 'samples/food/spices', alt: 'Especias' },
-      { publicId: 'samples/ecommerce/accessories-bag', alt: 'Bolso' }
+    // Lista de imágenes de respaldo por si falla la API
+    this.fallbackImages = [
+      { publicId: 'docs/models-13', alt: 'Modelo' },
+      { publicId: 'docs/models-12', alt: 'Modelo 2' },
+      { publicId: 'docs/models-11', alt: 'Modelo 3' },
+      { publicId: 'docs/models-10', alt: 'Modelo 4' },
+      { publicId: 'docs/models-9', alt: 'Modelo 5' },
+      { publicId: 'docs/models-8', alt: 'Modelo 6' }
     ];
   }
 
@@ -33,7 +33,7 @@ class SimpleCloudinaryService {
    * @returns {string} - URL de la imagen
    */
   getImageUrl(publicId, options = {}) {
-    if (!publicId) return 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg';
+    if (!publicId) return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
     
     const { width, height, format, quality } = options;
     
@@ -130,18 +130,34 @@ class SimpleCloudinaryService {
   }
 
   /**
-   * Obtiene todas las imágenes disponibles en Cloudinary
-   * @param {number} maxResults - Número máximo de resultados a obtener (no usado)
+   * Obtiene todas las imágenes disponibles en Cloudinary mediante el backend
+   * @param {number} maxResults - Número máximo de resultados a obtener
    * @returns {Promise<Array>} - Promise con la lista de imágenes
    */
   async getAllImages(maxResults = 100) {
     try {
-      // Para evitar errores de API, siempre devolvemos las imágenes de muestra
-      console.log("Devolviendo imágenes de muestra de Cloudinary");
-      return this.sampleImages;
+      console.log("Intentando obtener imágenes de Cloudinary a través del backend...");
+      
+      // Usar el endpoint del backend para obtener todas las imágenes
+      const response = await axios.get(`${API_PATH}/cloudinary/images`, {
+        params: { maxResults },
+        // Asegurarnos de que incluya el token de autenticación
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      
+      if (response.data && Array.isArray(response.data)) {
+        console.log(`Se recuperaron ${response.data.length} imágenes de Cloudinary`);
+        return response.data;
+      } else {
+        console.warn("La respuesta del backend no es válida, usando imágenes de respaldo");
+        return this.fallbackImages;
+      }
     } catch (error) {
-      console.error('Error al obtener imágenes de Cloudinary:', error);
-      return this.sampleImages;
+      console.error('Error al obtener imágenes de Cloudinary desde el backend:', error);
+      console.log("Usando imágenes de respaldo debido al error");
+      return this.fallbackImages;
     }
   }
 }
