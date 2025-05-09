@@ -2,92 +2,147 @@
   <div class="pdf-example-view">
     <h1>Generación de PDF de {{ empresa ? empresa.nombre : 'Empresa' }}</h1>
     
-    <div class="options-panel">
-      <h2>Opciones del PDF</h2>
+    <!-- Sección de información de la empresa -->
+    <div class="empresa-info-panel" v-if="empresa">
+      <h2>Información de la Empresa</h2>
       
-      <!-- Opciones básicas -->
-      <div class="form-group">
-        <label for="title">Título:</label>
-        <input id="title" v-model="pdfOptions.title" type="text" />
-      </div>
-      
-      <div class="form-group">
-        <label for="subtitle">Subtítulo:</label>
-        <input id="subtitle" v-model="pdfOptions.subtitle" type="text" />
-      </div>
-      
-      <div class="form-group">
-        <label for="description">Descripción:</label>
-        <textarea id="description" v-model="pdfOptions.description" rows="3"></textarea>
-      </div>
-      
-      <div class="form-group">
-        <label for="filename">Nombre del archivo:</label>
-        <input id="filename" v-model="pdfOptions.filename" type="text" />
-      </div>
-      
-      <!-- Selector de logo -->
-      <div class="form-group">
-        <label>Logo:</label>
-        <div class="logo-selector">
-          <img 
-            v-if="pdfOptions.logoPublicId" 
-            :src="getCloudinaryUrl(pdfOptions.logoPublicId, {width: 100})" 
-            alt="Logo" 
-            class="preview-image"
-          />
-          <button @click="selectImage('logo')" class="btn-select">Seleccionar Logo</button>
-        </div>
-      </div>
-      
-      <!-- Selector de imágenes -->
-      <div class="form-group">
-        <label>Imágenes:</label>
-        <div class="images-list">
-          <div v-for="(image, index) in pdfOptions.images" :key="index" class="image-item">
-            <img 
-              :src="getCloudinaryUrl(image.publicId, {width: 100})" 
-              :alt="image.alt || 'Imagen'" 
-              class="preview-image"
-            />
-            <div class="image-item-controls">
-              <input v-model="image.caption" placeholder="Título de la imagen" />
-              <button @click="removeImage(index)" class="btn-remove">Eliminar</button>
+      <div class="empresa-info-grid">
+        <!-- Información general -->
+        <div class="empresa-section">
+          <h3>Información General</h3>
+          <div class="info-item">
+            <div class="info-label">Nombre:</div>
+            <input v-model="empresa.nombre" class="info-input" type="text" />
+          </div>
+          <div class="info-item">
+            <div class="info-label">Ciudad:</div>
+            <input v-model="empresa.ciudad" class="info-input" type="text" placeholder="No especificada" />
+          </div>
+          <div class="info-item">
+            <div class="info-label">Fecha de creación:</div>
+            <input v-model="empresa.fechaCreacion" class="info-input" type="date" />
+          </div>
+          <div class="info-item">
+            <div class="info-label">Descripción:</div>
+            <textarea v-model="empresa.descripcion" class="info-textarea" rows="3" placeholder="Sin descripción"></textarea>
+          </div>
+          
+          <!-- Selector de logo -->
+          <div class="info-item">
+            <div class="info-label">Logo:</div>
+            <div class="logo-selector">
+              <img 
+                v-if="pdfOptions.logoPublicId" 
+                :src="getCloudinaryUrl(pdfOptions.logoPublicId, {width: 100})" 
+                alt="Logo" 
+                class="preview-image"
+              />
+              <button @click="selectImage('logo')" class="btn-select">Seleccionar Logo</button>
             </div>
           </div>
-          <button @click="selectImage('pdf')" class="btn-add">Añadir Imagen</button>
         </div>
-      </div>
-      
-      <!-- Opciones de tabla -->
-      <div class="form-group">
-        <label>Tabla de datos:</label>
-        <button @click="addTableRow" class="btn-add">Añadir Fila</button>
-        <table class="editable-table" v-if="pdfOptions.tableData.length > 0">
-          <thead>
-            <tr>
-              <th v-for="(header, index) in pdfOptions.tableHeaders" :key="index">
-                <input v-model="pdfOptions.tableHeaders[index]" placeholder="Encabezado" />
-              </th>
-              <th v-if="pdfOptions.tableHeaders.length > 0">Acciones</th>
-              <th v-else>
-                <button @click="addTableColumn" class="btn-add-sm">+</button>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, rowIndex) in pdfOptions.tableData" :key="rowIndex">
-              <td v-for="(cell, cellIndex) in row" :key="cellIndex">
-                <input v-model="pdfOptions.tableData[rowIndex][cellIndex]" placeholder="Dato" />
-              </td>
-              <td>
-                <button @click="removeTableRow(rowIndex)" class="btn-remove-sm">Eliminar</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div v-else class="empty-table-message">
-          <p>No hay datos en la tabla. Añade una fila para comenzar.</p>
+        
+        <!-- Departamentos -->
+        <div class="empresa-section">
+          <h3>Departamentos</h3>
+          <div v-if="!empresa.departamentos || empresa.departamentos.length === 0" class="empty-message">
+            No hay departamentos registrados
+          </div>
+          <div v-else class="items-list">
+            <div v-for="(departamento, index) in empresa.departamentos" :key="index" class="list-item">
+              <div class="item-header">Departamento {{ index + 1 }}</div>
+              <div class="info-item">
+                <div class="info-label">Nombre:</div>
+                <input v-model="departamento.nombre" class="info-input" type="text" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Centros -->
+        <div class="empresa-section">
+          <h3>Centros</h3>
+          <div v-if="!empresa.centros || empresa.centros.length === 0" class="empty-message">
+            No hay centros registrados
+          </div>
+          <div v-else class="items-list">
+            <div v-for="(centro, index) in empresa.centros" :key="index" class="list-item">
+              <div class="item-header">Centro {{ index + 1 }}</div>
+              <div class="info-item">
+                <div class="info-label">Nombre:</div>
+                <input v-model="centro.nombre" class="info-input" type="text" />
+              </div>
+              <div class="info-item">
+                <div class="info-label">Dirección:</div>
+                <input v-model="centro.direccion" class="info-input" type="text" placeholder="No especificada" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Formaciones -->
+        <div class="empresa-section">
+          <h3>Formaciones</h3>
+          <div v-if="!empresa.formaciones || empresa.formaciones.length === 0" class="empty-message">
+            No hay formaciones registradas
+          </div>
+          <div v-else class="items-list">
+            <div v-for="(formacion, index) in empresa.formaciones" :key="index" class="list-item">
+              <div class="item-header">Formación {{ index + 1 }}</div>
+              <div class="info-item">
+                <div class="info-label">Nombre:</div>
+                <input v-model="formacion.nombre" class="info-input" type="text" />
+              </div>
+              <div class="info-item">
+                <div class="info-label">Tipo:</div>
+                <select v-model="formacion.tipo" class="info-select">
+                  <option value="presencial">Presencial</option>
+                  <option value="online">Online</option>
+                  <option value="mixta">Mixta</option>
+                  <option value="externa">Externa</option>
+                </select>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Duración (horas):</div>
+                <input v-model.number="formacion.duracion" class="info-input" type="number" min="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Opciones adicionales -->
+        <div class="empresa-section">
+          <h3>Opciones del PDF</h3>
+          <div class="info-item">
+            <div class="info-label">Título del documento:</div>
+            <input v-model="pdfOptions.title" class="info-input" type="text" />
+          </div>
+          <div class="info-item">
+            <div class="info-label">Subtítulo:</div>
+            <input v-model="pdfOptions.subtitle" class="info-input" type="text" />
+          </div>
+          <div class="info-item">
+            <div class="info-label">Nombre del archivo:</div>
+            <input v-model="pdfOptions.filename" class="info-input" type="text" />
+          </div>
+          <!-- Selector de imágenes -->
+          <div class="info-item">
+            <div class="info-label">Imágenes:</div>
+            <div class="images-list">
+              <div v-for="(image, index) in pdfOptions.images" :key="index" class="image-item">
+                <img 
+                  :src="getCloudinaryUrl(image.publicId, {width: 100})" 
+                  :alt="image.alt || 'Imagen'" 
+                  class="preview-image"
+                />
+                <div class="image-item-controls">
+                  <input v-model="image.caption" placeholder="Título de la imagen" class="info-input" />
+                  <button @click="removeImage(index)" class="btn-remove">Eliminar</button>
+                </div>
+              </div>
+              <button @click="selectImage('pdf')" class="btn-add">Añadir Imagen</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -108,79 +163,38 @@
       </button>
     </div>
     
-    <!-- Selector de Imágenes -->
-    <div v-if="showImageSelector" class="image-selector">
-      <div class="image-selector-header">
-        <h3>Selecciona una imagen</h3>
-        <button @click="showImageSelector = false" class="close-button">×</button>
-      </div>
-      
-      <div class="image-selector-content">
-        <div v-if="isLoadingImages" class="loading-images">
-          <div class="loading-spinner small-spinner"></div>
-          <p>Cargando imágenes de Cloudinary...</p>
-        </div>
+    <!-- Diálogo para seleccionar imágenes -->
+    <div v-if="showImageSelector" class="image-selector-overlay">
+      <div class="image-selector-dialog">
+        <h3>Seleccionar Imagen</h3>
         
-        <div v-else-if="availableImages.length === 0" class="no-images">
-          No hay imágenes disponibles.
-        </div>
-        
-        <div v-else>
-          <!-- Filtro de imágenes -->
-          <div class="image-filter">
-            <input 
-              type="text" 
-              v-model="imageFilter" 
-              placeholder="Buscar imágenes..." 
-              @input="filterImages"
-              class="image-search"
-            />
-          </div>
+        <!-- Opciones para cargar imagen -->
+        <div class="upload-section">
+          <input type="file" @change="handleFileSelect" accept="image/*" ref="fileInput" />
+          <button @click="$refs.fileInput.click()" class="btn-upload">Seleccionar archivo</button>
           
-          <div class="image-grid">
-            <div 
-              v-for="image in paginatedImages" 
-              :key="image.publicId" 
-              class="image-thumbnail-container"
-              @click="selectAvailableImage(image.publicId)"
-            >
+          <div v-if="uploadStatus" class="upload-status">
+            {{ uploadStatus }}
+          </div>
+        </div>
+        
+        <!-- Imágenes disponibles -->
+        <div class="available-images">
+          <h4>Imágenes disponibles:</h4>
+          <div class="images-grid">
+            <div v-for="image in availableImages" :key="image.publicId" class="grid-item">
               <img 
-                :src="getCloudinaryUrl(image.publicId, { width: 100, height: 100 })" 
-                :alt="image.alt"
-                class="image-thumbnail"
-                @error="handleImageLoadError"
-                loading="lazy"
+                :src="getCloudinaryUrl(image.publicId, {width: 100})" 
+                alt="Imagen disponible" 
+                class="preview-image"
+                @click="selectAvailableImage(image.publicId)"
               />
-              <div class="image-name">{{ image.alt }}</div>
             </div>
           </div>
-          
-          <!-- Paginación -->
-          <div v-if="totalPages > 1" class="pagination">
-            <button 
-              @click="currentPage > 1 && (currentPage--)" 
-              :disabled="currentPage === 1"
-              class="pagination-button"
-            >
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            
-            <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
-            
-            <button 
-              @click="currentPage < totalPages && (currentPage++)" 
-              :disabled="currentPage === totalPages"
-              class="pagination-button"
-            >
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
         </div>
         
-        <div class="upload-section">
-          <p>O sube una nueva imagen:</p>
-          <input type="file" ref="fileInput" @change="handleFileSelect" accept="image/*" />
-          <div v-if="uploadStatus" class="upload-status">{{ uploadStatus }}</div>
+        <div class="dialog-buttons">
+          <button @click="showImageSelector = false" class="btn-cancel">Cancelar</button>
         </div>
       </div>
     </div>
@@ -235,14 +249,6 @@ const intervaloVerificacion = setInterval(verificarSesion, 5000);
 onMounted(() => {
   console.log("Componente PDF montado correctamente");
   verificarSesion();
-  
-  // Cargar imágenes inmediatamente
-  loadAvailableImages();
-  
-  // Después cargar la plantilla HTML
-  setTimeout(() => {
-    loadPlantillaHTML();
-  }, 500);
 });
 
 onUnmounted(() => {
@@ -272,63 +278,44 @@ const showImageSelector = ref(false);
 const currentImageType = ref(''); // 'logo' o 'pdf'
 const uploadStatus = ref('');
 
-// Paginación y filtrado
-const allAvailableImages = ref([]);
-const imageFilter = ref('');
-const currentPage = ref(1);
-const imagesPerPage = ref(24); // Mostrar 24 imágenes por página (4x6 grid)
-
-// Filtrar imágenes basado en el texto de búsqueda
-const filteredImages = computed(() => {
-  if (!imageFilter.value.trim()) {
-    return allAvailableImages.value;
-  }
-  
-  const searchTerm = imageFilter.value.toLowerCase().trim();
-  return allAvailableImages.value.filter(img => {
-    return img.alt.toLowerCase().includes(searchTerm) || 
-           img.publicId.toLowerCase().includes(searchTerm);
-  });
-});
-
-// Calcular el total de páginas
-const totalPages = computed(() => {
-  return Math.ceil(filteredImages.value.length / imagesPerPage.value);
-});
-
-// Obtener las imágenes de la página actual
-const paginatedImages = computed(() => {
-  const startIndex = (currentPage.value - 1) * imagesPerPage.value;
-  const endIndex = startIndex + imagesPerPage.value;
-  return filteredImages.value.slice(startIndex, endIndex);
-});
-
-// Resetear a la primera página cuando cambia el filtro
-const filterImages = () => {
-  currentPage.value = 1;
-};
-
-// Disponibilidad de imágenes para la UI
-const availableImages = computed(() => {
-  return filteredImages.value;
-});
+// Imágenes disponibles
+const availableImages = ref([
+  { publicId: 'sample', alt: 'Muestra general' },
+  { publicId: 'samples/landscapes/nature-mountains', alt: 'Montañas' },
+  { publicId: 'samples/food/pot-mussels', alt: 'Comida' },
+  { publicId: 'samples/ecommerce/accessories-bag', alt: 'Producto' }
+]);
 
 // Dentro del script, añadir estas variables reactivas
 const isGenerating = ref(false);
 const loadingMessage = ref('');
-const imageLoadErrors = ref({});
-const isLoadingImages = ref(false);
 
-// Función para obtener URL de Cloudinary con manejo de errores
+// Función para obtener URL de Cloudinary
 const getCloudinaryUrl = (publicId, options = {}) => {
-  if (!publicId) return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
+  if (!publicId) return '';
   
-  try {
-    return SimpleCloudinaryService.getImageUrl(publicId, options);
-  } catch (error) {
-    console.error('Error al generar URL de Cloudinary:', error);
-    return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
+  const { width, height, format, quality } = options;
+  
+  // URL base de Cloudinary
+  let url = `https://res.cloudinary.com/drqt6gd5v/image/upload`;
+  
+  // Transformaciones
+  const transformations = [];
+  if (width) transformations.push(`w_${width}`);
+  if (height) transformations.push(`h_${height}`);
+  if (format && format !== 'auto') transformations.push(`f_${format}`);
+  if (quality && quality !== 'auto') transformations.push(`q_${quality}`);
+  else transformations.push('q_auto');
+  
+  // Añadir transformaciones a la URL
+  if (transformations.length > 0) {
+    url += `/${transformations.join(',')}`;
   }
+  
+  // Añadir el ID público a la URL
+  url += `/${publicId}`;
+  
+  return url;
 };
 
 // Cargar la plantilla HTML
@@ -364,29 +351,18 @@ const selectImage = (type) => {
 
 // Seleccionar una imagen disponible
 const selectAvailableImage = (publicId) => {
-  try {
-    console.log(`Seleccionando imagen: ${publicId}`);
-    
-    if (currentImageType.value === 'logo') {
-      pdfOptions.logoPublicId = publicId;
-    } else {
-      // Buscar la imagen en las disponibles para obtener el alt
-      const imagen = availableImages.value.find(img => img.publicId === publicId);
-      const alt = imagen ? imagen.alt : 'Imagen';
-      
-      pdfOptions.images.push({
-        publicId,
-        alt,
-        caption: `Descripción de ${alt}`,
-        width: null,
-        height: null
-      });
-    }
-    showImageSelector.value = false;
-  } catch (error) {
-    console.error('Error al seleccionar imagen:', error);
-    alert('Hubo un problema al seleccionar la imagen. Por favor, intenta con otra.');
+  if (currentImageType.value === 'logo') {
+    pdfOptions.logoPublicId = publicId;
+  } else {
+    pdfOptions.images.push({
+      publicId,
+      alt: 'Imagen',
+      caption: 'Descripción de la imagen',
+      width: null,
+      height: null
+    });
   }
+  showImageSelector.value = false;
 };
 
 // Eliminar una imagen
@@ -424,7 +400,7 @@ const handleFileSelect = async (event) => {
       uploadStatus.value = 'Imagen subida correctamente.';
       
       // También añadir a las disponibles
-      allAvailableImages.value.push({
+      availableImages.value.push({
         publicId,
         alt: file.name
       });
@@ -811,25 +787,6 @@ const generatePdf = async () => {
   }
 };
 
-// Cargar imágenes disponibles desde Cloudinary sin esperar
-const loadAvailableImages = () => {
-  isLoadingImages.value = true;
-  loadingMessage.value = 'Cargando imágenes...';
-  
-  SimpleCloudinaryService.getAllImages()
-    .then(images => {
-      console.log('Imágenes cargadas:', images.length);
-      allAvailableImages.value = images;
-    })
-    .catch(error => {
-      console.error('Error al cargar imágenes:', error);
-    })
-    .finally(() => {
-      loadingMessage.value = '';
-      isLoadingImages.value = false;
-    });
-};
-
 // Al montar el componente, recuperar los datos de la empresa y cargar la plantilla
 onMounted(async () => {
   try {
@@ -858,10 +815,10 @@ onMounted(async () => {
       
       const images = await SimpleCloudinaryService.getAllImages(50);
       if (images && images.length > 0) {
-        allAvailableImages.value = images;
+        availableImages.value = images;
       }
       
-      console.log('Imágenes cargadas correctamente:', allAvailableImages.value.length);
+      console.log('Imágenes cargadas correctamente:', availableImages.value.length);
     } catch (imageError) {
       console.error('Error al cargar imágenes:', imageError);
       // Mantenemos las imágenes por defecto
@@ -880,18 +837,46 @@ watch(pdfOptions, async () => {
   await loadPlantillaHTML();
 }, { deep: true });
 
-// Manejar error de carga de imagen
-const handleImageLoadError = (event) => {
-  // Reemplazar la imagen que falló con una imagen de reemplazo
-  const alt = event.target.alt || 'imagen';
-  console.warn(`Error al cargar la imagen: ${alt}`);
-  
-  // Usar una imagen de fallback que existe en la cuenta del usuario
-  event.target.src = 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
-  
-  // Registrar el error para evitar reintentos
-  imageLoadErrors.value[alt] = true;
-};
+// Actualizar también la descripción del PDF cuando cambian los datos de la empresa
+watch(empresa, async () => {
+  if (empresa.value) {
+    // Actualizar el título y subtítulo
+    pdfOptions.title = `Informe de ${empresa.value.nombre}`;
+    pdfOptions.subtitle = `Datos principales de ${empresa.value.nombre}`;
+    
+    // Construir una descripción más completa con los datos actualizados
+    let descripcionCompleta = empresa.value.descripcion || '';
+    
+    if (empresa.value.ciudad) {
+      descripcionCompleta += `\n\nUbicación: ${empresa.value.ciudad}`;
+    }
+    
+    if (empresa.value.fechaCreacion) {
+      descripcionCompleta += `\n\nFecha de creación: ${formatDate(empresa.value.fechaCreacion)}`;
+    }
+    
+    // Añadir información sobre departamentos
+    if (empresa.value.departamentos && empresa.value.departamentos.length > 0) {
+      descripcionCompleta += `\n\nDepartamentos: ${empresa.value.departamentos.length}`;
+      descripcionCompleta += `\n- ${empresa.value.departamentos.map(d => d.nombre).join('\n- ')}`;
+    }
+    
+    // Añadir información sobre centros
+    if (empresa.value.centros && empresa.value.centros.length > 0) {
+      descripcionCompleta += `\n\nCentros: ${empresa.value.centros.length}`;
+      descripcionCompleta += `\n- ${empresa.value.centros.map(c => c.nombre).join('\n- ')}`;
+    }
+    
+    // Añadir información sobre formaciones
+    if (empresa.value.formaciones && empresa.value.formaciones.length > 0) {
+      descripcionCompleta += `\n\nFormaciones: ${empresa.value.formaciones.length}`;
+      descripcionCompleta += `\n- ${empresa.value.formaciones.map(f => f.nombre).join('\n- ')}`;
+    }
+    
+    pdfOptions.description = descripcionCompleta;
+    pdfOptions.filename = `informe_${empresa.value.nombre.replace(/\s+/g, '_')}.pdf`;
+  }
+}, { deep: true });
 </script>
 
 <style scoped>
@@ -908,56 +893,173 @@ h1 {
   color: #004698;
   border-bottom: 2px solid #eee;
   padding-bottom: 10px;
+  font-size: 28px;
+  font-weight: 600;
 }
 
-.options-panel {
-  background: #f9f9f9;
+h2 {
+  color: #00519e;
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+h3 {
+  color: #0067c5;
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.empresa-info-panel {
+  background: linear-gradient(to bottom, #ffffff, #f9f9f9);
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 3px 15px rgba(0, 70, 152, 0.1);
+  margin-bottom: 25px;
+  border: 1px solid #eaeaea;
+}
+
+.empresa-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.empresa-section {
+  background: white;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
 }
 
-.form-group {
-  margin-bottom: 15px;
+.empresa-section:hover {
+  box-shadow: 0 4px 15px rgba(0, 70, 152, 0.15);
+  transform: translateY(-2px);
 }
 
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+.info-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.info-label {
+  font-weight: 600;
   color: #5175a0;
+  margin-bottom: 6px;
+  font-size: 14px;
 }
 
-input, textarea {
+.info-input, .info-textarea, .info-select {
   width: 100%;
-  padding: 8px;
+  padding: 10px 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
   color: #333;
   background-color: #fff;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.info-input:focus, .info-textarea:focus, .info-select:focus {
+  border-color: #00a0ff;
+  box-shadow: 0 0 0 3px rgba(0, 160, 255, 0.15);
+  outline: none;
+}
+
+.info-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.info-select {
+  height: 40px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235175a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 30px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.empty-message {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  margin: 10px 0;
+  border: 1px dashed #ddd;
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.list-item {
+  background: #f7f9fd;
+  border-radius: 8px;
+  padding: 15px;
+  border-left: 4px solid #00a0ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.item-header {
+  font-weight: 600;
+  color: #004698;
+  margin-bottom: 12px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logo-selector, .images-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 15px;
   align-items: center;
+  margin-top: 8px;
 }
 
 .image-item {
-  border: 1px solid #eee;
-  border-radius: 4px;
-  padding: 10px;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.image-item:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .image-item-controls {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
 }
 
 .preview-image {
@@ -965,63 +1067,66 @@ input, textarea {
   max-height: 100px;
   object-fit: contain;
   border-radius: 4px;
-}
-
-.editable-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-.editable-table th, .editable-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-.editable-table input {
-  width: 100%;
-  border: 1px solid transparent;
-  background: transparent;
-  padding: 4px;
-  color: #333;
-}
-
-.editable-table input:focus {
-  border-color: #00c3ff;
-  background: white;
-  color: #333;
-}
-
-.empty-table-message {
-  text-align: center;
-  color: #999;
-  font-style: italic;
-  padding: 20px;
-  background: #f5f5f5;
-  border-radius: 4px;
+  border: 1px solid #eaeaea;
+  background: #f9f9f9;
+  padding: 5px;
 }
 
 /* Botones */
 .btn-select, .btn-add, .btn-remove, .btn-add-sm, .btn-remove-sm, .btn-upload, .btn-cancel {
-  padding: 5px 10px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s;
+  font-weight: 500;
+  transition: all 0.3s ease;
   color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-select::before {
+  content: "🖼️";
+  font-size: 16px;
+}
+
+.btn-add::before {
+  content: "➕";
+  font-size: 16px;
+}
+
+.btn-remove::before {
+  content: "❌";
+  font-size: 16px;
 }
 
 .btn-select, .btn-add, .btn-upload {
-  background: linear-gradient(90deg, #00c3ff, #00ff8c);
+  background: linear-gradient(90deg, #0088ff, #00c3ff);
+  box-shadow: 0 2px 5px rgba(0, 136, 255, 0.3);
+}
+
+.btn-select:hover, .btn-add:hover, .btn-upload:hover {
+  background: linear-gradient(90deg, #0077e6, #00b2eb);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 136, 255, 0.4);
 }
 
 .btn-remove, .btn-cancel {
-  background: #ff5252;
+  background: linear-gradient(90deg, #ff5252, #ff7676);
+  box-shadow: 0 2px 5px rgba(255, 82, 82, 0.3);
+}
+
+.btn-remove:hover, .btn-cancel:hover {
+  background: linear-gradient(90deg, #e64a4a, #e66b6b);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 82, 82, 0.4);
 }
 
 .btn-add-sm, .btn-remove-sm {
-  padding: 2px 6px;
+  padding: 4px 10px;
   font-size: 12px;
 }
 
@@ -1033,133 +1138,55 @@ input, textarea {
   background: #ff5252;
 }
 
-/* Selector de imágenes */
-.image-selector {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.image-selector-header {
-  background: white;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.image-selector-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 80%;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.no-images {
-  text-align: center;
-  color: #999;
-  padding: 20px;
-}
-
-.image-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
-}
-
-.image-thumbnail-container {
-  cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 4px;
-  padding: 5px;
-  transition: all 0.2s;
-}
-
-.image-thumbnail-container:hover {
-  border-color: #00c3ff;
-  transform: scale(1.05);
-}
-
-.image-thumbnail {
-  max-width: 100%;
-  max-height: 100px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.image-name {
-  margin-top: 5px;
-  text-align: center;
-  font-size: 12px;
-  color: #333;
-}
-
-.upload-section {
-  margin-top: 20px;
-  padding: 15px;
-  border: 2px dashed #ddd;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.upload-status {
-  margin-top: 10px;
-  padding: 5px;
-  border-radius: 4px;
-  background: #f0f0f0;
-  font-size: 14px;
-}
-
 .preview-panel {
   margin-top: 30px;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eaeaea;
 }
 
 .pdf-template {
   width: 210mm; /* Tamaño A4 */
   margin: 0 auto;
   background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #d0d0d0;
 }
 
 .action-buttons {
-  margin-top: 20px;
+  margin-top: 25px;
   display: flex;
   justify-content: center;
+  padding: 15px 0;
 }
 
 .pdf-button {
-  background: linear-gradient(90deg, #00c3ff, #00ff8c);
+  background: linear-gradient(90deg, #004698, #0067c5);
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 12px 25px;
+  border-radius: 8px;
+  padding: 14px 30px;
   font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 70, 152, 0.25);
   transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pdf-button::before {
+  content: "📄";
+  font-size: 20px;
 }
 
 .pdf-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(90deg, #003d85, #0058b0);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 70, 152, 0.35);
 }
 
 .loading-overlay {
@@ -1173,32 +1200,34 @@ input, textarea {
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  backdrop-filter: blur(3px);
 }
 
 .loading-content {
   background-color: white;
-  padding: 30px;
-  border-radius: 10px;
+  padding: 35px;
+  border-radius: 12px;
   text-align: center;
   max-width: 80%;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease;
 }
 
 .loading-spinner {
   display: inline-block;
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border: 5px solid #f3f3f3;
   border-top: 5px solid #004698;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .loading-text {
-  font-size: 16px;
+  font-size: 18px;
   color: #333;
-  font-weight: bold;
+  font-weight: 500;
 }
 
 @keyframes spin {
@@ -1206,63 +1235,25 @@ input, textarea {
   100% { transform: rotate(360deg); }
 }
 
-.loading-images {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 30px;
-  text-align: center;
-  color: #666;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.small-spinner {
-  width: 30px;
-  height: 30px;
-  margin-bottom: 15px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #00c3ff;
-  animation: spin 1s linear infinite;
-}
-
-.image-filter {
-  margin-bottom: 15px;
-  width: 100%;
-}
-
-.image-search {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  padding: 10px;
-}
-
-.pagination-button {
-  background: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 5px 10px;
-  margin: 0 5px;
-  cursor: pointer;
-}
-
-.pagination-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.page-info {
-  margin: 0 10px;
-  font-size: 14px;
-  color: #666;
+/* Estilos para pantallas pequeñas */
+@media (max-width: 768px) {
+  .empresa-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-item {
+    flex-direction: column;
+  }
+  
+  .info-label {
+    margin-right: 0;
+    margin-bottom: 6px;
+    width: 100%;
+  }
 }
 </style> 
