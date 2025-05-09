@@ -72,7 +72,7 @@ const router = createRouter({
       path: '/pdf',
       name: 'pdf',
       component: PdfExampleView,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, skipTokenValidation: true }
     },
   ],
 })
@@ -292,6 +292,7 @@ router.beforeEach((to, from, next) => {
   
   // Lógica de protección de rutas original
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const skipTokenValidation = to.matched.some(record => record.meta.skipTokenValidation);
   const isAuthenticated = localStorage.getItem('authToken');
   
   // Si el usuario va a la ruta principal
@@ -306,6 +307,12 @@ router.beforeEach((to, from, next) => {
   // Si estamos yendo a la página de registro o verificación, permitir siempre
   if (to.path === '/registro' || to.path === '/verify-email') {
     next();
+    return;
+  }
+  
+  // Para las rutas que deben omitir la validación del token (como /pdf)
+  if (requiresAuth && skipTokenValidation && isAuthenticated) {
+    next(); // Permitir acceso sin validar el token
     return;
   }
   
