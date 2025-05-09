@@ -108,49 +108,55 @@
       </button>
     </div>
     
-    <!-- Selector de Imágenes -->
-    <div v-if="showImageSelector" class="image-selector">
-      <div class="image-selector-header">
-        <h3>Selecciona una imagen</h3>
-        <button @click="showImageSelector = false" class="close-button">×</button>
-      </div>
-      
-      <div class="image-selector-content">
-        <div v-if="isLoadingImages" class="loading-images">
-          <div class="loading-spinner small-spinner"></div>
-          <p>Cargando imágenes de Cloudinary...</p>
+    <!-- Selector de Imágenes mejorado -->
+    <div v-if="showImageSelector" class="image-selector-overlay">
+      <div class="image-selector-dialog">
+        <div class="image-selector-header">
+          <h3>Selecciona una imagen</h3>
+          <button @click="showImageSelector = false" class="close-button">&times;</button>
         </div>
         
-        <div v-else-if="availableImages.length === 0" class="no-images">
-          No hay imágenes disponibles.
-        </div>
-        
-        <div v-else>
-          <!-- Filtro de imágenes -->
-          <div class="image-filter">
+        <div class="image-selector-content">
+          <!-- Campo de búsqueda -->
+          <div class="search-container">
             <input 
               type="text" 
               v-model="imageFilter" 
               placeholder="Buscar imágenes..." 
               @input="filterImages"
-              class="image-search"
+              class="search-input"
             />
           </div>
           
-          <div class="image-grid">
+          <!-- Cargando imágenes -->
+          <div v-if="isLoadingImages" class="loading-images">
+            <div class="loading-spinner"></div>
+            <p>Cargando imágenes...</p>
+          </div>
+          
+          <!-- Sin imágenes -->
+          <div v-else-if="availableImages.length === 0" class="no-images">
+            <p>No se encontraron imágenes disponibles</p>
+            <p class="upload-prompt">Puedes subir una nueva imagen usando el formulario de abajo</p>
+          </div>
+          
+          <!-- Grid de imágenes -->
+          <div v-else class="images-grid">
             <div 
               v-for="image in paginatedImages" 
               :key="image.publicId" 
-              class="image-thumbnail-container"
+              class="image-item"
               @click="selectAvailableImage(image.publicId)"
             >
-              <img 
-                :src="getCloudinaryUrl(image.publicId, { width: 100, height: 100 })" 
-                :alt="image.alt"
-                class="image-thumbnail"
-                @error="handleImageLoadError"
-                loading="lazy"
-              />
+              <div class="image-preview-container">
+                <img 
+                  :src="getCloudinaryUrl(image.publicId, { width: 120, height: 120 })" 
+                  :alt="image.alt"
+                  class="image-preview"
+                  @error="handleImageLoadError"
+                  loading="lazy"
+                />
+              </div>
               <div class="image-name">{{ image.alt }}</div>
             </div>
           </div>
@@ -162,25 +168,34 @@
               :disabled="currentPage === 1"
               class="pagination-button"
             >
-              <i class="fas fa-chevron-left"></i>
+              &laquo; Anterior
             </button>
             
-            <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
+            <span class="page-info">{{ currentPage }} de {{ totalPages }}</span>
             
             <button 
               @click="currentPage < totalPages && (currentPage++)" 
               :disabled="currentPage === totalPages"
               class="pagination-button"
             >
-              <i class="fas fa-chevron-right"></i>
+              Siguiente &raquo;
             </button>
           </div>
         </div>
         
+        <!-- Sección de subida de archivos -->
         <div class="upload-section">
-          <p>O sube una nueva imagen:</p>
-          <input type="file" ref="fileInput" @change="handleFileSelect" accept="image/*" />
-          <div v-if="uploadStatus" class="upload-status">{{ uploadStatus }}</div>
+          <h4>Subir una nueva imagen</h4>
+          <div class="file-upload-container">
+            <input type="file" id="file-upload" @change="handleFileSelect" accept="image/*" ref="fileInput" class="file-input" />
+            <label for="file-upload" class="file-upload-label">
+              <span class="upload-icon">📷</span>
+              <span class="upload-text">Seleccionar imagen</span>
+            </label>
+          </div>
+          <div v-if="uploadStatus" class="upload-status" :class="{'upload-error': uploadStatus.includes('Error')}">
+            {{ uploadStatus }}
+          </div>
         </div>
       </div>
     </div>
@@ -1033,99 +1048,318 @@ input, textarea {
   background: #ff5252;
 }
 
-/* Selector de imágenes */
-.image-selector {
+/* Selector de imágenes mejorado */
+.image-selector-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.image-selector-dialog {
+  background: white;
+  border-radius: 12px;
+  width: 80%;
+  max-width: 900px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  animation: fadeInScale 0.3s ease;
+}
+
+@keyframes fadeInScale {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1);
+  }
 }
 
 .image-selector-header {
-  background: white;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px 20px;
+  background: #004698;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.image-selector-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
 }
 
 .close-button {
-  background: none;
+  background: transparent;
   border: none;
-  font-size: 18px;
+  color: white;
+  font-size: 24px;
   cursor: pointer;
+  padding: 0;
+  line-height: 24px;
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  transform: scale(1.2);
 }
 
 .image-selector-content {
-  background: white;
   padding: 20px;
-  border-radius: 8px;
-  max-width: 80%;
-  max-height: 80vh;
   overflow-y: auto;
+  flex: 1;
+}
+
+.search-container {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  background: #f5f5f5;
+  transition: all 0.3s;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #004698;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0, 70, 152, 0.15);
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.image-item {
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  border-color: #004698;
+}
+
+.image-preview-container {
+  width: 100%;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.image-name {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #333;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: #f8f8f8;
 }
 
 .no-images {
   text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  background: #f8f8f8;
+  border-radius: 8px;
+}
+
+.upload-prompt {
+  margin-top: 10px;
+  font-size: 14px;
   color: #999;
-  padding: 20px;
 }
 
-.image-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
+.loading-images {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
 }
 
-.image-thumbnail-container {
-  cursor: pointer;
-  border: 2px solid transparent;
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #004698;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 0;
+}
+
+.pagination-button {
+  background: #f0f0f0;
+  color: #333;
+  border: none;
   border-radius: 4px;
-  padding: 5px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-.image-thumbnail-container:hover {
-  border-color: #00c3ff;
-  transform: scale(1.05);
+.pagination-button:not(:disabled):hover {
+  background: #004698;
+  color: white;
 }
 
-.image-thumbnail {
-  max-width: 100%;
-  max-height: 100px;
-  object-fit: contain;
-  border-radius: 4px;
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.image-name {
-  margin-top: 5px;
-  text-align: center;
-  font-size: 12px;
-  color: #333;
+.page-info {
+  margin: 0 15px;
+  color: #666;
+  font-size: 14px;
 }
 
 .upload-section {
-  margin-top: 20px;
-  padding: 15px;
-  border: 2px dashed #ddd;
-  border-radius: 4px;
-  text-align: center;
+  padding: 20px;
+  background: #f8f8f8;
+  border-top: 1px solid #eee;
+}
+
+.upload-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 16px;
+}
+
+.file-upload-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #00c3ff, #00ff8c);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 195, 255, 0.3);
+}
+
+.file-upload-label:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 195, 255, 0.4);
+}
+
+.upload-icon {
+  margin-right: 8px;
+  font-size: 18px;
 }
 
 .upload-status {
-  margin-top: 10px;
-  padding: 5px;
-  border-radius: 4px;
-  background: #f0f0f0;
+  text-align: center;
+  padding: 10px 15px;
+  border-radius: 8px;
   font-size: 14px;
+  background: #e1f5fe;
+  color: #0277bd;
+  margin-top: 10px;
+}
+
+.upload-error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+  .image-selector-dialog {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  
+  .image-preview-container {
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+  }
+  
+  .image-preview-container {
+    height: 80px;
+  }
 }
 
 .preview-panel {
