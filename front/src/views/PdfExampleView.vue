@@ -163,38 +163,94 @@
       </button>
     </div>
     
-    <!-- Diálogo para seleccionar imágenes -->
+    <!-- Selector de Imágenes mejorado -->
     <div v-if="showImageSelector" class="image-selector-overlay">
       <div class="image-selector-dialog">
-        <h3>Seleccionar Imagen</h3>
-        
-        <!-- Opciones para cargar imagen -->
-        <div class="upload-section">
-          <input type="file" @change="handleFileSelect" accept="image/*" ref="fileInput" />
-          <button @click="$refs.fileInput.click()" class="btn-upload">Seleccionar archivo</button>
-          
-          <div v-if="uploadStatus" class="upload-status">
-            {{ uploadStatus }}
-          </div>
+        <div class="image-selector-header">
+          <h3>Selecciona una imagen</h3>
+          <button @click="showImageSelector = false" class="close-button">&times;</button>
         </div>
         
-        <!-- Imágenes disponibles -->
-        <div class="available-images">
-          <h4>Imágenes disponibles:</h4>
-          <div class="images-grid">
-            <div v-for="image in availableImages" :key="image.publicId" class="grid-item">
-              <img 
-                :src="getCloudinaryUrl(image.publicId, {width: 100})" 
-                alt="Imagen disponible" 
-                class="preview-image"
-                @click="selectAvailableImage(image.publicId)"
-              />
+        <div class="image-selector-content">
+          <!-- Campo de búsqueda -->
+          <div class="search-container">
+            <input 
+              type="text" 
+              v-model="imageFilter" 
+              placeholder="Buscar imágenes..." 
+              @input="filterImages"
+              class="search-input"
+            />
+          </div>
+          
+          <!-- Cargando imágenes -->
+          <div v-if="isLoadingImages" class="loading-images">
+            <div class="loading-spinner"></div>
+            <p>Cargando imágenes...</p>
+          </div>
+          
+          <!-- Sin imágenes -->
+          <div v-else-if="availableImages.length === 0" class="no-images">
+            <p>No se encontraron imágenes disponibles</p>
+            <p class="upload-prompt">Puedes subir una nueva imagen usando el formulario de abajo</p>
+          </div>
+          
+          <!-- Grid de imágenes -->
+          <div v-else class="images-grid">
+            <div 
+              v-for="image in paginatedImages" 
+              :key="image.publicId" 
+              class="image-item"
+              @click="selectAvailableImage(image.publicId)"
+            >
+              <div class="image-preview-container">
+                <img 
+                  :src="getCloudinaryUrl(image.publicId, { width: 120, height: 120 })" 
+                  :alt="image.alt"
+                  class="image-preview"
+                  @error="handleImageLoadError"
+                  loading="lazy"
+                />
+              </div>
+              <div class="image-name">{{ image.alt }}</div>
             </div>
           </div>
+          
+          <!-- Paginación -->
+          <div v-if="totalPages > 1" class="pagination">
+            <button 
+              @click="currentPage > 1 && (currentPage--)" 
+              :disabled="currentPage === 1"
+              class="pagination-button"
+            >
+              &laquo; Anterior
+            </button>
+            
+            <span class="page-info">{{ currentPage }} de {{ totalPages }}</span>
+            
+            <button 
+              @click="currentPage < totalPages && (currentPage++)" 
+              :disabled="currentPage === totalPages"
+              class="pagination-button"
+            >
+              Siguiente &raquo;
+            </button>
+          </div>
         </div>
         
-        <div class="dialog-buttons">
-          <button @click="showImageSelector = false" class="btn-cancel">Cancelar</button>
+        <!-- Sección de subida de archivos -->
+        <div class="upload-section">
+          <h4>Subir una nueva imagen</h4>
+          <div class="file-upload-container">
+            <input type="file" id="file-upload" @change="handleFileSelect" accept="image/*" ref="fileInput" class="file-input" />
+            <label for="file-upload" class="file-upload-label">
+              <span class="upload-icon">📷</span>
+              <span class="upload-text">Seleccionar imagen</span>
+            </label>
+          </div>
+          <div v-if="uploadStatus" class="upload-status" :class="{'upload-error': uploadStatus.includes('Error')}">
+            {{ uploadStatus }}
+          </div>
         </div>
       </div>
     </div>
@@ -1031,111 +1087,322 @@ h3 {
   justify-content: space-between;
 }
 
-.logo-selector, .images-list {
+.btn-remove-sm {
+  background: #ff5252;
+}
+
+/* Selector de imágenes mejorado */
+.image-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
   align-items: center;
-  margin-top: 8px;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.image-selector-dialog {
+  background: white;
+  border-radius: 12px;
+  width: 80%;
+  max-width: 900px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  animation: fadeInScale 0.3s ease;
+}
+
+@keyframes fadeInScale {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+}
+
+.image-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #004698;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.image-selector-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 24px;
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  transform: scale(1.2);
+}
+
+.image-selector-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.search-container {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  background: #f5f5f5;
+  transition: all 0.3s;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #004698;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0, 70, 152, 0.15);
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .image-item {
-  border: 1px solid #eaeaea;
+  cursor: pointer;
   border-radius: 8px;
-  padding: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  transition: all 0.3s;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  background: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
 }
 
 .image-item:hover {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  border-color: #004698;
 }
 
-.image-item-controls {
+.image-preview-container {
+  width: 100%;
+  height: 120px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.preview-image {
-  max-width: 100px;
-  max-height: 100px;
-  object-fit: contain;
-  border-radius: 4px;
-  border: 1px solid #eaeaea;
-  background: #f9f9f9;
-  padding: 5px;
-}
-
-/* Botones */
-.btn-select, .btn-add, .btn-remove, .btn-add-sm, .btn-remove-sm, .btn-upload, .btn-cancel {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  color: white;
-  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  overflow: hidden;
+  background: #f0f0f0;
 }
 
-.btn-select::before {
-  content: "🖼️";
-  font-size: 16px;
+.image-preview {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
-.btn-add::before {
-  content: "➕";
-  font-size: 16px;
-}
-
-.btn-remove::before {
-  content: "❌";
-  font-size: 16px;
-}
-
-.btn-select, .btn-add, .btn-upload {
-  background: linear-gradient(90deg, #0088ff, #00c3ff);
-  box-shadow: 0 2px 5px rgba(0, 136, 255, 0.3);
-}
-
-.btn-select:hover, .btn-add:hover, .btn-upload:hover {
-  background: linear-gradient(90deg, #0077e6, #00b2eb);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 136, 255, 0.4);
-}
-
-.btn-remove, .btn-cancel {
-  background: linear-gradient(90deg, #ff5252, #ff7676);
-  box-shadow: 0 2px 5px rgba(255, 82, 82, 0.3);
-}
-
-.btn-remove:hover, .btn-cancel:hover {
-  background: linear-gradient(90deg, #e64a4a, #e66b6b);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 82, 82, 0.4);
-}
-
-.btn-add-sm, .btn-remove-sm {
-  padding: 4px 10px;
+.image-name {
+  padding: 8px 10px;
   font-size: 12px;
+  color: #333;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: #f8f8f8;
 }
 
-.btn-add-sm {
-  background: #00c3ff;
+.no-images {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  background: #f8f8f8;
+  border-radius: 8px;
 }
 
-.btn-remove-sm {
-  background: #ff5252;
+.upload-prompt {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #999;
+}
+
+.loading-images {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #004698;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 0;
+}
+
+.pagination-button {
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-button:not(:disabled):hover {
+  background: #004698;
+  color: white;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  margin: 0 15px;
+  color: #666;
+  font-size: 14px;
+}
+
+.upload-section {
+  padding: 20px;
+  background: #f8f8f8;
+  border-top: 1px solid #eee;
+}
+
+.upload-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 16px;
+}
+
+.file-upload-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #00c3ff, #00ff8c);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 195, 255, 0.3);
+}
+
+.file-upload-label:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 195, 255, 0.4);
+}
+
+.upload-icon {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.upload-status {
+  text-align: center;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #e1f5fe;
+  color: #0277bd;
+  margin-top: 10px;
+}
+
+.upload-error {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+  .image-selector-dialog {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  
+  .image-preview-container {
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+  }
+  
+  .image-preview-container {
+    height: 80px;
+  }
 }
 
 .preview-panel {
