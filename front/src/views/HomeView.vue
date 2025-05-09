@@ -2,16 +2,13 @@
   <div class="home-page">
     <AnimatedBackground />
     <div class="dashboard-container">
-      <!-- Encabezado del dashboard -->
       <DashboardHeader 
         :usuario="usuario"
         :importando="importando"
         :error-importacion="errorImportacion"
         @create-company="showFormModal = true; modoEdicion = false;"
-        @import-click="$refs.fileInput.click()"
         @file-selected="importarArchivo"
       />
-      <!-- Banner de Alicante destacado -->
       <AlicanteBanner />
       <!-- Contenido principal -->
       <div class="dashboard-content">
@@ -595,41 +592,17 @@
       </div>
       </teleport>
     </div>
-    
-    <!-- Footer -->
     <AppFooter />
   </div>
   
   <!-- Modal para previsualizar PDF -->
-  
 
   <!-- Modal de confirmación de importación -->
-  <div v-if="mostrarConfirmacionImportacion" class="modal-overlay">
-    <div class="modal-container modal-small">
-      <div class="modal-header">
-        <h2>{{ resultadoImportacion.exitoso ? 'Importación Exitosa' : 'Error en la Importación' }}</h2>
-        <button class="btn-close" @click="mostrarConfirmacionImportacion = false">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="resultado-importacion">
-          <p :class="{ 'text-success': resultadoImportacion.exitoso, 'text-error': !resultadoImportacion.exitoso }">
-            {{ resultadoImportacion.mensaje }}
-          </p>
-          <div v-if="resultadoImportacion.detalles" class="detalles-importacion">
-            <h3 v-if="resultadoImportacion.exitoso">Empresas importadas:</h3>
-            <ul>
-              <li v-for="(detalle, index) in resultadoImportacion.detalles" :key="index">
-                {{ detalle }}
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-primary" @click="mostrarConfirmacionImportacion = false">Cerrar</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <ImportConfirmationModal
+    :show="mostrarConfirmacionImportacion"
+    :resultado="resultadoImportacion"
+    @close="mostrarConfirmacionImportacion = false"
+  />
 
   <!-- Pantalla de carga durante la importación -->
   <div v-if="importando" class="loading-overlay">
@@ -656,6 +629,7 @@ import ScrollAnimation from '../components/ScrollAnimation.vue';
 import AlicanteBanner from '../components/home/AlicanteBanner.vue';
 import StatsPanel from '../components/home/StatsPanel.vue';
 import CompaniesList from '../components/home/CompaniesList.vue';
+import CompanyFormModal from '@/components/home/CompanyFormModal.vue';
 import AppFooter from '../components/home/AppFooter.vue';
 import GeminiButton from '../components/GeminiButton.vue';
 import DashboardHeader from '../components/home/DashboardHeader.vue';
@@ -676,6 +650,7 @@ import {
   centrosCount,
   formacionesCount
 } from '../services/DataService';
+import ImportConfirmationModal from '@/components/home/ImportConfirmationModal.vue';
 
 const router = useRouter();
 const auth = getAuth();
@@ -2058,35 +2033,6 @@ const irAPaginaPDF = () => {
 <style src="../assets/Home.css"></style>
 
 <style>
-.btn-apple {
-  background: linear-gradient(90deg, #007AFF, #34AADC);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  font-size: 15px;
-  font-weight: 500;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
-}
-
-.btn-apple:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4);
-}
-
-.btn-apple .arrow {
-  margin-left: 8px;
-  transition: transform 0.3s ease;
-}
-
-.btn-apple:hover .arrow {
-  transform: translateX(4px);
-}
-
 /* Estilos para modales al estilo Apple */
 .apple-modal {
   background: rgba(255, 255, 255, 0.95);
@@ -2982,23 +2928,6 @@ const irAPaginaPDF = () => {
   gap: 2rem;
   width: 100%;
   overflow-y: visible;
-}
-
-/* Aseguramos que los modales no interfieran con el scroll principal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  overflow-y: auto;
-  padding: 2rem;
-  margin: 0;
 }
 
 /* Estilos para el scrollbar personalizado */

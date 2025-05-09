@@ -11,7 +11,7 @@
       <button 
         type="button" 
         class="btn btn-secondary btn-create"
-        @click="$emit('import-click')"
+        @click="triggerFileInput"
         :disabled="importando"
       >
         <span class="icon">↓</span>
@@ -19,11 +19,11 @@
         <span v-else>Importar Empresas</span>
       </button>
       <input 
+        ref="fileInput"
         type="file" 
-        ref="fileInput" 
         style="display: none" 
         accept=".csv,.json"
-        @change="$emit('file-selected', $event)"
+        @change="handleFileChange"
       >
       <div v-if="errorImportacion" class="error-message">
         {{ errorImportacion }}
@@ -33,7 +33,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { ref } from 'vue';
+
+const props = defineProps({
   usuario: {
     type: Object,
     default: () => ({})
@@ -48,7 +50,16 @@ defineProps({
   }
 });
 
-defineEmits(['create-company', 'import-click', 'file-selected']);
+const emit = defineEmits(['create-company', 'file-selected']);
+const fileInput = ref(null);
+
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const handleFileChange = (event) => {
+  emit('file-selected', event);
+};
 </script>
 
 <style scoped>
