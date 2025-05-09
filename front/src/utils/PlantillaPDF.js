@@ -1931,8 +1931,14 @@ export async function crearPlantillaPDF() {
     const placeholderImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAyCAYAAACqNX6+AAAACXBIWXMAAAsTAAALEwEAmpwYAAAEOklEQVR4nO2cW27bMBCGp4/tqkBOIJ+gQBYoeoKgJ0ib9LHICdKcoMgJmhO06QnSnCDNCdrnAn1q0RMUaFFUHiRbHJJDUpTlhUX9AwZsLNnk/OTMcGZIhyASiUQikUgkEolEIpFIJBIJGQC3AewA+ExEFRHVeATnOwBeArhTluUrpZRCYMqyxPl85iTG87wvRVG8BvDQNAullDiV1lpXSu2I6BOAt7Zt22GapnUQBOcAbpmmWRVF8SMIgg8AntByJ87X67XUdd3wOF8sFnA9DMPwptPpewBvbJ9xPp9Dr74Z3/fb0+lUl2UJ9r+UUsi9RpIkCIKgZbquqyiKQoQwRkEQFGEYVnEcV2w8Ho8ZNKSvubdwbNu2V2maXs9msz7nQRB8DcOwStO0SpKkbttW7eJFmmYvgzRNw/d9HXM+m80wHo8RRVH3dxiGKIpiy9jsMHEcFy7P7JthmiYejwej6aNlU8AZx1GD5yYZZ/oZTbmxyzXbtgMAK+YSAJ9d181cAq5WK+R5jrqudcZ93zdKszzvvM/zHEopY64cDAZ6jTzPUVUVkiS5fq7neTfcn5vNJhaLBZIkQZqmOtRxcUzT1BhKoijq5tJsNkMYhtfWjeO4832e57Bt276vj9bzDMNQuLYoCtR1jfl83pnb8zydmPM818/jue99jPP5HGVZGkGaptVoNMJ0OsVkMukSfxAE2rtc+2dZpkE+nU4Nj+TCnKbptQewx7Ixf5bCNrZarYxnHEKAKIrqXc/uDftbfZ2/1+Gfv9e29dgmjdHb29Z6z+uFHFpbWVWVMWfUdd0Zwxb+8G39Lmvc1qvfFw67lWmaOmx1eOHN3/D4tv2Mvu+39/X8IYRbzDRtbP/sMmzbNnrP42LNZKIoCjFYE1qWpXMYyPNcex7P8ZozGAwwHA61l7TZF7WKQ0N7XVmWsG0bWutdszyluztN0yBJEjx6Bq7VYV0FjhXGLr7BVWy+7/J1vqZpGq5Xw3VdreVf+UJR6z4nk8lRnmDbtl4D1zE7RJvN5ufKWblc7lu/0xxZlv242Gw2Z7VWL9brNd4DuNh33fF4/LFt20daa6SXl/h0B0CWZZfX/ZjF9/0zz/POLcu6hcNNWqc+1ut1q5TaAri8q/HiOP7ouq5mE4bhrWVZr3dd53neudZ6DeDxnzbnE631h9VqhbeMw3AThqH2CsZdxnQ6RV8Gd5V0NptBa90J2uXlJebz+d7wF4YhkiTRibxvTsuy+o5PuOXuqxZt2z6zbdto8PaVf1mWbTrUXQqKfrXJ11xVk4aN4V1N4b7yvq+87Hv+vtptX9PXtc8xjd9Vfai27P8aR7fOl2XZjSAIHpRluX848y5clPXvvI2zzp+/ZXkL4P6h+0QikUgkEolEIpFIJBKJRCLRb9UvkR6lzA/rWkAAAAAASUVORK5CYII=';
     
     // Reemplazar todas las imágenes placeholder vacías o con URLs inválidas
+    // y hacer que todas las imágenes sean seleccionables
     const imagenes = tempDiv.querySelectorAll('img');
-    imagenes.forEach(img => {
+    imagenes.forEach((img, index) => {
+      // Añadir clases y atributos para hacer todas las imágenes seleccionables
+      img.classList.add('selectable-image');
+      img.setAttribute('data-image-id', `img-${index}`);
+      img.style.cursor = 'pointer';
+      
       // Si la imagen no tiene src, está vacía o intenta cargar desde localhost
       // Pero NO reemplazar imágenes que ya tienen formato base64
       if ((!img.src || 

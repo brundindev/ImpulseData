@@ -150,6 +150,11 @@
     <!-- Vista previa con la plantilla de PlantillaPDF -->
     <div class="preview-panel">
       <h2>Vista Previa</h2>
+      <div class="instructions-box">
+        <h3>Instrucciones</h3>
+        <p>Haz clic en cualquier imagen de la plantilla para seleccionarla y elegir una imagen de Cloudinary para reemplazarla.</p>
+        <p>Las imágenes seleccionadas se conservarán automáticamente entre sesiones.</p>
+      </div>
       <div ref="pdfTemplate" class="pdf-template">
         <!-- Contenedor para insertar la plantilla de PlantillaPDF -->
         <div id="plantilla-container" v-html="plantillaHTML"></div>
@@ -324,18 +329,71 @@ const formatDate = (dateString) => {
   }
 };
 
-// Limpiar el intervalo cuando se desmonta el componente
-onMounted(() => {
+// Al montar el componente, recuperar los datos de la empresa y cargar la plantilla
+onMounted(async () => {
   console.log("Componente PDF montado correctamente");
   verificarSesion();
   
-  // Cargar imágenes inmediatamente
-  loadAvailableImages();
-  
-  // Después cargar la plantilla HTML
-  setTimeout(() => {
-    loadPlantillaHTML();
-  }, 500);
+  try {
+    // Obtener datos de empresa desde localStorage
+    const empresaData = localStorage.getItem('empresa_pdf');
+    if (empresaData) {
+      empresa.value = JSON.parse(empresaData);
+      console.log('Datos de empresa recuperados:', empresa.value);
+      
+      // Rellenar opciones del PDF con datos de la empresa
+      pdfOptions.title = `Informe de ${empresa.value.nombre}`;
+      pdfOptions.subtitle = `Datos principales de ${empresa.value.nombre}`;
+      pdfOptions.description = empresa.value.descripcion || 'Informe detallado de la empresa.';
+      pdfOptions.filename = `informe_${empresa.value.nombre.replace(/\s+/g, '_')}.pdf`;
+    } else {
+      console.warn('No se encontraron datos de empresa en localStorage');
+    }
+    
+    // Intentar restaurar las selecciones de imágenes guardadas
+    try {
+      const savedSelections = localStorage.getItem('templateImageSelections');
+      if (savedSelections) {
+        selectedImages.value = JSON.parse(savedSelections);
+        console.log("Selecciones de imágenes restauradas:", selectedImages.value);
+      }
+    } catch (error) {
+      console.error("Error al restaurar selecciones de imágenes:", error);
+    }
+    
+    // Añadir estilos para imágenes seleccionables
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      .image-selected {
+        border: 2px solid #00a0ff !important;
+        box-shadow: 0 0 10px rgba(0, 160, 255, 0.8) !important;
+      }
+      
+      .selectable-image {
+        transition: all 0.3s ease;
+      }
+      
+      .selectable-image:hover {
+        opacity: 0.9;
+      }
+      
+      #plantilla-container .selectable-image {
+        cursor: pointer;
+      }
+    `;
+    document.head.appendChild(styleElement);
+    
+    // Cargar imágenes inmediatamente
+    loadAvailableImages();
+    
+    // Cargar la plantilla HTML
+    setTimeout(() => {
+      loadPlantillaHTML();
+    }, 500);
+    
+  } catch (error) {
+    console.error('Error al inicializar componente:', error);
+  }
 });
 
 onUnmounted(() => {
@@ -445,23 +503,133 @@ const loadAvailableImages = () => {
     });
 };
 
-// Seleccionar una imagen disponible
+// Variables para las imágenes de la plantilla
+const currentTemplateImageId = ref(null);
+const selectedImages = ref({});  // Almacena las imágenes seleccionadas por ID
+
+// Cargar la plantilla HTML
+const loadPlantillaHTML = async () => {
+  try {
+    // Obtener el HTML de la plantilla sin modificar
+    const htmlTemplate = await crearPlantillaPDF();
+    
+    // Actualizar la variable reactiva directamente sin personalizar
+    plantillaHTML.value = htmlTemplate;
+    
+    console.log("Plantilla HTML cargada correctamente");
+    
+    // Asegurarse de que el contenedor se actualice correctamente
+    setTimeout(() => {
+      const container = document.getElementById('plantilla-container');
+      if (container) {
+        // Forzar la actualización del DOM con el contenido original
+        container.innerHTML = htmlTemplate;
+        
+        // Añadir event listeners a todas las imágenes seleccionables
+        setupImageListeners();
+      }
+    }, 100);
+  } catch (error) {
+    console.error("Error al cargar la plantilla HTML:", error);
+    plantillaHTML.value = html; // Usar el HTML base como fallback
+  }
+};
+
+// Función para configurar los event listeners en las imágenes de la plantilla
+const setupImageListeners = () => {
+  const container = document.getElementById('plantilla-container');
+  if (!container) return;
+  
+  const images = container.querySelectorAll('.selectable-image');
+  images.forEach(img => {
+    img.addEventListener('click', (event) => {
+      // Guardar el ID de la imagen actual
+      currentTemplateImageId.value = event.target.getAttribute('data-image-id');
+      
+      // Mostrar el selector de imágenes para la plantilla
+      selectTemplateImage();
+      
+      // Añadir estilo visual para indicar que está seleccionada
+      images.forEach(i => i.classList.remove('image-selected'));
+      event.target.classList.add('image-selected');
+      
+      console.log(`Seleccionada imagen de plantilla: ${currentTemplateImageId.value}`);
+    });
+    
+    // Estilo visual para mostrar interactividad
+    img.addEventListener('mouseenter', () => {
+      img.style.boxShadow = '0 0 10px rgba(0, 160, 255, 0.8)';
+      img.style.transition = 'all 0.3s ease';
+    });
+    
+    img.addEventListener('mouseleave', () => {
+      img.style.boxShadow = '';
+    });
+    
+    // Si esta imagen ya tiene una selección, aplicarla
+    const imageId = img.getAttribute('data-image-id');
+    if (selectedImages.value[imageId]) {
+      const selected = selectedImages.value[imageId];
+      img.src = getCloudinaryUrl(selected.publicId);
+      img.alt = selected.alt || 'Imagen';
+    }
+  });
+};
+
+// Seleccionar una imagen para la plantilla
+const selectTemplateImage = () => {
+  // Establecer tipo para que el selector de imágenes sepa que es para la plantilla
+  currentImageType.value = 'template';
+  uploadStatus.value = ''; // Limpiar cualquier mensaje de error anterior
+  isLoadingImages.value = true; // Mostrar indicador de carga
+  
+  // Si no tenemos imágenes cargadas aún, cargarlas ahora
+  if (allAvailableImages.value.length === 0) {
+    loadAvailableImages();
+  } else {
+    isLoadingImages.value = false;
+  }
+  
+  showImageSelector.value = true;
+};
+
+// Actualizar el método selectAvailableImage para manejar imágenes de la plantilla
 const selectAvailableImage = (publicId) => {
   try {
     console.log(`Seleccionando imagen: ${publicId}`);
     
     if (currentImageType.value === 'logo') {
       pdfOptions.logoPublicId = publicId;
-    } else {
+    } else if (currentImageType.value === 'template' && currentTemplateImageId.value) {
       // Buscar la imagen en las disponibles para obtener el alt
       const source = allAvailableImages.value.length > 0 ? allAvailableImages.value : availableImages.value;
       const imagen = source.find(img => img.publicId === publicId);
       const alt = imagen ? imagen.alt : 'Imagen';
       
+      // Guardar la selección para esta imagen de la plantilla
+      selectedImages.value[currentTemplateImageId.value] = {
+        publicId,
+        alt
+      };
+      
+      // Actualizar la imagen en la plantilla
+      const container = document.getElementById('plantilla-container');
+      if (container) {
+        const imgElement = container.querySelector(`[data-image-id="${currentTemplateImageId.value}"]`);
+        if (imgElement) {
+          imgElement.src = getCloudinaryUrl(publicId);
+          imgElement.alt = alt;
+        }
+      }
+      
+      // Guardar las selecciones en localStorage para persistencia
+      localStorage.setItem('templateImageSelections', JSON.stringify(selectedImages.value));
+    } else {
+      // Caso normal para añadir imagen a la lista
       pdfOptions.images.push({
         publicId,
-        alt,
-        caption: `Descripción de ${alt}`,
+        alt: 'Imagen',
+        caption: 'Descripción de la imagen',
         width: null,
         height: null
       });
@@ -823,31 +991,6 @@ const generatePdf = async () => {
   }
 };
 
-// Cargar la plantilla HTML
-const loadPlantillaHTML = async () => {
-  try {
-    // Obtener el HTML de la plantilla sin modificar
-    const htmlTemplate = await crearPlantillaPDF();
-    
-    // Actualizar la variable reactiva directamente sin personalizar
-    plantillaHTML.value = htmlTemplate;
-    
-    console.log("Plantilla HTML cargada correctamente");
-    
-    // Asegurarse de que el contenedor se actualice correctamente
-    setTimeout(() => {
-      const container = document.getElementById('plantilla-container');
-      if (container) {
-        // Forzar la actualización del DOM con el contenido original
-        container.innerHTML = htmlTemplate;
-      }
-    }, 100);
-  } catch (error) {
-    console.error("Error al cargar la plantilla HTML:", error);
-    plantillaHTML.value = html; // Usar el HTML base como fallback
-  }
-};
-
 // Abrir selector de imágenes
 const selectImage = (type) => {
   currentImageType.value = type;
@@ -921,51 +1064,6 @@ const handleFileSelect = async (event) => {
     }
   }
 };
-
-// Al montar el componente, recuperar los datos de la empresa y cargar la plantilla
-onMounted(async () => {
-  try {
-    // Obtener datos de empresa desde localStorage
-    const empresaData = localStorage.getItem('empresa_pdf');
-    if (empresaData) {
-      empresa.value = JSON.parse(empresaData);
-      console.log('Datos de empresa recuperados:', empresa.value);
-      
-      // Rellenar opciones del PDF con datos de la empresa
-      pdfOptions.title = `Informe de ${empresa.value.nombre}`;
-      pdfOptions.subtitle = `Datos principales de ${empresa.value.nombre}`;
-      pdfOptions.description = empresa.value.descripcion || 'Informe detallado de la empresa.';
-      pdfOptions.filename = `informe_${empresa.value.nombre.replace(/\s+/g, '_')}.pdf`;
-    } else {
-      console.warn('No se encontraron datos de empresa en localStorage');
-    }
-    
-    // Cargar la plantilla HTML
-    await loadPlantillaHTML();
-    
-    // Cargar imágenes disponibles desde Cloudinary a través del backend
-    try {
-      loadingMessage.value = 'Cargando imágenes disponibles...';
-      isGenerating.value = true;
-      
-      const images = await SimpleCloudinaryService.getAllImages(50);
-      if (images && images.length > 0) {
-        availableImages.value = images;
-      }
-      
-      console.log('Imágenes cargadas correctamente:', availableImages.value.length);
-    } catch (imageError) {
-      console.error('Error al cargar imágenes:', imageError);
-      // Mantenemos las imágenes por defecto
-    } finally {
-      loadingMessage.value = '';
-      isGenerating.value = false;
-    }
-    
-  } catch (error) {
-    console.error('Error al inicializar componente:', error);
-  }
-});
 
 // Actualizar la plantilla cuando cambian las opciones
 watch(pdfOptions, async () => {
@@ -1429,12 +1527,12 @@ h3 {
   transition: all 0.3s;
   font-size: 14px;
   font-weight: 600;
-  box-shadow: 0 4px 10px rgba(0, 195, 255, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 195, 255, 0.2);
 }
 
 .file-upload-label:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 195, 255, 0.4);
+  box-shadow: 0 6px 15px rgba(0, 195, 255, 0.3);
 }
 
 .upload-icon {
@@ -1718,5 +1816,44 @@ h3 {
   border-color: #00a0ff;
   outline: none;
   box-shadow: 0 0 0 2px rgba(0, 160, 255, 0.15);
+}
+
+/* CSS para el estilo de imagen seleccionada */
+.image-selected {
+  border: 2px solid #00a0ff !important;
+  box-shadow: 0 0 10px rgba(0, 160, 255, 0.8) !important;
+}
+
+.selectable-image {
+  transition: all 0.3s ease;
+}
+
+.selectable-image:hover {
+  opacity: 0.9;
+}
+
+#plantilla-container .selectable-image {
+  cursor: pointer;
+}
+
+.instructions-box {
+  background-color: #e6f7ff;
+  border-left: 4px solid #1890ff;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.instructions-box h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #0066cc;
+  font-size: 16px;
+}
+
+.instructions-box p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #333;
 }
 </style> 
