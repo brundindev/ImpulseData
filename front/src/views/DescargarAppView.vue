@@ -45,7 +45,7 @@
             <li>100MB espacio libre</li>
           </ul>
         </div>
-        <a href="/descargar/ImpulseData.dmg" class="download-button">
+        <a href="/descargar/ImpulseData 1.0.0.dmg" class="download-button">
           <i class="fas fa-download"></i> Descargar para macOS
         </a>
       </div>
