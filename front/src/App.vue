@@ -334,6 +334,7 @@ const mostrarChatbot = computed(() => {
       <nav class="main-nav">
         <template v-if="usuario">
           <RouterLink to="/home" class="nav-link">Inicio</RouterLink>
+          <RouterLink to="/descargar-app" class="nav-link">Descargar App</RouterLink>
           <div class="user-dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <div class="dropdown-toggle">
               <div class="user-profile-container">
@@ -373,6 +374,7 @@ const mostrarChatbot = computed(() => {
           </button>
         </template>
         <template v-else>
+          <RouterLink to="/descargar-app" class="nav-link">Descargar App</RouterLink>
           <RouterLink to="/login" class="nav-link">Iniciar Sesión</RouterLink>
           <a href="#" @click.prevent="reloadRegistro" class="button2" :class="{ 'button2-active': estaEnRegistro }">Regístrate</a>
         </template>

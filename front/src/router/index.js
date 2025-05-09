@@ -10,6 +10,7 @@ import SoporteView from '../views/SoporteView.vue'
 import AdminSoporteView from '../views/AdminSoporteView.vue'
 import PdfExampleView from '../views/PdfExampleView.vue'
 import CloudinaryTestView from '../views/CloudinaryTestView.vue'
+import DescargarAppView from '../views/DescargarAppView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -73,6 +74,12 @@ const router = createRouter({
       name: 'pdf',
       component: PdfExampleView,
       meta: { requiresAuth: true, skipTokenValidation: true }
+    },
+    {
+      path: '/descargar-app',
+      name: 'descargarApp',
+      component: DescargarAppView,
+      meta: { requiresAuth: false }
     },
   ],
 })
