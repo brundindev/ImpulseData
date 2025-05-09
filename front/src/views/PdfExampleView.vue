@@ -313,15 +313,16 @@ const loadPlantillaHTML = async () => {
     setTimeout(() => {
       const container = document.getElementById('plantilla-container');
       if (container) {
+        // Limpiar cualquier contenido previo
+        container.innerHTML = '';
+        
         // Crear un iframe para aislar el documento completo y preservar todos los estilos
         const iframe = document.createElement('iframe');
         iframe.style.width = '100%';
-        iframe.style.height = '100%'; 
+        iframe.style.height = '100%';
         iframe.style.border = 'none';
-        iframe.style.overflow = 'visible';
+        iframe.style.overflow = 'hidden';
         
-        // Limpiar cualquier contenido previo
-        container.innerHTML = '';
         container.appendChild(iframe);
         
         // Acceder al documento del iframe
@@ -329,19 +330,92 @@ const loadPlantillaHTML = async () => {
         
         // Establecer el contenido del iframe con el HTML completo
         iframeDoc.open();
-        iframeDoc.write(rawHtmlTemplate);
+        iframeDoc.write(`
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+            <meta charset="UTF-8">
+            <title>Plantilla PDF</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 0;
+              }
+              body {
+                margin: 0;
+                padding: 0;
+                background-color: white;
+                font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+              }
+              .page {
+                width: 210mm;
+                height: 297mm;
+                margin: 0 auto 20px auto;
+                background-color: white;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                position: relative;
+                padding: 10mm;
+                box-sizing: border-box;
+                page-break-after: always;
+                overflow: hidden;
+              }
+              .pagebreak {
+                page-break-before: always;
+                height: 20px;
+                width: 100%;
+                display: block;
+                border-top: 1px dashed #ccc;
+                margin: 20px 0;
+              }
+              /* Añadir estilos para márgenes de página */
+              #portada, #contraportada, #indice, 
+              .section-agencia, .section-empleo, .section-promo, 
+              .section-desarrollo, .section-gestion, .section-marketing, .section-anexos {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0 auto 20px auto;
+                background-color: white;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                position: relative;
+                padding: 10mm;
+                box-sizing: border-box;
+                page-break-after: always;
+                overflow: hidden;
+              }
+            </style>
+          </head>
+          <body>${rawHtmlTemplate}</body>
+          </html>
+        `);
         iframeDoc.close();
         
         // Ajustar la altura del iframe para que muestre todo el contenido
         setTimeout(() => {
           const body = iframeDoc.body;
           if (body) {
-            iframe.style.height = `${body.scrollHeight}px`;
+            // Calcular altura total de todas las páginas
+            const pages = iframeDoc.querySelectorAll('.page, #portada, #contraportada, #indice, .section-agencia, .section-empleo, .section-promo, .section-desarrollo, .section-gestion, .section-marketing, .section-anexos');
+            let totalHeight = 0;
+            
+            pages.forEach(page => {
+              // Asegurarnos que cada página tenga al menos altura A4
+              if (page.offsetHeight < 297) {
+                page.style.minHeight = '297mm';
+              }
+              totalHeight += page.offsetHeight + 20; // 20px de margen entre páginas
+            });
+            
+            // Si no hay páginas específicas, usar la altura del body
+            if (pages.length === 0) {
+              totalHeight = body.scrollHeight;
+            }
+            
+            iframe.style.height = `${totalHeight + 50}px`; // 50px extra por seguridad
           }
           
-          // Aplicar ajustes adicionales si es necesario
+          // Aplicar ajustes adicionales
           adjustPageDisplay(iframeDoc);
-        }, 300);
+        }, 500);
         
         console.log("Plantilla HTML cargada correctamente en iframe");
       }
@@ -536,55 +610,7 @@ const generatePdf = async () => {
     
     loadingMessage.value = 'Generando PDF desde la plantilla HTML...';
     
-    // Crear un iframe temporal para la generación del PDF (sin afectar la visualización)
-    const tempIframe = document.createElement('iframe');
-    tempIframe.style.position = 'absolute';
-    tempIframe.style.top = '-9999px';
-    tempIframe.style.left = '-9999px';
-    tempIframe.style.width = '210mm';
-    tempIframe.style.height = '297mm';
-    tempIframe.style.border = 'none';
-    document.body.appendChild(tempIframe);
-    
-    // Configurar el documento temporal con estilos optimizados para PDF
-    const tempDoc = tempIframe.contentDocument || tempIframe.contentWindow.document;
-    tempDoc.open();
-    tempDoc.write(`
-      <!DOCTYPE html>
-      <html lang="es">
-      <head>
-        <meta charset="UTF-8">
-        <title>Memoria de Actividad - Impulsalicante</title>
-        <style>
-          @page {
-            size: A4;
-            margin: 0;
-          }
-          body {
-            margin: 0;
-            padding: 0;
-            background-color: white;
-            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-          }
-          ${Array.from(iframeDoc.querySelectorAll('style')).map(style => style.innerHTML).join('\n')}
-        </style>
-      </head>
-      <body>${iframeDoc.body.innerHTML}</body>
-      </html>
-    `);
-    tempDoc.close();
-    
-    // Eliminar elementos de UI que no deberían estar en el PDF
-    const pageIndicators = tempDoc.querySelectorAll('[style*="position: absolute"][style*="bottom: 5mm"]');
-    pageIndicators.forEach(el => el.parentNode.removeChild(el));
-    
-    // Esperar a que todo el contenido se cargue
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
     // Configuración para jsPDF
-    loadingMessage.value = 'Creando documento PDF...';
-    
-    // Crear PDF con la biblioteca jsPDF
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -593,68 +619,135 @@ const generatePdf = async () => {
     });
     
     // Obtener las páginas del documento
-    const pages = tempDoc.querySelectorAll('.page, #portada, #contraportada, #indice, .section-agencia, .section-empleo, .section-promo, .section-desarrollo, .section-gestion, .section-marketing, .section-anexos');
-    
-    // Si no encontramos páginas, usar el body completo
-    const elements = pages.length > 0 ? Array.from(pages) : [tempDoc.body];
+    const pages = iframeDoc.querySelectorAll('.page, #portada, #contraportada, #indice, .section-agencia, .section-empleo, .section-promo, .section-desarrollo, .section-gestion, .section-marketing, .section-anexos');
     
     // Configuración para html2canvas
     const html2canvasOptions = {
-      scale: 2,
+      scale: 2, // Escala mayor para mejor calidad
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#FFFFFF',
       logging: false
     };
     
-    // Procesar cada página
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
-      
-      loadingMessage.value = `Procesando página ${i + 1} de ${elements.length}...`;
+    // Si no hay páginas específicas definidas, intentar procesar todo el cuerpo como una página
+    if (pages.length === 0) {
+      loadingMessage.value = 'Procesando documento completo...';
       
       try {
-        // Convertir la página a canvas
-        const canvas = await html2canvas(element, html2canvasOptions);
-        
-        // Si no es la primera página, agregar una nueva
-        if (i > 0) {
-          pdf.addPage();
-        }
+        const canvas = await html2canvas(iframeDoc.body, html2canvasOptions);
         
         // Obtener dimensiones de la página PDF
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
         
-        // Calcular relación de aspecto para mantener proporciones
-        const canvasRatio = canvas.width / canvas.height;
-        const pageRatio = pageWidth / pageHeight;
-        
-        let imgWidth = pageWidth;
-        let imgHeight = imgWidth / canvasRatio;
-        
-        // Si la imagen es más alta que la página, ajustar altura
-        if (imgHeight > pageHeight) {
-          imgHeight = pageHeight;
-          imgWidth = imgHeight * canvasRatio;
-        }
-        
-        // Centrar la imagen si es más estrecha que la página
-        const xOffset = (pageWidth - imgWidth) / 2;
-        
         // Convertir canvas a imagen y añadir al PDF
         const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        pdf.addImage(imgData, 'JPEG', xOffset, 0, imgWidth, imgHeight);
-      } catch (pageError) {
-        console.error(`Error al procesar página ${i + 1}:`, pageError);
         
-        // Si hay error, añadir página con mensaje de error
-        if (i > 0) {
-          pdf.addPage();
+        // Calcular cuántas páginas A4 necesitamos basado en la altura total
+        const totalPages = Math.ceil(canvas.height / (pageHeight * html2canvasOptions.scale));
+        
+        // Dividir la imagen en múltiples páginas A4
+        for (let i = 0; i < totalPages; i++) {
+          if (i > 0) {
+            pdf.addPage();
+          }
+          
+          // Calcular qué parte de la imagen va en esta página
+          const sourceY = i * pageHeight * html2canvasOptions.scale;
+          const sourceHeight = Math.min(pageHeight * html2canvasOptions.scale, canvas.height - sourceY);
+          
+          // Añadir la porción de la imagen a la página actual
+          pdf.addImage(
+            imgData, 
+            'JPEG', 
+            0, 0, 
+            pageWidth, pageHeight, 
+            null, 
+            'FAST', 
+            0, 
+            -sourceY / html2canvasOptions.scale
+          );
         }
+      } catch (error) {
+        console.error('Error al procesar el documento completo:', error);
+        pdf.text('Error al procesar el documento', 20, 20);
+      }
+    } else {
+      // Procesar cada página individualmente
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
         
-        pdf.setFontSize(14);
-        pdf.text(`Error al procesar página ${i + 1}`, 20, 20);
+        loadingMessage.value = `Procesando página ${i + 1} de ${pages.length}...`;
+        
+        try {
+          // Asegurarse de que la página tenga dimensiones mínimas de A4
+          if (page.offsetHeight < 297) {
+            page.style.minHeight = '297mm';
+          }
+          
+          // Convertir la página a canvas
+          const canvas = await html2canvas(page, html2canvasOptions);
+          
+          // Si no es la primera página, agregar una nueva
+          if (i > 0) {
+            pdf.addPage();
+          }
+          
+          // Obtener dimensiones de la página PDF
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          
+          // Convertir canvas a imagen y añadir al PDF con ajuste
+          const imgData = canvas.toDataURL('image/jpeg', 1.0);
+          
+          // Calcular proporción de aspecto para mantener proporciones
+          const aspectRatio = canvas.width / canvas.height;
+          const imgWidth = pageWidth;
+          const imgHeight = imgWidth / aspectRatio;
+          
+          // Si la imagen es más alta que una página A4, dividirla en varias páginas
+          if (imgHeight > pageHeight) {
+            // Calcular cuántas páginas A4 necesitamos para esta imagen
+            const pagesNeeded = Math.ceil(imgHeight / pageHeight);
+            
+            for (let j = 0; j < pagesNeeded; j++) {
+              // Añadir página excepto para la primera iteración en la primera página
+              if (j > 0 || i > 0) {
+                pdf.addPage();
+              }
+              
+              // Calcular qué parte de la imagen va en esta página
+              const sourceY = j * (canvas.height / pagesNeeded);
+              const sourceHeight = canvas.height / pagesNeeded;
+              
+              // Añadir la porción de la imagen a la página actual
+              pdf.addImage(
+                imgData, 
+                'JPEG', 
+                0, 0, 
+                pageWidth, pageHeight, 
+                null, 
+                'FAST', 
+                0, 
+                -sourceY * (pageHeight / sourceHeight)
+              );
+            }
+          } else {
+            // Si la imagen cabe en una página, añadirla directamente
+            pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, imgHeight);
+          }
+        } catch (pageError) {
+          console.error(`Error al procesar página ${i + 1}:`, pageError);
+          
+          // Si hay error, añadir página con mensaje de error
+          if (i > 0) {
+            pdf.addPage();
+          }
+          
+          pdf.setFontSize(14);
+          pdf.text(`Error al procesar página ${i + 1}`, 20, 20);
+        }
       }
     }
     
@@ -666,9 +759,6 @@ const generatePdf = async () => {
     // Guardar PDF
     loadingMessage.value = 'Guardando PDF...';
     pdf.save(filename);
-    
-    // Limpiar
-    document.body.removeChild(tempIframe);
     
     loadingMessage.value = '¡PDF generado con éxito!';
     setTimeout(() => {
@@ -1107,21 +1197,20 @@ input, textarea {
   position: relative;
   overflow-y: auto;
   max-height: 80vh;
-  padding: 0;
+  padding: 10px;
   box-sizing: border-box;
+  border-radius: 8px;
 }
 
 .a4-container {
   width: 210mm;
-  max-width: 100%;
   margin: 0 auto;
-  padding: 0;
   background-color: white;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
   position: relative;
   box-sizing: border-box;
   transform-origin: top center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Aseguramos que se renderice correctamente la plantilla HTML completa */
