@@ -3,37 +3,14 @@
     <AnimatedBackground />
     <div class="dashboard-container">
       <!-- Encabezado del dashboard -->
-      <div class="dashboard-header">
-        <div>
-          <h1 class="welcome-title">Dashboard</h1>
-          <p class="welcome-subtitle">¡Bienvenido, <span class="user-name">{{ usuario?.nombre || usuario?.displayName || 'Usuario' }}</span>!</p>
-        </div>
-        <div class="action-buttons">
-          <button @click="showFormModal = true; modoEdicion = false;" class="btn btn-primary btn-create">
-            <span class="icon">+</span> Crear empresa
-          </button>
-          <button 
-            type="button" 
-            class="btn btn-secondary btn-create"
-            @click="$refs.fileInput.click()"
-            :disabled="importando"
-          >
-            <span class="icon">↓</span>
-            <span v-if="importando">Importando...</span>
-            <span v-else>Importar Empresas</span>
-          </button>
-          <input 
-            type="file" 
-            ref="fileInput" 
-            style="display: none" 
-            accept=".csv,.json"
-            @change="importarArchivo"
-          >
-          <div v-if="errorImportacion" class="error-message">
-            {{ errorImportacion }}
-          </div>
-        </div>
-      </div>    
+      <DashboardHeader 
+        :usuario="usuario"
+        :importando="importando"
+        :error-importacion="errorImportacion"
+        @create-company="showFormModal = true; modoEdicion = false;"
+        @import-click="$refs.fileInput.click()"
+        @file-selected="importarArchivo"
+      />
       <!-- Banner de Alicante destacado -->
       <AlicanteBanner />
       <!-- Contenido principal -->
@@ -681,6 +658,7 @@ import StatsPanel from '../components/home/StatsPanel.vue';
 import CompaniesList from '../components/home/CompaniesList.vue';
 import AppFooter from '../components/home/AppFooter.vue';
 import GeminiButton from '../components/GeminiButton.vue';
+import DashboardHeader from '../components/home/DashboardHeader.vue';
 // Importar PDFService
 import PDFService from '../services/PDFService';
 // Importar el logo e imágenes
