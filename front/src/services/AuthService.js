@@ -69,12 +69,18 @@ axios.interceptors.response.use(
     }
     
     if (error.response && error.response.status === 401) {
+      // Comprobar si estamos en la ruta /pdf para no redirigir
+      const currentPath = window.location.pathname;
+      if (currentPath === '/pdf') {
+        console.warn("Error 401 en ruta /pdf, ignorando redirección al login");
+        return Promise.reject(error);
+      }
+      
       // Si recibimos un 401 Unauthorized, cerramos la sesión
       localStorage.removeItem('authToken');
       localStorage.removeItem('userData');
       
       // Solo redirigir si no estamos ya en la página de login
-      const currentPath = window.location.pathname;
       if (currentPath !== '/login') {
         window.location.href = '/login';
       }
@@ -88,6 +94,13 @@ authAxios.interceptors.response.use(
   response => response,
   error => {
     if (error.response && error.response.status === 401) {
+      // Comprobar si estamos en la ruta /pdf para no redirigir
+      const currentPath = window.location.pathname;
+      if (currentPath === '/pdf') {
+        console.warn("Error 401 en ruta /pdf (authAxios), ignorando redirección al login");
+        return Promise.reject(error);
+      }
+      
       // Silenciar completamente los errores de credenciales incorrectas
       // No mostrar en consola
       
@@ -96,7 +109,6 @@ authAxios.interceptors.response.use(
       localStorage.removeItem('userData');
       
       // Solo redirigir si no estamos ya en la página de login
-      const currentPath = window.location.pathname;
       if (currentPath !== '/login') {
         window.location.href = '/login';
       }

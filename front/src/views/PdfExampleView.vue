@@ -155,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue';
+import { ref, reactive, onMounted, computed, watch, onUnmounted } from 'vue';
 import { crearPlantillaPDF, html } from '../utils/PlantillaPDF';
 import html2canvas from 'html2canvas';
 import SimpleCloudinaryService from '../services/SimpleCloudinaryService';
@@ -170,6 +170,36 @@ const empresa = ref(null);
 
 // Plantilla HTML generada a partir de PlantillaPDF.js
 const plantillaHTML = ref("");
+
+// Verificar que la sesión se mantiene activa
+const tokenInicial = localStorage.getItem('authToken');
+if (tokenInicial) {
+  console.log("Vista PDF: Sesión activa detectada");
+}
+
+// Funciones para mantener la sesión activa
+const verificarSesion = () => {
+  const tokenActual = localStorage.getItem('authToken');
+  if (!tokenActual && tokenInicial) {
+    console.warn("Vista PDF: Token de sesión perdido, pero manteniendo la vista");
+    // Restaurar el token en lugar de redirigir
+    localStorage.setItem('authToken', tokenInicial);
+  }
+};
+
+// Verificar la sesión periódicamente mientras se usa la vista PDF
+const intervaloVerificacion = setInterval(verificarSesion, 5000);
+
+// Limpiar el intervalo cuando se desmonta el componente
+onMounted(() => {
+  console.log("Componente PDF montado correctamente");
+  verificarSesion();
+});
+
+onUnmounted(() => {
+  console.log("Componente PDF desmontado");
+  clearInterval(intervaloVerificacion);
+});
 
 // Opciones del PDF
 const pdfOptions = reactive({
