@@ -2162,10 +2162,10 @@ body:has(.welcome-page) .button2:after,
   height: 2px;
   background: var(--primary-gradient);
 }
-
+/* 
 .actividad-title, .actividad-date {
-  /* color: white !important; */
-}
+  color: white !important;
+} */
 
 .actividad-icon {
   background: var(--primary-gradient) !important;
