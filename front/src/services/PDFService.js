@@ -109,8 +109,8 @@ class PDFService {
       iframe.style.position = 'fixed';
       iframe.style.top = '0';
       iframe.style.left = '0';
-      iframe.style.width = '793px'; // Ancho A4 en px
-      iframe.style.height = '1122px'; // Alto A4 en px
+      iframe.style.width = '210mm'; // Ancho A4 en mm
+      iframe.style.height = '297mm'; // Alto A4 en mm
       iframe.style.border = 'none';
       iframe.style.zIndex = '10000';
       
@@ -134,13 +134,19 @@ class PDFService {
             <meta charset="UTF-8">
             <title>PDF</title>
             <style>
+              @page {
+                size: A4;
+                margin: 0;
+              }
               body { 
-                margin: 15mm; 
-                padding: 0; 
+                margin: 0; 
+                padding: 10mm; 
                 background: white; 
-                width: 793px;
+                width: 190mm; /* 210mm - 20mm de margen total */
+                height: 277mm; /* 297mm - 20mm de margen total */
                 font-family: Arial, sans-serif;
                 color: #000;
+                box-sizing: border-box;
               }
               * {
                 box-sizing: border-box;
@@ -154,7 +160,7 @@ class PDFService {
                 background: white;
                 border: none;
                 box-shadow: none;
-                min-height: 1122px; /* Altura mínima de página A4 */
+                min-height: 277mm; /* Altura útil de página A4 */
                 height: auto;
                 position: relative;
                 overflow: hidden;
@@ -211,47 +217,49 @@ class PDFService {
       // Dar tiempo para que se carguen las imágenes
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Configuración mínima para html2pdf
-      const opciones = {
-        margin: 0,
-        filename: `informe_${empresa.nombre}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 1, 
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#FFFFFF',
-          removeContainer: false
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'portrait',
-          compress: true,
-          hotfixes: ["px_scaling"]
-        },
-        pagebreak: { 
-          mode: 'avoid-all', 
-          before: '.page', 
-          avoid: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', '.no-break']
-        }
-      };
-      
       // Usar el método outputPdf directamente
       try {
         console.log("Generando PDF con outputPdf...");
         
-        // Utilizar outputPdf directamente con el body del iframe
-        const pdfData = await html2pdf()
-          .from(iframeDoc.body)
-          .set(opciones)
-          .outputPdf('arraybuffer');
+        // Dividir el proceso de renderizado para más control
+        // 1. Primero convertir el HTML a canvas con ajustes específicos
+        const canvas = await html2canvas(iframeDoc.body, {
+          scale: 2, // Escala para mejor calidad
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#FFFFFF',
+          letterRendering: true,
+          logging: false,
+          windowWidth: 794, // Ancho de página A4 en puntos (72 dpi)
+          windowHeight: 1123 // Alto de página A4 en puntos (72 dpi)
+        });
+        
+        // 2. Crear PDF con el tamaño adecuado de A4
+        const pdf = new jsPDF({
+          unit: 'mm',
+          format: 'a4',
+          orientation: 'portrait',
+          compress: true,
+          precision: 16
+        });
+        
+        // 3. Calcular dimensiones para ajustar el canvas al PDF
+        // La relación de aspecto se mantiene mientras se ajusta el ancho a la página A4
+        const imgWidth = 210; // Ancho A4 en mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // 4. Convertir canvas a imagen y agregar al PDF
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+        
+        // 5. Obtener el documento como ArrayBuffer
+        const pdfData = pdf.output('arraybuffer');
         
         if (!pdfData) {
           throw new Error("No se generaron datos PDF");
         }
         
-        console.log("PDF generado correctamente con outputPdf");
+        console.log("PDF generado correctamente con nuevo método");
         
         // Convertir a Uint8Array
         const pdfBytes = new Uint8Array(pdfData);

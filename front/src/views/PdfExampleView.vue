@@ -97,7 +97,7 @@
       <h2>Vista Previa</h2>
       <div ref="pdfTemplate" class="pdf-template">
         <!-- Contenedor para insertar la plantilla de PlantillaPDF -->
-        <div id="plantilla-container" v-html="plantillaHTML"></div>
+        <div id="plantilla-container" class="a4-container" v-html="plantillaHTML"></div>
       </div>
     </div>
     
@@ -1040,5 +1040,39 @@ input, textarea {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Estilos específicos para simulación A4 */
+.a4-container {
+  width: 210mm;
+  height: 297mm;
+  margin: 0 auto;
+  padding: 10mm;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+@media screen {
+  .a4-container {
+    border: 1px solid #ddd;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  
+  .a4-container {
+    width: 100%;
+    height: 100%;
+    box-shadow: none;
+    border: none;
+  }
 }
 </style> 
