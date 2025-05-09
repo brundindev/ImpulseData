@@ -5,7 +5,7 @@ import { getAuth } from 'firebase/auth';
 import AuthService from './AuthService';
 import FirestoreService from './FirestoreService';
 import FirebaseAuthService from './FirebaseAuthService';
-import router from '../../router';  // Ajusta la ruta si tu router está en otro lugar
+import router from '../router/index';  // Ajusta la ruta si tu router está en otro lugar
 
 // Estados reactivos exportados
 export const cargando = ref(false);
