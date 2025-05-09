@@ -116,11 +116,16 @@
       </div>
       
       <div class="image-selector-content">
-        <div v-if="availableImages.length === 0" class="no-images">
+        <div v-if="isLoadingImages" class="loading-images">
+          <div class="loading-spinner small-spinner"></div>
+          <p>Cargando imágenes de Cloudinary...</p>
+        </div>
+        
+        <div v-else-if="availableImages.length === 0" class="no-images">
           No hay imágenes disponibles.
         </div>
         
-        <div class="image-grid">
+        <div v-else class="image-grid">
           <div 
             v-for="image in availableImages" 
             :key="image.publicId" 
@@ -240,6 +245,7 @@ const availableImages = ref([]);
 const isGenerating = ref(false);
 const loadingMessage = ref('');
 const imageLoadErrors = ref({});
+const isLoadingImages = ref(false);
 
 // Función para obtener URL de Cloudinary con manejo de errores
 const getCloudinaryUrl = (publicId, options = {}) => {
@@ -735,45 +741,20 @@ const generatePdf = async () => {
 
 // Cargar imágenes disponibles desde Cloudinary sin esperar
 const loadAvailableImages = () => {
-  loadingMessage.value = 'Cargando imágenes de Cloudinary...';
-  isGenerating.value = true;
+  isLoadingImages.value = true;
+  loadingMessage.value = 'Cargando imágenes...';
   
   SimpleCloudinaryService.getAllImages()
     .then(images => {
-      console.log('Imágenes cargadas desde el backend:', images.length);
-      
-      // Si no hay imágenes, mostrar mensaje de error
-      if (!images || images.length === 0) {
-        console.warn('No se encontraron imágenes en Cloudinary');
-        alert('No se pudieron cargar las imágenes de Cloudinary. Se usarán imágenes de respaldo.');
-      }
-      
-      // Asegurarse de que las imágenes tengan el formato correcto
-      const formattedImages = images.map(img => {
-        // Si la imagen ya tiene el formato correcto, usarla como está
-        if (img.publicId && (img.alt || img.caption)) {
-          return {
-            publicId: img.publicId,
-            alt: img.alt || img.caption || 'Imagen sin título'
-          };
-        }
-        
-        // Si la imagen viene con otra estructura, adaptarla
-        const publicId = img.publicId || img.public_id || '';
-        const alt = img.alt || img.caption || publicId.split('/').pop() || 'Imagen';
-        
-        return { publicId, alt };
-      });
-      
-      availableImages.value = formattedImages;
+      console.log('Imágenes cargadas:', images.length);
+      availableImages.value = images;
     })
     .catch(error => {
       console.error('Error al cargar imágenes:', error);
-      alert('Error al cargar imágenes de Cloudinary. Se mostrarán imágenes de respaldo.');
     })
     .finally(() => {
       loadingMessage.value = '';
-      isGenerating.value = false;
+      isLoadingImages.value = false;
     });
 };
 
@@ -1151,5 +1132,24 @@ input, textarea {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.loading-images {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  text-align: center;
+  color: #666;
+}
+
+.small-spinner {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 15px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #00c3ff;
+  animation: spin 1s linear infinite;
 }
 </style> 

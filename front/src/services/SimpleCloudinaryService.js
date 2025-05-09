@@ -15,7 +15,7 @@ class SimpleCloudinaryService {
     this.cloudName = 'drqt6gd5v';
     this.defaultUploadPreset = 'impulsedata';
     
-    // Lista de imágenes de respaldo por si falla la API
+    // Lista de imágenes de respaldo por si falla la conexión al backend
     this.fallbackImages = [
       { publicId: 'docs/models-13', alt: 'Modelo' },
       { publicId: 'docs/models-12', alt: 'Modelo 2' },
@@ -130,35 +130,69 @@ class SimpleCloudinaryService {
   }
 
   /**
-   * Obtiene todas las imágenes disponibles en Cloudinary mediante el backend
+   * Obtiene todas las imágenes disponibles en Cloudinary a través del backend
    * @param {number} maxResults - Número máximo de resultados a obtener
    * @returns {Promise<Array>} - Promise con la lista de imágenes
    */
   async getAllImages(maxResults = 100) {
     try {
-      console.log("Intentando obtener imágenes de Cloudinary a través del backend...");
+      console.log(`Obteniendo imágenes de Cloudinary desde el backend: ${API_PATH}/cloudinary/images`);
       
-      // Usar el endpoint del backend para obtener todas las imágenes
+      // Obtener token de autenticación del localStorage si existe
+      const token = localStorage.getItem('authToken');
+      
+      // Configurar headers con el token si existe
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      
+      // Realizar petición al backend
       const response = await axios.get(`${API_PATH}/cloudinary/images`, {
         params: { maxResults },
-        // Asegurarnos de que incluya el token de autenticación
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`
-        }
+        headers
       });
       
+      console.log('Respuesta del backend (imágenes):', response.data.length);
+      
+      // Si la respuesta es válida y tiene datos, devolverlos
       if (response.data && Array.isArray(response.data)) {
-        console.log(`Se recuperaron ${response.data.length} imágenes de Cloudinary`);
-        return response.data;
+        return response.data.map(img => ({
+          publicId: img.publicId,
+          alt: img.alt || this.formatPublicIdToAlt(img.publicId),
+          url: img.url || img.secureUrl,
+          width: img.width,
+          height: img.height
+        }));
       } else {
-        console.warn("La respuesta del backend no es válida, usando imágenes de respaldo");
+        console.warn('El backend devolvió un formato inesperado, usando imágenes de respaldo');
         return this.fallbackImages;
       }
     } catch (error) {
-      console.error('Error al obtener imágenes de Cloudinary desde el backend:', error);
-      console.log("Usando imágenes de respaldo debido al error");
+      console.error('Error al obtener imágenes del backend:', error);
+      console.log('Usando imágenes de respaldo debido al error');
       return this.fallbackImages;
     }
+  }
+  
+  /**
+   * Formatea un publicId para usarlo como texto alternativo
+   * @param {string} publicId - ID público de la imagen
+   * @returns {string} - Texto formateado para alt
+   */
+  formatPublicIdToAlt(publicId) {
+    if (!publicId) return 'Imagen';
+    
+    // Extraer el nombre del archivo sin la ruta
+    const fileName = publicId.split('/').pop();
+    
+    // Reemplazar guiones y guiones bajos por espacios
+    const formatted = fileName
+      .replace(/[-_]/g, ' ')
+      .replace(/\.\w+$/, ''); // Eliminar extensión si existe
+    
+    // Capitalizar primera letra de cada palabra
+    return formatted
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 }
 
