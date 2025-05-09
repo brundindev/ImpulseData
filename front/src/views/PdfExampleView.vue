@@ -103,9 +103,24 @@
       <!-- Vista previa con la plantilla de PlantillaPDF -->
       <div class="preview-panel">
         <h2>Vista Previa</h2>
-        <div ref="pdfTemplate" class="pdf-template">
-          <!-- Contenedor para insertar la plantilla de PlantillaPDF -->
-          <div id="plantilla-container" class="a4-container" v-html="plantillaHTML"></div>
+        <div class="pdf-wrapper">
+          <div ref="pdfTemplate" class="pdf-template">
+            <!-- Contenedor para insertar la plantilla de PlantillaPDF -->
+            <div id="plantilla-container" class="a4-container" v-html="plantillaHTML"></div>
+          </div>
+        </div>
+        
+        <!-- Controles de vista previa -->
+        <div class="preview-controls">
+          <button class="btn-zoom-in" @click="zoomIn" title="Aumentar zoom">
+            <span>+</span>
+          </button>
+          <button class="btn-zoom-out" @click="zoomOut" title="Reducir zoom">
+            <span>-</span>
+          </button>
+          <button class="btn-reset-zoom" @click="resetZoom" title="Restablecer zoom">
+            <span>100%</span>
+          </button>
         </div>
       </div>
       
@@ -184,6 +199,12 @@ const empresa = ref(null);
 
 // Plantilla HTML generada a partir de PlantillaPDF.js
 const plantillaHTML = ref("");
+
+// Control de zoom para la vista previa
+const zoomLevel = ref(0.9); // Nivel inicial de zoom (90%)
+const maxZoom = 1.5; // Zoom máximo 150%
+const minZoom = 0.5; // Zoom mínimo 50%
+const zoomStep = 0.1; // Incremento/decremento de zoom
 
 // Opciones del PDF
 const pdfOptions = reactive({
@@ -293,6 +314,18 @@ const loadPlantillaHTML = async () => {
       if (container) {
         // Forzar la actualización del DOM con el contenido original
         container.innerHTML = htmlTemplate;
+        
+        // Asegurarse de que todos los estilos se apliquen correctamente
+        const pages = container.querySelectorAll('.page');
+        pages.forEach(page => {
+          page.style.width = '100%';
+          page.style.minHeight = 'auto';
+          page.style.position = 'relative';
+          page.style.overflow = 'hidden';
+          page.style.backgroundColor = 'white';
+          page.style.margin = '0';
+          page.style.padding = '0';
+        });
       }
     }, 100);
   } catch (error) {
@@ -790,6 +823,11 @@ const loadData = async () => {
     // Cargar la plantilla HTML
     await loadPlantillaHTML();
     
+    // Aplicar zoom inicial después de que la plantilla se haya cargado
+    setTimeout(() => {
+      applyZoom();
+    }, 300);
+    
     // Cargar imágenes disponibles desde Cloudinary a través del backend
     try {
       loadingMessage.value = 'Cargando imágenes disponibles...';
@@ -826,6 +864,27 @@ onMounted(async () => {
   // Primero verificar autenticación
   if (await verifyAuth()) {
     await loadData();
+    
+    // Inicializar observador para ajustar zoom cuando cambien los estilos o el DOM
+    const observer = new MutationObserver(() => {
+      applyZoom();
+    });
+    
+    // Observar el contenedor de la plantilla
+    const container = document.getElementById('plantilla-container');
+    if (container) {
+      observer.observe(container, { 
+        childList: true, 
+        subtree: true, 
+        attributes: true,
+        characterData: true 
+      });
+    }
+    
+    // Aplicar zoom inicial después de un breve retraso para permitir la renderización completa
+    setTimeout(() => {
+      applyZoom();
+    }, 500);
   }
 });
 
@@ -835,6 +894,44 @@ watch(pdfOptions, async () => {
     await loadPlantillaHTML();
   }
 }, { deep: true });
+
+// Función para aumentar zoom
+const zoomIn = () => {
+  if (zoomLevel.value < maxZoom) {
+    zoomLevel.value = Math.min(maxZoom, zoomLevel.value + zoomStep);
+    applyZoom();
+  }
+};
+
+// Función para reducir zoom
+const zoomOut = () => {
+  if (zoomLevel.value > minZoom) {
+    zoomLevel.value = Math.max(minZoom, zoomLevel.value - zoomStep);
+    applyZoom();
+  }
+};
+
+// Función para restablecer zoom
+const resetZoom = () => {
+  zoomLevel.value = 0.9;
+  applyZoom();
+};
+
+// Aplicar nivel de zoom a la plantilla
+const applyZoom = () => {
+  const container = document.querySelector('.a4-container');
+  if (container) {
+    container.style.transform = `scale(${zoomLevel.value})`;
+    
+    // Ajustar el margen si es necesario para centrar mejor
+    if (zoomLevel.value !== 1) {
+      const marginAdjustment = ((1 - zoomLevel.value) * 100) / 2;
+      container.style.marginTop = zoomLevel.value < 1 ? `${marginAdjustment}px` : '0';
+    } else {
+      container.style.marginTop = '0';
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -1083,13 +1180,60 @@ input, textarea {
 
 .preview-panel {
   margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview-panel h2 {
+  margin-bottom: 15px;
+  color: #004698;
+}
+
+.pdf-wrapper {
+  width: 210mm; /* Tamaño A4 */
+  margin: 0 auto;
+  background-color: white;
+  position: relative;
+  overflow: visible;
+  padding: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .pdf-template {
   width: 210mm; /* Tamaño A4 */
   margin: 0 auto;
   background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: visible;
+  padding: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.preview-controls {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-zoom-in, .btn-zoom-out, .btn-reset-zoom {
+  background: linear-gradient(90deg, #00c3ff, #00ff8c);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.btn-zoom-in:hover, .btn-zoom-out:hover, .btn-reset-zoom:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .action-buttons {
@@ -1166,16 +1310,48 @@ input, textarea {
   margin: 0 auto;
   padding: 10mm;
   background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
+  transform-origin: top center;
+}
+
+.pdf-template {
+  width: 210mm; /* Tamaño A4 */
+  margin: 0 auto;
+  background-color: white;
+  position: relative;
+  overflow: visible;
+  padding: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.preview-panel {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview-panel h2 {
+  margin-bottom: 15px;
+  color: #004698;
 }
 
 @media screen {
   .a4-container {
     border: 1px solid #ddd;
+  }
+  
+  /* Contenedor con scroll para evitar problemas en pantallas pequeñas */
+  .pdf-template {
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 1rem;
+    border-radius: 4px;
   }
 }
 
@@ -1190,6 +1366,18 @@ input, textarea {
     height: 100%;
     box-shadow: none;
     border: none;
+    transform: scale(1);
+  }
+  
+  /* Ocultar elementos que no deben imprimirse */
+  .options-panel, .action-buttons, .preview-panel h2 {
+    display: none;
+  }
+  
+  /* El contenedor de vista previa ocupa toda la página */
+  .preview-panel {
+    margin: 0;
+    padding: 0;
   }
 }
 </style> 
