@@ -125,21 +125,55 @@
           No hay imágenes disponibles.
         </div>
         
-        <div v-else class="image-grid">
-          <div 
-            v-for="image in availableImages" 
-            :key="image.publicId" 
-            class="image-thumbnail-container"
-            @click="selectAvailableImage(image.publicId)"
-          >
-            <img 
-              :src="getCloudinaryUrl(image.publicId, { width: 100, height: 100 })" 
-              :alt="image.alt"
-              class="image-thumbnail"
-              @error="handleImageLoadError"
-              loading="lazy"
+        <div v-else>
+          <!-- Filtro de imágenes -->
+          <div class="image-filter">
+            <input 
+              type="text" 
+              v-model="imageFilter" 
+              placeholder="Buscar imágenes..." 
+              @input="filterImages"
+              class="image-search"
             />
-            <div class="image-name">{{ image.alt }}</div>
+          </div>
+          
+          <div class="image-grid">
+            <div 
+              v-for="image in paginatedImages" 
+              :key="image.publicId" 
+              class="image-thumbnail-container"
+              @click="selectAvailableImage(image.publicId)"
+            >
+              <img 
+                :src="getCloudinaryUrl(image.publicId, { width: 100, height: 100 })" 
+                :alt="image.alt"
+                class="image-thumbnail"
+                @error="handleImageLoadError"
+                loading="lazy"
+              />
+              <div class="image-name">{{ image.alt }}</div>
+            </div>
+          </div>
+          
+          <!-- Paginación -->
+          <div v-if="totalPages > 1" class="pagination">
+            <button 
+              @click="currentPage > 1 && (currentPage--)" 
+              :disabled="currentPage === 1"
+              class="pagination-button"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
+            
+            <button 
+              @click="currentPage < totalPages && (currentPage++)" 
+              :disabled="currentPage === totalPages"
+              class="pagination-button"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
           </div>
         </div>
         
@@ -238,8 +272,46 @@ const showImageSelector = ref(false);
 const currentImageType = ref(''); // 'logo' o 'pdf'
 const uploadStatus = ref('');
 
-// Imágenes disponibles
-const availableImages = ref([]);
+// Paginación y filtrado
+const allAvailableImages = ref([]);
+const imageFilter = ref('');
+const currentPage = ref(1);
+const imagesPerPage = ref(24); // Mostrar 24 imágenes por página (4x6 grid)
+
+// Filtrar imágenes basado en el texto de búsqueda
+const filteredImages = computed(() => {
+  if (!imageFilter.value.trim()) {
+    return allAvailableImages.value;
+  }
+  
+  const searchTerm = imageFilter.value.toLowerCase().trim();
+  return allAvailableImages.value.filter(img => {
+    return img.alt.toLowerCase().includes(searchTerm) || 
+           img.publicId.toLowerCase().includes(searchTerm);
+  });
+});
+
+// Calcular el total de páginas
+const totalPages = computed(() => {
+  return Math.ceil(filteredImages.value.length / imagesPerPage.value);
+});
+
+// Obtener las imágenes de la página actual
+const paginatedImages = computed(() => {
+  const startIndex = (currentPage.value - 1) * imagesPerPage.value;
+  const endIndex = startIndex + imagesPerPage.value;
+  return filteredImages.value.slice(startIndex, endIndex);
+});
+
+// Resetear a la primera página cuando cambia el filtro
+const filterImages = () => {
+  currentPage.value = 1;
+};
+
+// Disponibilidad de imágenes para la UI
+const availableImages = computed(() => {
+  return filteredImages.value;
+});
 
 // Dentro del script, añadir estas variables reactivas
 const isGenerating = ref(false);
@@ -352,7 +424,7 @@ const handleFileSelect = async (event) => {
       uploadStatus.value = 'Imagen subida correctamente.';
       
       // También añadir a las disponibles
-      availableImages.value.push({
+      allAvailableImages.value.push({
         publicId,
         alt: file.name
       });
@@ -747,7 +819,7 @@ const loadAvailableImages = () => {
   SimpleCloudinaryService.getAllImages()
     .then(images => {
       console.log('Imágenes cargadas:', images.length);
-      availableImages.value = images;
+      allAvailableImages.value = images;
     })
     .catch(error => {
       console.error('Error al cargar imágenes:', error);
@@ -786,10 +858,10 @@ onMounted(async () => {
       
       const images = await SimpleCloudinaryService.getAllImages(50);
       if (images && images.length > 0) {
-        availableImages.value = images;
+        allAvailableImages.value = images;
       }
       
-      console.log('Imágenes cargadas correctamente:', availableImages.value.length);
+      console.log('Imágenes cargadas correctamente:', allAvailableImages.value.length);
     } catch (imageError) {
       console.error('Error al cargar imágenes:', imageError);
       // Mantenemos las imágenes por defecto
@@ -1151,5 +1223,46 @@ input, textarea {
   border: 3px solid #f3f3f3;
   border-top: 3px solid #00c3ff;
   animation: spin 1s linear infinite;
+}
+
+.image-filter {
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.image-search {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.pagination-button {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px 10px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  margin: 0 10px;
+  font-size: 14px;
+  color: #666;
 }
 </style> 
