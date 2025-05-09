@@ -108,38 +108,39 @@
       </button>
     </div>
     
-    <!-- Diálogo para seleccionar imágenes -->
-    <div v-if="showImageSelector" class="image-selector-overlay">
-      <div class="image-selector-dialog">
-        <h3>Seleccionar Imagen</h3>
+    <!-- Selector de Imágenes -->
+    <div v-if="showImageSelector" class="image-selector">
+      <div class="image-selector-header">
+        <h3>Selecciona una imagen</h3>
+        <button @click="showImageSelector = false" class="close-button">×</button>
+      </div>
+      
+      <div class="image-selector-content">
+        <div v-if="availableImages.length === 0" class="no-images">
+          No hay imágenes disponibles.
+        </div>
         
-        <!-- Opciones para cargar imagen -->
+        <div class="image-grid">
+          <div 
+            v-for="image in availableImages" 
+            :key="image.publicId" 
+            class="image-thumbnail-container"
+            @click="selectAvailableImage(image.publicId)"
+          >
+            <img 
+              :src="getCloudinaryUrl(image.publicId, { width: 100, height: 100 })" 
+              :alt="image.alt"
+              class="image-thumbnail"
+              @error="handleImageLoadError"
+            />
+            <div class="image-name">{{ image.alt }}</div>
+          </div>
+        </div>
+        
         <div class="upload-section">
-          <input type="file" @change="handleFileSelect" accept="image/*" ref="fileInput" />
-          <button @click="$refs.fileInput.click()" class="btn-upload">Seleccionar archivo</button>
-          
-          <div v-if="uploadStatus" class="upload-status">
-            {{ uploadStatus }}
-          </div>
-        </div>
-        
-        <!-- Imágenes disponibles -->
-        <div class="available-images">
-          <h4>Imágenes disponibles:</h4>
-          <div class="images-grid">
-            <div v-for="image in availableImages" :key="image.publicId" class="grid-item">
-              <img 
-                :src="getCloudinaryUrl(image.publicId, {width: 100})" 
-                alt="Imagen disponible" 
-                class="preview-image"
-                @click="selectAvailableImage(image.publicId)"
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div class="dialog-buttons">
-          <button @click="showImageSelector = false" class="btn-cancel">Cancelar</button>
+          <p>O sube una nueva imagen:</p>
+          <input type="file" ref="fileInput" @change="handleFileSelect" accept="image/*" />
+          <div v-if="uploadStatus" class="upload-status">{{ uploadStatus }}</div>
         </div>
       </div>
     </div>
@@ -194,6 +195,8 @@ const intervaloVerificacion = setInterval(verificarSesion, 5000);
 onMounted(() => {
   console.log("Componente PDF montado correctamente");
   verificarSesion();
+  loadPlantillaHTML();
+  loadAvailableImages();
 });
 
 onUnmounted(() => {
@@ -225,10 +228,11 @@ const uploadStatus = ref('');
 
 // Imágenes disponibles
 const availableImages = ref([
-  { publicId: 'sample', alt: 'Muestra general' },
-  { publicId: 'samples/landscapes/nature-mountains', alt: 'Montañas' },
-  { publicId: 'samples/food/pot-mussels', alt: 'Comida' },
-  { publicId: 'samples/ecommerce/accessories-bag', alt: 'Producto' }
+  { publicId: 'samples/people/smiling-man', alt: 'Persona sonriente' },
+  { publicId: 'samples/landscapes/beach-boat', alt: 'Playa con barco' },
+  { publicId: 'samples/food/dessert', alt: 'Postre' },
+  { publicId: 'samples/animals/cat', alt: 'Gato' },
+  { publicId: 'samples/ecommerce/leather-bag-gray', alt: 'Bolso de cuero' }
 ]);
 
 // Dentro del script, añadir estas variables reactivas
@@ -237,7 +241,7 @@ const loadingMessage = ref('');
 
 // Función para obtener URL de Cloudinary
 const getCloudinaryUrl = (publicId, options = {}) => {
-  if (!publicId) return '';
+  if (!publicId) return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1/samples/cloudinary-icon';
   
   const { width, height, format, quality } = options;
   
@@ -249,7 +253,7 @@ const getCloudinaryUrl = (publicId, options = {}) => {
   if (width) transformations.push(`w_${width}`);
   if (height) transformations.push(`h_${height}`);
   if (format && format !== 'auto') transformations.push(`f_${format}`);
-  if (quality && quality !== 'auto') transformations.push(`q_${quality}`);
+  if (quality && quality !== 'auto') transformations.push(`q_auto`);
   else transformations.push('q_auto');
   
   // Añadir transformaciones a la URL
@@ -732,6 +736,19 @@ const generatePdf = async () => {
   }
 };
 
+// Cargar imágenes disponibles desde Cloudinary
+const loadAvailableImages = async () => {
+  try {
+    const images = await SimpleCloudinaryService.getAllImages();
+    if (images && images.length > 0) {
+      availableImages.value = images;
+    }
+  } catch (error) {
+    console.error("Error al cargar imágenes disponibles:", error);
+    // Mantener las imágenes por defecto
+  }
+};
+
 // Al montar el componente, recuperar los datos de la empresa y cargar la plantilla
 onMounted(async () => {
   try {
@@ -781,6 +798,13 @@ onMounted(async () => {
 watch(pdfOptions, async () => {
   await loadPlantillaHTML();
 }, { deep: true });
+
+// Manejar error de carga de imagen
+const handleImageLoadError = (event) => {
+  // Reemplazar la imagen que falló con una imagen de reemplazo
+  event.target.src = 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1/samples/cloudinary-icon';
+  console.warn('Error al cargar la imagen:', event.target.alt);
+};
 </script>
 
 <style scoped>
@@ -923,7 +947,7 @@ input, textarea {
 }
 
 /* Selector de imágenes */
-.image-selector-overlay {
+.image-selector {
   position: fixed;
   top: 0;
   left: 0;
@@ -936,27 +960,77 @@ input, textarea {
   z-index: 1000;
 }
 
-.image-selector-dialog {
+.image-selector-header {
   background: white;
-  border-radius: 8px;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.image-selector-content {
+  background: white;
   padding: 20px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-  width: 80%;
-  max-width: 800px;
+  border-radius: 8px;
+  max-width: 80%;
   max-height: 80vh;
   overflow-y: auto;
 }
 
+.no-images {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.image-thumbnail-container {
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  padding: 5px;
+  transition: all 0.2s;
+}
+
+.image-thumbnail-container:hover {
+  border-color: #00c3ff;
+  transform: scale(1.05);
+}
+
+.image-thumbnail {
+  max-width: 100%;
+  max-height: 100px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.image-name {
+  margin-top: 5px;
+  text-align: center;
+  font-size: 12px;
+  color: #333;
+}
+
 .upload-section {
-  margin: 20px 0;
+  margin-top: 20px;
   padding: 15px;
   border: 2px dashed #ddd;
   border-radius: 4px;
   text-align: center;
-}
-
-.upload-section input[type="file"] {
-  display: none;
 }
 
 .upload-status {
@@ -965,33 +1039,6 @@ input, textarea {
   border-radius: 4px;
   background: #f0f0f0;
   font-size: 14px;
-}
-
-.images-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
-}
-
-.grid-item {
-  cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 4px;
-  padding: 5px;
-  transition: all 0.2s;
-}
-
-.grid-item:hover {
-  border-color: #00c3ff;
-  transform: scale(1.05);
-}
-
-.dialog-buttons {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
 }
 
 .preview-panel {

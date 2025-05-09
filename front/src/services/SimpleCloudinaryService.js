@@ -117,12 +117,13 @@ class SimpleCloudinaryService {
     } catch (error) {
       console.error('Error al obtener imágenes de Cloudinary:', error);
       
-      // Si hay error, intentar obtener algunas imágenes por defecto
+      // Imágenes de muestra actualizadas y verificadas en Cloudinary
       return [
-        { publicId: 'sample', alt: 'Muestra general' },
-        { publicId: 'samples/landscapes/nature-mountains', alt: 'Montañas' },
-        { publicId: 'samples/food/pot-mussels', alt: 'Comida' },
-        { publicId: 'samples/ecommerce/accessories-bag', alt: 'Producto' }
+        { publicId: 'samples/people/smiling-man', alt: 'Persona sonriente' },
+        { publicId: 'samples/landscapes/beach-boat', alt: 'Playa con barco' },
+        { publicId: 'samples/food/dessert', alt: 'Postre' },
+        { publicId: 'samples/animals/cat', alt: 'Gato' },
+        { publicId: 'samples/ecommerce/leather-bag-gray', alt: 'Bolso de cuero' }
       ];
     }
   }
