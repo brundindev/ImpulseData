@@ -1,113 +1,122 @@
 <template>
   <div class="pdf-example-view">
-    <h1>Generación de PDF de {{ empresa ? empresa.nombre : 'Empresa' }}</h1>
+    <!-- Mensaje cuando la autenticación está en progreso -->
+    <div v-if="!authVerified" class="auth-checking">
+      <div class="auth-spinner"></div>
+      <p>Verificando sesión...</p>
+    </div>
     
-    <div class="options-panel">
-      <h2>Opciones del PDF</h2>
+    <!-- Contenido principal cuando el usuario está autenticado -->
+    <div v-else>
+      <h1>Generación de PDF de {{ empresa ? empresa.nombre : 'Empresa' }}</h1>
       
-      <!-- Opciones básicas -->
-      <div class="form-group">
-        <label for="title">Título:</label>
-        <input id="title" v-model="pdfOptions.title" type="text" />
-      </div>
-      
-      <div class="form-group">
-        <label for="subtitle">Subtítulo:</label>
-        <input id="subtitle" v-model="pdfOptions.subtitle" type="text" />
-      </div>
-      
-      <div class="form-group">
-        <label for="description">Descripción:</label>
-        <textarea id="description" v-model="pdfOptions.description" rows="3"></textarea>
-      </div>
-      
-      <div class="form-group">
-        <label for="filename">Nombre del archivo:</label>
-        <input id="filename" v-model="pdfOptions.filename" type="text" />
-      </div>
-      
-      <!-- Selector de logo -->
-      <div class="form-group">
-        <label>Logo:</label>
-        <div class="logo-selector">
-          <img 
-            v-if="pdfOptions.logoPublicId" 
-            :src="getCloudinaryUrl(pdfOptions.logoPublicId, {width: 100})" 
-            alt="Logo" 
-            class="preview-image"
-          />
-          <button @click="selectImage('logo')" class="btn-select">Seleccionar Logo</button>
+      <div class="options-panel">
+        <h2>Opciones del PDF</h2>
+        
+        <!-- Opciones básicas -->
+        <div class="form-group">
+          <label for="title">Título:</label>
+          <input id="title" v-model="pdfOptions.title" type="text" />
         </div>
-      </div>
-      
-      <!-- Selector de imágenes -->
-      <div class="form-group">
-        <label>Imágenes:</label>
-        <div class="images-list">
-          <div v-for="(image, index) in pdfOptions.images" :key="index" class="image-item">
+        
+        <div class="form-group">
+          <label for="subtitle">Subtítulo:</label>
+          <input id="subtitle" v-model="pdfOptions.subtitle" type="text" />
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Descripción:</label>
+          <textarea id="description" v-model="pdfOptions.description" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="filename">Nombre del archivo:</label>
+          <input id="filename" v-model="pdfOptions.filename" type="text" />
+        </div>
+        
+        <!-- Selector de logo -->
+        <div class="form-group">
+          <label>Logo:</label>
+          <div class="logo-selector">
             <img 
-              :src="getCloudinaryUrl(image.publicId, {width: 100})" 
-              :alt="image.alt || 'Imagen'" 
+              v-if="pdfOptions.logoPublicId" 
+              :src="getCloudinaryUrl(pdfOptions.logoPublicId, {width: 100})" 
+              alt="Logo" 
               class="preview-image"
             />
-            <div class="image-item-controls">
-              <input v-model="image.caption" placeholder="Título de la imagen" />
-              <button @click="removeImage(index)" class="btn-remove">Eliminar</button>
-            </div>
+            <button @click="selectImage('logo')" class="btn-select">Seleccionar Logo</button>
           </div>
-          <button @click="selectImage('pdf')" class="btn-add">Añadir Imagen</button>
+        </div>
+        
+        <!-- Selector de imágenes -->
+        <div class="form-group">
+          <label>Imágenes:</label>
+          <div class="images-list">
+            <div v-for="(image, index) in pdfOptions.images" :key="index" class="image-item">
+              <img 
+                :src="getCloudinaryUrl(image.publicId, {width: 100})" 
+                :alt="image.alt || 'Imagen'" 
+                class="preview-image"
+              />
+              <div class="image-item-controls">
+                <input v-model="image.caption" placeholder="Título de la imagen" />
+                <button @click="removeImage(index)" class="btn-remove">Eliminar</button>
+              </div>
+            </div>
+            <button @click="selectImage('pdf')" class="btn-add">Añadir Imagen</button>
+          </div>
+        </div>
+        
+        <!-- Opciones de tabla -->
+        <div class="form-group">
+          <label>Tabla de datos:</label>
+          <button @click="addTableRow" class="btn-add">Añadir Fila</button>
+          <table class="editable-table" v-if="pdfOptions.tableData.length > 0">
+            <thead>
+              <tr>
+                <th v-for="(header, index) in pdfOptions.tableHeaders" :key="index">
+                  <input v-model="pdfOptions.tableHeaders[index]" placeholder="Encabezado" />
+                </th>
+                <th v-if="pdfOptions.tableHeaders.length > 0">Acciones</th>
+                <th v-else>
+                  <button @click="addTableColumn" class="btn-add-sm">+</button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, rowIndex) in pdfOptions.tableData" :key="rowIndex">
+                <td v-for="(cell, cellIndex) in row" :key="cellIndex">
+                  <input v-model="pdfOptions.tableData[rowIndex][cellIndex]" placeholder="Dato" />
+                </td>
+                <td>
+                  <button @click="removeTableRow(rowIndex)" class="btn-remove-sm">Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-else class="empty-table-message">
+            <p>No hay datos en la tabla. Añade una fila para comenzar.</p>
+          </div>
         </div>
       </div>
       
-      <!-- Opciones de tabla -->
-      <div class="form-group">
-        <label>Tabla de datos:</label>
-        <button @click="addTableRow" class="btn-add">Añadir Fila</button>
-        <table class="editable-table" v-if="pdfOptions.tableData.length > 0">
-          <thead>
-            <tr>
-              <th v-for="(header, index) in pdfOptions.tableHeaders" :key="index">
-                <input v-model="pdfOptions.tableHeaders[index]" placeholder="Encabezado" />
-              </th>
-              <th v-if="pdfOptions.tableHeaders.length > 0">Acciones</th>
-              <th v-else>
-                <button @click="addTableColumn" class="btn-add-sm">+</button>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, rowIndex) in pdfOptions.tableData" :key="rowIndex">
-              <td v-for="(cell, cellIndex) in row" :key="cellIndex">
-                <input v-model="pdfOptions.tableData[rowIndex][cellIndex]" placeholder="Dato" />
-              </td>
-              <td>
-                <button @click="removeTableRow(rowIndex)" class="btn-remove-sm">Eliminar</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div v-else class="empty-table-message">
-          <p>No hay datos en la tabla. Añade una fila para comenzar.</p>
+      <!-- Vista previa con la plantilla de PlantillaPDF -->
+      <div class="preview-panel">
+        <h2>Vista Previa</h2>
+        <div ref="pdfTemplate" class="pdf-template">
+          <!-- Contenedor para insertar la plantilla de PlantillaPDF -->
+          <div id="plantilla-container" class="a4-container" v-html="plantillaHTML"></div>
         </div>
       </div>
-    </div>
-    
-    <!-- Vista previa con la plantilla de PlantillaPDF -->
-    <div class="preview-panel">
-      <h2>Vista Previa</h2>
-      <div ref="pdfTemplate" class="pdf-template">
-        <!-- Contenedor para insertar la plantilla de PlantillaPDF -->
-        <div id="plantilla-container" class="a4-container" v-html="plantillaHTML"></div>
+      
+      <!-- Botón para generar el PDF -->
+      <div class="action-buttons">
+        <button @click="generatePdf" class="pdf-button">
+          Generar PDF
+        </button>
       </div>
     </div>
-    
-    <!-- Botón para generar el PDF -->
-    <div class="action-buttons">
-      <button @click="generatePdf" class="pdf-button">
-        Generar PDF
-      </button>
-    </div>
-    
+
     <!-- Diálogo para seleccionar imágenes -->
     <div v-if="showImageSelector" class="image-selector-overlay">
       <div class="image-selector-dialog">
@@ -156,10 +165,15 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { crearPlantillaPDF, html } from '../utils/PlantillaPDF';
 import html2canvas from 'html2canvas';
 import SimpleCloudinaryService from '../services/SimpleCloudinaryService';
+import AuthService from '../services/AuthService';
 import jsPDF from 'jspdf';
+
+// Router para redirecciones
+const router = useRouter();
 
 // Referencias a elementos del DOM
 const pdfTemplate = ref(null);
@@ -204,6 +218,35 @@ const availableImages = ref([
 // Dentro del script, añadir estas variables reactivas
 const isGenerating = ref(false);
 const loadingMessage = ref('');
+const authVerified = ref(false);
+
+// Verificar la autenticación antes de continuar
+const verifyAuth = async () => {
+  try {
+    // Verificar si hay un token de autenticación
+    if (!AuthService.isAuthenticated()) {
+      console.warn('Usuario no autenticado, redirigiendo a login...');
+      router.push('/login');
+      return false;
+    }
+    
+    // Intentar obtener el usuario actual
+    const currentUser = AuthService.getCurrentUser();
+    if (!currentUser) {
+      console.warn('No se pudo obtener datos del usuario, redirigiendo a login...');
+      router.push('/login');
+      return false;
+    }
+    
+    // Autenticación verificada
+    console.log('Usuario autenticado correctamente:', currentUser.email);
+    authVerified.value = true;
+    return true;
+  } catch (error) {
+    console.error('Error al verificar autenticación:', error);
+    return false;
+  }
+};
 
 // Función para obtener URL de Cloudinary
 const getCloudinaryUrl = (publicId, options = {}) => {
@@ -329,7 +372,12 @@ const handleFileSelect = async (event) => {
     }
   } catch (error) {
     console.error('Error al subir la imagen:', error);
-    if (error.response && error.response.data) {
+    if (error.response && error.response.status === 401) {
+      uploadStatus.value = 'Error de autenticación. Por favor, inicia sesión nuevamente.';
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+    } else if (error.response && error.response.data) {
       console.error('Error de Cloudinary:', error.response.data);
       uploadStatus.value = `Error: ${error.response.data.error?.message || 'Verifica tu upload_preset en Cloudinary'}`;
     } else {
@@ -367,6 +415,11 @@ const addTableColumn = () => {
 
 // Método para generar el PDF a partir de la plantilla HTML mostrada en la vista previa
 const generatePdf = async () => {
+  // Verificar autenticación antes de continuar
+  if (!authVerified.value && !(await verifyAuth())) {
+    return;
+  }
+  
   try {
     // Activar indicador de carga
     isGenerating.value = true;
@@ -617,6 +670,15 @@ const generatePdf = async () => {
   } catch (error) {
     console.error('Error al generar el PDF:', error);
     
+    // Verificar si es un error de autenticación
+    if (error.response && error.response.status === 401) {
+      loadingMessage.value = 'Sesión expirada. Redirigiendo al login...';
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+      return;
+    }
+    
     // Intentar método alternativo si falla el principal
     loadingMessage.value = 'Intentando método alternativo...';
     
@@ -702,9 +764,14 @@ const generatePdf = async () => {
   }
 };
 
-// Al montar el componente, recuperar los datos de la empresa y cargar la plantilla
-onMounted(async () => {
+// Función para cargar datos
+const loadData = async () => {
   try {
+    // Verificar autenticación antes de cargar datos
+    if (!authVerified.value && !(await verifyAuth())) {
+      return;
+    }
+    
     // Obtener datos de empresa desde localStorage
     const empresaData = localStorage.getItem('empresa_pdf');
     if (empresaData) {
@@ -736,20 +803,37 @@ onMounted(async () => {
       console.log('Imágenes cargadas correctamente:', availableImages.value.length);
     } catch (imageError) {
       console.error('Error al cargar imágenes:', imageError);
+      // Verificar si es un error de autenticación
+      if (imageError.response && imageError.response.status === 401) {
+        console.warn('Sesión expirada al cargar imágenes, redirigiendo a login...');
+        // No redirigir automáticamente para evitar bucles, usar las imágenes por defecto
+      }
       // Mantenemos las imágenes por defecto
     } finally {
       loadingMessage.value = '';
       isGenerating.value = false;
     }
-    
   } catch (error) {
     console.error('Error al inicializar componente:', error);
+    if (error.response && error.response.status === 401) {
+      console.warn('Error de autenticación, se usarán datos por defecto');
+    }
+  }
+};
+
+// Al montar el componente, recuperar los datos de la empresa y cargar la plantilla
+onMounted(async () => {
+  // Primero verificar autenticación
+  if (await verifyAuth()) {
+    await loadData();
   }
 });
 
 // Actualizar la plantilla cuando cambian las opciones
 watch(pdfOptions, async () => {
-  await loadPlantillaHTML();
+  if (authVerified.value) {
+    await loadPlantillaHTML();
+  }
 }, { deep: true });
 </script>
 
@@ -761,6 +845,39 @@ watch(pdfOptions, async () => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+/* Estilos para el componente de verificación de autenticación */
+.auth-checking {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 70, 152, 0.1);
+  border-top: 4px solid #004698;
+  border-radius: 50%;
+  animation: auth-spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes auth-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.auth-checking p {
+  font-size: 16px;
+  font-weight: bold;
+  color: #004698;
 }
 
 h1 {

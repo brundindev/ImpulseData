@@ -109,8 +109,25 @@ class SimpleCloudinaryService {
    */
   async getAllImages(maxResults = 100) {
     try {
-      const response = await axios.get(`${API_PATH}/cloudinary/images`, {
-        params: { maxResults }
+      // Verificar si hay un token de autenticación antes de hacer la petición
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.warn('No hay token de autenticación para obtener imágenes');
+        // Retornar imágenes por defecto en lugar de hacer la solicitud
+        return [
+          { publicId: 'sample', alt: 'Muestra general' },
+          { publicId: 'samples/landscapes/nature-mountains', alt: 'Montañas' },
+          { publicId: 'samples/food/pot-mussels', alt: 'Comida' },
+          { publicId: 'samples/ecommerce/accessories-bag', alt: 'Producto' }
+        ];
+      }
+      
+      // Usar axios sin interceptores para evitar redireccionamiento automático
+      const response = await cloudinaryAxios.get(`${API_PATH}/cloudinary/images`, {
+        params: { maxResults },
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       return response.data;
