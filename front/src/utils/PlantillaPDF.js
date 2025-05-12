@@ -1202,6 +1202,8 @@ tbody tr:nth-child(even) {
                               </ul>
                           </li>
                     </ul>
+            </section>
+            <section id="indice" class="page section-indice">
                     <h3>3. DEPARTAMENTO DE PROMOCIÓN ECONÓMICA</h3>
                      <ul>
                          <li>3.1 PROGRAMAS DE FOMENTO DE EMPRENDIMIENTO
@@ -1339,7 +1341,12 @@ tbody tr:nth-child(even) {
                         <div class="stat-block"><strong>Presupuesto ejecutado:</strong> 5.025.482,34 €</div>
                          <div class="stat-block"><strong>Porcentaje de ejecución:</strong> 84,84%</div>
                      </div>
-                     <h3>Indicadores Clave 2025</h3>
+            </div>
+            </div>
+        </section>
+        <section id="agencia-local" class="page section-agencia">
+                   <div class="stats-container budget-stats"> <div class="stats-container key-indicators">  <h3>Indicadores Clave 2025</h3>
+            <div class="stats-container budget-stats">
                     <div class="stats-container key-indicators">
                          <div class="indicator"><strong>Total usuarios:</strong> 11.662</div>
                          <div class="indicator"><strong>Nuevos usuarios:</strong> 1.979</div>
@@ -1349,6 +1356,14 @@ tbody tr:nth-child(even) {
                          <div class="indicator"><strong>Puestos de trabajo (ofertados/gestionados):</strong> 2.038</div>
                          <div class="indicator"><strong>Personas contratadas:</strong> 338</div>
                          <div class="indicator"><strong>Actividades formativas:</strong> 248</div>
+                    </div>
+            </div>
+            </div>
+            </div>
+        </section>
+        <section id="agencia-local" class="page section-agencia">
+        <div class="stats-container budget-stats">
+                    <div class="stats-container key-indicators">
                          <div class="indicator"><strong>Horas de formación:</strong> 6.881</div>
                          <div class="indicator"><strong>Participantes en actividades formativas:</strong> 3.389</div>
                          <div class="indicator"><strong>Asesoramiento empresas y emprendedores:</strong> 913</div>
@@ -1357,8 +1372,9 @@ tbody tr:nth-child(even) {
                          <img src="" alt="Placeholder Imagen 11 - Ayudas concedidas" class="image-placeholder" style="width: 90%; height: 100px; flex-basis: 100%; margin-top: 15px;">
                     </div>
                  </div>
-
-                 <div class="content-block"> <h3>1.2 QUÉ HACEMOS</h3>
+        </section>
+        <section id="agencia-local" class="page section-agencia"> 
+                  <div class="stats-container budget-stats"> <div class="stats-container key-indicators"><div class="content-block"> <h3>1.2 QUÉ HACEMOS</h3>
                      <img src="" alt="Placeholder Imagen 12 - Departamentos" class="image-placeholder" style="width: 100%; height: 150px;">
                      <p>Desde su creación en 2000, la Agencia Local de Desarrollo Económico y Social gestiona las actuaciones del Pacto Territorial por el Empleo de Alicante, impulsando la creación de empleo y el desarrollo socioeconómico.</p>
                      <h4>Líneas Estratégicas del Pacto Territorial:</h4>
@@ -1376,9 +1392,13 @@ tbody tr:nth-child(even) {
                          <li>Departamento Económico Financiero</li>
                          <li>Departamento de Marketing y Comunicación</li>
                   </ul>
+             </div>
+            </div>
           </div>
+          </section>
+          <section id="agencia-local" class="page section-agencia">
 
-                  <div class="content-block"> <h3>1.3 CÓMO ESTAMOS ORGANIZADOS</h3>
+                 <div class="stats-container budget-stats"> <div class="stats-container key-indicators"> <div class="content-block"> <h3>1.3 CÓMO ESTAMOS ORGANIZADOS</h3>
                     <p>Organigrama (representación textual):</p>
                     <ul>
                         <li>Presidencia (Concejala de Empleo y Fomento)</li>
@@ -1409,6 +1429,10 @@ tbody tr:nth-child(even) {
                         </li>
                   </ul>
               </div>
+            </div>
+            </div>
+            </section>
+            <section id="agencia-local" class="page section-agencia">
              </div> <div class="content-block full-width-block"> <h3>1.4 DÓNDE ESTAMOS</h3>
                  <div class="locations">
                     <div class="location-block">
@@ -1480,6 +1504,8 @@ tbody tr:nth-child(even) {
                 <img src="" alt="Placeholder Imagen 26" class="image-placeholder" style="width: 48%; height: 250px;">
           </div>
 
+        </section>
+        <section id="empleo-formacion" class="page section-empleo">
             <h2>2. DEPARTAMENTO DE EMPLEO Y FORMACIÓN</h2>
              <img src="" alt="Placeholder Imagen 27 - Ilustración Salida" class="image-placeholder" style="width: 180px; height: 135px; float: right; margin: 0 0 15px 15px;">
 
@@ -1508,8 +1534,10 @@ tbody tr:nth-child(even) {
                  </div>
              </div>
              <div style="clear: both;"></div>
+         </section>
+         <section id="empleo-formacion" class="page section-empleo">    
 
-             <div class="section-content-grid columns-2"> <div class="content-block"> <h3>2.2 NUESTROS CENTROS</h3>
+             <div class="section-content-grid columns-2"> <div class="content-block">  <h3>2.2 NUESTROS CENTROS</h3>
                      <p>El Departamento cuenta con cuatro sedes...</p>
                     <h4>2.2.1 Sede Central "Puerta Ferrisa"</h4>
                     <img src="" alt="Placeholder Imagen 28" class="image-placeholder" style="width: 48%; height: 150px; display: inline-block;">
@@ -1519,7 +1547,8 @@ tbody tr:nth-child(even) {
                     <h4>2.2.2 Centro Formación Alejandrina Candela</h4>
                     <img src="" alt="Placeholder Imagen 30" class="image-placeholder" style="width: 98%; height: 150px;">
                     <h5>Servicios:</h5> <ul><li>Cursos oficiales LABORA</li><li>Talleres de empleo</li><li>Cursos con/sin certificación</li><li>Asesoramiento y orientación alumnado</li></ul> <p>Número de cursos: 20 | Alumnos/as: 272 | Horas de cursos: 6.294</p>
-
+                </section>
+                <section id="empleo-formacion" class="page section-empleo">
                     <h4>2.2.3 Centro Empleo y Formación El Tossalet</h4>
                      <div class="image-gallery-4"> <img src="" alt="Placeholder Imagen 31" class="image-placeholder" style="width: 48%; height: 100px;">
                         <img src="" alt="Placeholder Imagen 32" class="image-placeholder" style="width: 48%; height: 100px;">
@@ -1917,90 +1946,90 @@ tbody tr:nth-child(even) {
 
 // Función auxiliar para crear la plantilla HTML con el contenido personalizado
 export async function crearPlantillaPDF() {
-  try {
-    console.log("Iniciando creación de plantilla HTML para PDF...");
-    
-    // Clonar el HTML para no modificar el original
-    let htmlContent = html;
-    
-    // Asegurarnos de que las imágenes placeholders tengan un src
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-    
-    // Crear un placeholder base64 para que las imágenes se muestren
-    const placeholderImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAyCAYAAACqNX6+AAAACXBIWXMAAAsTAAALEwEAmpwYAAAEOklEQVR4nO2cW27bMBCGp4/tqkBOIJ+gQBYoeoKgJ0ib9LHICdKcoMgJmhO06QnSnCDNCdrnAn1q0RMUaFFUHiRbHJJDUpTlhUX9AwZsLNnk/OTMcGZIhyASiUQikUgkEolEIpFIJBIJGQC3AewA+ExEFRHVeATnOwBeArhTluUrpZRCYMqyxPl85iTG87wvRVG8BvDQNAullDiV1lpXSu2I6BOAt7Zt22GapnUQBOcAbpmmWRVF8SMIgg8AntByJ87X67XUdd3wOF8sFnA9DMPwptPpewBvbJ9xPp9Dr74Z3/fb0+lUl2UJ9r+UUsi9RpIkCIKgZbquqyiKQoQwRkEQFGEYVnEcV2w8Ho8ZNKSvubdwbNu2V2maXs9msz7nQRB8DcOwStO0SpKkbttW7eJFmmYvgzRNw/d9HXM+m80wHo8RRVH3dxiGKIpiy9jsMHEcFy7P7JthmiYejwej6aNlU8AZx1GD5yYZZ/oZTbmxyzXbtgMAK+YSAJ9d181cAq5WK+R5jrqudcZ93zdKszzvvM/zHEopY64cDAZ6jTzPUVUVkiS5fq7neTfcn5vNJhaLBZIkQZqmOtRxcUzT1BhKoijq5tJsNkMYhtfWjeO4832e57Bt276vj9bzDMNQuLYoCtR1jfl83pnb8zydmPM818/jue99jPP5HGVZGkGaptVoNMJ0OsVkMukSfxAE2rtc+2dZpkE+nU4Nj+TCnKbptQewx7Ixf5bCNrZarYxnHEKAKIrqXc/uDftbfZ2/1+Gfv9e29dgmjdHb29Z6z+uFHFpbWVWVMWfUdd0Zwxb+8G39Lmvc1qvfFw67lWmaOmx1eOHN3/D4tv2Mvu+39/X8IYRbzDRtbP/sMmzbNnrP42LNZKIoCjFYE1qWpXMYyPNcex7P8ZozGAwwHA61l7TZF7WKQ0N7XVmWsG0bWutdszyluztN0yBJEjx6Bq7VYV0FjhXGLr7BVWy+7/J1vqZpGq5Xw3VdreVf+UJR6z4nk8lRnmDbtl4D1zE7RJvN5ufKWblc7lu/0xxZlv242Gw2Z7VWL9brNd4DuNh33fF4/LFt20daa6SXl/h0B0CWZZfX/ZjF9/0zz/POLcu6hcNNWqc+1ut1q5TaAri8q/HiOP7ouq5mE4bhrWVZr3dd53neudZ6DeDxnzbnE631h9VqhbeMw3AThqH2CsZdxnQ6RV8Gd5V0NptBa90J2uXlJebz+d7wF4YhkiTRibxvTsuy+o5PuOXuqxZt2z6zbdto8PaVf1mWbTrUXQqKfrXJ11xVk4aN4V1N4b7yvq+87Hv+vtptX9PXtc8xjd9Vfai27P8aR7fOl2XZjSAIHpRluX848y5clPXvvI2zzp+/ZXkL4P6h+0QikUgkEolEIpFIJBKJRCLRb9UvkR6lzA/rWkAAAAAASUVORK5CYII=';
-    
-    // Reemplazar todas las imágenes placeholder vacías o con URLs inválidas
-    // y hacer que todas las imágenes sean seleccionables
-    const imagenes = tempDiv.querySelectorAll('img');
-    imagenes.forEach((img, index) => {
-      // Añadir clases y atributos para hacer todas las imágenes seleccionables
-      img.classList.add('selectable-image');
-      img.setAttribute('data-image-id', `img-${index}`);
-      img.style.cursor = 'pointer';
-      
-      // Si la imagen no tiene src, está vacía o intenta cargar desde localhost
-      // Pero NO reemplazar imágenes que ya tienen formato base64
-      if ((!img.src || 
-          img.src === '' || 
-          img.src === 'about:blank' || 
-          img.src.startsWith('http://localhost/') ||
-          img.src.startsWith('/')) && 
-          !img.src.startsWith('data:image')) {
-        
-        console.log("Corrigiendo imagen con src:", img.src);
-        img.src = placeholderImg;
-        
-        // Asegurarnos de que no se intente cargar desde una ruta relativa
-        img.removeAttribute('srcset');
-        img.removeAttribute('data-src');
-      }
-      
-      // Añadir un título para mejorar la UX
-      img.title = "Haz clic para cambiar esta imagen";
-      
-      // Asegurarse de que la imagen sea visible
-      img.style.opacity = "1";
-      img.style.visibility = "visible";
-      img.style.display = "inline-block";
-    });
-    
-    // Tratamiento especial para la sección de logos en la parte inferior de la portada
-    const logosPortadaBottom = tempDiv.querySelector('.logos-portada-bottom');
-    if (logosPortadaBottom) {
-      const logosImg = logosPortadaBottom.querySelectorAll('img');
-      logosImg.forEach((img, idx) => {
-        // Asegurar que estas imágenes específicas se muestren correctamente
-        img.style.display = "inline-block";
-        img.style.margin = "5px 10px";
-        img.style.maxWidth = "90px";
-        img.style.opacity = "1";
-        
-        // Añadir z-index para asegurarse de que estén por encima de otros elementos
-        img.style.position = "relative";
-        img.style.zIndex = "5";
-        
-        console.log(`Ajustando imagen de logos-portada-bottom ${idx}: ${img.alt}`);
-      });
+    try {
+        console.log("Iniciando creación de plantilla HTML para PDF...");
+
+        // Clonar el HTML para no modificar el original
+        let htmlContent = html;
+
+        // Asegurarnos de que las imágenes placeholders tengan un src
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+
+        // Crear un placeholder base64 para que las imágenes se muestren
+        const placeholderImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAyCAYAAACqNX6+AAAACXBIWXMAAAsTAAALEwEAmpwYAAAEOklEQVR4nO2cW27bMBCGp4/tqkBOIJ+gQBYoeoKgJ0ib9LHICdKcoMgJmhO06QnSnCDNCdrnAn1q0RMUaFFUHiRbHJJDUpTlhUX9AwZsLNnk/OTMcGZIhyASiUQikUgkEolEIpFIJBIJGQC3AewA+ExEFRHVeATnOwBeArhTluUrpZRCYMqyxPl85iTG87wvRVG8BvDQNAullDiV1lpXSu2I6BOAt7Zt22GapnUQBOcAbpmmWRVF8SMIgg8AntByJ87X67XUdd3wOF8sFnA9DMPwptPpewBvbJ9xPp9Dr74Z3/fb0+lUl2UJ9r+UUsi9RpIkCIKgZbquqyiKQoQwRkEQFGEYVnEcV2w8Ho8ZNKSvubdwbNu2V2maXs9msz7nQRB8DcOwStO0SpKkbttW7eJFmmYvgzRNw/d9HXM+m80wHo8RRVH3dxiGKIpiy9jsMHEcFy7P7JthmiYejwej6aNlU8AZx1GD5yYZZ/oZTbmxyzXbtgMAK+YSAJ9d181cAq5WK+R5jrqudcZ93zdKszzvvM/zHEopY64cDAZ6jTzPUVUVkiS5fq7neTfcn5vNJhaLBZIkQZqmOtRxcUzT1BhKoijq5tJsNkMYhtfWjeO4832e57Bt276vj9bzDMNQuLYoCtR1jfl83pnb8zydmPM818/jue99jPP5HGVZGkGaptVoNMJ0OsVkMukSfxAE2rtc+2dZpkE+nU4Nj+TCnKbptQewx7Ixf5bCNrZarYxnHEKAKIrqXc/uDftbfZ2/1+Gfv9e29dgmjdHb29Z6z+uFHFpbWVWVMWfUdd0Zwxb+8G39Lmvc1qvfFw67lWmaOmx1eOHN3/D4tv2Mvu+39/X8IYRbzDRtbP/sMmzbNnrP42LNZKIoCjFYE1qWpXMYyPNcex7P8ZozGAwwHA61l7TZF7WKQ0N7XVmWsG0bWutdszyluztN0yBJEjx6Bq7VYV0FjhXGLr7BVWy+7/J1vqZpGq5Xw3VdreVf+UJR6z4nk8lRnmDbtl4D1zE7RJvN5ufKWblc7lu/0xxZlv242Gw2Z7VWL9brNd4DuNh33fF4/LFt20daa6SXl/h0B0CWZZfX/ZjF9/0zz/POLcu6hcNNWqc+1ut1q5TaAri8q/HiOP7ouq5mE4bhrWVZr3dd53neudZ6DeDxnzbnE631h9VqhbeMw3AThqH2CsZdxnQ6RV8Gd5V0NptBa90J2uXlJebz+d7wF4YhkiTRibxvTsuy+o5PuOXuqxZt2z6zbdto8PaVf1mWbTrUXQqKfrXJ11xVk4aN4V1N4b7yvq+87Hv+vtptX9PXtc8xjd9Vfai27P8aR7fOl2XZjSAIHpRluX848y5clPXvvI2zzp+/ZXkL4P6h+0QikUgkEolEIpFIJBKJRCLRb9UvkR6lzA/rWkAAAAAASUVORK5CYII=';
+
+        // Reemplazar todas las imágenes placeholder vacías o con URLs inválidas
+        // y hacer que todas las imágenes sean seleccionables
+        const imagenes = tempDiv.querySelectorAll('img');
+        imagenes.forEach((img, index) => {
+            // Añadir clases y atributos para hacer todas las imágenes seleccionables
+            img.classList.add('selectable-image');
+            img.setAttribute('data-image-id', `img-${index}`);
+            img.style.cursor = 'pointer';
+
+            // Si la imagen no tiene src, está vacía o intenta cargar desde localhost
+            // Pero NO reemplazar imágenes que ya tienen formato base64
+            if ((!img.src ||
+                img.src === '' ||
+                img.src === 'about:blank' ||
+                img.src.startsWith('http://localhost/') ||
+                img.src.startsWith('/')) &&
+                !img.src.startsWith('data:image')) {
+
+                console.log("Corrigiendo imagen con src:", img.src);
+                img.src = placeholderImg;
+
+                // Asegurarnos de que no se intente cargar desde una ruta relativa
+                img.removeAttribute('srcset');
+                img.removeAttribute('data-src');
+            }
+
+            // Añadir un título para mejorar la UX
+            img.title = "Haz clic para cambiar esta imagen";
+
+            // Asegurarse de que la imagen sea visible
+            img.style.opacity = "1";
+            img.style.visibility = "visible";
+            img.style.display = "inline-block";
+        });
+
+        // Tratamiento especial para la sección de logos en la parte inferior de la portada
+        const logosPortadaBottom = tempDiv.querySelector('.logos-portada-bottom');
+        if (logosPortadaBottom) {
+            const logosImg = logosPortadaBottom.querySelectorAll('img');
+            logosImg.forEach((img, idx) => {
+                // Asegurar que estas imágenes específicas se muestren correctamente
+                img.style.display = "inline-block";
+                img.style.margin = "5px 10px";
+                img.style.maxWidth = "90px";
+                img.style.opacity = "1";
+
+                // Añadir z-index para asegurarse de que estén por encima de otros elementos
+                img.style.position = "relative";
+                img.style.zIndex = "5";
+
+                console.log(`Ajustando imagen de logos-portada-bottom ${idx}: ${img.alt}`);
+            });
+        }
+
+        // También remover cualquier URL relativa de enlaces
+        const enlaces = tempDiv.querySelectorAll('a');
+        enlaces.forEach(a => {
+            if (a.href && (a.href.startsWith('/') || a.href.startsWith('http://localhost/'))) {
+                console.log("Corrigiendo enlace con href:", a.href);
+                a.href = '#';
+            }
+        });
+
+        // Actualizar el HTML con las imágenes corregidas
+        htmlContent = tempDiv.innerHTML;
+
+        return htmlContent;
+    } catch (error) {
+        console.error("Error al crear la plantilla PDF:", error);
+        throw error;
     }
-    
-    // También remover cualquier URL relativa de enlaces
-    const enlaces = tempDiv.querySelectorAll('a');
-    enlaces.forEach(a => {
-      if (a.href && (a.href.startsWith('/') || a.href.startsWith('http://localhost/'))) {
-        console.log("Corrigiendo enlace con href:", a.href);
-        a.href = '#';
-      }
-    });
-    
-    // Actualizar el HTML con las imágenes corregidas
-    htmlContent = tempDiv.innerHTML;
-    
-    return htmlContent;
-  } catch (error) {
-    console.error("Error al crear la plantilla PDF:", error);
-    throw error;
-  }
 }
 
 export { html };

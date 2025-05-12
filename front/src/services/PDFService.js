@@ -101,9 +101,6 @@ class PDFService {
         throw new Error("No se pudo crear la plantilla HTML base");
       }
 
-      // SOLUCIÓN FINAL: USAR HTML2PDF DIRECTAMENTE CON OUTPUTPDF
-      console.log("Usando método directo con outputPdf");
-      
       // Crear un iframe para aislar el renderizado
       const iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
@@ -113,10 +110,6 @@ class PDFService {
       iframe.style.height = '1122px'; // Alto A4 en px
       iframe.style.border = 'none';
       iframe.style.zIndex = '10000';
-      
-      // Hacerlo visible para debugging si es necesario
-      // Normalmente debería estar oculto, pero esto puede ayudar a ver qué sucede
-      // iframe.style.opacity = '0.2'; 
       iframe.style.visibility = 'hidden';
       
       // Añadir al DOM
@@ -178,10 +171,33 @@ class PDFService {
                 margin-top: 5mm;
                 margin-bottom: 5mm;
               }
+              /* Forzar saltos de página en títulos principales */
+              h1, h2, section, .section {
+                page-break-before: always;
+                break-before: page;
+              }
+              /* Primera sección sin salto de página */
+              body > h1:first-child, 
+              body > h2:first-child, 
+              body > section:first-child, 
+              body > .section:first-child {
+                page-break-before: auto;
+                break-before: auto;
+              }
               /* Evitar saltos de página dentro de secciones críticas */
               .no-break {
                 page-break-inside: avoid;
                 break-inside: avoid;
+              }
+              /* Forzar que cada elemento con ID propio comience en una nueva página */
+              [id] {
+                page-break-before: always;
+                break-before: page;
+              }
+              /* Excepto los primeros elementos con ID */
+              body > [id]:first-child {
+                page-break-before: auto;
+                break-before: auto;
               }
             </style>
           </head>
@@ -210,121 +226,233 @@ class PDFService {
       
       // Dar tiempo para que se carguen las imágenes
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Configuración mínima para html2pdf
-      const opciones = {
-        margin: 0,
-        filename: `informe_${empresa.nombre}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 1, 
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#FFFFFF',
-          removeContainer: false
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'portrait',
-          compress: true,
-          hotfixes: ["px_scaling"]
-        },
-        pagebreak: { 
-          mode: 'avoid-all', 
-          before: '.page', 
-          avoid: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', '.no-break']
-        }
-      };
-      
-      // Usar el método outputPdf directamente
+
       try {
-        console.log("Generando PDF con outputPdf...");
+        console.log("Generando PDF con método directo html2canvas + jsPDF...");
         
-        // Utilizar outputPdf directamente con el body del iframe
-        const pdfData = await html2pdf()
-          .from(iframeDoc.body)
-          .set(opciones)
-          .outputPdf('arraybuffer');
+        // Crear un nuevo iframe para la captura final
+        const captureIframe = document.createElement('iframe');
+        captureIframe.style.position = 'fixed';
+        captureIframe.style.top = '0';
+        captureIframe.style.left = '0';
+        captureIframe.style.width = '100%';
+        captureIframe.style.height = '100%';
+        captureIframe.style.border = 'none';
+        captureIframe.style.zIndex = '10001';
+        captureIframe.style.visibility = 'hidden';
         
-        if (!pdfData) {
-          throw new Error("No se generaron datos PDF");
+        // Añadir al DOM
+        document.body.appendChild(captureIframe);
+        
+        // Acceder al documento del iframe
+        const captureDoc = captureIframe.contentDocument || captureIframe.contentWindow.document;
+        
+        // Copiar el contenido exacto
+        captureDoc.open();
+        captureDoc.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>PDF</title>
+              <style>
+                @page { size: A4; margin: 0; }
+                body { 
+                  margin: 0; 
+                  padding: 0; 
+                  background: white; 
+                  font-family: Arial, sans-serif;
+                }
+                .pdf-page {
+                  width: 210mm;
+                  height: 297mm;
+                  margin: 0 auto;
+                  background: white;
+                  position: relative;
+                  page-break-after: always;
+                  overflow: hidden;
+                }
+                /* Ocultar inicialmente todas las páginas */
+                .page {
+                  display: none;
+                }
+                /* Mostrar solo la página actual */
+                .page.active {
+                  display: block;
+                }
+              </style>
+            </head>
+            <body>
+              ${plantillaHTML}
+            </body>
+          </html>
+        `);
+        captureDoc.close();
+        
+        // Esperar a que todo se cargue
+        await new Promise(resolve => {
+          captureIframe.onload = resolve;
+          setTimeout(resolve, 1000);
+        });
+        
+        // Corregir imágenes
+        const allImages = captureDoc.querySelectorAll('img');
+        allImages.forEach(img => {
+          if (!img.src || 
+              img.src === '' || 
+              img.src === 'about:blank' || 
+              img.src.startsWith('http://localhost/') || 
+              img.src.startsWith('/')) {
+            img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+          }
+        });
+        
+        // Esperar a que se carguen las imágenes
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Crear el PDF exactamente como se ve la plantilla
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
+        
+        // Capturar exactamente lo que se ve en la vista previa
+        const viewportWidth = 793; // Ancho A4 en px
+        const viewportHeight = 1122; // Alto A4 en px
+        
+        // Obtener todas las páginas tal como se ven en la vista previa
+        const previewPages = captureDoc.querySelectorAll('.page');
+        
+        // Si no hay páginas definidas, tratar el documento completo como una sola página
+        if (previewPages.length === 0) {
+          try {
+            const canvas = await html2canvas(captureDoc.body, {
+              scale: 2,
+              useCORS: true,
+              allowTaint: true,
+              backgroundColor: 'white',
+              width: viewportWidth,
+              height: viewportHeight
+            });
+            
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            
+            pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
+          } catch (error) {
+            console.error('Error al capturar el documento completo:', error);
+          }
+        } else {
+          // Procesar cada página tal como se ve en la vista previa
+          for (let i = 0; i < previewPages.length; i++) {
+            const page = previewPages[i];
+            
+            try {
+              // Mostrar solo esta página y ocultar el resto
+              previewPages.forEach(p => {
+                p.style.display = 'none';
+              });
+              page.style.display = 'block';
+              
+              // Capturar la página exactamente como se ve
+              const canvas = await html2canvas(page, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: 'white',
+                width: viewportWidth,
+                height: viewportHeight
+              });
+              
+              // Si no es la primera página, añadir una nueva página al PDF
+              if (i > 0) {
+                pdf.addPage();
+              }
+              
+              // Añadir la imagen al PDF
+              const imgData = canvas.toDataURL('image/jpeg', 1.0);
+              const pageWidth = pdf.internal.pageSize.getWidth();
+              const pageHeight = pdf.internal.pageSize.getHeight();
+              
+              pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
+            } catch (pageError) {
+              console.error(`Error al procesar página ${i + 1}:`, pageError);
+            }
+          }
         }
         
-        console.log("PDF generado correctamente con outputPdf");
+        // Obtener los bytes del PDF
+        const pdfBytes = new Uint8Array(pdf.output('arraybuffer'));
         
-        // Convertir a Uint8Array
-        const pdfBytes = new Uint8Array(pdfData);
-        
-        // Limpiar iframe
+        // Limpiar iframes
         document.body.removeChild(iframe);
+        document.body.removeChild(captureIframe);
         
         // Ocultar overlay
         this.ocultarOverlayGeneracion();
         
         return pdfBytes;
       } catch (pdfError) {
-        console.error("Error al generar PDF con outputPdf:", pdfError);
+        console.error("Error al generar PDF con método directo:", pdfError);
         
-        // ÚLTIMO RECURSO: Descargar directamente
+        // ÚLTIMO RECURSO: Intentar con método legacy (solo para documentos pequeños)
         try {
-          console.log("Intentando guardar directamente el PDF...");
+          console.log("Intentando con método legacy...");
+          const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+          });
           
-          // Usar el método save() directamente
-          await html2pdf()
-            .from(iframeDoc.body)
-            .set(opciones)
-            .save();
+          // Capturar todo el body de una vez
+          const canvas = await html2canvas(iframeDoc.body, {
+            scale: 1.5,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#FFFFFF'
+          });
           
-          console.log("PDF guardado directamente");
+          const imgData = canvas.toDataURL('image/jpeg');
           
-          // Para la vista previa, devolvemos un PDF vacío pequeño
-          const emptyPdf = new Uint8Array(100);
+          // Calcular dimensiones
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
           
-          // Limpiar iframe
+          // Ajustar proporciones
+          const canvasWidth = canvas.width;
+          const canvasHeight = canvas.height;
+          
+          const ratio = canvasWidth / canvasHeight;
+          const pageRatio = pageWidth / pageHeight;
+          
+          let finalWidth, finalHeight;
+          if (ratio >= pageRatio) {
+            finalWidth = pageWidth;
+            finalHeight = finalWidth / ratio;
+          } else {
+            finalHeight = pageHeight;
+            finalWidth = finalHeight * ratio;
+          }
+          
+          // Centrar en la página
+          const xOffset = (pageWidth - finalWidth) / 2;
+          const yOffset = (pageHeight - finalHeight) / 2;
+          
+          pdf.addImage(imgData, 'JPEG', xOffset, yOffset, finalWidth, finalHeight);
+          
+          // Obtener los bytes
+          const pdfBytes = new Uint8Array(pdf.output('arraybuffer'));
+          
+          // Limpiar
           document.body.removeChild(iframe);
-          
-          // Ocultar overlay
           this.ocultarOverlayGeneracion();
           
-          return emptyPdf;
-        } catch (saveError) {
-          console.error("Error también al guardar directamente:", saveError);
-          
-          // ÚLTIMO RECURSO EXTREMO: Abrir ventana de impresión
-          const printWindow = window.open('', '_blank');
-          if (printWindow) {
-            printWindow.document.write(`
-              <!DOCTYPE html>
-              <html>
-                <head>
-                  <meta charset="UTF-8">
-                  <title>Memoria de Actividad - Impulsalicante</title>
-                  <style>
-                    @media print {
-                      body { margin: 0; padding: 0; }
-                      .page { page-break-after: always; }
-                    }
-                  </style>
-                </head>
-                <body>${plantillaHTML}</body>
-              </html>
-            `);
-            printWindow.document.close();
-            
-            // Esperar y mostrar el diálogo de impresión
-            setTimeout(() => {
-              printWindow.print();
-            }, 1000);
-            
-            // Limpiar iframe
-            document.body.removeChild(iframe);
-            
-            // Ocultar overlay
-            this.ocultarOverlayGeneracion();
-            
-            return new Uint8Array(100); // PDF vacío para la vista previa
-          }
+          return pdfBytes;
+        } catch (legacyError) {
+          console.error("Error también con método legacy:", legacyError);
           
           // Si todo falla, limpiamos y lanzamos el error
           document.body.removeChild(iframe);
@@ -663,34 +791,52 @@ class PDFService {
     } = options;
 
     try {
-      // Convertir el HTML a un canvas
-      const canvas = await html2canvas(element, {
-        scale: 2, // Mejor resolución
-        useCORS: true, // Permitir cargar imágenes de otros dominios (como Cloudinary)
-        logging: false,
-        allowTaint: true
-      });
-
       // Crear el PDF
       const pdf = new jsPDF({
         orientation,
         unit: 'mm',
-        format
+        format,
+        compress: true
       });
-
-      // Calcular dimensiones
-      const imgWidth = pdf.internal.pageSize.getWidth() - (margin * 2);
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      // Añadir la imagen del canvas al PDF
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
-
+      
+      // Convertir el HTML a un canvas
+      const canvas = await html2canvas(element, {
+        scale: 2, // Mejor resolución
+        useCORS: true, // Permitir cargar imágenes de otros dominios
+        allowTaint: true,
+        backgroundColor: '#FFFFFF'
+      });
+      
+      // Obtener dimensiones
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calcular proporción para mantener el aspecto
+      const canvasAspectRatio = canvas.width / canvas.height;
+      const pageAspectRatio = pageWidth / pageHeight;
+      
+      let imgWidth = pageWidth - (margin * 2);
+      let imgHeight = imgWidth / canvasAspectRatio;
+      
+      // Si la imagen es más alta que la página, ajustar altura
+      if (imgHeight > pageHeight - (margin * 2)) {
+        imgHeight = pageHeight - (margin * 2);
+        imgWidth = imgHeight * canvasAspectRatio;
+      }
+      
+      // Centrar imagen si no ocupa todo el ancho disponible
+      const xOffset = margin + (pageWidth - margin * 2 - imgWidth) / 2;
+      const yOffset = margin;
+      
+      // Añadir la imagen al PDF
+      pdf.addImage(imgData, 'JPEG', xOffset, yOffset, imgWidth, imgHeight);
+      
       // Guardar el PDF
       pdf.save(filename);
-
-      // También devolvemos el Blob para otros usos
-      return pdf.output('blob');
+      
+      // También devolver el blob para otros usos
+      return new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
     } catch (error) {
       console.error('Error al generar el PDF:', error);
       throw error;
@@ -722,62 +868,136 @@ class PDFService {
     } = options;
 
     try {
-      // Crear el PDF
-      const pdf = new jsPDF({
-        orientation,
-        unit: 'mm',
-        format
-      });
-
+      // Crear un contenedor HTML para las imágenes
+      const container = document.createElement('div');
+      container.style.width = '210mm';
+      container.style.padding = `${margin}mm`;
+      container.style.backgroundColor = 'white';
+      
       // Añadir título si se proporciona
       if (title) {
-        pdf.setFontSize(16);
-        pdf.text(title, margin, margin + 10);
+        const titleElement = document.createElement('h1');
+        titleElement.style.fontSize = '16pt';
+        titleElement.style.fontFamily = 'Arial, sans-serif';
+        titleElement.style.marginBottom = '20px';
+        titleElement.textContent = title;
+        container.appendChild(titleElement);
       }
-
-      // Calcular dimensiones disponibles
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const contentWidth = pageWidth - (margin * 2);
       
-      let yPosition = title ? margin + 20 : margin;
-
-      // Añadir cada imagen al PDF
+      // Añadir cada imagen al contenedor
       for (let i = 0; i < imagePublicIds.length; i++) {
         const publicId = imagePublicIds[i];
         const imageUrl = CloudinaryService.getImageUrlForPdf(publicId);
         
-        // Crear una imagen temporal para obtener dimensiones
-        const img = new Image();
+        const imgContainer = document.createElement('div');
+        imgContainer.style.marginBottom = '20px';
+        imgContainer.style.pageBreakInside = 'avoid';
+        imgContainer.style.breakInside = 'avoid';
+        
+        const img = document.createElement('img');
         img.src = imageUrl;
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        img.style.display = 'block';
+        img.style.margin = '0 auto';
         
-        // Esperar a que cargue la imagen
-        await new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve; // Resolver incluso si hay error
-        });
+        imgContainer.appendChild(img);
+        container.appendChild(imgContainer);
         
-        // Calcular alto proporcional
-        const imgHeight = (img.height * contentWidth) / img.width;
-        
-        // Si la imagen no cabe en el espacio restante, crear nueva página
-        if (yPosition + imgHeight > pageHeight - margin) {
-          pdf.addPage();
-          yPosition = margin;
+        // Añadir un separador si no es la última imagen
+        if (i < imagePublicIds.length - 1) {
+          const separator = document.createElement('hr');
+          separator.style.border = 'none';
+          separator.style.height = '1px';
+          separator.style.backgroundColor = '#eee';
+          separator.style.margin = '30px 0';
+          container.appendChild(separator);
         }
-        
-        // Añadir la imagen al PDF
-        pdf.addImage(imageUrl, 'PNG', margin, yPosition, contentWidth, imgHeight);
-        
-        // Actualizar la posición Y para la siguiente imagen
-        yPosition += imgHeight + 10; // 10mm de espacio entre imágenes
       }
-
+      
+      // Añadir el contenedor temporalmente al documento para procesarlo
+      document.body.appendChild(container);
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      
+      // Crear el PDF
+      const pdf = new jsPDF({
+        orientation,
+        unit: 'mm',
+        format,
+        compress: true
+      });
+      
+      // Esperar a que las imágenes se carguen
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Obtener el tamaño total del contenedor
+      const containerHeight = container.offsetHeight;
+      const containerWidth = container.offsetWidth;
+      
+      // Calcular el número de páginas necesarias
+      const pageHeight = pdf.internal.pageSize.getHeight() - (margin * 2);
+      const pageWidth = pdf.internal.pageSize.getWidth() - (margin * 2);
+      
+      const numPages = Math.ceil(containerHeight / (pageHeight * 3.779527559)); // Factor de conversión px a mm
+      
+      // Capturar una imagen del contenedor completo
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: 'white',
+        height: containerHeight,
+        width: containerWidth
+      });
+      
+      // Cortar la imagen en páginas
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      
+      // Añadir la imagen al PDF, posiblemente en múltiples páginas
+      if (numPages <= 1) {
+        // Si cabe en una sola página, centrar
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        const xOffset = margin;
+        const yOffset = margin;
+        
+        pdf.addImage(imgData, 'JPEG', xOffset, yOffset, imgWidth, imgHeight);
+      } else {
+        // Si no cabe en una página, dividir en múltiples páginas
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        const pageHeightPx = (pageHeight * canvas.width) / imgWidth; // altura de página en px
+        
+        for (let i = 0; i < numPages; i++) {
+          if (i > 0) {
+            pdf.addPage();
+          }
+          
+          const srcY = i * pageHeightPx;
+          const srcHeight = Math.min(pageHeightPx, canvas.height - srcY);
+          const destHeight = (srcHeight * imgWidth) / canvas.width;
+          
+          pdf.addImage(
+            imgData, 'JPEG',
+            margin, margin, // x, y destino
+            imgWidth, destHeight, // ancho y alto destino
+            0, srcY, // x, y origen
+            canvas.width, srcHeight // ancho y alto origen
+          );
+        }
+      }
+      
       // Guardar el PDF
       pdf.save(filename);
-
-      // También devolvemos el Blob para otros usos
-      return pdf.output('blob');
+      
+      // Limpiar el DOM
+      document.body.removeChild(container);
+      
+      // Devolver el blob para otros usos
+      return new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
     } catch (error) {
       console.error('Error al generar el PDF con imágenes:', error);
       throw error;
