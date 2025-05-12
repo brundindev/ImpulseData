@@ -228,105 +228,37 @@ class FirestoreService {
   static async guardarEmpresa(empresa) {
     try {
       const user = auth.currentUser;
-      if (!user) {
-        console.error("No hay usuario autenticado para guardar empresa");
-        throw new Error("Usuario no autenticado");
-      }
-      console.log("Usuario autenticado:", user.uid, user.email);
+      if (!user) throw new Error("Usuario no autenticado");
       
-      // Crear un ID para la empresa
-      const empresasRef = collection(db, "empresas");
-      const empresaDoc = doc(empresasRef);
-      const empresaId = empresaDoc.id;
-      console.log("ID generado para la empresa:", empresaId);
+      // Crear referencia a una nueva empresa
+      const empresaRef = doc(collection(db, "empresas"));
       
       // Preparar datos de la empresa
       const empresaData = {
-        id: empresaId,
-        nombre: empresa.nombre,
-        descripcion: empresa.descripcion || "",
-        fechaCreacion: empresa.fechaCreacion,
-        ciudad: empresa.ciudad || "",
+        ...empresa,
         creadoPor: user.uid,
         creadorEmail: user.email,
-        fechaCreacionSistema: new Date().toISOString()
+        fechaCreacionSistema: new Date().toISOString(),
+        fechaActualizacion: new Date().toISOString()
       };
-      console.log("Datos de empresa a guardar:", JSON.stringify(empresaData));
       
       // Guardar la empresa
-      console.log("Guardando empresa en Firestore...");
-      await setDoc(empresaDoc, empresaData);
-      console.log("Empresa guardada correctamente con ID:", empresaId);
+      await setDoc(empresaRef, empresaData);
       
-      // Guardar departamentos como subcolección
-      if (empresa.departamentos && empresa.departamentos.length > 0) {
-        console.log(`Guardando ${empresa.departamentos.length} departamentos como subcolección...`);
-        for (const departamento of empresa.departamentos) {
-          if (departamento.nombre && departamento.nombre.trim()) {
-            // Crear referencia a la subcolección de departamentos
-            const depRef = doc(collection(empresaDoc, "departamentos"));
-            const depData = {
-              id: depRef.id,
-              nombre: departamento.nombre,
-              creadoPor: user.uid
-            };
-            await setDoc(depRef, depData);
-            console.log(`Departamento guardado: ${depData.nombre} con ID: ${depData.id}`);
-          } else {
-            console.log("Saltando departamento sin nombre");
-          }
-        }
+      // Guardar subcolecciones
+      if (empresa.departamentos) {
+        await this.actualizarSubcolecciones(
+          empresaRef.id,
+          empresa.departamentos,
+          empresa.centros || [],
+          empresa.formaciones || []
+        );
       }
       
-      // Guardar centros como subcolección
-      if (empresa.centros && empresa.centros.length > 0) {
-        console.log(`Guardando ${empresa.centros.length} centros como subcolección...`);
-        for (const centro of empresa.centros) {
-          if (centro.nombre && centro.nombre.trim()) {
-            // Crear referencia a la subcolección de centros
-            const centroRef = doc(collection(empresaDoc, "centros"));
-            const centroData = {
-              id: centroRef.id,
-              nombre: centro.nombre,
-              direccion: centro.direccion || "",
-              creadoPor: user.uid
-            };
-            await setDoc(centroRef, centroData);
-            console.log(`Centro guardado: ${centroData.nombre} con ID: ${centroData.id}`);
-          } else {
-            console.log("Saltando centro sin nombre");
-          }
-        }
-      }
-      
-      // Guardar formaciones como subcolección
-      if (empresa.formaciones && empresa.formaciones.length > 0) {
-        console.log(`Guardando ${empresa.formaciones.length} formaciones como subcolección...`);
-        for (const formacion of empresa.formaciones) {
-          if (formacion.nombre && formacion.nombre.trim()) {
-            // Crear referencia a la subcolección de formaciones
-            const formacionRef = doc(collection(empresaDoc, "formaciones"));
-            const formacionData = {
-              id: formacionRef.id,
-              nombre: formacion.nombre,
-              tipo: formacion.tipo || "presencial",
-              duracion: formacion.duracion || 0,
-              creadoPor: user.uid
-            };
-            await setDoc(formacionRef, formacionData);
-            console.log(`Formación guardada: ${formacionData.nombre} con ID: ${formacionData.id}`);
-          } else {
-            console.log("Saltando formación sin nombre");
-          }
-        }
-      }
-      
-      return empresaId;
+      // Devolver el ID de la empresa creada
+      return empresaRef.id;
     } catch (error) {
       console.error("Error al guardar empresa:", error);
-      if (error.code) {
-        console.error("Código de error Firebase:", error.code);
-      }
       throw error;
     }
   }
@@ -700,26 +632,37 @@ class FirestoreService {
       if (!user) throw new Error("Usuario no autenticado");
       
       // Verificar que la empresa pertenezca al usuario
-      const empresaDoc = await getDoc(doc(db, "empresas", empresaId));
+      const empresaRef = doc(db, "empresas", empresaId);
+      const empresaDoc = await getDoc(empresaRef);
+      
       if (!empresaDoc.exists()) throw new Error("Empresa no encontrada");
       if (empresaDoc.data().creadoPor !== user.uid) throw new Error("No tienes permiso para editar esta empresa");
-      
-      // Actualizar datos básicos de la empresa
-      const empresaRef = doc(db, "empresas", empresaId);
       
       // Mantener los campos que no deben cambiarse
       const datosOriginales = empresaDoc.data();
       
+      // Crear objeto con los datos actualizados
       const datosActualizados = {
-        ...empresaData,
+        ...datosOriginales,  // Mantener todos los datos originales
+        ...empresaData,      // Sobrescribir con los nuevos datos
         creadoPor: datosOriginales.creadoPor,
         creadorEmail: datosOriginales.creadorEmail,
         fechaCreacionSistema: datosOriginales.fechaCreacionSistema,
         fechaActualizacion: new Date().toISOString()
       };
       
-      await updateDoc(empresaRef, datosActualizados);
+      console.log("Actualizando empresa con datos:", datosActualizados);
       
+      // Actualizar el documento usando setDoc con merge
+      await setDoc(empresaRef, datosActualizados, { merge: true });
+      
+      // Verificar que la actualización fue exitosa
+      const empresaActualizada = await getDoc(empresaRef);
+      if (!empresaActualizada.exists()) {
+        throw new Error("Error al verificar la actualización");
+      }
+      
+      console.log("Empresa actualizada exitosamente");
       return true;
     } catch (error) {
       console.error("Error al actualizar empresa:", error);

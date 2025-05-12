@@ -229,8 +229,8 @@ const formatDate = (date) => {
 }
 
 .form-stats span{
-  color: white !important;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+  color: black !important;
+  text-shadow: 0 1px 1px rgb(6 94 247 / 70%);
 }
 
 .stat-pill {
