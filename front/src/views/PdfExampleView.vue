@@ -192,9 +192,6 @@
           <div v-if="isLoadingImages" class="loading-images">
             <div class="loading-spinner"></div>
             <p>Cargando imágenes...</p>
-            <p v-if="allAvailableImages.length > 0" class="loading-count">
-              {{ allAvailableImages.length }} imágenes encontradas hasta ahora
-            </p>
           </div>
           
           <!-- Sin imágenes -->
@@ -234,10 +231,7 @@
               &laquo; Anterior
             </button>
             
-            <span class="page-info">
-              {{ currentPage }} de {{ totalPages }} 
-              <span class="total-images">({{ filteredImages.length }} imágenes)</span>
-            </span>
+            <span class="page-info">{{ currentPage }} de {{ totalPages }}</span>
             
             <button 
               @click="currentPage < totalPages && (currentPage++)" 
@@ -440,7 +434,7 @@ const uploadStatus = ref('');
 const allAvailableImages = ref([]);
 const imageFilter = ref('');
 const currentPage = ref(1);
-const imagesPerPage = ref(48); // Aumentado de 24 a 48 imágenes por página
+const imagesPerPage = ref(24); // Mostrar 24 imágenes por página (4x6 grid)
 const isLoadingImages = ref(false);
 const imageLoadErrors = ref({});
 
@@ -499,58 +493,20 @@ const getCloudinaryUrl = (publicId, options = {}) => {
 // Cargar imágenes disponibles desde Cloudinary
 const loadAvailableImages = () => {
   isLoadingImages.value = true;
-  uploadStatus.value = 'Cargando todas las imágenes disponibles...';
   
-  console.log('Iniciando carga de imágenes de Cloudinary...');
-  
-  // Inicializar con algunas imágenes de muestra para evitar interfaz vacía
-  allAvailableImages.value = availableImages.value;
-  
-  // Intentar cargar todas las imágenes de Cloudinary con el servicio mejorado
   SimpleCloudinaryService.getAllImages()
     .then(images => {
       console.log('Imágenes cargadas:', images.length);
-      
-      if (images.length === 0) {
-        console.warn('No se encontraron imágenes en Cloudinary');
-        uploadStatus.value = 'No se encontraron imágenes. Por favor, sube algunas.';
-        return;
-      }
-      
-      // Guardar todas las imágenes obtenidas
+      // Guardar en allAvailableImages para mantener las originales
       allAvailableImages.value = images;
-      
-      // Limpiar el estado de carga
-      uploadStatus.value = '';
-      
-      // Mostrar mensaje si tenemos más de 100 imágenes
-      if (images.length > 100) {
-        console.log(`Se encontraron ${images.length} imágenes. Asegúrate de usar el buscador para filtrar.`);
-      }
     })
     .catch(error => {
       console.error('Error al cargar imágenes:', error);
-      
-      // Mantener las imágenes de fallback si hay error
-      if (allAvailableImages.value.length === 0) {
-        allAvailableImages.value = [...availableImages.value];
-        console.log('Usando imágenes de respaldo');
-      }
-      
-      // Mostrar mensaje de error
-      uploadStatus.value = 'Error al cargar imágenes. Usando conjunto limitado.';
+      // Usar las imágenes de fallback si hay error
+      allAvailableImages.value = [...availableImages.value];
     })
     .finally(() => {
       isLoadingImages.value = false;
-      
-      // Si después de todo no hay imágenes, mostrar mensaje
-      if (allAvailableImages.value.length === 0) {
-        uploadStatus.value = 'No se encontraron imágenes. Intenta subir algunas.';
-      } else {
-        setTimeout(() => {
-          uploadStatus.value = '';
-        }, 2000);
-      }
     });
 };
 
@@ -1571,11 +1527,6 @@ h3 {
   font-size: 14px;
 }
 
-.total-images {
-  font-size: 12px;
-  color: #999;
-}
-
 .upload-section {
   padding: 20px;
   background: #f8f8f8;
@@ -1964,27 +1915,5 @@ h3 {
   margin-bottom: 15px;
   border-left: 4px solid #2196F3;
   text-align: center;
-}
-
-.loading-count {
-  font-size: 13px;
-  color: #0066CC;
-  font-weight: 500;
-  margin-top: 5px;
-}
-
-.loading-images {
-  text-align: center;
-  padding: 40px 0;
-}
-
-.loading-images .loading-spinner {
-  margin: 0 auto 15px;
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #0066CC;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
 }
 </style> 

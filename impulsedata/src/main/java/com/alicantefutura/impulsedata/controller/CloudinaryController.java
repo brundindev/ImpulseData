@@ -33,20 +33,4 @@ public class CloudinaryController {
         List<CloudinaryImageDTO> images = cloudinaryService.getAllImages(maxResults);
         return ResponseEntity.ok(images);
     }
-    
-    /**
-     * Obtiene imágenes de una carpeta específica en Cloudinary
-     * 
-     * @param folder nombre de la carpeta
-     * @param maxResults máximo número de resultados a retornar (opcional, por defecto 100)
-     * @return lista de imágenes en la carpeta
-     */
-    @GetMapping("/folder/{folder}")
-    public ResponseEntity<List<CloudinaryImageDTO>> getImagesByFolder(
-            @PathVariable String folder,
-            @RequestParam(value = "maxResults", defaultValue = "100") int maxResults) {
-        
-        List<CloudinaryImageDTO> images = cloudinaryService.getImagesByFolder(folder, maxResults);
-        return ResponseEntity.ok(images);
-    }
 } 
