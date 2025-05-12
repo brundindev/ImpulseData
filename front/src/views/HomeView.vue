@@ -372,34 +372,54 @@ const editarEmpresa = async (empresa) => {
   modoEdicion.value = true;
   empresaEditandoId.value = empresa.id;
   
+  // Asignar datos básicos a nuevaEmpresa
+  Object.assign(EmpresaService.nuevaEmpresa, {
+    nombre: empresa.nombre || '',
+    fechaCreacion: empresa.fechaCreacion || '',
+    descripcion: empresa.descripcion || '',
+    ciudad: empresa.ciudad || '',
+    departamentos: [],
+    centros: [],
+    formaciones: []
+  });
+  
   try {
     await EmpresaService.cargarSubcolecciones(empresa.id);
     showFormModal.value = true;
   } catch (err) {
     console.error("Error al preparar datos para edición:", err);
+    error.value = "No se pudieron cargar los datos para edición. Por favor, inténtalo de nuevo.";
   }
 };
 
 const verEmpresa = async (empresa) => {
   try {
-    Object.keys(empresaActual).forEach(key => {
-      if (Array.isArray(empresaActual[key])) {
-        empresaActual[key] = [];
-      } else {
-        empresaActual[key] = '';
-      }
+    // Limpiar datos previos
+    Object.assign(EmpresaService.empresaActual, {
+      id: '',
+      nombre: '',
+      fechaCreacion: '',
+      descripcion: '',
+      ciudad: '',
+      departamentos: [],
+      centros: [],
+      formaciones: []
     });
     
-    empresaActual.id = empresa.id;
-    empresaActual.nombre = empresa.nombre;
-    empresaActual.fechaCreacion = empresa.fechaCreacion;
-    empresaActual.descripcion = empresa.descripcion || '';
-    empresaActual.ciudad = empresa.ciudad || '';
+    // Asignar propiedades básicas
+    Object.assign(EmpresaService.empresaActual, {
+      id: empresa.id,
+      nombre: empresa.nombre,
+      fechaCreacion: empresa.fechaCreacion,
+      descripcion: empresa.descripcion || '',
+      ciudad: empresa.ciudad || ''
+    });
     
     await EmpresaService.cargarSubcoleccionesParaVista(empresa.id);
     showViewModal.value = true;
   } catch (error) {
     console.error("Error al cargar detalles de la empresa:", error);
+    error.value = "No se pudieron cargar los detalles de la empresa. Por favor, inténtalo de nuevo.";
   }
 };
 
@@ -1474,6 +1494,11 @@ const irAPaginaPDF = () => {
   
   // Redirigir a la página /pdf
   router.push('/pdf');
+};
+
+const confirmarEliminar = (empresa) => {
+  empresaAEliminar.value = empresa;
+  mostrarConfirmacion.value = true;
 };
 </script>
 
