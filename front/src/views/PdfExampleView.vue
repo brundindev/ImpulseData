@@ -155,9 +155,16 @@
         <p>Haz clic en cualquier imagen de la plantilla para seleccionarla y elegir una imagen de Cloudinary para reemplazarla.</p>
         <p>Las imágenes seleccionadas se conservarán automáticamente entre sesiones.</p>
       </div>
+      
+      <!-- Añadir en el template, justo encima del contenedor de la plantilla -->
+      <div class="image-tooltip">
+        <i class="fas fa-info-circle"></i> 
+        Haz clic en cualquier imagen de la plantilla para cambiarla por una de tu biblioteca.
+      </div>
+      
       <div ref="pdfTemplate" class="pdf-template">
         <!-- Contenedor para insertar la plantilla de PlantillaPDF -->
-        <div id="plantilla-container" v-html="plantillaHTML"></div>
+        <div id="plantilla-container" v-html="plantillaHTML" class="pdf-content"></div>
       </div>
     </div>
     
@@ -266,12 +273,6 @@
         <div class="loading-spinner"></div>
         <div class="loading-text">{{ loadingMessage }}</div>
       </div>
-    </div>
-
-    <!-- Añadir en el template, justo encima del contenedor de la plantilla -->
-    <div class="image-tooltip">
-      <i class="fas fa-info-circle"></i> 
-      Haz clic en cualquier imagen de la plantilla para cambiarla por una de tu biblioteca.
     </div>
   </div>
 </template>
@@ -396,6 +397,9 @@ onMounted(async () => {
     setTimeout(() => {
       loadPlantillaHTML();
     }, 500);
+    
+    // Forzar scroll al inicio cuando se monta el componente
+    window.scrollTo(0, 0);
     
   } catch (error) {
     console.error('Error al inicializar componente:', error);
@@ -698,15 +702,7 @@ const generatePdf = async () => {
   try {
     // Activar indicador de carga
     isGenerating.value = true;
-    loadingMessage.value = 'Preparando la plantilla...';
-    
-    // Asegurarse de que la plantilla esté actualizada
-    await loadPlantillaHTML();
-    
-    // Dar tiempo al DOM para actualizarse antes de la captura
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    loadingMessage.value = 'Generando PDF desde la plantilla HTML...';
+    loadingMessage.value = 'Preparando la captura de la plantilla...';
     
     // Obtener el elemento que contiene la plantilla HTML
     const plantillaContainer = document.getElementById('plantilla-container');
@@ -714,118 +710,42 @@ const generatePdf = async () => {
       throw new Error('No se encontró el contenedor de la plantilla');
     }
     
-    // Crear un iframe temporal para renderizar correctamente la plantilla con estilos
-    const iframe = document.createElement('iframe');
-    iframe.style.width = '210mm';  // Ancho A4 exacto
-    iframe.style.height = '297mm'; // Alto A4 exacto
-    iframe.style.position = 'absolute';
-    iframe.style.top = '-9999px';
-    iframe.style.left = '-9999px';
-    iframe.style.border = 'none';
-    document.body.appendChild(iframe);
+    // Asegurarse de que todas las imágenes están cargadas antes de capturar
+    const imagesToLoad = plantillaContainer.querySelectorAll('img');
     
-    // Copiar todo el contenido de la plantilla al iframe con los estilos correctos
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-    iframeDoc.open();
-    iframeDoc.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>PDF</title>
-          <style>
-            @page {
-              size: A4;
-              margin: 0;
+    // Esperar a que todas las imágenes se carguen
+    if (imagesToLoad.length > 0) {
+      loadingMessage.value = `Cargando imágenes (0/${imagesToLoad.length})...`;
+      
+      await Promise.all(
+        Array.from(imagesToLoad).map((img, index) => {
+          return new Promise((resolve) => {
+            if (img.complete) {
+              loadingMessage.value = `Cargando imágenes (${index+1}/${imagesToLoad.length})...`;
+              resolve();
+            } else {
+              img.onload = () => {
+                loadingMessage.value = `Cargando imágenes (${index+1}/${imagesToLoad.length})...`;
+                resolve();
+              };
+              img.onerror = () => {
+                console.warn(`Error al cargar imagen: ${img.src}`);
+                resolve();
+              };
+              
+              // Si la imagen tiene un src vacío o inválido, resolverla de inmediato
+              if (!img.src || img.src === 'about:blank') {
+                resolve();
+              }
             }
-            body { 
-              margin: 0; 
-              padding: 0; 
-              background: white; 
-              font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-              color: #000;
-              width: 210mm;
-              height: 297mm;
-            }
-            * { box-sizing: border-box; }
-            
-            .page { 
-              page-break-after: always; 
-              break-after: page;
-              width: 210mm;
-              min-height: 297mm;
-              position: relative;
-              padding: 0;
-              margin: 0;
-              background: white;
-              overflow: hidden;
-            }
-            
-            .pagebreak {
-              display: block;
-              clear: both;
-              page-break-after: always;
-              break-after: page;
-              height: 0;
-              margin: 0;
-              padding: 0;
-              border: 0;
-            }
-            
-            .page:last-child,
-            #contraportada {
-              page-break-after: auto;
-              break-after: auto;
-            }
-            
-            img {
-              max-width: 100%;
-              height: auto;
-              display: block;
-            }
-            
-            p, h1, h2, h3, h4, h5, h6 {
-              page-break-inside: avoid;
-              break-inside: avoid;
-            }
-            
-            .no-break {
-              page-break-inside: avoid;
-              break-inside: avoid;
-            }
-          </style>
-          <!-- Copiar los estilos originales de la plantilla -->
-          <style>${iframeDoc.styleSheets[0]?.cssRules ? Array.from(iframeDoc.styleSheets[0].cssRules).map(rule => rule.cssText).join('\n') : ''}</style>
-        </head>
-        <body>${plantillaHTML.value}</body>
-      </html>
-    `);
-    iframeDoc.close();
-    
-    // Dar tiempo para que el iframe renderice completamente
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Identificar todas las páginas de la plantilla
-    loadingMessage.value = 'Identificando páginas del documento...';
-    
-    // Obtener todos los elementos que deben ser páginas separadas
-    // Incluye divs de clase 'page', divs de id específicos como 'portada', 'contraportada', etc.,
-    // y elementos con clase 'pagebreak'
-    const pageElements = iframeDoc.querySelectorAll('.page, #portada, #contraportada, #indice, .section-agencia, .section-empleo, .section-promo, .section-desarrollo, .section-gestion, .section-marketing, .section-anexos, .pagebreak');
-    
-    // Si no hay elementos de página, usar todo el body como una sola página
-    let pages = [];
-    if (pageElements.length === 0) {
-      pages.push(iframeDoc.body);
-    } else {
-      // Filtrar elementos vacíos o muy pequeños
-      pages = Array.from(pageElements).filter(el => {
-        return el.offsetHeight > 20 || el.classList.contains('pagebreak');
-      });
+          });
+        })
+      );
     }
     
-    // Crear el documento PDF
+    loadingMessage.value = 'Capturando la plantilla como se ve en pantalla...';
+    
+    // Crear documento PDF
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -833,98 +753,77 @@ const generatePdf = async () => {
       compress: true
     });
     
-    // Configuración para html2canvas optimizada para calidad
-    const html2canvasOptions = {
-      scale: 2, // Mayor escala para mejor calidad
+    // Dimensiones del PDF (A4)
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    
+    // Hacer una captura del contenedor completo
+    const canvas = await html2canvas(plantillaContainer, {
+      scale: 2, // Mayor calidad
       useCORS: true,
       allowTaint: true,
       logging: false,
-      backgroundColor: '#ffffff',
-      onclone: (clonedDoc) => {
-        // Asegurarse que los elementos con pagebreak tengan altura cero
-        const pagebreaks = clonedDoc.querySelectorAll('.pagebreak');
-        pagebreaks.forEach(pb => {
-          pb.style.height = '0px';
-          pb.style.display = 'block';
-        });
-      }
-    };
+      backgroundColor: '#ffffff'
+    });
     
-    // Procesar cada página secuencialmente
-    loadingMessage.value = 'Capturando páginas...';
+    // Convertir canvas a imagen
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
     
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
-      
-      // Actualizar mensaje de carga
-      loadingMessage.value = `Procesando página ${i + 1} de ${pages.length}...`;
-      
-      // Si es solo un pagebreak, añadir nueva página y continuar
-      if (page.classList.contains('pagebreak')) {
-        if (i > 0) { // No añadir página en blanco si es el primer elemento
-          pdf.addPage();
-        }
-        continue;
+    // Calcular la altura total del contenido
+    const contentHeight = canvas.height;
+    const contentWidth = canvas.width;
+    
+    // Calcular cuántas páginas necesitamos
+    const contentAspectRatio = contentWidth / contentHeight;
+    const pageAspectRatio = pageWidth / pageHeight;
+    
+    // Ajustar ancho para que ocupe todo el ancho de página
+    const imgWidth = pageWidth;
+    const imgHeight = imgWidth / contentAspectRatio;
+    
+    // Si el contenido es más alto que una página, dividirlo en varias
+    const totalPages = Math.ceil(contentHeight * (pageWidth / contentWidth) / pageHeight);
+    
+    loadingMessage.value = `Creando PDF de ${totalPages} páginas...`;
+    
+    // Para cada página, recortar la imagen y añadirla al PDF
+    for (let i = 0; i < totalPages; i++) {
+      // Si no es la primera página, añadir una nueva
+      if (i > 0) {
+        pdf.addPage();
       }
       
-      try {
-        // Asegurarse que la página sea visible durante la captura
-        page.style.display = 'block';
-        
-        // Capturar la página como imagen
-        const canvas = await html2canvas(page, html2canvasOptions);
-        
-        // Si no es la primera página, añadir una nueva página al PDF
-        if (i > 0) {
-          pdf.addPage();
-        }
-        
-        // Convertir canvas a imagen
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        
-        // Dimensiones del PDF
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        
-        // Calcular proporción para mantener el aspecto
-        const canvasAspectRatio = canvas.width / canvas.height;
-        const pageAspectRatio = pageWidth / pageHeight;
-        
-        let imgWidth = pageWidth;
-        let imgHeight = imgWidth / canvasAspectRatio;
-        
-        // Si la imagen es más alta que la página, ajustar altura
-        if (imgHeight > pageHeight) {
-          imgHeight = pageHeight;
-          imgWidth = imgHeight * canvasAspectRatio;
-        }
-        
-        // Centrar imagen si no ocupa todo el ancho
-        const xOffset = (pageWidth - imgWidth) / 2;
-        
-        // Añadir imagen al PDF
-        pdf.addImage(
-          imgData,
-          'JPEG',
-          xOffset,
-          0,
-          imgWidth,
-          imgHeight
-        );
-      } catch (error) {
-        console.error(`Error al procesar página ${i + 1}:`, error);
-        
-        // Añadir página en blanco con mensaje de error
-        if (i > 0) {
-          pdf.addPage();
-        }
-        pdf.setFontSize(12);
-        pdf.text(`[Error en página ${i + 1}]`, 20, 20);
-      }
+      // Calcular qué parte de la imagen añadir a esta página
+      const srcY = i * (contentHeight / totalPages);
+      const srcHeight = contentHeight / totalPages;
+      
+      // Crear un canvas temporal para esta porción
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = contentWidth;
+      tempCanvas.height = srcHeight;
+      
+      const ctx = tempCanvas.getContext('2d');
+      ctx.drawImage(
+        canvas,
+        0, srcY, contentWidth, srcHeight,
+        0, 0, contentWidth, srcHeight
+      );
+      
+      // Convertir este canvas a imagen
+      const pageImgData = tempCanvas.toDataURL('image/jpeg', 1.0);
+      
+      // Añadir al PDF
+      pdf.addImage(
+        pageImgData,
+        'JPEG',
+        0,
+        0,
+        pageWidth,
+        pageHeight
+      );
+      
+      loadingMessage.value = `Procesando página ${i+1} de ${totalPages}...`;
     }
-    
-    // Finalizar y descargar el PDF
-    loadingMessage.value = 'Finalizando y descargando PDF...';
     
     // Nombre del archivo
     const filename = pdfOptions.filename.endsWith('.pdf') ? 
@@ -932,10 +831,8 @@ const generatePdf = async () => {
                      `${pdfOptions.filename}.pdf`;
     
     // Guardar PDF
+    loadingMessage.value = 'Finalizando y descargando PDF...';
     pdf.save(filename);
-    
-    // Limpiar
-    document.body.removeChild(iframe);
     
     loadingMessage.value = '¡PDF generado con éxito!';
     setTimeout(() => {
@@ -944,81 +841,54 @@ const generatePdf = async () => {
     
   } catch (error) {
     console.error('Error al generar el PDF:', error);
-    
-    // Intentar método alternativo si falla el principal
     loadingMessage.value = 'Intentando método alternativo...';
     
     try {
-      // Método alternativo usando html2pdf.js
-      const plantillaHTML = document.getElementById('plantilla-container');
+      // Método alternativo: capturar imagen completa y ajustarla a PDF
+      const plantillaContainer = document.getElementById('plantilla-container');
       
-      if (!plantillaHTML) {
+      if (!plantillaContainer) {
         throw new Error('No se pudo encontrar la plantilla HTML');
       }
       
-      // Crear iframe temporal para capturar toda la plantilla de una vez
-      const iframe = document.createElement('iframe');
-      iframe.style.width = '210mm';
-      iframe.style.height = '297mm';
-      iframe.style.position = 'absolute';
-      iframe.style.top = '-9999px';
-      iframe.style.left = '-9999px';
-      document.body.appendChild(iframe);
+      // Capturar toda la plantilla en una sola imagen
+      const canvas = await html2canvas(plantillaContainer, {
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
       
-      // Copiar el contenido al iframe
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-      iframeDoc.open();
-      iframeDoc.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="UTF-8">
-            <title>PDF</title>
-            <style>
-              @page { size: A4; margin: 0; }
-              body { 
-                margin: 0; 
-                padding: 0; 
-                font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-              }
-              .page { page-break-after: always; }
-              .page:last-child { page-break-after: auto; }
-              .pagebreak { page-break-after: always; height: 0; }
-            </style>
-          </head>
-          <body>${plantillaHTML.innerHTML}</body>
-        </html>
-      `);
-      iframeDoc.close();
+      const imgData = canvas.toDataURL('image/png');
       
-      // Dar tiempo para renderizar
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Capturar el documento completo
+      // Crear PDF con la imagen completa
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
       
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const contentAspectRatio = canvas.width / canvas.height;
+      const imgWidth = pageWidth;
+      const imgHeight = imgWidth / contentAspectRatio;
+      
+      // Añadir la imagen completa
+      pdf.addImage(
+        imgData,
+        'PNG',
+        0,
+        0,
+        imgWidth,
+        imgHeight
+      );
+      
       // Nombre del archivo
       const filename = pdfOptions.filename.endsWith('.pdf') ? 
                       pdfOptions.filename : 
                       `${pdfOptions.filename}.pdf`;
       
-      // Mensaje para el usuario
-      pdf.setFontSize(16);
-      pdf.text('La vista previa no pudo ser capturada correctamente.', 20, 30);
-      pdf.setFontSize(12);
-      pdf.text('Recomendamos usar la función de impresión del navegador:', 20, 50);
-      pdf.text('1. Haga clic derecho en la vista previa', 20, 70);
-      pdf.text('2. Seleccione "Imprimir"', 20, 80);
-      pdf.text('3. Elija "Guardar como PDF"', 20, 90);
-      
       pdf.save(filename);
-      
-      // Limpiar
-      document.body.removeChild(iframe);
       
     } catch (fallbackError) {
       console.error('Error en método alternativo:', fallbackError);
@@ -1688,11 +1558,46 @@ h3 {
 }
 
 .pdf-template {
-  width: 210mm; /* Tamaño A4 */
+  width: 210mm;  /* Ancho A4 */
   margin: 0 auto;
   background-color: white;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
   border: 1px solid #d0d0d0;
+  overflow: hidden; /* Importante para evitar desbordamientos */
+}
+
+.pdf-content {
+  width: 100%;
+  background-color: white;
+  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #000;
+  overflow: visible;
+}
+
+/* Asegurar que todas las imágenes se muestren correctamente */
+.pdf-content img {
+  display: inline-block !important;
+  max-width: 100%;
+  height: auto;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Asegurar que la estructura de página sea visible */
+.pdf-content .page, 
+.pdf-content #portada, 
+.pdf-content #contraportada,
+.pdf-content .section-agencia,
+.pdf-content .section-empleo,
+.pdf-content .section-promo,
+.pdf-content .section-desarrollo,
+.pdf-content .section-gestion,
+.pdf-content .section-marketing {
+  display: block !important;
+  position: relative !important;
+  overflow: visible !important;
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
 }
 
 .action-buttons {

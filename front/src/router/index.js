@@ -82,6 +82,20 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
   ],
+  scrollBehavior(to, from, savedPosition) {
+    // Si estamos navegando a la ruta PDF, siempre scroll al inicio
+    if (to.path === '/pdf') {
+      return { top: 0 }
+    }
+    
+    // Para otras rutas, usa el comportamiento predeterminado:
+    // Si hay una posición guardada (por ejemplo, navegación atrás/adelante), usarla
+    if (savedPosition) {
+      return savedPosition
+    }
+    // De lo contrario, scroll al inicio
+    return { top: 0 }
+  }
 })
 
 // Variables para el manejo del loader
