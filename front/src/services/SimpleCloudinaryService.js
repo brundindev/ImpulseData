@@ -18,14 +18,26 @@ class SimpleCloudinaryService {
     this.defaultUploadPreset = 'impulsedata';
     this.apiKey = '526484494966574'; // Clave API pública (solo para operaciones de lectura)
     
-    // Lista de imágenes de respaldo por si falla la conexión al backend
+    // Lista ampliada de imágenes de respaldo por si falla la conexión al backend
     this.fallbackImages = [
-      { publicId: 'docs/models-13', alt: 'Modelo' },
-      { publicId: 'docs/models-12', alt: 'Modelo 2' },
-      { publicId: 'docs/models-11', alt: 'Modelo 3' },
-      { publicId: 'docs/models-10', alt: 'Modelo 4' },
-      { publicId: 'docs/models-9', alt: 'Modelo 5' },
-      { publicId: 'docs/models-8', alt: 'Modelo 6' }
+      { publicId: 'docs/models-13', alt: 'Modelo Básico' },
+      { publicId: 'docs/models-12', alt: 'Modelo Profesional' },
+      { publicId: 'docs/models-11', alt: 'Modelo Equipo' },
+      { publicId: 'docs/models-10', alt: 'Modelo Oficina' },
+      { publicId: 'docs/models-9', alt: 'Modelo Reunión' },
+      { publicId: 'docs/models-8', alt: 'Modelo Presentación' },
+      { publicId: 'docs/models-7', alt: 'Modelo Proyecto' },
+      { publicId: 'docs/models-6', alt: 'Modelo Conferencia' },
+      { publicId: 'docs/models-5', alt: 'Modelo Trabajo' },
+      { publicId: 'docs/models-4', alt: 'Modelo Tecnología' },
+      { publicId: 'docs/models-3', alt: 'Modelo Colaboración' },
+      { publicId: 'docs/models-2', alt: 'Modelo Innovación' },
+      { publicId: 'docs/models-1', alt: 'Modelo Digital' },
+      { publicId: 'samples/landscapes/nature-mountains', alt: 'Paisaje Montañas' },
+      { publicId: 'samples/food/pot-mussels', alt: 'Alimentos Mejillones' },
+      { publicId: 'samples/ecommerce/accessories-bag', alt: 'Accesorios Bolso' },
+      { publicId: 'samples/animals/kitten-playing', alt: 'Gatito Jugando' },
+      { publicId: 'samples/people/kitchen-bar', alt: 'Personas en Bar' }
     ];
     
     // Rutas conocidas de carpetas para buscar imágenes
@@ -141,79 +153,57 @@ class SimpleCloudinaryService {
    */
   async getResourcesByFolder(prefix = '') {
     try {
-      const cloudinaryBrowseURL = `https://res.cloudinary.com/${this.cloudName}/image/list/${prefix || 'all_images'}.json`;
+      // En lugar de acceder a los archivos JSON directamente, usemos el backend como intermediario
+      console.log(`Intentando obtener recursos de carpeta '${prefix}' a través del backend`);
       
-      console.log(`Consultando recursos de carpeta '${prefix}':`, cloudinaryBrowseURL);
+      const token = localStorage.getItem('authToken');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       
-      const response = await axios.get(cloudinaryBrowseURL, {
-        timeout: 10000
+      // Usar el endpoint del backend para obtener imágenes
+      const response = await axios.get(`${API_PATH}/cloudinary/images`, {
+        headers,
+        params: { folder: prefix },
+        timeout: 15000
       });
       
-      if (response.data && response.data.resources) {
-        return response.data.resources.map(res => ({
-          publicId: res.public_id,
-          alt: this.formatPublicIdToAlt(res.public_id),
+      if (response.data && Array.isArray(response.data)) {
+        return response.data.map(res => ({
+          publicId: res.publicId,
+          alt: res.alt || this.formatPublicIdToAlt(res.publicId),
           format: res.format,
           width: res.width,
           height: res.height,
-          url: this.getImageUrl(res.public_id)
+          url: res.secureUrl || this.getImageUrl(res.publicId)
         }));
       }
       
       return [];
     } catch (error) {
       console.error(`Error al obtener recursos de carpeta '${prefix}':`, error);
+      // Si falla, devolver un array vacío
       return [];
     }
   }
 
   /**
-   * Obtiene todas las imágenes disponibles de forma recursiva explorando carpetas conocidas
+   * Obtiene todas las imágenes disponibles para la aplicación
    * @returns {Promise<Array>} - Promise con la lista de imágenes
    */
   async getAllImages() {
     try {
-      console.log("Obteniendo imágenes de Cloudinary mediante exploración directa...");
+      console.log("Obteniendo imágenes de Cloudinary a través del backend...");
       
-      const allImages = [...this.fallbackImages]; // Comenzar con las imágenes de respaldo
-      const processedFolders = new Set();
-      
-      // Función recursiva para explorar carpetas
-      const exploreFolder = async (prefix) => {
-        if (processedFolders.has(prefix)) return;
-        processedFolders.add(prefix);
-        
-        const folderImages = await this.getResourcesByFolder(prefix);
-        
-        // Añadir imágenes únicas (evitar duplicados por publicId)
-        folderImages.forEach(img => {
-          if (!allImages.some(existing => existing.publicId === img.publicId)) {
-            allImages.push(img);
-          }
-        });
-      };
-      
-      // Explorar todas las carpetas conocidas
-      for (const folder of this.knownFolders) {
-        await exploreFolder(folder);
-      }
-      
-      // Si tenemos suficientes imágenes, devolver
-      if (allImages.length > this.fallbackImages.length) {
-        console.log(`Se encontraron ${allImages.length} imágenes en total`);
-        return allImages;
-      }
-      
-      // Si no encontramos suficientes imágenes, intentar la API del backend como respaldo
-      console.log("Intentando obtener imágenes del backend como respaldo...");
+      // Usar siempre las imágenes de respaldo como base para garantizar que siempre hay imágenes
+      const allImages = [...this.fallbackImages];
       
       try {
         const token = localStorage.getItem('authToken');
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         
+        // Intentar obtener imágenes del backend directamente
         const response = await axios.get(`${API_PATH}/cloudinary/images`, {
           headers,
-          timeout: 8000 // Timeout más corto para el respaldo
+          timeout: 15000
         });
         
         if (response.data && Array.isArray(response.data) && response.data.length > 0) {
@@ -222,7 +212,7 @@ class SimpleCloudinaryService {
           const backendImages = response.data.map(img => ({
             publicId: img.publicId,
             alt: img.alt || this.formatPublicIdToAlt(img.publicId),
-            url: img.url || img.secureUrl,
+            url: img.secureUrl || this.getImageUrl(img.publicId),
             width: img.width,
             height: img.height
           }));
@@ -236,24 +226,12 @@ class SimpleCloudinaryService {
         }
       } catch (backendError) {
         console.warn("No se pudieron obtener imágenes del backend:", backendError.message);
+        console.log("Usando imágenes de respaldo predefinidas");
       }
       
-      // Si aún no tenemos suficientes imágenes, intentar explorar la raíz
-      if (allImages.length <= this.fallbackImages.length) {
-        console.log("Intentando explorar la raíz como último recurso...");
-        const rootImages = await this.getResourcesByFolder('');
-        
-        rootImages.forEach(img => {
-          if (!allImages.some(existing => existing.publicId === img.publicId)) {
-            allImages.push(img);
-          }
-        });
-      }
-      
-      console.log(`Finalmente, se encontraron ${allImages.length} imágenes en total`);
       return allImages;
     } catch (error) {
-      console.error('Error al obtener imágenes:', error);
+      console.error('Error al obtener todas las imágenes:', error);
       return this.fallbackImages;
     }
   }
