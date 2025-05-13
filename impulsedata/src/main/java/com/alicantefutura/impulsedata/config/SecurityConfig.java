@@ -49,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/registro", // Permitir registro sin autenticación
                                 "/api/auth/login", // Permitir login sin autenticación
+                                "/api/cloudinary/images", // Permitir acceso a imágenes sin autenticación
+                                "/api/cloudinary/health", // Permitir health check sin autenticación
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
@@ -84,6 +86,8 @@ public class SecurityConfig {
             "http://localhost:5173", // Puerto por defecto de Vite
             "http://localhost",      // Nuevo puerto en Docker
             "http://localhost:80",   // Especificar explícitamente puerto 80
+            "https://impulsedata.es",
+            "https://www.impulsedata.es",
             "https://impulsedata.vercel.app"
         )); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

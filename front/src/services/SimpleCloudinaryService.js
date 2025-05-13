@@ -181,12 +181,13 @@ class SimpleCloudinaryService {
       // En lugar de acceder a los archivos JSON directamente, usemos el backend como intermediario
       console.log(`Intentando obtener recursos de carpeta '${prefix}' a través del backend`);
       
-      const token = localStorage.getItem('authToken');
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      // Endpoints públicos, no necesitamos enviar token
+      // const token = localStorage.getItem('authToken');
+      // const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       // Usar el endpoint del backend para obtener imágenes
       const response = await axios.get(`${API_PATH}/cloudinary/images`, {
-        headers,
+        // headers,
         params: { folder: prefix },
         timeout: 15000
       });
@@ -229,33 +230,23 @@ class SimpleCloudinaryService {
           return allImages;
         }
         
-        // Verificar el token de autenticación
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          console.log("Sin token de autenticación. Usando imágenes de respaldo.");
-          return allImages;
-        }
-        
-        const headers = { 'Authorization': `Bearer ${token}` };
-        
-        // Intentar un ping rápido al backend para ver si responde
+        // Verificar si podemos acceder al backend
         try {
-          await axios.get(`${API_PATH}/health`, { 
-            headers, 
+          // Ping rápido al endpoint de health (público)
+          await axios.get(`${API_PATH}/cloudinary/health`, { 
             timeout: 3000,
             validateStatus: (status) => status === 200
           });
         } catch (pingError) {
-          console.log("Backend no disponible o token inválido. Usando imágenes de respaldo.");
+          console.log("Backend no disponible. Usando imágenes de respaldo.");
           return allImages;
         }
         
-        // Si llegamos aquí, el backend está disponible y el token es válido
+        // Si llegamos aquí, el backend está disponible
         // Ahora intentamos obtener las imágenes
         console.log("Backend disponible. Intentando obtener imágenes...");
         
         const response = await axios.get(`${API_PATH}/cloudinary/images`, {
-          headers,
           timeout: 15000
         });
         

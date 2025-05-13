@@ -17,7 +17,7 @@ import com.alicantefutura.impulsedata.service.CloudinaryService;
 
 @RestController
 @RequestMapping("/api/cloudinary")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "https://impulsedata.vercel.app"})
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "https://impulsedata.es", "https://impulsedata.vercel.app"})
 public class CloudinaryController {
 
     private final CloudinaryService cloudinaryService;
@@ -29,6 +29,7 @@ public class CloudinaryController {
 
     /**
      * Obtiene todas las imágenes disponibles en Cloudinary
+     * Este endpoint es público y no requiere autenticación
      * 
      * @param maxResults máximo número de resultados a retornar (opcional, por defecto 100)
      * @param folder carpeta específica para filtrar (opcional)
@@ -61,7 +62,7 @@ public class CloudinaryController {
 
     /**
      * Endpoint de salud para verificar que el backend está disponible
-     * y que el token de autenticación es válido
+     * Este endpoint es público y no requiere autenticación
      * 
      * @return 200 OK si todo está correcto
      */
