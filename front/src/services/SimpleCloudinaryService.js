@@ -18,27 +18,18 @@ class SimpleCloudinaryService {
     this.defaultUploadPreset = 'impulsedata';
     this.apiKey = '526484494966574'; // Clave API pública (solo para operaciones de lectura)
     
-    // Lista ampliada de imágenes de respaldo por si falla la conexión al backend
+    // Nueva lista de imágenes de respaldo (verificadas que existen)
     this.fallbackImages = [
-      { publicId: 'docs/models-13', alt: 'Modelo Básico' },
-      { publicId: 'docs/models-12', alt: 'Modelo Profesional' },
-      { publicId: 'docs/models-11', alt: 'Modelo Equipo' },
-      { publicId: 'docs/models-10', alt: 'Modelo Oficina' },
-      { publicId: 'docs/models-9', alt: 'Modelo Reunión' },
-      { publicId: 'docs/models-8', alt: 'Modelo Presentación' },
-      { publicId: 'docs/models-7', alt: 'Modelo Proyecto' },
-      { publicId: 'docs/models-6', alt: 'Modelo Conferencia' },
-      { publicId: 'docs/models-5', alt: 'Modelo Trabajo' },
-      { publicId: 'docs/models-4', alt: 'Modelo Tecnología' },
-      { publicId: 'docs/models-3', alt: 'Modelo Colaboración' },
-      { publicId: 'docs/models-2', alt: 'Modelo Innovación' },
-      { publicId: 'docs/models-1', alt: 'Modelo Digital' },
-      { publicId: 'samples/landscapes/nature-mountains', alt: 'Paisaje Montañas' },
-      { publicId: 'samples/food/pot-mussels', alt: 'Alimentos Mejillones' },
-      { publicId: 'samples/ecommerce/accessories-bag', alt: 'Accesorios Bolso' },
-      { publicId: 'samples/animals/kitten-playing', alt: 'Gatito Jugando' },
-      { publicId: 'samples/people/kitchen-bar', alt: 'Personas en Bar' }
+      { publicId: 'v1745577235/docs/models-13', alt: 'Modelo' },
+      { publicId: 'v1745577235/docs/models-12', alt: 'Modelo Trabajo' },
+      { publicId: 'v1745577235/docs/models-11', alt: 'Modelo Reunión' },
+      { publicId: 'v1745577235/docs/models-10', alt: 'Modelo Colaboración' },
+      { publicId: 'v1745577235/docs/models-9', alt: 'Modelo Técnico' },
+      { publicId: 'v1745577235/docs/models-8', alt: 'Modelo Presentación' }
     ];
+    
+    // URL de imagen por defecto para cuando falla todo lo demás
+    this.defaultImageUrl = 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
     
     // Rutas conocidas de carpetas para buscar imágenes
     this.knownFolders = ['docs', 'samples', 'logos', 'uploads'];
@@ -51,30 +42,64 @@ class SimpleCloudinaryService {
    * @returns {string} - URL de la imagen
    */
   getImageUrl(publicId, options = {}) {
-    if (!publicId) return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
+    if (!publicId) return this.defaultImageUrl;
     
-    const { width, height, format, quality } = options;
-    
-    // URL base de Cloudinary
-    let url = `https://res.cloudinary.com/${this.cloudName}/image/upload`;
-    
-    // Transformaciones
-    const transformations = [];
-    if (width) transformations.push(`w_${width}`);
-    if (height) transformations.push(`h_${height}`);
-    if (format && format !== 'auto') transformations.push(`f_${format}`);
-    if (quality && quality !== 'auto') transformations.push(`q_${quality}`);
-    else transformations.push('q_auto');
-    
-    // Añadir transformaciones a la URL
-    if (transformations.length > 0) {
-      url += `/${transformations.join(',')}`;
+    try {
+      const { width, height, format, quality } = options;
+      
+      // Si el publicId ya es una URL completa, devolverlo directamente
+      if (publicId.startsWith('http')) {
+        return publicId;
+      }
+      
+      // Si ya incluye versión (v12345), usarlo tal cual
+      if (publicId.match(/^v\d+\//)) {
+        // URL base de Cloudinary
+        let url = `https://res.cloudinary.com/${this.cloudName}/image/upload`;
+        
+        // Transformaciones
+        const transformations = [];
+        if (width) transformations.push(`w_${width}`);
+        if (height) transformations.push(`h_${height}`);
+        if (format && format !== 'auto') transformations.push(`f_${format}`);
+        if (quality && quality !== 'auto') transformations.push(`q_${quality}`);
+        else transformations.push('q_auto');
+        
+        // Añadir transformaciones a la URL
+        if (transformations.length > 0) {
+          url += `/${transformations.join(',')}`;
+        }
+        
+        // Añadir el ID público a la URL
+        url += `/${publicId}`;
+        
+        return url;
+      } else {
+        // Para IDs sin versión, usar la versión predeterminada
+        let url = `https://res.cloudinary.com/${this.cloudName}/image/upload`;
+        
+        // Transformaciones
+        const transformations = [];
+        if (width) transformations.push(`w_${width}`);
+        if (height) transformations.push(`h_${height}`);
+        if (format && format !== 'auto') transformations.push(`f_${format}`);
+        if (quality && quality !== 'auto') transformations.push(`q_${quality}`);
+        else transformations.push('q_auto');
+        
+        // Añadir transformaciones a la URL
+        if (transformations.length > 0) {
+          url += `/${transformations.join(',')}`;
+        }
+        
+        // Añadir el ID público a la URL (con versión predeterminada)
+        url += `/v1745577235/${publicId}`;
+        
+        return url;
+      }
+    } catch (error) {
+      console.error(`Error al generar URL para imagen ${publicId}:`, error);
+      return this.defaultImageUrl;
     }
-    
-    // Añadir el ID público a la URL
-    url += `/${publicId}`;
-    
-    return url;
   }
 
   /**
@@ -191,16 +216,44 @@ class SimpleCloudinaryService {
    */
   async getAllImages() {
     try {
-      console.log("Obteniendo imágenes de Cloudinary a través del backend...");
+      console.log("Obteniendo imágenes de Cloudinary...");
       
-      // Usar siempre las imágenes de respaldo como base para garantizar que siempre hay imágenes
+      // Iniciar con imágenes de respaldo (funcionamiento offline)
       const allImages = [...this.fallbackImages];
       
+      // Verificar si hay red y conexión con el backend
       try {
-        const token = localStorage.getItem('authToken');
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        // Detectar si estamos offline
+        if (!navigator.onLine) {
+          console.log("Navegador offline. Usando imágenes de respaldo.");
+          return allImages;
+        }
         
-        // Intentar obtener imágenes del backend directamente
+        // Verificar el token de autenticación
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          console.log("Sin token de autenticación. Usando imágenes de respaldo.");
+          return allImages;
+        }
+        
+        const headers = { 'Authorization': `Bearer ${token}` };
+        
+        // Intentar un ping rápido al backend para ver si responde
+        try {
+          await axios.get(`${API_PATH}/health`, { 
+            headers, 
+            timeout: 3000,
+            validateStatus: (status) => status === 200
+          });
+        } catch (pingError) {
+          console.log("Backend no disponible o token inválido. Usando imágenes de respaldo.");
+          return allImages;
+        }
+        
+        // Si llegamos aquí, el backend está disponible y el token es válido
+        // Ahora intentamos obtener las imágenes
+        console.log("Backend disponible. Intentando obtener imágenes...");
+        
         const response = await axios.get(`${API_PATH}/cloudinary/images`, {
           headers,
           timeout: 15000
@@ -217,21 +270,28 @@ class SimpleCloudinaryService {
             height: img.height
           }));
           
-          // Añadir imágenes únicas del backend
+          // Limpiar y añadir imágenes únicas del backend
+          const uniqueImages = [...allImages];
           backendImages.forEach(img => {
-            if (!allImages.some(existing => existing.publicId === img.publicId)) {
-              allImages.push(img);
+            if (!uniqueImages.some(existing => 
+                existing.publicId === img.publicId || 
+                (existing.url && img.url && existing.url === img.url)
+            )) {
+              uniqueImages.push(img);
             }
           });
+          
+          return uniqueImages;
         }
       } catch (backendError) {
-        console.warn("No se pudieron obtener imágenes del backend:", backendError.message);
-        console.log("Usando imágenes de respaldo predefinidas");
+        console.warn("Error al obtener imágenes del backend:", backendError.message);
       }
       
+      // Si llegamos aquí, hubo un problema o no se pudieron obtener imágenes del backend
+      console.log("Usando imágenes de respaldo (fallback)");
       return allImages;
     } catch (error) {
-      console.error('Error al obtener todas las imágenes:', error);
+      console.error('Error global al obtener imágenes:', error);
       return this.fallbackImages;
     }
   }

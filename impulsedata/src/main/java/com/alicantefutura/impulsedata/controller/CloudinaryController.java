@@ -1,6 +1,8 @@
 package com.alicantefutura.impulsedata.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +57,20 @@ public class CloudinaryController {
             // Devolver una lista vacía en caso de error
             return ResponseEntity.ok(List.of());
         }
+    }
+
+    /**
+     * Endpoint de salud para verificar que el backend está disponible
+     * y que el token de autenticación es válido
+     * 
+     * @return 200 OK si todo está correcto
+     */
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, String>> healthCheck() {
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "UP");
+        response.put("service", "cloudinary");
+        response.put("timestamp", new java.util.Date().toString());
+        return ResponseEntity.ok(response);
     }
 } 
