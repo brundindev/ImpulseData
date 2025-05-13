@@ -87,6 +87,7 @@ public class SecurityConfig {
             "http://localhost",      // Nuevo puerto en Docker
             "http://localhost:80",   // Especificar explícitamente puerto 80
             "https://impulsedata.es",
+            "https://impulsedata.onrender.com",
             "https://www.impulsedata.es",
             "https://impulsedata.vercel.app"
         )); 

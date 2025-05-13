@@ -17,7 +17,7 @@ import com.alicantefutura.impulsedata.service.CloudinaryService;
 
 @RestController
 @RequestMapping("/api/cloudinary")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "https://impulsedata.es", "https://impulsedata.vercel.app"})
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "https://impulsedata.es", "https://impulsedata.vercel.app", "https://impulsedata.onrender.com"})
 public class CloudinaryController {
 
     private final CloudinaryService cloudinaryService;
