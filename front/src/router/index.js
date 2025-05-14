@@ -81,6 +81,14 @@ const router = createRouter({
       component: DescargarAppView,
       meta: { requiresAuth: false }
     },
+    {
+      path: '/memoria-anual',
+      name: 'memoria-anual',
+      component: () => import('../views/MemoriaAnualView.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     // Si estamos navegando a la ruta PDF, siempre scroll al inicio

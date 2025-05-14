@@ -114,7 +114,7 @@ const openChatbot = () => {
 }
 
 .banner-info p {
-  font-size: 16px;
+  font-size: 1.2rem;
   line-height: 1.6;
   color: #000000;
   margin-bottom: 25px;
