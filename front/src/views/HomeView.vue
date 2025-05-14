@@ -332,6 +332,7 @@ import {
 import ImportConfirmationModal from '@/components/home/ImportConfirmationModal.vue';
 import EmpresaService from '../services/EmpresaService';
 
+import { usePdfNavigator } from '../services/usePdfNavigator';
 const router = useRouter();
 const auth = getAuth();
 const usuario = ref(null);
@@ -347,6 +348,7 @@ const empresaEditandoId = ref(null);
 // Reemplazar las variables reactivas existentes
 const nuevaEmpresa = EmpresaService.nuevaEmpresa;
 const empresaActual = EmpresaService.empresaActual;
+const { irAPaginaPDF } = usePdfNavigator(showViewModal, empresaActual);
 
 // Reemplazar las funciones existentes
 const resetearFormulario = () => EmpresaService.resetearFormulario();
@@ -1485,16 +1487,6 @@ const importarArchivo = async (event) => {
 };
 
 // Función para ir a la página de PDF
-const irAPaginaPDF = () => {
-  // Cerrar el modal de vista
-  showViewModal.value = false;
-  
-  // Almacenar los datos de la empresa actual en localStorage para recuperarlos en la página PDF
-  localStorage.setItem('empresa_pdf', JSON.stringify(empresaActual));
-  
-  // Redirigir a la página /pdf
-  router.push('/pdf');
-};
 
 const confirmarEliminar = (empresa) => {
   empresaAEliminar.value = empresa;
