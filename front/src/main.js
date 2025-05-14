@@ -1,13 +1,11 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import store from './store' // Importar la store Vuex
+import store from './store'
 
 import App from './App.vue'
 import router from './router'
 
 import './assets/main.css'
-
-// Importar Font Awesome
 import '@fortawesome/fontawesome-free/css/all.css';
 
 // Configurar manejador global para ocultar errores de autenticación en consola
@@ -65,6 +63,6 @@ const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
-app.use(store) // Usar la store Vuex
+app.use(store)
 
 app.mount('#app')

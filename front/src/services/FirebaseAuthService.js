@@ -9,11 +9,7 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth, waitForAuthInit } from '../firebase';
-// Importar el servicio de Firestore para crear la empresa por defecto
 import FirestoreService from './FirestoreService';
-
-// Verificar que FirestoreService se importó correctamente y tiene el método crearUsuario
-console.log('FirestoreService en AuthService:', FirestoreService, 'método crearUsuario:', FirestoreService.crearUsuario);
 
 class FirebaseAuthService {
   /**

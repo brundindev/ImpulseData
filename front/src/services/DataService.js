@@ -7,7 +7,6 @@ import FirestoreService from './FirestoreService';
 import FirebaseAuthService from './FirebaseAuthService';
 import router from '../router/index';
 
-// Estados reactivos exportados
 export const cargando = ref(false);
 export const error = ref(null);
 export const empresas = ref([]);

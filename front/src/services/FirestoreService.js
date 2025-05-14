@@ -1,4 +1,3 @@
-// Import Firebase
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, collectionGroup, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { db } from '../firebase';
