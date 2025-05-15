@@ -1549,6 +1549,7 @@ tbody tr:nth-child(even) {
                     <h5>Servicios:</h5> <ul><li>Cursos oficiales LABORA</li><li>Talleres de empleo</li><li>Cursos con/sin certificación</li><li>Asesoramiento y orientación alumnado</li></ul> <p>Número de cursos: 20 | Alumnos/as: 272 | Horas de cursos: 6.294</p>
                 </section>
                 <section id="empleo-formacion" class="page section-empleo">
+                    <div class="section-content-grid columns-2"> <div class="content-block"> 
                     <h4>2.2.3 Centro Empleo y Formación El Tossalet</h4>
                      <div class="image-gallery-4"> <img src="" alt="Placeholder Imagen 31" class="image-placeholder" style="width: 48%; height: 100px;">
                         <img src="" alt="Placeholder Imagen 32" class="image-placeholder" style="width: 48%; height: 100px;">
@@ -1563,7 +1564,14 @@ tbody tr:nth-child(even) {
                     <p>Atención integral área...</p> <h5>Servicios:</h5> <ul><li>Información</li><li>Orientación laboral</li><li>Píldoras formativas</li><li>Asesoramiento emprendimiento</li><li>Prospección empresas</li></ul> <p>Nuevas altas demandantes: 224 | Citas orientación: 653</p>
                     <p><a href="#">Anexo 1: Memoria Entre Castillos 2024-2025</a> | <a href="#">Anexo 2: Explotación estadística Portalemp 2025</a></p>
                  </div>
+                 </div>
+                 </div>
+                </section>
 
+                <div class="pagebreak"></div>
+
+                <section id="empleo-formacion" class="page section-empleo">
+                    <div class="section-content-grid columns-2"> <div class="content-block"> 
                  <div class="content-block"> <h3>2.3 SERVICIOS PARA EL EMPLEO</h3>
                       <img src="" alt="Placeholder Imagen 37 - Portalemp Screenshot" class="image-placeholder full-width" style="height: 150px;">
                      <h4>2.3.1 Orientación e intermediación laboral</h4>
@@ -1573,7 +1581,13 @@ tbody tr:nth-child(even) {
                      <p><strong>PERFIL DEMANDANTES 2025:</strong> Mujer mayor de 45 años, parada de larga duración. (Mujeres: 1.977 | Mayores 45: 1.181 | 30-45 años: 798 | Menores 30: 705)</p>
                      <h4>2.3.2 Asesoramiento empresarial y al autoempleo</h4>
                      <p>Sesiones asesoramiento: 347 | Nuevas empresas / altas autónomo: 54</p>
+                </div>
+                </div>
+                </section>
 
+
+                <section id="empleo-formacion" class="page section-empleo">
+                     <div class="section-content-grid columns-2"> <div class="content-block"> 
                      <h3>2.4 ACTIVIDADES DE FORMACIÓN</h3>
                      <ol>
                          <li><strong>Cursos LABORA:</strong> Vinculados a Certificados de Profesionalidad (>200h + prácticas). Ej: Jardinería, Limpieza, RTE-Bar, Pastelería.</li>
@@ -1593,6 +1607,11 @@ tbody tr:nth-child(even) {
                               <tr><td>Horas:</td><td>26,5</td><td>18</td><td>31,5</td><td>75</td></tr>
                           </tbody>
                       </table>
+                    </div>
+                    </div>
+                    </section>
+                    <section id="empleo-formacion" class="page section-empleo">
+                    <div class="section-content-grid columns-2"> <div class="content-block"> 
                      <h4>Formación por Modalidad</h4>
                       <table>
                           <thead>
@@ -1613,7 +1632,13 @@ tbody tr:nth-child(even) {
                      </div>
                      <p><a href="#">Anexo 7: Informe calidad interna 2025</a> | <a href="#">Anexo 8: Informe calidad externa 2025</a></p>
                  </div>
-             </div> <div class="section-content-grid columns-3"> <div class="content-block"> <h3>2.5 PROGRAMAS Y PROYECTOS</h3>
+             </div> 
+             </section>
+
+             <div class="pagebreak"></div>
+
+             <section id="empleo-formacion" class="page section-empleo">
+             <div class="section-content-grid columns-3"> <div class="content-block"> <h3>2.5 PROGRAMAS Y PROYECTOS</h3>
                       <img src="" alt="Placeholder Imagen 38 - Evento o grupo" class="image-placeholder full-width" style="height: 200px;">
                     <h4>2.5.1 Programa "Grandes Ciudades"</h4>
                      <div class="program-results">
@@ -1630,7 +1655,9 @@ tbody tr:nth-child(even) {
                      <img src="" alt="Placeholder Imagen 41" class="image-placeholder" style="width: 48%; height: 150px; display: inline-block;">
                     <img src="" alt="Placeholder Imagen 42" class="image-placeholder" style="width: 48%; height: 150px; display: inline-block;">
                     <p>Partic: 31 | Éxito: 25 | Subv: 180k €</p> <p>Horas: 575 form / 350 grup / 486 indiv</p> <p><a href="#">Anexo 11</a></p>
-
+            </section>
+            <section id="empleo-formacion" class="page section-empleo">
+            <div class="section-content-grid columns-3"> <div class="content-block">
                     <h4>2.5.4 Plan brecha digital EOI</h4>
                     <p>Cursos: 9 | Horas: 3.042 | Partic: 159 | Aptos: 84%</p> <p><a href="#">Anexo 12</a></p>
           </div>
@@ -1646,7 +1673,14 @@ tbody tr:nth-child(even) {
                     <p>Mod A (15 proy): 99k € | Mod B (4 proy): 43k € | Mod C (5 proy): 24k €</p>
                     <p>Usuarios: 2.230 (999 H / 1.231 M)</p>
                     <p><a href="#">Anexo 13</a></p>
+            </div>
+            </div>
+            </section>
 
+
+
+            <section id="empleo-formacion" class="page section-empleo">
+            <div class="section-content-grid columns-3"> <div class="content-block">
                     <h4>2.6.2 Convenios nominativos</h4>
                      <img src="" alt="Placeholder Imagen 46 - Logos entidades convenio" class="image-placeholder full-width" style="height: 60px;">
                     <div class="convenios-grid">
@@ -1658,7 +1692,9 @@ tbody tr:nth-child(even) {
                         <div class="convenio-item"><strong>Mercalicante:</strong> 10k €. 4 cursos, 45 dip. <a href="#">Anexo 19</a> <img src="" alt="Img Mercalicante" class="image-placeholder" style="width: 100px; height: 60px;"></div>
           </div>
           </div>
+          
 
+            <div class="section-content-grid columns-2">
                 <div class="content-block"> <h3>2.7 OTROS</h3>
                     <div class="otros-grid">
                          <div class="otro-item">
@@ -1685,12 +1721,20 @@ tbody tr:nth-child(even) {
         <div class="pagebreak"></div>
 
          <section id="promocion-economica" class="page section-promo">
+         <div class="section-content-grid columns-3"> <div class="content-block">
              <div class="image-collage-promo">
                  <img src="" alt="Placeholder Imagen 54" class="image-placeholder" style="width: 48%; height: 200px;">
                  <img src="" alt="Placeholder Imagen 55" class="image-placeholder" style="width: 48%; height: 200px;">
                  <img src="" alt="Placeholder Imagen 56" class="image-placeholder" style="width: 48%; height: 200px;">
                  <img src="" alt="Placeholder Imagen 57" class="image-placeholder" style="width: 48%; height: 200px;">
              </div>
+        </div>
+        </div>
+            </section>
+
+
+            <section id="promocion-economica" class="page section-promo">
+                     <div class="section-content-grid columns-3"> <div class="content-block">
              <h2>3. DEPARTAMENTO DE PROMOCIÓN ECONÓMICA</h2>
               <img src="" alt="Placeholder Imagen 58 - Diagrama proceso" class="image-placeholder full-width" style="height: 150px;">
 
@@ -1726,6 +1770,13 @@ tbody tr:nth-child(even) {
                              <p>Importe: 3.99M € | Solicitudes: 3.603 | Benefic.: 2.176</p>
                              <p><a href="#">Anexo 32</a></p>
                           </div>
+                </div>
+                </div>
+                </section>
+
+
+                <section id="promocion-economica" class="page section-promo">
+                     <div class="section-content-grid columns-3"> <div class="content-block">
                           <div>
                              <h3>VIVEROS EMPRESARIALES</h3>
                               <img src="" alt="Placeholder Imagen 73" class="image-placeholder" style="width: 48%; height: 150px; display: inline-block;">
@@ -1768,6 +1819,13 @@ tbody tr:nth-child(even) {
                               <img src="" alt="Placeholder Imagen 70" class="image-placeholder logo" style="width: 150px; height: 60px;">
                              <p>LLAMP AMÉS / LLAMP 3I</p> <table>...</table> <p><a href="#">Anexo 27</a></p>
                          </div>
+                        
+                    </div>
+                    </div>
+                    </section>
+
+                    <section id="promocion-economica" class="page section-promo">
+                     <div class="section-content-grid columns-3"> <div class="content-block">
                          <div>
                              <h4>3.2.6 Actividades colaboración</h4>
                              <h5>3.2.6.1 Colaboración UA</h5>
@@ -1776,6 +1834,12 @@ tbody tr:nth-child(even) {
                              <h5>3.2.6.2 V Laboratorio Fikticia Med</h5>
                               <img src="" alt="Placeholder Imagen 72" class="image-placeholder logo" style="width: 200px; height: 80px;">
                              <p>Pres: 182 | Sel: 18 | Premios...</p> <p><a href="#">Anexo 29</a></p>
+                             </div>
+                             </div>
+                    </section>
+
+                    <section id="promocion-economica" class="page section-promo">
+                     <div class="section-content-grid columns-3"> <div class="content-block">
                              <h5>3.2.6.3 Microcréditos Rotary</h5>
                              <p>Cand: 12 | Premio: 6k € | Ganador: Excapic</p> <p><a href="#">Anexo 30</a></p>
                          </div>
@@ -1800,6 +1864,8 @@ tbody tr:nth-child(even) {
                   </ul>
               </div>
              </div> 
+             </div>
+             </div>
         </section>
 
         <div class="pagebreak"></div>
@@ -1818,7 +1884,11 @@ tbody tr:nth-child(even) {
                     <h4>4.1.5 Proyectos prioritarios</h4> <p>Tramitados '23: 13 | Puestos: 151 | Presup: 34.5M €</p>
                     <p><a href="#">Anexo 36</a> | <a href="#">Anexo 37</a></p>
           </div>
+          </section>
 
+
+
+            <section id="desarrollo-estrategico" class="page section-desarrollo">
                  <div class="content-block"> <h3>4.2 OBSERVATORIO PACTO TERRITORIAL</h3>
                      <p>Secretaría Pacto. Finan: LABORA (EMPACE).</p>
                      <p>Contratados: 3 | Subv: 185k €</p>
@@ -1838,7 +1908,10 @@ tbody tr:nth-child(even) {
                      <h4>4.3.2 III Copa Robotikid</h4> <p>Jun '23. 52 centros | 300 niños. <a href="#">Anexo 44</a></p>
                      <p>Otras: Un Mar de Cine (<a href="#">Anexo 41</a>), Congreso (<a href="#">Anexo 42</a>)...</p>
                 </div>
+            </section>
 
+
+            <section id="desarrollo-estrategico" class="page section-desarrollo">
                 <div class="content-block"> <h3>4.4 OFICINA ATRACCIÓN INVERSIONES - ALIA</h3>
                      <p>Res '21-'23: 74 proy, 65 empr dir, 452M € inv pot.</p>
                      <p>Act '23: Informes, 13 Activ dinam, 7 Eventos.</p>
