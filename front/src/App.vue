@@ -6,6 +6,7 @@ import AuthService from './services/AuthService';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import FirebaseAuthService from './services/FirebaseAuthService';
 import ChatbotAssistant from './components/ChatbotAssistant.vue';
+import CookieConsent from '@/components/CookieConsent.vue';
 
 const router = useRouter();
 const auth = getAuth();
@@ -385,6 +386,7 @@ const mostrarChatbot = computed(() => {
   <main class="main-content" :class="{ 'fullscreen-welcome': estaEnWelcome }">
     <RouterView />
     <ChatbotAssistant v-if="mostrarChatbot" />
+    <CookieConsent />
   </main>
 </template>
 
