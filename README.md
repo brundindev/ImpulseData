@@ -105,7 +105,6 @@ Este documento define los requisitos técnicos para la automatización y estruct
 ## 🚀 Used
 
 * [Java](https://java.com)
-* [Bootstrap](https://bootstrap.com)
 * [Vue.js](https://vuejs.org)
 * [Firebase Authentication](https://firebase.com)
 * [Firebase Database](https://firebase.com)
