@@ -75,9 +75,7 @@ defineEmits(['scroll-to-top', 'open-chatbot', 'create-company']);
   color: white;
   padding: 3rem 0 0;
   margin-top: 3rem;
-  margin-bottom: 0;
   z-index: 1;
-  bottom: 0;
 }
 
 /* Efecto de difuminado para la transición entre home y footer */
@@ -242,8 +240,6 @@ defineEmits(['scroll-to-top', 'open-chatbot', 'create-company']);
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 0;
-  padding-bottom: 1rem;
 }
 
 .footer-bottom p {
@@ -301,10 +297,8 @@ defineEmits(['scroll-to-top', 'open-chatbot', 'create-company']);
 .app-footer {
   width: 100%;
   position: relative;
-  margin-top: 3rem;
-  margin-bottom: 0;
+  margin-top: 3rem; /* Empuja el footer al final del contenedor */
   z-index: 10;
-  bottom: 0;
 }
 
 /* Elimina cualquier espacio adicional después del footer */
@@ -334,27 +328,5 @@ defineEmits(['scroll-to-top', 'open-chatbot', 'create-company']);
   .footer-section ul li a {
     justify-content: center;
   }
-}
-
-/* Asegurarse de que no haya espacios después del footer */
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.home-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
 }
 </style> 
