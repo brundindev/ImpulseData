@@ -12,7 +12,7 @@
           </div>
         </div>
         <div class="hero-image pulse-animation">
-          <img src="../assets/img/impulsedata_logo.png" alt="Application Dashboard Preview" />
+          <img src="../assets/img/logo_impulsedata.jpg" alt="Application Dashboard Preview" />
         </div>
       </div>
     </div>

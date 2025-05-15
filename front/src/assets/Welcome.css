@@ -1,17 +1,17 @@
 /* Variables de color */
 :root {
-  --primary-gradient: linear-gradient(90deg, #00c3ff, #00ff8c);
-  --primary-color: #004698;
-  --primary-hover: #0056b8;
-  --secondary-color: #5175a0;
+  --primary-gradient: linear-gradient(90deg, #e91e63, #9c27b0);
+  --primary-color: #9c27b0;
+  --primary-hover: #8e24aa;
+  --secondary-color: #e91e63;
   --danger-color: #f44336;
-  --success-color: #4CAF50;
+  --success-color: #8e24aa;
   --border-color: #e0e0e0;
   --text-color: #333333;
   --light-text: #666666;
   --card-background: #ffffff;
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --pale-blue: #e6f7ff;
+  --pale-blue: #f8e3ff;
 }
 
 /* Estas reglas solo deben aplicarse cuando la página welcome está activa */
@@ -48,7 +48,7 @@ body.welcome-open::-webkit-scrollbar,
   left: 0;
   right: 0;
   height: 100%;
-  background: radial-gradient(circle at 15% 15%, rgba(0, 195, 255, 0.1) 0%, transparent 60%);
+  background: radial-gradient(circle at 15% 15%, rgba(233, 30, 99, 0.15) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -59,7 +59,7 @@ body.welcome-open::-webkit-scrollbar,
   right: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 85% 85%, rgba(0, 255, 140, 0.15) 0%, transparent 55%);
+  background: radial-gradient(circle at 85% 85%, rgba(156, 39, 176, 0.2) 0%, transparent 55%);
   pointer-events: none;
 }
 
@@ -86,11 +86,11 @@ body.welcome-open::-webkit-scrollbar,
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 0 20px rgba(0, 195, 255, 0.3);
+    box-shadow: 0 0 20px rgba(233, 30, 99, 0.3);
   }
   50% {
     transform: scale(1.03);
-    box-shadow: 0 0 30px rgba(0, 195, 255, 0.5);
+    box-shadow: 0 0 30px rgba(156, 39, 176, 0.5);
   }
 }
 
@@ -107,7 +107,7 @@ body.welcome-open::-webkit-scrollbar,
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(0, 195, 255, 0.3) 0%, rgba(0, 255, 140, 0.2) 30%, transparent 70%);
+  background: radial-gradient(circle, rgba(233, 30, 99, 0.3) 0%, rgba(156, 39, 176, 0.2) 30%, transparent 70%);
   opacity: 0;
   transform: scale(0.5);
   transition: opacity 0.3s, transform 0.5s;
@@ -197,7 +197,7 @@ body.welcome-open::-webkit-scrollbar,
   background: var(--primary-gradient);
   color: white;
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 195, 255, 0.4), 0 0 40px rgba(0, 255, 140, 0.3);
+  box-shadow: 0 5px 15px rgba(233, 30, 99, 0.4), 0 0 40px rgba(156, 39, 176, 0.3);
 }
   
 .login-btn {

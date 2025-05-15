@@ -5,7 +5,7 @@
         <div class="logo">
           <router-link to="/">
             <div class="logo-img">
-              <img src="../assets/img/impulsedata_logo.png" alt="Logo" />
+              <img src="../assets/img/logo_impulsedata.jpg" alt="Logo" />
             </div>
             <span class="brand-name">ImpulseData</span>
           </router-link>

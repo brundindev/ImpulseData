@@ -329,7 +329,7 @@ const mostrarChatbot = computed(() => {
   <header class="app-header navbar-container" v-if="!estaEnWelcome">
     <div class="header-container">
       <div class="logo-container">
-        <img src="@/assets/img/impulsedata_logo.png" alt="Impulsa Alicante" class="impulsa-logo" />
+        <img src="@/assets/img/logo_impulsedata.jpg" alt="Impulsa Alicante" class="impulsa-logo" />
         <RouterLink to="/" class="app-logo">IMPULSEDATA</RouterLink>
       </div>
       <nav class="main-nav">
@@ -395,11 +395,11 @@ const mostrarChatbot = computed(() => {
 
 <style>
 :root {
-  --primary-color: #1a73e8;
-  --accent-color: #00ff8c;
+  --primary-color: #9c27b0;
+  --accent-color: #e91e63;
   --warning-color: #ffc107;
   --danger-color: #f44336;
-  --success-color: #4CAF50;
+  --success-color: #8e24aa;
   --text-color: #212121;
   --text-secondary: #757575;
   --background-color: #ffffff;
@@ -441,7 +441,7 @@ body::-webkit-scrollbar {
   height: auto;
   position: relative;
   scrollbar-width: thin;
-  scrollbar-color: #004698 #f1f1f1;
+  scrollbar-color: #9c27b0 #f1f1f1;
   padding-bottom: 4rem;
 }
 body, html {
@@ -461,7 +461,7 @@ body, html {
 }
 
 .main-content::-webkit-scrollbar-thumb {
-  background: #004698;
+  background: #9c27b0;
   border-radius: 4px;
 }
 

@@ -315,7 +315,7 @@ import DashboardHeader from '../components/home/DashboardHeader.vue';
 // Importar PDFService
 import PDFService from '../services/PDFService';
 // Importar el logo e imágenes
-import logoUrl from '../assets/img/impulsedata_logo.png';
+import logoUrl from '../assets/img/logo_impulsedata.jpg';
 import impulsaAlicanteLogo from '../assets/img/impulsaalicante.png';
 import ayuntamientoLogo from '../assets/img/ayuntamiento-alicante.jpg';
 import FileImportService from '../services/FileImportService';

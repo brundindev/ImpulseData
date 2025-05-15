@@ -233,7 +233,7 @@ export default {
 .cookie-text h3 {
   margin-top: 0;
   margin-bottom: 10px;
-  color: #0066CC;
+  color: #9c27b0;
   font-size: 18px;
 }
 
@@ -297,21 +297,21 @@ export default {
 }
 
 .accept {
-  background-color: #34C759;
+  background-color: #e91e63;
   color: white;
 }
 
 .accept:hover {
-  background-color: #2EB350;
+  background-color: #d81b60;
 }
 
 .accept-all {
-  background-color: #0066CC;
+  background-color: #9c27b0;
   color: white;
 }
 
 .accept-all:hover {
-  background-color: #0055AA;
+  background-color: #8e24aa;
 }
 
 @media (min-width: 768px) {

@@ -3,7 +3,7 @@
       <div class="footer-difuminado" style="position: absolute; top: -150px; left: 0; right: 0; height: 150px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.6) 70%, rgba(0, 0, 0, 0.85) 100%); z-index: -1; pointer-events: none;"></div>
       <div class="footer-container">
         <div class="footer-column logo-column">
-          <img src="@/assets/img/impulsedata_logo.png" alt="ImpulseData Logo" class="footer-logo" />
+          <img src="@/assets/img/logo_impulsedata.jpg" alt="ImpulseData Logo" class="footer-logo" />
           <h3>ImpulseData</h3>
           <p>✨ Transformando datos en conocimiento, donde la excelencia se hace realidad.</p>
         </div>

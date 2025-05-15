@@ -1,4 +1,4 @@
-# <img src="/docs/img/ImpulseData_Logo.png" alt="ImpulseData" width="400" height="400">
+# <img src="/docs/img/logo_impulsedata.jpg" alt="ImpulseData" width="400" height="400">
 
 
 

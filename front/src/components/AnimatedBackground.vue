@@ -53,7 +53,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #0a1520 0%, #132030 100%);
+  background: linear-gradient(135deg, #1a0a1f 0%, #2a0e29 100%);
   z-index: -10;
 }
 
@@ -65,8 +65,8 @@ export default {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 20%, rgba(0, 70, 152, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(0, 70, 152, 0.15) 0%, transparent 50%);
+    radial-gradient(circle at 20% 20%, rgba(156, 39, 176, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(233, 30, 99, 0.15) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -92,7 +92,7 @@ export default {
 .sphere-1 {
   width: 500px;
   height: 500px;
-  background: linear-gradient(45deg, rgba(0, 70, 152, 0.4), rgba(0, 176, 255, 0.4));
+  background: linear-gradient(45deg, rgba(156, 39, 176, 0.4), rgba(233, 30, 99, 0.4));
   top: -100px;
   left: -100px;
   animation: floatSphere 25s infinite ease-in-out;
@@ -102,7 +102,7 @@ export default {
 .sphere-2 {
   width: 600px;
   height: 600px;
-  background: linear-gradient(135deg, rgba(0, 234, 184, 0.3), rgba(0, 118, 230, 0.3));
+  background: linear-gradient(135deg, rgba(171, 71, 188, 0.3), rgba(240, 98, 146, 0.3));
   bottom: -200px;
   right: -100px;
   animation: floatSphere 25s infinite ease-in-out;
@@ -112,7 +112,7 @@ export default {
 .sphere-3 {
   width: 400px;
   height: 400px;
-  background: linear-gradient(225deg, rgba(0, 171, 255, 0.3), rgba(0, 245, 157, 0.3));
+  background: linear-gradient(225deg, rgba(233, 30, 99, 0.3), rgba(156, 39, 176, 0.3));
   top: 40%;
   left: 60%;
   animation: floatSphere 25s infinite ease-in-out;
@@ -148,11 +148,11 @@ export default {
 
 .particle {
   position: absolute;
-  background: linear-gradient(135deg, rgba(0, 70, 152, 0.2) 0%, rgba(0, 200, 255, 0.3) 100%);
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.2) 0%, rgba(233, 30, 99, 0.3) 100%);
   border-radius: 50%;
   animation: float 20s infinite ease-in-out;
   filter: blur(2px);
-  box-shadow: 0 0 20px rgba(0, 70, 152, 0.3);
+  box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
 }
 
 .particle:nth-child(1) {
@@ -310,7 +310,7 @@ export default {
   left: 0;
   right: 0;
   height: 100%;
-  background: radial-gradient(circle at 15% 15%, rgba(0, 195, 255, 0.1) 0%, transparent 60%);
+  background: radial-gradient(circle at 15% 15%, rgba(233, 30, 99, 0.15) 0%, transparent 60%); /* Rosa */
   pointer-events: none;
 }
 
@@ -321,7 +321,7 @@ export default {
   right: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 85% 85%, rgba(0, 255, 140, 0.15) 0%, transparent 55%);
+  background: radial-gradient(circle at 85% 85%, rgba(156, 39, 176, 0.2) 0%, transparent 55%); /* Morado */
   pointer-events: none;
 }
 
@@ -377,7 +377,7 @@ export default {
 
 .welcome-particles .particle {
   background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
-  box-shadow: 0 0 15px rgba(0, 195, 255, 0.3);
+  box-shadow: 0 0 15px rgba(233, 30, 99, 0.3); /* Rosa */
 }
 
 .welcome-waves {
@@ -386,11 +386,11 @@ export default {
 
 .welcome-waves .wave {
   background: linear-gradient(90deg, 
-    rgba(0, 195, 255, 0.1), 
-    rgba(0, 255, 140, 0.2), 
-    rgba(0, 195, 255, 0.1),
-    rgba(0, 255, 140, 0.2),
-    rgba(0, 195, 255, 0.1)
+    rgba(233, 30, 99, 0.1), /* Rosa */
+    rgba(156, 39, 176, 0.2), /* Morado */
+    rgba(233, 30, 99, 0.1), /* Rosa */
+    rgba(156, 39, 176, 0.2), /* Morado */
+    rgba(233, 30, 99, 0.1) /* Rosa */
   );
 }
 
@@ -445,12 +445,12 @@ export default {
   0%, 100% {
     opacity: 0.2;
     transform: scale(1);
-    box-shadow: 0 0 2px rgba(0, 195, 255, 0.1);
+    box-shadow: 0 0 2px rgba(233, 30, 99, 0.1); /* Rosa */
   }
   50% {
     opacity: 1;
     transform: scale(2);
-    box-shadow: 0 0 8px rgba(0, 255, 140, 0.8), 0 0 12px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 8px rgba(156, 39, 176, 0.8), 0 0 12px rgba(255, 255, 255, 0.4); /* Morado */
   }
 }
 
@@ -482,11 +482,11 @@ export default {
   animation-duration: 20s;
   opacity: 0.5;
   background: linear-gradient(90deg, 
-    rgba(0, 195, 255, 0.1), 
-    rgba(0, 255, 140, 0.2), 
-    rgba(0, 195, 255, 0.1),
-    rgba(0, 255, 140, 0.2),
-    rgba(0, 195, 255, 0.1)
+    rgba(233, 30, 99, 0.1), /* Rosa */
+    rgba(156, 39, 176, 0.2), /* Morado */
+    rgba(233, 30, 99, 0.1), /* Rosa */
+    rgba(156, 39, 176, 0.2), /* Morado */
+    rgba(233, 30, 99, 0.1) /* Rosa */
   );
 }
 
@@ -497,9 +497,11 @@ export default {
   animation-direction: reverse;
   opacity: 0.3;
   background: linear-gradient(90deg, 
-    rgba(0, 195, 255, 0.1), 
-    rgba(0, 255, 140, 0.2), 
-    rgba(0, 195, 255, 0.1)
+    rgba(156, 39, 176, 0.1), /* Morado */
+    rgba(233, 30, 99, 0.2), /* Rosa */
+    rgba(156, 39, 176, 0.1), /* Morado */
+    rgba(233, 30, 99, 0.2), /* Rosa */
+    rgba(156, 39, 176, 0.1) /* Morado */
   );
 }
 
@@ -509,9 +511,11 @@ export default {
   animation-duration: 30s;
   opacity: 0.2;
   background: linear-gradient(90deg, 
-    rgba(0, 255, 140, 0.1), 
-    rgba(0, 195, 255, 0.2), 
-    rgba(0, 255, 140, 0.1)
+    rgba(233, 30, 99, 0.1), /* Rosa */
+    rgba(156, 39, 176, 0.1), /* Morado */
+    rgba(233, 30, 99, 0.1), /* Rosa */
+    rgba(156, 39, 176, 0.1), /* Morado */
+    rgba(233, 30, 99, 0.1) /* Rosa */
   );
 }
 
