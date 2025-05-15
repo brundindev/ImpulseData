@@ -3,37 +3,68 @@
     <h3>Estructura Organizativa</h3>
     
     <div class="form-group">
+      <label>Organigrama</label>
+      <textarea 
+        v-model="datos.organigrama" 
+        class="form-control"
+        rows="4"
+        placeholder="Describa la estructura organizativa de la agencia"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
       <label>Órganos de Gobierno</label>
       <div class="organos-gobierno">
         <div v-for="(organo, index) in datos.organosGobierno" :key="index" class="organo-item">
           <div class="organo-header">
-            <input 
-              type="text" 
-              v-model="organo.nombre" 
-              class="form-control"
-              placeholder="Nombre del órgano"
-            >
+            <h4>Órgano {{ index + 1 }}</h4>
             <button 
               @click="eliminarOrgano(index)" 
               class="btn btn-danger"
               type="button"
+              v-if="datos.organosGobierno.length > 1"
             >
               Eliminar
             </button>
           </div>
-          <textarea 
-            v-model="organo.descripcion" 
-            class="form-control"
-            rows="3"
-            placeholder="Descripción de funciones y responsabilidades"
-          ></textarea>
+          
+          <div class="form-group">
+            <label>Nombre del Órgano</label>
+            <input 
+              type="text" 
+              v-model="organo.nombre" 
+              class="form-control"
+              placeholder="Nombre del órgano de gobierno"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Composición</label>
+            <textarea 
+              v-model="organo.composicion" 
+              class="form-control"
+              rows="3"
+              placeholder="Describa la composición del órgano"
+            ></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Funciones</label>
+            <textarea 
+              v-model="organo.funciones" 
+              class="form-control"
+              rows="3"
+              placeholder="Describa las funciones principales del órgano"
+            ></textarea>
+          </div>
         </div>
+        
         <button 
           @click="agregarOrgano" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Órgano
+          Agregar Órgano de Gobierno
         </button>
       </div>
     </div>
@@ -41,50 +72,67 @@
     <div class="form-group">
       <label>Equipo Directivo</label>
       <div class="equipo-directivo">
-        <div v-for="(miembro, index) in datos.equipoDirectivo" :key="index" class="miembro-item">
-          <div class="miembro-header">
-            <input 
-              type="text" 
-              v-model="miembro.nombre" 
-              class="form-control"
-              placeholder="Nombre del miembro"
-            >
-            <input 
-              type="text" 
-              v-model="miembro.cargo" 
-              class="form-control"
-              placeholder="Cargo"
-            >
+        <div v-for="(directivo, index) in datos.equipoDirectivo" :key="index" class="directivo-item">
+          <div class="directivo-header">
+            <h4>Directivo {{ index + 1 }}</h4>
             <button 
-              @click="eliminarMiembro(index)" 
+              @click="eliminarDirectivo(index)" 
               class="btn btn-danger"
               type="button"
+              v-if="datos.equipoDirectivo.length > 1"
             >
               Eliminar
             </button>
           </div>
+          
+          <div class="form-group">
+            <label>Nombre y Apellidos</label>
+            <input 
+              type="text" 
+              v-model="directivo.nombre" 
+              class="form-control"
+              placeholder="Nombre completo del directivo"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Cargo</label>
+            <input 
+              type="text" 
+              v-model="directivo.cargo" 
+              class="form-control"
+              placeholder="Cargo que ocupa"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Formación</label>
+            <textarea 
+              v-model="directivo.formacion" 
+              class="form-control"
+              rows="2"
+              placeholder="Formación académica y profesional"
+            ></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Experiencia</label>
+            <textarea 
+              v-model="directivo.experiencia" 
+              class="form-control"
+              rows="2"
+              placeholder="Experiencia profesional relevante"
+            ></textarea>
+          </div>
         </div>
+        
         <button 
-          @click="agregarMiembro" 
+          @click="agregarDirectivo" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Miembro
+          Agregar Directivo
         </button>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="organigrama">Organigrama</label>
-      <div class="organigrama-upload">
-        <input 
-          type="file" 
-          id="organigrama" 
-          @change="handleOrganigramaUpload" 
-          accept="image/*"
-          class="form-control"
-        >
-        <p class="help-text">Formato recomendado: PNG o JPG, máximo 5MB</p>
       </div>
     </div>
 
@@ -126,45 +174,59 @@ const datos = computed({
 
 // Inicializar datos si no existen
 if (!datos.value.organosGobierno) {
-  datos.value.organosGobierno = [];
+  datos.value.organosGobierno = [{
+    nombre: '',
+    composicion: '',
+    funciones: ''
+  }];
 }
+
 if (!datos.value.equipoDirectivo) {
-  datos.value.equipoDirectivo = [];
+  datos.value.equipoDirectivo = [{
+    nombre: '',
+    cargo: '',
+    formacion: '',
+    experiencia: ''
+  }];
 }
 
 const agregarOrgano = () => {
   datos.value.organosGobierno.push({
     nombre: '',
-    descripcion: ''
+    composicion: '',
+    funciones: ''
   });
 };
 
 const eliminarOrgano = (index) => {
-  datos.value.organosGobierno.splice(index, 1);
+  if (datos.value.organosGobierno.length > 1) {
+    datos.value.organosGobierno.splice(index, 1);
+  }
 };
 
-const agregarMiembro = () => {
+const agregarDirectivo = () => {
   datos.value.equipoDirectivo.push({
     nombre: '',
-    cargo: ''
+    cargo: '',
+    formacion: '',
+    experiencia: ''
   });
 };
 
-const eliminarMiembro = (index) => {
-  datos.value.equipoDirectivo.splice(index, 1);
-};
-
-const handleOrganigramaUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    // Aquí iría la lógica para procesar y guardar el archivo
-    console.log('Archivo seleccionado:', file);
+const eliminarDirectivo = (index) => {
+  if (datos.value.equipoDirectivo.length > 1) {
+    datos.value.equipoDirectivo.splice(index, 1);
   }
 };
 
 const esValido = computed(() => {
-  return datos.value.organosGobierno.length > 0 && 
-         datos.value.equipoDirectivo.length > 0;
+  return datos.value.organigrama &&
+         datos.value.organosGobierno.every(organo => 
+           organo.nombre && organo.composicion && organo.funciones
+         ) &&
+         datos.value.equipoDirectivo.every(directivo => 
+           directivo.nombre && directivo.cargo
+         );
 });
 </script>
 
@@ -175,15 +237,37 @@ const esValido = computed(() => {
 }
 
 .form-group {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.organo-item,
+.directivo-item {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.organo-header,
+.directivo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.organo-header h4,
+.directivo-header h4 {
+  margin: 0;
+  color: #004698;
+  font-size: 1.2rem;
 }
 
 label {
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: #333;
   font-weight: 500;
-  font-size: 1.1rem;
 }
 
 .form-control {
@@ -192,25 +276,17 @@ label {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  margin-bottom: 0.5rem;
 }
 
-.organo-item, .miembro-item {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+.form-control:focus {
+  outline: none;
+  border-color: #004698;
+  box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.1);
 }
 
-.organo-header, .miembro-header {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.organo-header .form-control,
-.miembro-header .form-control {
-  flex: 1;
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
 }
 
 .btn {
@@ -250,22 +326,5 @@ label {
   margin-top: 2rem;
   display: flex;
   justify-content: space-between;
-}
-
-.help-text {
-  font-size: 0.875rem;
-  color: #666;
-  margin-top: 0.25rem;
-}
-
-.organigrama-upload {
-  border: 2px dashed #ddd;
-  padding: 1rem;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.organigrama-upload:hover {
-  border-color: #004698;
 }
 </style> 
