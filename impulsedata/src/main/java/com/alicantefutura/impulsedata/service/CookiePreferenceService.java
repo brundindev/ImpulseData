@@ -1,42 +1,74 @@
 package com.alicantefutura.impulsedata.service;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alicantefutura.impulsedata.dto.CookiePreferenceDTO;
 import com.alicantefutura.impulsedata.model.CookiePreference;
-import com.alicantefutura.impulsedata.repository.CookiePreferenceRepository;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.WriteResult;
+import com.google.firebase.cloud.FirestoreClient;
 
 @Service
 public class CookiePreferenceService {
 
-    private final CookiePreferenceRepository cookiePreferenceRepository;
-
-    @Autowired
-    public CookiePreferenceService(CookiePreferenceRepository cookiePreferenceRepository) {
-        this.cookiePreferenceRepository = cookiePreferenceRepository;
-    }
+    private static final String COLLECTION_NAME = "cookie_preferences";
 
     public CookiePreference savePreferences(CookiePreferenceDTO cookiePreferenceDTO) {
-        String userId = cookiePreferenceDTO.getUserId();
-        
-        // Buscar preferencias existentes o crear nuevas
-        CookiePreference cookiePreference = cookiePreferenceRepository.findByUserId(userId)
-                .orElse(new CookiePreference());
-        
-        // Actualizar los datos
-        cookiePreference.setUserId(userId);
-        cookiePreference.setNecessaryCookies(cookiePreferenceDTO.getPreferences().isNecessary());
-        cookiePreference.setAnalyticsCookies(cookiePreferenceDTO.getPreferences().isAnalytics());
-        cookiePreference.setMarketingCookies(cookiePreferenceDTO.getPreferences().isMarketing());
-        
-        // Guardar en la base de datos
-        return cookiePreferenceRepository.save(cookiePreference);
+        try {
+            Firestore dbFirestore = FirestoreClient.getFirestore();
+            String userId = cookiePreferenceDTO.getUserId();
+            
+            // Crear el objeto de preferencias
+            CookiePreference cookiePreference = new CookiePreference(
+                userId,
+                cookiePreferenceDTO.getPreferences().isNecessary(),
+                cookiePreferenceDTO.getPreferences().isAnalytics(),
+                cookiePreferenceDTO.getPreferences().isMarketing()
+            );
+            
+            // Verificar si ya existe un documento para este usuario
+            DocumentReference docRef = dbFirestore.collection(COLLECTION_NAME).document(userId);
+            ApiFuture<DocumentSnapshot> future = docRef.get();
+            DocumentSnapshot document = future.get();
+            
+            if (document.exists()) {
+                // Actualizar documento existente
+                cookiePreference.updateTimestamp();
+                ApiFuture<WriteResult> writeResult = docRef.set(cookiePreference);
+                System.out.println("Update time : " + writeResult.get().getUpdateTime());
+            } else {
+                // Crear nuevo documento
+                ApiFuture<WriteResult> writeResult = docRef.set(cookiePreference);
+                System.out.println("Creation time : " + writeResult.get().getUpdateTime());
+            }
+            
+            return cookiePreference;
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Error al guardar preferencias de cookies: " + e.getMessage(), e);
+        }
     }
 
     public Optional<CookiePreference> getPreferencesByUserId(String userId) {
-        return cookiePreferenceRepository.findByUserId(userId);
+        try {
+            Firestore dbFirestore = FirestoreClient.getFirestore();
+            DocumentReference docRef = dbFirestore.collection(COLLECTION_NAME).document(userId);
+            ApiFuture<DocumentSnapshot> future = docRef.get();
+            DocumentSnapshot document = future.get();
+            
+            if (document.exists()) {
+                return Optional.ofNullable(document.toObject(CookiePreference.class));
+            }
+            
+            return Optional.empty();
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error al obtener preferencias de cookies: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 } 

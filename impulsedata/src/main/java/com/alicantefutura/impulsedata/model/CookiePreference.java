@@ -2,58 +2,38 @@ package com.alicantefutura.impulsedata.model;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "cookie_preferences")
 public class CookiePreference {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "user_id")
+    private String id;
     private String userId;
-
-    @Column(name = "necessary_cookies")
     private boolean necessaryCookies = true;
-
-    @Column(name = "analytics_cookies")
     private boolean analyticsCookies = false;
-
-    @Column(name = "marketing_cookies")
     private boolean marketingCookies = false;
-    
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
-    
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    @PrePersist
-    protected void onCreate() {
+    // Constructor por defecto necesario para Firebase
+    public CookiePreference() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
     
-    @PreUpdate
-    protected void onUpdate() {
+    // Constructor con parámetros
+    public CookiePreference(String userId, boolean necessaryCookies, boolean analyticsCookies, boolean marketingCookies) {
+        this.userId = userId;
+        this.necessaryCookies = necessaryCookies;
+        this.analyticsCookies = analyticsCookies;
+        this.marketingCookies = marketingCookies;
+        this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
     // Getters y Setters
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -103,5 +83,9 @@ public class CookiePreference {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public void updateTimestamp() {
+        this.updatedAt = LocalDateTime.now();
     }
 } 

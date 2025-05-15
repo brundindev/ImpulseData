@@ -32,6 +32,14 @@ public class CookiePreferenceController {
     @PostMapping("/preferences")
     public ResponseEntity<Map<String, Object>> savePreferences(@RequestBody CookiePreferenceDTO cookiePreferenceDTO) {
         try {
+            // Validar que el usuario no sea nulo o vacío
+            if (cookiePreferenceDTO.getUserId() == null || cookiePreferenceDTO.getUserId().trim().isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "El ID de usuario no puede estar vacío");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
             CookiePreference savedPreference = cookiePreferenceService.savePreferences(cookiePreferenceDTO);
             
             Map<String, Object> response = new HashMap<>();
