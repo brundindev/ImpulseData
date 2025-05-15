@@ -14,6 +14,7 @@ const usuario = ref(null);
 const showDropdown= ref(false);
 const userPhoto = ref('');
 const userEmail = ref('');
+const isScrolled = ref(false);
 const userInitials = computed(() => {
   if (!usuario.value || !usuario.value.nombre) return '?';
   return usuario.value.nombre
@@ -229,6 +230,11 @@ const actualizarEstadoUsuario = async () => {
   }
 };
 
+// Función para detectar scroll
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 50;
+};
+
 // Configurar listener para cambios de autenticación
 onMounted(async () => {
   // Configurar observer para eventos de autenticación de Firebase
@@ -248,14 +254,19 @@ onMounted(async () => {
 
   // Agregar event listener para cerrar el dropdown
   document.addEventListener('click', closeDropdown);
+  
+  // Agregar event listener para detectar scroll
+  window.addEventListener('scroll', handleScroll);
+  
+  // Ejecutar inicialmente para establecer el estado correcto
+  handleScroll();
 });
-
-
 
 onUnmounted(() => {
   // Limpiar event listener cuando el componente se desmonta
   document.removeEventListener('click', closeDropdown);
   window.removeEventListener('auth-state-changed', actualizarEstadoUsuario);
+  window.removeEventListener('scroll', handleScroll);
 });
 
 // Logout function
@@ -326,7 +337,7 @@ const mostrarChatbot = computed(() => {
 </script>
 
 <template>
-  <header class="app-header navbar-container" v-if="!estaEnWelcome">
+  <header class="app-header navbar-container" :class="{ 'navbar-scrolled': isScrolled }" v-if="!estaEnWelcome">
     <div class="header-container">
       <div class="logo-container">
         <img src="@/assets/img/logo_impulsedata.jpg" alt="Impulsa Alicante" class="impulsa-logo" />

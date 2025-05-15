@@ -1,5 +1,5 @@
 <template>
-  <div class="navbar-container">
+  <div class="navbar-container" :class="{ 'navbar-scrolled': isScrolled }">
     <div class="navbar">
       <div class="navbar-left">
         <div class="logo">
@@ -74,6 +74,7 @@ export default {
     const dropdownToggle = ref(null);
     const dropdownMenu = ref(null);
     const closeTimeout = ref(null);
+    const isScrolled = ref(false);
 
     // Funciones para acceder al estado de autenticación y usuario
     const isAuthenticated = () => {
@@ -129,14 +130,24 @@ export default {
       }
     };
 
+    // Detectar el scroll para cambiar el estilo del navbar
+    const handleScroll = () => {
+      isScrolled.value = window.scrollY > 50;
+    };
+
     onMounted(() => {
       document.addEventListener('click', handleClickOutside);
+      window.addEventListener('scroll', handleScroll);
       console.log('NavBar mounted, isAuthenticated:', isAuthenticated());
       console.log('Current User:', usuario());
+      
+      // Ejecutar inicialmente para establecer el estado correcto
+      handleScroll();
     });
 
     onUnmounted(() => {
       document.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll);
       if (closeTimeout.value) {
         clearTimeout(closeTimeout.value);
       }
@@ -164,25 +175,212 @@ export default {
       logout,
       scrollToSection,
       dropdownToggle,
-      dropdownMenu
+      dropdownMenu,
+      isScrolled
     };
   }
 };
 </script>
 
 <style>
-/* Estilos del Navbar aquí */
+/* Estilos del Navbar mejorados */
+.navbar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+}
+
+.navbar-scrolled {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(156, 39, 176, 0.15), 0 2px 8px rgba(233, 30, 99, 0.1);
+  padding: 0.3rem 1rem;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 60px;
+  transition: height 0.3s ease;
+}
+
+.navbar-scrolled .navbar {
+  height: 50px;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  margin-right: 2rem;
+}
+
+.logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-img {
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 50%;
+  margin-right: 10px;
+  transition: transform 0.3s ease;
+}
+
+.navbar-scrolled .logo-img {
+  width: 35px;
+  height: 35px;
+}
+
+.logo-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #9c27b0;
+  background: linear-gradient(45deg, #9c27b0, #e91e63);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: font-size 0.3s ease;
+}
+
+.navbar-scrolled .brand-name {
+  font-size: 1.3rem;
+}
+
+.logo:hover .logo-img {
+  transform: scale(1.1);
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #9c27b0;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(45deg, #9c27b0, #e91e63);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+  width: 100%;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.button2 {
+  background: linear-gradient(45deg, #9c27b0, #e91e63);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 10px rgba(156, 39, 176, 0.3);
+}
+
+.button2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(156, 39, 176, 0.4);
+}
+
+.user-dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50px;
+  background: rgba(156, 39, 176, 0.1);
+  transition: all 0.3s ease;
+}
+
+.dropdown-toggle:hover {
+  background: rgba(156, 39, 176, 0.2);
+}
+
 .dropdown-menu {
   position: absolute;
   top: 100%;
   right: 0;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1), 0 3px 8px rgba(156, 39, 176, 0.1);
   padding: 0.5rem 0;
   min-width: 200px;
   z-index: 1000;
   transition: opacity 0.3s, transform 0.3s;
+  transform-origin: top right;
+  transform: translateY(10px);
+  opacity: 0;
+  animation: dropdown-fade-in 0.3s forwards;
+}
+
+@keyframes dropdown-fade-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-item {
@@ -191,10 +389,60 @@ export default {
   padding: 0.7rem 1rem;
   color: #333;
   text-decoration: none;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dropdown-icon {
+  margin-right: 10px;
+  font-size: 0.9rem;
+  color: #9c27b0;
 }
 
 .dropdown-item:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+}
+
+.logout-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin-top: 0.5rem;
+  padding-top: 0.7rem;
+  color: #e91e63;
+}
+
+.logout-item:hover {
+  background-color: rgba(233, 30, 99, 0.1);
+  color: #e91e63;
+}
+
+.logout-item .dropdown-icon {
+  color: #e91e63;
+}
+
+/* Media queries para responsive */
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+    height: auto;
+  }
+  
+  .navbar-left {
+    flex-basis: 100%;
+    justify-content: space-between;
+  }
+  
+  .nav-links {
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  
+  .navbar-right {
+    margin-top: 1rem;
+    flex-basis: 100%;
+    justify-content: center;
+  }
 }
 </style> 

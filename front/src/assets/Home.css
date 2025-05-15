@@ -3144,3 +3144,11 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 2rem 2rem; /* Añadir padding superior para compensar el navbar fijo */
+  position: relative;
+  z-index: 1;
+}
