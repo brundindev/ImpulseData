@@ -805,53 +805,27 @@ const handleOnlineStatus = () => {
 }
 
 .outer-cont {
-  padding: 12px 20px;
-  border: none;
-  font-size: 1rem;
+  align-items: center;
+  background: linear-gradient(45deg, #9c27b0, #e91e63);
+  border-radius: 1000px;
+  color: #ffffff;
   cursor: pointer;
-  position: relative;
-  background: linear-gradient(45deg, #00c3ff, #00e1a0, #00ff8c);
-  background-size: 200% 200%;
-  animation: gradientAnimation 8s ease infinite;
-  border-radius: 12px;
-  color: #fff;
-  transition: all 0.3s ease;
-  box-shadow:
-    inset 0px 0px 5px #ffffffa9,
-    inset 0px 35px 30px rgba(0, 0, 0, 0.5),
-    0px 5px 15px rgba(0, 0, 0, 0.6);
-  text-shadow: 1px 1px 1px #000;
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  z-index: 1001;
+  display: flex;
   font-weight: 600;
-}
-
-.outer-cont::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  border-radius: 12px;
-  filter: blur(0);
-  z-index: -1;
-  box-shadow: none;
-  background: conic-gradient(
-    #00000000 80deg,
-    #00c3ff,
-    #00e1a0,
-    #00ff8c,
-    #00c3ff,
-    #00000000 280deg
-  );
+  gap: 8px;
+  justify-content: center;
+  padding: 10px 20px;
+  position: relative;
+  text-overflow: ellipsis;
   transition: all 0.3s ease;
-  opacity: 0.7;
+  width: auto;
+  z-index: 999;
+  box-shadow: 0 3px 12px rgba(156, 39, 176, 0.4);
 }
 
 .outer-cont:hover {
-  background-size: 150% 150%;
-  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(156, 39, 176, 0.6);
+  transform: translateY(-2px);
 }
 
 .outer-cont:hover::before {
@@ -862,13 +836,6 @@ const handleOnlineStatus = () => {
 .outer-cont:active::before {
   filter: blur(5px);
   transform: translateY(1px);
-}
-
-.outer-cont:active {
-  box-shadow:
-    inset 0px 0px 5px #ffffffa9,
-    inset 0px 35px 30px rgba(0, 0, 0, 0.5);
-  margin-top: 3px;
 }
 
 .outer-cont.chat-open {
@@ -952,6 +919,7 @@ const handleOnlineStatus = () => {
   transform-origin: bottom right;
   transition: transform 0.3s ease;
   opacity: 0;
+  border-top: 3px solid #9c27b0;
 }
 
 .chat-window.chat-open {
@@ -960,7 +928,7 @@ const handleOnlineStatus = () => {
 }
 
 .chat-header {
-  background: var(--primary-gradient);
+  background: linear-gradient(45deg, #9c27b0, #e91e63);
   color: white;
   padding: 15px;
   display: flex;
@@ -1134,7 +1102,7 @@ const handleOnlineStatus = () => {
 }
 
 .send-button {
-  background: var(--primary-gradient);
+  background: linear-gradient(45deg, #9c27b0, #e91e63);
   color: white;
   border: none;
   width: 36px;
@@ -1150,6 +1118,7 @@ const handleOnlineStatus = () => {
 }
 
 .send-button:hover {
+  background: linear-gradient(45deg, #8e24aa, #d81b60);
   transform: scale(1.1);
   box-shadow: 0 2px 12px rgba(0, 195, 255, 0.6);
 }
@@ -1169,8 +1138,8 @@ const handleOnlineStatus = () => {
 }
 
 .question-button {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 195, 255, 0.3);
+  border: 1px solid #9c27b020;
+  background-color: #9c27b010;
   color: #333;
   padding: 8px 12px;
   border-radius: 18px;
@@ -1197,8 +1166,8 @@ const handleOnlineStatus = () => {
 }
 
 .question-button:hover {
-  color: white;
-  border-color: transparent;
+  background-color: #9c27b020;
+  border-color: #9c27b0;
 }
 
 .question-button:hover::after {
@@ -1206,9 +1175,13 @@ const handleOnlineStatus = () => {
 }
 
 .question-button.create-question {
-  background: var(--primary-gradient);
-  color: white;
-  border: none;
+  background: linear-gradient(45deg, #9c27b020, #e91e6320);
+  border: 1px solid #e91e6330;
+}
+
+.question-button.create-question:hover {
+  background: linear-gradient(45deg, #9c27b030, #e91e6330);
+  border-color: #e91e63;
 }
 
 .toggle-questions-button {
@@ -1216,14 +1189,14 @@ const handleOnlineStatus = () => {
   margin: 10px auto 0;
   background: transparent;
   border: none;
-  color: #00c3ff;
+  color: #9c27b0;
   cursor: pointer;
   font-size: 14px;
   padding: 5px;
 }
 
 .toggle-questions-button:hover {
-  text-decoration: underline;
+  color: #e91e63;
 }
 
 .create-company-button-container {
@@ -1233,7 +1206,7 @@ const handleOnlineStatus = () => {
 }
 
 .create-company-button {
-  background: var(--primary-gradient);
+  background: linear-gradient(45deg, #9c27b0, #e91e63);
   color: white;
   border: none;
   padding: 12px 20px;
@@ -1248,6 +1221,7 @@ const handleOnlineStatus = () => {
 }
 
 .create-company-button:hover {
+  background: linear-gradient(45deg, #8e24aa, #d81b60);
   transform: translateY(-3px);
   box-shadow: 0 6px 15px rgba(0, 195, 255, 0.5);
 }

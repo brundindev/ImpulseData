@@ -146,7 +146,7 @@ const handleDownload = (filePath, fileName) => {
 
 .header-section h1 {
   font-size: 2.5em;
-  color: #004698;
+  color: #9c27b0;
   margin-bottom: 10px;
 }
 
@@ -161,7 +161,7 @@ const handleDownload = (filePath, fileName) => {
   align-items: center;
   gap: 15px;
   background-color: #f8f9fa;
-  border-left: 4px solid #00c3ff;
+  border-left: 4px solid #e91e63;
   padding: 15px 20px;
   margin-bottom: 40px;
   border-radius: 4px;
@@ -169,7 +169,7 @@ const handleDownload = (filePath, fileName) => {
 
 .beta-notice i {
   font-size: 2em;
-  color: #00c3ff;
+  color: #e91e63;
 }
 
 .beta-notice p {
@@ -205,13 +205,13 @@ const handleDownload = (filePath, fileName) => {
 .platform-logo {
   font-size: 3em;
   margin-bottom: 20px;
-  color: #004698;
+  color: #9c27b0;
 }
 
 .download-card h2 {
   font-size: 1.8em;
   margin-bottom: 5px;
-  color: #004698;
+  color: #9c27b0;
 }
 
 .download-card p {
@@ -245,22 +245,30 @@ const handleDownload = (filePath, fileName) => {
   content: "✓";
   position: absolute;
   left: 0;
-  color: #00c3ff;
+  color: #e91e63;
 }
 
 .download-button {
-  background: linear-gradient(90deg, #00c3ff, #00ff8c);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(45deg, #9c27b0, #e91e63);
   color: white;
-  text-decoration: none;
-  padding: 12px 25px;
-  border-radius: 30px;
-  font-weight: bold;
-  display: inline-block;
-  transition: transform 0.2s ease;
+  border: none;
+  padding: 13px 25px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
 }
 
 .download-button:hover {
-  transform: scale(1.05);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
 }
 
 .instructions-section {
@@ -269,7 +277,7 @@ const handleDownload = (filePath, fileName) => {
 
 .instructions-section h2 {
   text-align: center;
-  color: #004698;
+  color: #9c27b0;
   margin-bottom: 30px;
 }
 
@@ -289,7 +297,7 @@ const handleDownload = (filePath, fileName) => {
 }
 
 .instruction-card h3 {
-  color: #004698;
+  color: #9c27b0;
   margin-bottom: 15px;
   border-bottom: 2px solid #f5f5f5;
   padding-bottom: 10px;
@@ -310,7 +318,7 @@ const handleDownload = (filePath, fileName) => {
 
 .features-section h2 {
   text-align: center;
-  color: #004698;
+  color: #9c27b0;
   margin-bottom: 30px;
 }
 
@@ -334,13 +342,13 @@ const handleDownload = (filePath, fileName) => {
 }
 
 .feature-item i {
-  font-size: 2.5em;
-  color: #00c3ff;
+  font-size: 2em;
+  color: #e91e63;
   margin-bottom: 15px;
 }
 
 .feature-item h3 {
-  color: #004698;
+  color: #9c27b0;
   margin-bottom: 10px;
 }
 
@@ -352,24 +360,27 @@ const handleDownload = (filePath, fileName) => {
 }
 
 .support-section h2 {
-  color: #004698;
+  color: #9c27b0;
   margin-bottom: 15px;
 }
 
 .support-link {
-  display: inline-block;
-  margin-top: 15px;
-  background: #004698;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #9c27b0;
   color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
   text-decoration: none;
-  padding: 10px 20px;
-  border-radius: 30px;
-  font-weight: bold;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .support-link:hover {
-  background: #003475;
+  background-color: #8e24aa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(156, 39, 176, 0.3);
 }
 
 @media (max-width: 768px) {

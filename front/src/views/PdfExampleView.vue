@@ -1158,7 +1158,7 @@ onMounted(async () => {
 }
 
 h1 {
-  color: #004698;
+  color: #9c27b0;
   border-bottom: 2px solid #eee;
   padding-bottom: 10px;
   font-size: 28px;
@@ -1166,7 +1166,7 @@ h1 {
 }
 
 h2 {
-  color: #00519e;
+  color: #9c27b0;
   font-size: 24px;
   font-weight: 500;
   margin-bottom: 20px;
@@ -1175,7 +1175,7 @@ h2 {
 }
 
 h3 {
-  color: #0067c5;
+  color: #9c27b0;
   font-size: 18px;
   font-weight: 500;
   margin-top: 0;
@@ -1642,30 +1642,26 @@ h3 {
 }
 
 .pdf-button {
-  background: linear-gradient(90deg, #004698, #0067c5);
+  background-color: #9c27b0;
   color: white;
-  border: none;
+  padding: 12px 24px;
   border-radius: 8px;
-  padding: 14px 30px;
+  border: none;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 70, 152, 0.25);
-  transition: all 0.3s ease;
+  transition: background-color 0.3s, transform 0.3s;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-}
-
-.pdf-button::before {
-  content: "📄";
-  font-size: 20px;
+  margin-top: 1rem;
 }
 
 .pdf-button:hover {
-  background: linear-gradient(90deg, #003d85, #0058b0);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 70, 152, 0.35);
+  background-color: #8e24aa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3);
 }
 
 .loading-overlay {

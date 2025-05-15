@@ -627,7 +627,7 @@ onUnmounted(() => {
 
 .admin-title {
   margin-bottom: 20px;
-  color: #004698;
+  color: #9c27b0;
   text-align: center;
 }
 
@@ -997,8 +997,8 @@ button {
 }
 
 .action-button {
-  background-color: transparent;
-  color: #004698;
+  background-color: #9c27b0;
+  color: white;
   font-size: 16px;
   padding: 5px 10px;
   border-radius: 4px;
@@ -1006,7 +1006,7 @@ button {
 }
 
 .action-button:hover {
-  background-color: rgba(0, 70, 152, 0.1);
+  background-color: #8e24aa;
 }
 
 .delete-button {
@@ -1018,11 +1018,11 @@ button {
 }
 
 .reopen-button {
-  color: #00c3ff;
+  background-color: #e91e63;
 }
 
 .reopen-button:hover {
-  background-color: rgba(0, 195, 255, 0.1);
+  background-color: #d81b60;
 }
 
 .ticket-id {
@@ -1037,14 +1037,12 @@ button {
   font-weight: bold;
 }
 
-.status-closed {
-  background-color: #ff3860;
-  color: white;
+.chat-status.status-open {
+  background-color: #9c27b0;
 }
 
-.status-open {
-  background-color: #00ff8c;
-  color: white;
+.chat-status.status-closed {
+  background-color: #e91e63;
 }
 
 /* Responsive */
@@ -1062,5 +1060,15 @@ button {
   .active-chat, .no-chat-selected {
     height: 100%;
   }
+}
+
+.admin-message .message-content {
+  background-color: #9c27b045;
+  border: 1px solid #9c27b020;
+}
+
+.user-message .message-content {
+  background-color: #e91e6345;
+  border: 1px solid #e91e6320;
 }
 </style> 
