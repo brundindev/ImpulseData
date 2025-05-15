@@ -2,7 +2,9 @@
 .scroll-animate-hidden {
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transition: opacity 0.8s cubic-bezier(0.215, 0.61, 0.355, 1), 
+              transform 0.8s cubic-bezier(0.215, 0.61, 0.355, 1);
+  will-change: opacity, transform;
 }
 
 /* Estilos cuando el elemento aparece */
@@ -13,27 +15,27 @@
 
 /* Animación de entrada desde abajo */
 .animate-up {
-  animation: fadeInUp 0.8s ease forwards;
+  animation: fadeInUp 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
 }
 
 /* Animación de entrada desde la izquierda */
 .animate-left {
-  animation: fadeInLeft 0.8s ease forwards;
+  animation: fadeInLeft 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
 }
 
 /* Animación de entrada desde la derecha */
 .animate-right {
-  animation: fadeInRight 0.8s ease forwards;
+  animation: fadeInRight 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
 }
 
 /* Animación de zoom */
 .animate-zoom {
-  animation: zoomIn 0.8s ease forwards;
+  animation: zoomIn 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
 }
 
 /* Animación de aparición con rotación */
 .animate-rotate {
-  animation: rotateIn 0.8s ease forwards;
+  animation: rotateIn 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
 }
 
 /* Definición de las animaciones */
@@ -41,10 +43,12 @@
   from {
     opacity: 0;
     transform: translateY(50px);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0);
   }
 }
 
@@ -52,10 +56,12 @@
   from {
     opacity: 0;
     transform: translateX(-50px);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
     transform: translateX(0);
+    filter: blur(0);
   }
 }
 
@@ -63,10 +69,12 @@
   from {
     opacity: 0;
     transform: translateX(50px);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
     transform: translateX(0);
+    filter: blur(0);
   }
 }
 
@@ -74,10 +82,12 @@
   from {
     opacity: 0;
     transform: scale(0.8);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
     transform: scale(1);
+    filter: blur(0);
   }
 }
 
@@ -85,16 +95,19 @@
   from {
     opacity: 0;
     transform: rotate(-10deg) scale(0.9);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
     transform: rotate(0) scale(1);
+    filter: blur(0);
   }
 }
 
 /* Animación para las tarjetas de empresas */
 .company-card.animate-in {
-  animation: companyCardAnimation 0.8s ease forwards;
+  animation: companyCardAnimation 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  box-shadow: 0 10px 25px rgba(156, 39, 176, 0.2), 0 5px 10px rgba(233, 30, 99, 0.2);
 }
 
 @keyframes companyCardAnimation {
@@ -102,17 +115,19 @@
     opacity: 0;
     transform: translateY(30px) scale(0.95);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    filter: brightness(0.9) blur(5px);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
     box-shadow: 0 10px 25px rgba(156, 39, 176, 0.2), 0 5px 10px rgba(233, 30, 99, 0.2);
+    filter: brightness(1) blur(0);
   }
 }
 
 /* Animación para las estadísticas */
 .stat-card.animate-in {
-  animation: statCardAnimation 0.8s ease forwards;
+  animation: statCardAnimation 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes statCardAnimation {
@@ -120,17 +135,32 @@
     opacity: 0;
     transform: translateY(20px);
     background: linear-gradient(45deg, rgba(156, 39, 176, 0.6), rgba(233, 30, 99, 0.6));
+    filter: blur(5px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
     background: linear-gradient(45deg, rgba(156, 39, 176, 0.9), rgba(233, 30, 99, 0.9));
+    filter: blur(0);
   }
 }
 
 /* Animación para los elementos de sección */
 .section-title.animate-in {
-  animation: sectionTitleAnimation 0.8s ease forwards;
+  animation: sectionTitleAnimation 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+}
+
+.section-title.animate-in h2::after {
+  animation: lineGrow 0.8s 0.3s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+}
+
+@keyframes lineGrow {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @keyframes sectionTitleAnimation {
@@ -138,17 +168,19 @@
     opacity: 0;
     transform: translateY(20px);
     text-shadow: none;
+    filter: blur(5px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
     text-shadow: 0 0 15px rgba(156, 39, 176, 0.3);
+    filter: blur(0);
   }
 }
 
 /* Animación para los botones */
 .action-button.animate-in {
-  animation: buttonAnimation 0.8s ease forwards;
+  animation: buttonAnimation 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes buttonAnimation {
@@ -156,12 +188,81 @@
     opacity: 0;
     transform: translateY(20px) scale(0.9);
     box-shadow: 0 4px 8px rgba(156, 39, 176, 0.3);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
     box-shadow: 0 6px 12px rgba(156, 39, 176, 0.5), 0 3px 6px rgba(233, 30, 99, 0.5);
+    filter: blur(0);
   }
+}
+
+/* Animaciones adicionales para el footer */
+.footer-column.animate-in, 
+.footer-column.animate-up,
+.footer-column.animate-left,
+.footer-column.animate-right {
+  animation-delay: 0.1s;
+}
+
+.social-icon.animate-zoom {
+  animation-duration: 0.5s;
+}
+
+/* Animación para el scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #9c27b0, #e91e63);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #8e24aa, #d81b60);
+}
+
+/* Animación para el banner y elementos principales */
+.alicante-banner-showcase .animate-in,
+.alicante-banner-showcase .animate-left,
+.alicante-banner-showcase .animate-right,
+.alicante-banner-showcase .animate-zoom {
+  animation-duration: 1s;
+}
+
+.banner-image-container.animate-in,
+.banner-image-container.animate-left {
+  animation-delay: 0.1s;
+}
+
+.banner-info.animate-in,
+.banner-info.animate-right {
+  animation-delay: 0.3s;
+}
+
+/* Efectos de paralaje al hacer scroll */
+.home-page {
+  perspective: 1px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.parallax-section {
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.parallax-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateZ(-1px) scale(2);
+  z-index: -1;
 }
 
 /* Asegurarse de que las animaciones solo ocurran en dispositivos que no prefieran reducción de movimiento */
@@ -170,6 +271,7 @@
     transition: none;
     opacity: 1;
     transform: none;
+    filter: none;
   }
   
   .animate-in,
@@ -185,5 +287,11 @@
     animation: none;
     opacity: 1;
     transform: none;
+    filter: none;
+  }
+  
+  .section-title.animate-in h2::after {
+    animation: none;
+    width: 100%;
   }
 } 

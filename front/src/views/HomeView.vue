@@ -40,7 +40,7 @@
         </div>
         
         <!-- Mensaje de error si algo falla -->
-        <div v-else-if="error" class="error-container">
+        <div v-else-if="error" class="error-container" v-scroll-animate="'animate-zoom'">
           <p>{{ error }}</p>
           <button @click="cargarDatos" class="btn btn-primary">Reintentar</button>
         </div>
@@ -72,7 +72,7 @@
       <!-- Modal de confirmación para eliminar -->
       <teleport to="body">
       <div class="modal-overlay" v-if="mostrarConfirmacion" @click.self="mostrarConfirmacion = false">
-        <div class="modal-container modal-small apple-modal apple-modal-confirm">
+        <div class="modal-container modal-small apple-modal apple-modal-confirm" v-scroll-animate="'animate-zoom'">
           <div class="modal-accent-shapes">
             <div class="modal-accent-shape shape-1"></div>
           </div>
@@ -178,7 +178,7 @@
                   </div>
                 </div>
                 
-                <div v-if="!empresaActual.departamentos || empresaActual.departamentos.length === 0" class="empty-message">
+                <div v-if="!empresaActual.departamentos || empresaActual.departamentos.length === 0" class="empty-message" v-scroll-animate="'animate-up'">
                   No hay departamentos registrados
                 </div>
                 
@@ -187,6 +187,8 @@
                     v-for="(departamento, index) in empresaActual.departamentos" 
                     :key="index"
                     class="apple-view-card"
+                    v-scroll-animate:100="'animate-right'"
+                    :style="{ 'animation-delay': `${index * 0.1}s` }"
                   >
                     <div class="view-card-header">
                       <h4>Departamento {{ index + 1 }}</h4>
@@ -210,7 +212,7 @@
                   </div>
                 </div>
                 
-                <div v-if="!empresaActual.centros || empresaActual.centros.length === 0" class="empty-message">
+                <div v-if="!empresaActual.centros || empresaActual.centros.length === 0" class="empty-message" v-scroll-animate="'animate-up'">
                   No hay centros registrados
                 </div>
                 
@@ -219,6 +221,8 @@
                     v-for="(centro, index) in empresaActual.centros" 
                     :key="index"
                     class="apple-view-card"
+                    v-scroll-animate:150="'animate-left'"
+                    :style="{ 'animation-delay': `${index * 0.1}s` }"
                   >
                     <div class="view-card-header">
                       <h4>{{ centro.nombre }}</h4>
@@ -242,7 +246,7 @@
                   </div>
                 </div>
                 
-                <div v-if="!empresaActual.formaciones || empresaActual.formaciones.length === 0" class="empty-message">
+                <div v-if="!empresaActual.formaciones || empresaActual.formaciones.length === 0" class="empty-message" v-scroll-animate="'animate-up'">
                   No hay formaciones registradas
                 </div>
                 
@@ -251,6 +255,8 @@
                     v-for="(formacion, index) in empresaActual.formaciones" 
                     :key="index"
                     class="apple-view-card"
+                    v-scroll-animate:200="'animate-up'"
+                    :style="{ 'animation-delay': `${index * 0.1}s` }"
                   >
                     <div class="view-card-header">
                       <h4>{{ formacion.nombre }}</h4>

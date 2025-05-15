@@ -1,10 +1,10 @@
 <template>
   <div class="dashboard-header">
-    <div>
+    <div v-scroll-animate="'animate-left'">
       <h1 class="welcome-title">Dashboard</h1>
       <p class="welcome-subtitle">¡Bienvenido, <span class="user-name">{{ usuario?.nombre || usuario?.displayName || 'Usuario' }}</span>!</p>
     </div>
-    <div class="action-buttons">
+    <div class="action-buttons" v-scroll-animate:200="'animate-right'">
       <button @click="$emit('create-company')" class="btn btn-primary btn-create">
         <span class="icon">+</span> Crear empresa
       </button>
@@ -25,7 +25,7 @@
         accept=".csv,.json"
         @change="handleFileChange"
       >
-      <div v-if="errorImportacion" class="error-message">
+      <div v-if="errorImportacion" class="error-message" v-scroll-animate:300="'animate-up'">
         {{ errorImportacion }}
       </div>
     </div>

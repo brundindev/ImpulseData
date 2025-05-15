@@ -1,11 +1,11 @@
 <template>
   <div class="alicante-banner-showcase">
     <div class="banner-content">
-      <div class="banner-image-container">
+      <div class="banner-image-container" v-scroll-animate:100="'animate-left'">
         <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image" />
         <div class="image-glow"></div>
       </div>
-      <div class="banner-info">
+      <div class="banner-info" v-scroll-animate:300="'animate-right'">
         <h3>ImpulseData - Alicante Futura</h3>
         <p>Plataforma digital de gestión de datos para la innovación y el desarrollo sostenible de Alicante.</p>
         <div class="banner-action">
@@ -14,9 +14,9 @@
       </div>
     </div>
     <div class="banner-accent-shapes">
-      <div class="accent-shape shape-1"></div>
-      <div class="accent-shape shape-2"></div>
-      <div class="accent-shape shape-3"></div>
+      <div class="accent-shape shape-1" v-scroll-animate:200="'animate-zoom'"></div>
+      <div class="accent-shape shape-2" v-scroll-animate:400="'animate-zoom'"></div>
+      <div class="accent-shape shape-3" v-scroll-animate:600="'animate-zoom'"></div>
     </div>
   </div>
 </template>
