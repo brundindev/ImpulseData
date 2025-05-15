@@ -8,8 +8,11 @@
         :error-importacion="errorImportacion"
         @create-company="showFormModal = true; modoEdicion = false;"
         @file-selected="importarArchivo"
+        v-scroll-animate="'animate-left'"
       />
-      <AlicanteBanner />
+      <AlicanteBanner 
+        v-scroll-animate="'animate-zoom'"
+      />
       <!-- Contenido principal -->
       <div class="dashboard-content">
         <!-- Panel de estadísticas -->
@@ -18,6 +21,7 @@
           :departamentosCount="departamentosCount"
           :centrosCount="centrosCount"
           :formacionesCount="formacionesCount"
+          v-scroll-animate="'animate-up'"
         />
         
         <!-- Loader para estados de carga -->
@@ -43,6 +47,9 @@
         
         <!-- Lista de empresas -->
         <div v-else class="forms-section">
+          <div class="section-title" v-scroll-animate="'animate-left'">
+            <h2>Tus Empresas</h2>
+          </div>
           <CompaniesList 
             :empresas="empresas"
             @create-company="() => { showFormModal = true; modoEdicion = false; }"
@@ -1048,6 +1055,204 @@ const confirmarEliminar = (empresa) => {
   empresaAEliminar.value = empresa;
   mostrarConfirmacion.value = true;
 };
+
+// Función para aplicar animaciones a las tarjetas de empresa
+const applyCompanyCardAnimations = () => {
+  const companyCards = document.querySelectorAll('.company-card');
+  if (companyCards.length > 0) {
+    companyCards.forEach((card, index) => {
+      // Añadir clase para el selector de la directiva
+      card.classList.add('scroll-animate-hidden');
+      
+      // Configurar opciones de Intersection Observer
+      const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.2
+      };
+      
+      // Callback cuando la tarjeta es visible
+      const onIntersect = (entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Añadir un retraso escalonado basado en el índice
+            setTimeout(() => {
+              card.classList.add('animate-in');
+              card.classList.add('company-card-animated');
+            }, 100 * index);
+            
+            // Dejar de observar este elemento
+            observer.unobserve(card);
+          }
+        });
+      };
+      
+      // Crear y aplicar el observer
+      const observer = new IntersectionObserver(onIntersect, options);
+      observer.observe(card);
+    });
+  }
+};
+
+// Función para aplicar animaciones a las tarjetas de estadísticas
+const applyStatCardAnimations = () => {
+  const statCards = document.querySelectorAll('.stat-card');
+  if (statCards.length > 0) {
+    statCards.forEach((card, index) => {
+      card.classList.add('scroll-animate-hidden');
+      
+      const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.2
+      };
+      
+      const onIntersect = (entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              card.classList.add('animate-in');
+              card.classList.add('stat-card-animated');
+            }, 150 * index);
+            
+            observer.unobserve(card);
+          }
+        });
+      };
+      
+      const observer = new IntersectionObserver(onIntersect, options);
+      observer.observe(card);
+    });
+  }
+};
+
+// Observar cuando las empresas cambian para aplicar animaciones
+watch(() => empresas.value, () => {
+  // Esperar a que el DOM se actualice
+  setTimeout(() => {
+    applyCompanyCardAnimations();
+  }, 100);
+}, { deep: true });
+
+// Aplicar animaciones adicionales cuando el componente se monta
+onMounted(() => {
+  // Aplicar animaciones a las estadísticas
+  setTimeout(() => {
+    applyStatCardAnimations();
+  }, 200);
+  
+  // Escuchar eventos de scroll para animar elementos según se necesite
+  window.addEventListener('scroll', () => {
+    applyCompanyCardAnimations();
+    applyStatCardAnimations();
+  });
+  
+  // Resto del código de onMounted...
+  // ... existing code ...
+});
+
+// Limpiar event listeners cuando el componente se desmonta
+onUnmounted(() => {
+  window.removeEventListener('scroll', () => {
+    applyCompanyCardAnimations();
+    applyStatCardAnimations();
+  });
+  
+  // Resto del código de onUnmounted...
+  // ... existing code ...
+});
 </script>
 
 <style src="../assets/Home.css"></style>
+
+<style>
+/* Añadir estilos específicos para el HomeView */
+.section-title {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.section-title h2 {
+  color: #9c27b0;
+  font-size: 1.8rem;
+  position: relative;
+  display: inline-block;
+}
+
+.section-title h2::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #9c27b0, #e91e63);
+  transition: width 0.8s ease;
+}
+
+.section-title.animate-in h2::after {
+  width: 100%;
+}
+
+/* Estilos para las animaciones de las tarjetas */
+.company-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.company-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(156, 39, 176, 0.2), 0 10px 15px rgba(233, 30, 99, 0.2);
+}
+
+.company-card-animated {
+  animation: pulse 2s infinite ease-in-out;
+  animation-delay: 0.8s;
+}
+
+.stat-card-animated {
+  animation: glow 3s infinite alternate;
+  animation-delay: 0.8s;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 10px 25px rgba(156, 39, 176, 0.2), 0 5px 10px rgba(233, 30, 99, 0.2);
+  }
+  50% {
+    box-shadow: 0 15px 30px rgba(156, 39, 176, 0.3), 0 8px 15px rgba(233, 30, 99, 0.3);
+  }
+  100% {
+    box-shadow: 0 10px 25px rgba(156, 39, 176, 0.2), 0 5px 10px rgba(233, 30, 99, 0.2);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px rgba(156, 39, 176, 0.3), 0 0 10px rgba(233, 30, 99, 0.3);
+  }
+  to {
+    box-shadow: 0 0 15px rgba(156, 39, 176, 0.5), 0 0 20px rgba(233, 30, 99, 0.5);
+  }
+}
+
+/* Asegurarse de que las animaciones respetan la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .section-title h2::after {
+    transition: none;
+    width: 100%;
+  }
+  
+  .company-card {
+    transition: none;
+  }
+  
+  .company-card:hover {
+    transform: none;
+  }
+  
+  .company-card-animated,
+  .stat-card-animated {
+    animation: none;
+  }
+}
+</style>

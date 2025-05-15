@@ -1,18 +1,18 @@
 <template>
   <div class="stats-section">
-    <div class="stat-card">
+    <div class="stat-card" v-scroll-animate:100="'animate-in'">
       <h3>Empresas</h3>
       <div class="stat-value"><AnimatedNumber :number="empresasCount" /></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" v-scroll-animate:200="'animate-in'">
       <h3>Departamentos</h3>
       <div class="stat-value"><AnimatedNumber :number="departamentosCount" /></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" v-scroll-animate:300="'animate-in'">
       <h3>Centros</h3>
       <div class="stat-value"><AnimatedNumber :number="centrosCount" /></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" v-scroll-animate:400="'animate-in'">
       <h3>Formaciones</h3>
       <div class="stat-value"><AnimatedNumber :number="formacionesCount" /></div>
     </div>
@@ -60,22 +60,81 @@ defineProps({
   -webkit-backdrop-filter: blur(5px);
   background-color: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  transform: translateY(30px);
+  opacity: 0;
+  transition: transform 0.8s ease, opacity 0.8s ease, box-shadow 0.4s ease;
+}
+
+.stat-card.animate-in {
+  transform: translateY(0);
+  opacity: 1;
+  animation: statCardGlow 4s infinite alternate;
+}
+
+.stat-card:nth-child(1).animate-in {
+  animation-delay: 0.2s;
+}
+
+.stat-card:nth-child(2).animate-in {
+  animation-delay: 0.4s;
+}
+
+.stat-card:nth-child(3).animate-in {
+  animation-delay: 0.6s;
+}
+
+.stat-card:nth-child(4).animate-in {
+  animation-delay: 0.8s;
+}
+
+@keyframes statCardGlow {
+  0% {
+    box-shadow: 0 8px 16px rgba(156, 39, 176, 0.2);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.9));
+  }
+  100% {
+    box-shadow: 0 12px 24px rgba(233, 30, 99, 0.3);
+    background: linear-gradient(135deg, rgba(233, 30, 99, 0.1), rgba(156, 39, 176, 0.1));
+  }
 }
 
 .stat-card h3 {
-  color: white;
+  color: #9c27b0;
   margin-bottom: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.stat-card.animate-in h3 {
+  animation: textColorPulse 4s infinite alternate;
+}
+
+@keyframes textColorPulse {
+  0% {
+    color: #9c27b0;
+  }
+  100% {
+    color: #e91e63;
+  }
 }
 
 .stat-value {
   font-size: 2.5rem;
   font-weight: 700;
-  background: var(--primary-gradient);
+  background: linear-gradient(90deg, #9c27b0, #e91e63);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: transform 0.8s ease, opacity 0.8s ease;
+}
+
+.animate-in .stat-value {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: 0.3s;
 }
 
 @media (max-width: 768px) {
@@ -87,6 +146,34 @@ defineProps({
 @media (max-width: 480px) {
   .stats-section {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Asegurarse de que las animaciones respeten la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .stat-card {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+  
+  .stat-card.animate-in,
+  .stat-card:nth-child(1).animate-in,
+  .stat-card:nth-child(2).animate-in,
+  .stat-card:nth-child(3).animate-in,
+  .stat-card:nth-child(4).animate-in {
+    animation: none;
+  }
+  
+  .stat-card.animate-in h3 {
+    animation: none;
+  }
+  
+  .stat-value,
+  .animate-in .stat-value {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 </style> 

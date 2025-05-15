@@ -8,7 +8,13 @@
     </div>
     
     <div v-else class="forms-list">
-      <div v-for="empresa in empresas" :key="empresa.id" class="form-card">
+      <div 
+        v-for="(empresa, index) in empresas" 
+        :key="empresa.id" 
+        class="form-card company-card"
+        v-scroll-animate:150="'animate-in'"
+        :style="{ 'animation-delay': `${index * 0.15}s` }"
+      >
         <div class="form-info" @click="$emit('view-company', empresa)">
           <h3>{{ empresa.nombre }}</h3>
           <p>{{ empresa.descripcion }}</p>
@@ -366,6 +372,61 @@ button.noselect:hover .text {
 @media (max-width: 768px) {
   .forms-list {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Añadir estilos específicos para las animaciones */
+.company-card {
+  transform: translateY(50px);
+  opacity: 0;
+  transition: transform 0.8s ease, opacity 0.8s ease, box-shadow 0.3s ease;
+}
+
+.company-card.animate-in {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Efecto para tarjetas cuando estén en estado animado */
+.form-card:nth-child(odd).animate-in {
+  animation: pulseCardOdd 3s infinite ease-in-out;
+  animation-delay: 1s;
+}
+
+.form-card:nth-child(even).animate-in {
+  animation: pulseCardEven 3s infinite ease-in-out;
+  animation-delay: 1.5s;
+}
+
+@keyframes pulseCardOdd {
+  0%, 100% {
+    box-shadow: 0 8px 16px rgba(156, 39, 176, 0.2);
+  }
+  50% {
+    box-shadow: 0 10px 20px rgba(156, 39, 176, 0.4);
+  }
+}
+
+@keyframes pulseCardEven {
+  0%, 100% {
+    box-shadow: 0 8px 16px rgba(233, 30, 99, 0.2);
+  }
+  50% {
+    box-shadow: 0 10px 20px rgba(233, 30, 99, 0.4);
+  }
+}
+
+/* Asegurarse de que las animaciones respetan la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .company-card {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+  
+  .form-card:nth-child(odd).animate-in,
+  .form-card:nth-child(even).animate-in {
+    animation: none;
   }
 }
 </style> 

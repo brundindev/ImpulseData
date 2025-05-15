@@ -6,7 +6,11 @@ import App from './App.vue'
 import router from './router'
 
 import './assets/main.css'
+import './assets/ScrollAnimations.css'
 import '@fortawesome/fontawesome-free/css/all.css';
+
+// Importar y registrar la directiva de animación de scroll
+import ScrollAnimation from './directives/ScrollAnimation'
 
 // Configurar manejador global para ocultar errores de autenticación en consola
 const originalConsoleError = console.error;
@@ -64,5 +68,6 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(store)
+app.use(ScrollAnimation)
 
 app.mount('#app')
