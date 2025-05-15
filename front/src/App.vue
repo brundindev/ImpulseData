@@ -394,6 +394,66 @@ const mostrarChatbot = computed(() => {
 </style>
 
 <style>
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.app-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.25rem 0;
+}
+
+.impulsa-logo {
+  height: 30px;
+  border-radius: 5px;
+  transition: transform 0.3s;
+}
+
+.app-logo {
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1.2rem;
+  background: linear-gradient(45deg, #9c27b0, #e91e63);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: transform 0.3s;
+}
+
+.app-logo:hover, .impulsa-logo:hover {
+  transform: scale(1.05);
+}
+
+/* Eliminar margen inferior del cuerpo para evitar franja blanca */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+}
+
+/* Asegurar que el router view ocupe todo el espacio vertical disponible */
+.router-view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 :root {
   --primary-color: #9c27b0;
   --accent-color: #e91e63;

@@ -2192,10 +2192,11 @@ body:has(.welcome-page) .button2:after,
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  position: relative;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  color: white;
+  position: relative;
+  background-color: transparent;
 }
   
 .home-page::before {
@@ -3112,28 +3113,21 @@ body:has(.welcome-page) .button2:after,
   background: transparent;
 }
 
-.home-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
 body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   min-height: 100vh;
+  background-color: transparent;
 }
 
 /* Ajustes para la estructura general del contenido */
 .dashboard-container {
   flex: 1;
   overflow-y: visible;
-  padding-bottom: 0; /* Eliminar el padding inferior si existe */
+  padding-bottom: 0; /* Eliminar el padding inferior */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Ajustes para la estructura completa */
@@ -3143,4 +3137,5 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative;
 }
