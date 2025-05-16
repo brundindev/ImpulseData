@@ -45,6 +45,7 @@
           class="form-control"
           min="0"
           step="0.01"
+          @input="calcularPorcentajeEjecucion"
         >
       </div>
 
@@ -56,18 +57,19 @@
           class="form-control"
           min="0"
           step="0.01"
+          @input="calcularPorcentajeEjecucion"
         >
       </div>
 
-      <div class="form-group">
+      <div class="form-group" v-if="mostrarPorcentajeEjecucion">
         <label>Porcentaje de ejecución (%)</label>
         <input 
           type="number" 
           v-model="datos.cifras.porcentajeEjecucion" 
           class="form-control"
-          min="0"
-          max="100"
-          step="0.01"
+          disabled
+          readonly
+          style="background-color: #e9ecef; cursor: not-allowed;"
         >
       </div>
 
@@ -282,6 +284,19 @@ const esValido = computed(() => {
          datos.value.fechaCreacion && 
          datos.value.descripcion;
 });
+
+const mostrarPorcentajeEjecucion = ref(false);
+
+const calcularPorcentajeEjecucion = () => {
+  if (datos.value.cifras.presupuestoInicial && datos.value.cifras.presupuestoEjecutado) {
+    mostrarPorcentajeEjecucion.value = true;
+    const porcentaje = (datos.value.cifras.presupuestoEjecutado / datos.value.cifras.presupuestoInicial) * 100;
+    datos.value.cifras.porcentajeEjecucion = Number(porcentaje.toFixed(2));
+  } else {
+    mostrarPorcentajeEjecucion.value = false;
+    datos.value.cifras.porcentajeEjecucion = null;
+  }
+};
 </script>
 
 <style scoped>
@@ -292,6 +307,7 @@ const esValido = computed(() => {
 
 .form-group {
   margin-bottom: 1.5rem;
+  background-color: aliceblue;
 }
 
 .section-title {

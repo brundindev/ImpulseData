@@ -9,7 +9,7 @@
       <!-- AGENCIA LOCAL -->
       <div class="seccion-card" :class="{ 'completa': secciones.agenciaLocal.completa, 'parcial': secciones.agenciaLocal.parcial }">
         <div class="seccion-header">
-          <h2>Agencia Local</h2>
+          <h2>Agencia Local de Desarollo Económico y Social</h2>
           <div class="estado-indicador">
             <span v-if="secciones.agenciaLocal.completa" class="check">✓</span>
             <span v-else-if="secciones.agenciaLocal.parcial" class="parcial">-</span>
@@ -502,5 +502,6 @@ const guardarFormulario = async () => {
 
 .form-content {
   padding: 1.5rem;
+  background-color: aliceblue;
 }
 </style> 
