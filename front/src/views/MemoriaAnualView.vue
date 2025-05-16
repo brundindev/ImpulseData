@@ -162,6 +162,35 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
+// Importar componentes de Agencia Local
+import AgenciaLocalGeneral from '../components/memoria/AgenciaLocalGeneral.vue';
+import AgenciaLocalQueHacemos from '../components/memoria/AgenciaLocalQueHacemos.vue';
+import AgenciaLocalEstructura from '../components/memoria/AgenciaLocalEstructura.vue';
+import AgenciaLocalRecursos from '../components/memoria/AgenciaLocalRecursos.vue';
+
+// Importar componentes de Empleo y Formación
+import EmpleoFormacionProgramas from '../components/memoria/EmpleoFormacionProgramas.vue';
+import EmpleoFormacionFormacion from '../components/memoria/EmpleoFormacionFormacion.vue';
+import EmpleoFormacionEstadisticas from '../components/memoria/EmpleoFormacionEstadisticas.vue';
+import EmpleoFormacionObjetivos from '../components/memoria/EmpleoFormacionObjetivos.vue';
+import EmpleoFormacionConclusiones from '../components/memoria/EmpleoFormacionConclusiones.vue';
+import EmpleoFormacionAnexos from '../components/memoria/EmpleoFormacionAnexos.vue';
+
+// Importar componentes de Promoción Económica
+import PromocionEconomicaGeneral from '../components/memoria/PromocionEconomicaGeneral.vue';
+import PromocionEconomicaProgramas from '../components/memoria/PromocionEconomicaProgramas.vue';
+import PromocionEconomicaEmpresas from '../components/memoria/PromocionEconomicaEmpresas.vue';
+import PromocionEconomicaResultados from '../components/memoria/PromocionEconomicaResultados.vue';
+import PromocionEconomicaObjetivos from '../components/memoria/PromocionEconomicaObjetivos.vue';
+import PromocionEconomicaConclusiones from '../components/memoria/PromocionEconomicaConclusiones.vue';
+
+// Importar componentes de Desarrollo Local
+import DesarrolloLocalGeneral from '../components/memoria/DesarrolloLocalGeneral.vue';
+import DesarrolloLocalProgramas from '../components/memoria/DesarrolloLocalProgramas.vue';
+import DesarrolloLocalResultados from '../components/memoria/DesarrolloLocalResultados.vue';
+import DesarrolloLocalObjetivos from '../components/memoria/DesarrolloLocalObjetivos.vue';
+import DesarrolloLocalConclusiones from '../components/memoria/DesarrolloLocalConclusiones.vue';
+
 const router = useRouter();
 
 // Estado de las secciones
@@ -197,17 +226,34 @@ const tituloFormulario = computed(() => {
 const pasosActuales = computed(() => {
   const pasos = {
     agenciaLocal: [
-      { titulo: 'Información General', componente: 'AgenciaLocalGeneral' },
-      { titulo: 'Qué hacemos', componente: 'AgenciaLocalQueHacemos' },
-      { titulo: 'Estructura Organizativa', componente: 'AgenciaLocalEstructura' },
-      { titulo: 'Gestión de Recursos', componente: 'AgenciaLocalRecursos' }
+      { titulo: 'Información General', componente: AgenciaLocalGeneral },
+      { titulo: 'Qué hacemos', componente: AgenciaLocalQueHacemos },
+      { titulo: 'Estructura Organizativa', componente: AgenciaLocalEstructura },
+      { titulo: 'Gestión de Recursos', componente: AgenciaLocalRecursos }
     ],
     empleoFormacion: [
-      { titulo: 'Programas de Empleo', componente: 'EmpleoFormacionProgramas' },
-      { titulo: 'Formación', componente: 'EmpleoFormacionFormacion' },
-      { titulo: 'Resultados', componente: 'EmpleoFormacionResultados' }
+      { titulo: 'Programas de Empleo', componente: EmpleoFormacionProgramas },
+      { titulo: 'Formación', componente: EmpleoFormacionFormacion },
+      { titulo: 'Estadísticas', componente: EmpleoFormacionEstadisticas },
+      { titulo: 'Objetivos', componente: EmpleoFormacionObjetivos },
+      { titulo: 'Conclusiones', componente: EmpleoFormacionConclusiones },
+      { titulo: 'Anexos', componente: EmpleoFormacionAnexos }
     ],
-    // ... Definir pasos para otras secciones
+    promocionEconomica: [
+      { titulo: 'Información General', componente: PromocionEconomicaGeneral },
+      { titulo: 'Programas y Proyectos', componente: PromocionEconomicaProgramas },
+      { titulo: 'Empresas y Emprendedores', componente: PromocionEconomicaEmpresas },
+      { titulo: 'Resultados', componente: PromocionEconomicaResultados },
+      { titulo: 'Objetivos', componente: PromocionEconomicaObjetivos },
+      { titulo: 'Conclusiones', componente: PromocionEconomicaConclusiones }
+    ],
+    desarrolloLocal: [
+      { titulo: 'Información General', componente: DesarrolloLocalGeneral },
+      { titulo: 'Programas Estratégicos', componente: DesarrolloLocalProgramas },
+      { titulo: 'Resultados', componente: DesarrolloLocalResultados },
+      { titulo: 'Objetivos', componente: DesarrolloLocalObjetivos },
+      { titulo: 'Conclusiones', componente: DesarrolloLocalConclusiones }
+    ]
   };
   return pasos[seccionActual.value] || [];
 });
