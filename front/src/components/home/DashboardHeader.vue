@@ -84,14 +84,17 @@ const handleFileChange = (event) => {
 
 .user-name {
   font-weight: 700;
-  color: white;
+  background-image: linear-gradient(to right, #0062d6, #8a2be2, #ff69b4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   position: relative;
   display: inline-block;
   padding: 0 4px;
 }
 
 .user-name:hover {
-  color: black;
+  color: transparent;
 }
 
 .user-name::after {
