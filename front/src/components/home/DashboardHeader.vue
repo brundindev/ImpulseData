@@ -88,25 +88,19 @@ const handleFileChange = (event) => {
   position: relative;
   display: inline-block;
   padding: 0 4px;
+  background: linear-gradient(90deg, #00c3ff, #7928ca, #ff0080);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: white;
+  text-shadow: 0 0 10px rgba(0, 195, 255, 0.7);
+  animation: gradientText 6s linear infinite;
 }
 
 .user-name:hover {
-  color: black;
+  -webkit-text-fill-color: transparent;
 }
 
-.user-name::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: var(--primary-gradient);
-  background-size: 200% 100%;
-  animation: gradientShift 3s ease infinite;
-}
-
-@keyframes gradientShift {
+@keyframes gradientText {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }

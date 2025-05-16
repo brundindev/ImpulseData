@@ -235,13 +235,13 @@ const formatDate = (date) => {
 }
 
 .form-stats span{
-  color: black !important;
-  text-shadow: 0 1px 1px rgb(6 94 247 / 70%);
+  color: white !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 .stat-pill {
-  background-color: var(--pale-blue);
-  color: var(--primary-color);
+  background-color: rgba(0, 70, 152, 0.7);
+  color: white;
   border-radius: 12px;
   padding: 0.2rem 0.6rem;
   font-size: 0.8rem;
