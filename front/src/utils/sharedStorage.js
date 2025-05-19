@@ -1,13 +1,21 @@
-// sharedStorage.js - Servicio para el almacenamiento compartido de Impulsalicante usando localStorage
+// sharedStorage.js - Servicio para el almacenamiento compartido de Impulsalicante con Firebase
+
+import { db, storage } from './firebaseConfig';
+import { 
+  collection, doc, getDoc, setDoc, getDocs, updateDoc, query, where, onSnapshot, deleteDoc 
+} from 'firebase/firestore';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 // Constantes para identificar la empresa
 const IMPULSALICANTE_ID = "impulsalicante";
 
-// Claves para localStorage
-const STORAGE_KEYS = {
-  IMAGES: "impulsalicante_shared_images",
-  FORM_DATA: "impulsalicante_shared_formdata"
-};
+// Colecciones de Firestore
+const COMPANIES_COLLECTION = "companies";
+const FORM_DATA_COLLECTION = "formData";
+const IMAGES_COLLECTION = "images";
+
+// Listeners activos para limpieza
+let activeListeners = [];
 
 /**
  * Comprueba si el usuario está trabajando con la empresa Impulsalicante
@@ -15,12 +23,12 @@ const STORAGE_KEYS = {
  */
 async function isImpulsalicante() {
   try {
-    // Siempre devolvemos true para desarrollo
-    console.log("Modo desarrollo: asumiendo que es Impulsalicante");
+    // En un entorno real, esto vendría de la autenticación del usuario
+    // pero para este ejemplo asumiremos que siempre es Impulsalicante
     return true;
   } catch (error) {
     console.error("Error verificando empresa:", error);
-    return true;
+    return true; // Para desarrollo, forzamos que sí
   }
 }
 
@@ -37,28 +45,18 @@ async function loadSharedImages() {
       return {}; // No es Impulsalicante, no hay imágenes compartidas
     }
     
-    // Usar localStorage
-    try {
-      const localData = localStorage.getItem(STORAGE_KEYS.IMAGES);
-      
-      if (localData) {
-        try {
-          // Validar que es un JSON válido antes de parsearlo
-          const parsedData = JSON.parse(localData);
-          console.log("Imágenes cargadas desde localStorage:", Object.keys(parsedData).length);
-          return parsedData;
-        } catch (jsonError) {
-          console.error("Error parseando JSON de localStorage:", jsonError);
-          return {};
-        }
-      }
-    } catch (storageError) {
-      console.error("Error accediendo a localStorage:", storageError);
-    }
+    // Obtener las imágenes de Firebase
+    const imagesRef = collection(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, IMAGES_COLLECTION);
+    const querySnapshot = await getDocs(imagesRef);
     
-    // Si llegamos aquí, no hay datos en localStorage
-    console.log("No hay imágenes en localStorage");
-    return {};
+    const images = {};
+    querySnapshot.forEach((doc) => {
+      const imageId = doc.id;
+      const imageData = doc.data();
+      images[imageId] = imageData.base64Data;
+    });
+    
+    return images;
   } catch (error) {
     console.error("Error cargando imágenes compartidas:", error);
     return {};
@@ -80,35 +78,15 @@ async function saveSharedImage(imageId, base64Data) {
       return false; // No es Impulsalicante, no guardar
     }
     
-    // Usar localStorage
-    try {
-      // Obtenemos las imágenes existentes con manejo de errores
-      let imagesData = {};
-      const existingData = localStorage.getItem(STORAGE_KEYS.IMAGES);
-      
-      if (existingData) {
-        try {
-          imagesData = JSON.parse(existingData);
-        } catch (jsonError) {
-          console.error("Error parseando JSON de localStorage, usando objeto vacío:", jsonError);
-        }
-      }
-      
-      // Guardamos la nueva imagen
-      imagesData[imageId] = base64Data;
-      localStorage.setItem(STORAGE_KEYS.IMAGES, JSON.stringify(imagesData));
-      console.log(`Imagen ${imageId} guardada en localStorage`);
-      
-      // Disparar un evento para que otros clientes sepan que hay cambios
-      window.dispatchEvent(new CustomEvent('sharedStorageUpdated', {
-        detail: { type: 'image', id: imageId }
-      }));
-      
-      return true;
-    } catch (storageError) {
-      console.error("Error accediendo a localStorage:", storageError);
-      return false;
-    }
+    // Guardar la imagen en Firestore
+    const imageRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, IMAGES_COLLECTION, imageId);
+    await setDoc(imageRef, {
+      base64Data: base64Data,
+      updatedAt: new Date().toISOString()
+    });
+    
+    console.log(`Imagen ${imageId} guardada en Firebase`);
+    return true;
   } catch (error) {
     console.error("Error guardando imagen compartida:", error);
     return false;
@@ -128,26 +106,14 @@ async function loadSharedFormData() {
       return {}; // No es Impulsalicante, no hay datos compartidos
     }
     
-    // Usar localStorage
-    try {
-      const formData = localStorage.getItem(STORAGE_KEYS.FORM_DATA);
-      
-      if (formData) {
-        try {
-          // Validar que es un JSON válido antes de parsearlo
-          const parsedData = JSON.parse(formData);
-          console.log("Datos de formulario cargados desde localStorage");
-          return parsedData;
-        } catch (jsonError) {
-          console.error("Error parseando JSON de formulario:", jsonError);
-          return {};
-        }
-      }
-    } catch (storageError) {
-      console.error("Error accediendo a localStorage para formulario:", storageError);
+    // Obtener los datos del formulario de Firebase
+    const formDataRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, FORM_DATA_COLLECTION, "mainForm");
+    const docSnap = await getDoc(formDataRef);
+    
+    if (docSnap.exists()) {
+      return docSnap.data();
     }
     
-    // Si llegamos aquí, no hay datos en localStorage
     return {};
   } catch (error) {
     console.error("Error cargando datos del formulario compartidos:", error);
@@ -170,37 +136,29 @@ async function saveSharedFormField(fieldId, value) {
       return false; // No es Impulsalicante, no guardar
     }
     
-    // Usar localStorage
-    try {
-      // Obtenemos los datos existentes
-      let formData = {};
-      const existingData = localStorage.getItem(STORAGE_KEYS.FORM_DATA);
-      
-      if (existingData) {
-        try {
-          formData = JSON.parse(existingData);
-        } catch (jsonError) {
-          console.error("Error parseando JSON de formulario, usando objeto vacío:", jsonError);
-        }
-      }
-      
-      // Guardamos el nuevo valor
-      formData[fieldId] = value;
-      formData.updatedAt = new Date().toISOString();
-      
-      localStorage.setItem(STORAGE_KEYS.FORM_DATA, JSON.stringify(formData));
-      console.log(`Campo ${fieldId} guardado en localStorage`);
-      
-      // Disparar un evento para que otros clientes sepan que hay cambios
-      window.dispatchEvent(new CustomEvent('sharedStorageUpdated', {
-        detail: { type: 'formField', id: fieldId, value: value }
-      }));
-      
-      return true;
-    } catch (storageError) {
-      console.error("Error accediendo a localStorage para formulario:", storageError);
-      return false;
+    // Guardar el campo en Firestore
+    const formDataRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, FORM_DATA_COLLECTION, "mainForm");
+    
+    // Comprobar si el documento existe
+    const docSnap = await getDoc(formDataRef);
+    
+    if (docSnap.exists()) {
+      // Actualizar campo existente
+      await updateDoc(formDataRef, {
+        [fieldId]: value,
+        updatedAt: new Date().toISOString()
+      });
+    } else {
+      // Crear documento nuevo
+      await setDoc(formDataRef, {
+        [fieldId]: value,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
     }
+    
+    console.log(`Campo ${fieldId} guardado en Firebase`);
+    return true;
   } catch (error) {
     console.error("Error guardando campo compartido:", error);
     return false;
@@ -213,43 +171,125 @@ async function saveSharedFormField(fieldId, value) {
  * @returns {Function} - Función para cancelar la suscripción
  */
 function subscribeToSharedData(callback) {
-  // Crear un manejador de eventos para escuchar actualizaciones
-  const handleUpdate = (event) => {
-    const { type, id, value } = event.detail;
+  // Verificar si estamos en Impulsalicante
+  isImpulsalicante().then(isImpulsalicanteCompany => {
+    if (!isImpulsalicanteCompany) return;
     
-    if (type === 'formField') {
-      callback({ fieldId: id, value: value });
-    } else if (type === 'image') {
-      // Para imágenes, necesitamos cargar el valor actual desde localStorage
-      try {
-        const imagesData = localStorage.getItem(STORAGE_KEYS.IMAGES);
-        if (imagesData) {
-          const images = JSON.parse(imagesData);
-          if (images[id]) {
-            callback({ fieldId: id, value: images[id], isImage: true });
+    // Suscribirse a cambios en el documento principal de formulario
+    const formDataRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, FORM_DATA_COLLECTION, "mainForm");
+    
+    const unsubscribe = onSnapshot(formDataRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        
+        // Para cada campo, notificar el cambio
+        Object.entries(data).forEach(([fieldId, value]) => {
+          // No notificar timestamps
+          if (fieldId !== 'createdAt' && fieldId !== 'updatedAt') {
+            callback({ fieldId, value });
           }
-        }
-      } catch (error) {
-        console.error("Error obteniendo imagen actualizada:", error);
+        });
       }
-    }
-  };
+    }, (error) => {
+      console.error("Error en suscripción a datos compartidos:", error);
+    });
+    
+    // Guardar referencia para limpieza
+    activeListeners.push(unsubscribe);
+    
+    // También suscribirse a cambios en imágenes
+    const imagesRef = collection(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, IMAGES_COLLECTION);
+    
+    const imagesUnsubscribe = onSnapshot(imagesRef, (querySnapshot) => {
+      querySnapshot.docChanges().forEach((change) => {
+        if (change.type === "added" || change.type === "modified") {
+          const imageId = change.doc.id;
+          const imageData = change.doc.data();
+          
+          // Notificar el cambio de imagen
+          callback({ 
+            fieldId: imageId, 
+            value: imageData.base64Data, 
+            isImage: true 
+          });
+        }
+      });
+    }, (error) => {
+      console.error("Error en suscripción a imágenes compartidas:", error);
+    });
+    
+    // Guardar referencia para limpieza
+    activeListeners.push(imagesUnsubscribe);
+  });
   
-  // Registrar el evento
-  window.addEventListener('sharedStorageUpdated', handleUpdate);
-  
-  // Retornar función para cancelar la suscripción
+  // Retornar función para cancelar todas las suscripciones
   return () => {
-    window.removeEventListener('sharedStorageUpdated', handleUpdate);
+    activeListeners.forEach(unsub => unsub());
+    activeListeners = [];
   };
 }
 
-// Función para limpiar el almacenamiento temporal si es necesario
-function resetSharedStorage() {
+/**
+ * Función para inicializar la base de datos para la empresa Impulsalicante si no existe
+ * @returns {Promise<void>}
+ */
+async function initializeDatabase() {
   try {
-    localStorage.removeItem(STORAGE_KEYS.IMAGES);
-    localStorage.removeItem(STORAGE_KEYS.FORM_DATA);
-    console.log("Almacenamiento compartido reiniciado");
+    // Verificar si ya existe el documento de la empresa
+    const companyRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID);
+    const companyDoc = await getDoc(companyRef);
+    
+    if (!companyDoc.exists()) {
+      // Crear documento para la empresa
+      await setDoc(companyRef, {
+        name: "Impulsalicante",
+        createdAt: new Date().toISOString()
+      });
+      
+      // Crear documento inicial para el formulario
+      const formDataRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, FORM_DATA_COLLECTION, "mainForm");
+      await setDoc(formDataRef, {
+        "portada-titulo": "MEMORIA<br>DE ACTIVIDAD",
+        "portada-year": "20<span class=\"year-highlight\">25</span>",
+        "portada-year-highlight": "25",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      console.log("Base de datos inicializada para Impulsalicante");
+    }
+  } catch (error) {
+    console.error("Error inicializando base de datos:", error);
+  }
+}
+
+// Función para limpiar el almacenamiento si es necesario
+async function resetSharedStorage() {
+  try {
+    const isImpulsalicanteCompany = await isImpulsalicante();
+    if (!isImpulsalicanteCompany) return false;
+    
+    // Borrar colección de imágenes
+    const imagesRef = collection(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, IMAGES_COLLECTION);
+    const imagesSnapshot = await getDocs(imagesRef);
+    
+    const deletePromises = imagesSnapshot.docs.map(doc => 
+      deleteDoc(doc.ref)
+    );
+    
+    await Promise.all(deletePromises);
+    
+    // Reiniciar documento de formulario principal
+    const formDataRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, FORM_DATA_COLLECTION, "mainForm");
+    await setDoc(formDataRef, {
+      "portada-titulo": "MEMORIA<br>DE ACTIVIDAD",
+      "portada-year": "20<span class=\"year-highlight\">25</span>",
+      "portada-year-highlight": "25",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    
+    console.log("Almacenamiento compartido reiniciado en Firebase");
     return true;
   } catch (error) {
     console.error("Error al reiniciar almacenamiento:", error);
@@ -257,34 +297,8 @@ function resetSharedStorage() {
   }
 }
 
-// Función para inicializar datos por defecto si no existen
-function initializeDefaultData() {
-  try {
-    // Verificar si ya existen datos de formulario
-    const formData = localStorage.getItem(STORAGE_KEYS.FORM_DATA);
-    if (!formData) {
-      // Crear datos iniciales
-      const initialData = {
-        "portada-titulo": "MEMORIA<br>DE ACTIVIDAD",
-        "portada-year": "20<span class=\"year-highlight\">25</span>",
-        "portada-year-highlight": "25",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      localStorage.setItem(STORAGE_KEYS.FORM_DATA, JSON.stringify(initialData));
-      console.log("Datos iniciales de formulario creados");
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Error al inicializar datos por defecto:", error);
-    return false;
-  }
-}
-
-// Inicializar datos por defecto al cargar
-initializeDefaultData();
+// Inicializar la base de datos al cargar
+initializeDatabase();
 
 export { 
   loadSharedImages, 
