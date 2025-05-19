@@ -73,40 +73,6 @@
           </button>
         </div>
       </div>
-
-      <!-- ÁREA DE GESTIÓN -->
-      <div class="seccion-card" :class="{ 'completa': secciones.gestion.completa, 'parcial': secciones.gestion.parcial }">
-        <div class="seccion-header">
-          <h2>Área de Gestión</h2>
-          <div class="estado-indicador">
-            <span v-if="secciones.gestion.completa" class="check">✓</span>
-            <span v-else-if="secciones.gestion.parcial" class="parcial">-</span>
-          </div>
-        </div>
-        <div class="seccion-content">
-          <p>Gestión administrativa y financiera</p>
-          <button @click="abrirFormulario('gestion')" class="btn-llenar">
-            {{ secciones.gestion.completa ? 'Editar' : 'Rellenar' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- DEPARTAMENTO DE MARKETING Y COMUNICACIÓN -->
-      <div class="seccion-card" :class="{ 'completa': secciones.marketing.completa, 'parcial': secciones.marketing.parcial }">
-        <div class="seccion-header">
-          <h2>Departamento de Marketing y Comunicación</h2>
-          <div class="estado-indicador">
-            <span v-if="secciones.marketing.completa" class="check">✓</span>
-            <span v-else-if="secciones.marketing.parcial" class="parcial">-</span>
-          </div>
-        </div>
-        <div class="seccion-content">
-          <p>Marketing y estrategias de comunicación</p>
-          <button @click="abrirFormulario('marketing')" class="btn-llenar">
-            {{ secciones.marketing.completa ? 'Editar' : 'Rellenar' }}
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Modal de Formulario Multistep -->
@@ -166,7 +132,7 @@ import { useRouter } from 'vue-router';
 import AgenciaLocalGeneral from '../components/memoria/AgenciaLocalGeneral.vue';
 import AgenciaLocalQueHacemos from '../components/memoria/AgenciaLocalQueHacemos.vue';
 import AgenciaLocalEstructura from '../components/memoria/AgenciaLocalEstructura.vue';
-import AgenciaLocalRecursos from '../components/memoria/AgenciaLocalRecursos.vue';
+import AgenciaLocalSedes from '../components/memoria/AgenciaLocalSedes.vue';
 
 // Importar componentes de Empleo y Formación
 import EmpleoFormacionProgramas from '../components/memoria/EmpleoFormacionProgramas.vue';
@@ -198,9 +164,7 @@ const secciones = ref({
   agenciaLocal: { completa: false, parcial: false },
   empleoFormacion: { completa: false, parcial: false },
   promocionEconomica: { completa: false, parcial: false },
-  desarrolloLocal: { completa: false, parcial: false },
-  gestion: { completa: false, parcial: false },
-  marketing: { completa: false, parcial: false }
+  desarrolloLocal: { completa: false, parcial: false }
 });
 
 // Estado del formulario
@@ -215,9 +179,7 @@ const tituloFormulario = computed(() => {
     agenciaLocal: 'Agencia Local',
     empleoFormacion: 'Departamento de Empleo y Formación',
     promocionEconomica: 'Departamento de Promoción Económica',
-    desarrolloLocal: 'Programas de Desarrollo Local Estratégico',
-    gestion: 'Área de Gestión',
-    marketing: 'Departamento de Marketing y Comunicación'
+    desarrolloLocal: 'Programas de Desarrollo Local Estratégico'
   };
   return titulos[seccionActual.value] || '';
 });
@@ -226,10 +188,10 @@ const tituloFormulario = computed(() => {
 const pasosActuales = computed(() => {
   const pasos = {
     agenciaLocal: [
-      { titulo: 'Información General', componente: AgenciaLocalGeneral },
+      { titulo: 'LA AGENCIA LOCAL EN CIFRAS', componente: AgenciaLocalGeneral },
       { titulo: 'Qué hacemos', componente: AgenciaLocalQueHacemos },
-      { titulo: 'Estructura Organizativa', componente: AgenciaLocalEstructura },
-      { titulo: 'Gestión de Recursos', componente: AgenciaLocalRecursos }
+      { titulo: 'CÓMO ESTAMOS ORGANIZADOS', componente: AgenciaLocalEstructura },
+      { titulo: 'Dónde estamos', componente: AgenciaLocalSedes }
     ],
     empleoFormacion: [
       { titulo: 'Programas de Empleo', componente: EmpleoFormacionProgramas },
