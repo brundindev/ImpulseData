@@ -262,11 +262,25 @@ const pasosActuales = computed(() => {
 const abrirFormulario = (seccion) => {
   seccionActual.value = seccion;
   pasoActual.value = 0;
-  datosFormulario.value = {};
+  
+  // Intentar cargar datos guardados
+  const datosGuardados = localStorage.getItem(`memoria_${seccion}`);
+  if (datosGuardados) {
+    datosFormulario.value = JSON.parse(datosGuardados);
+  } else {
+    datosFormulario.value = {};
+  }
+  
   mostrarFormulario.value = true;
 };
 
 const cerrarFormulario = () => {
+  // Verificar si hay datos sin guardar
+  if (Object.keys(datosFormulario.value).length > 0 && !secciones.value[seccionActual.value].completa) {
+    if (confirm('¿Deseas guardar tu progreso antes de salir?')) {
+      guardarProgreso();
+    }
+  }
   mostrarFormulario.value = false;
   seccionActual.value = '';
   pasoActual.value = 0;
@@ -299,6 +313,34 @@ const guardarFormulario = async () => {
     console.error('Error al guardar:', error);
   }
 };
+
+const guardarProgreso = async () => {
+  try {
+    // Aquí iría la lógica para guardar el progreso en el backend
+    console.log('Guardando progreso:', datosFormulario.value);
+    
+    // Actualizar estado de la sección a parcial
+    secciones.value[seccionActual.value].parcial = true;
+    secciones.value[seccionActual.value].completa = false;
+    
+    // Guardar en localStorage como respaldo
+    localStorage.setItem(`memoria_${seccionActual.value}`, JSON.stringify(datosFormulario.value));
+    
+    alert('Progreso guardado correctamente');
+  } catch (error) {
+    console.error('Error al guardar el progreso:', error);
+    alert('Error al guardar el progreso');
+  }
+};
+
+// Agregar evento para detectar cierre del navegador
+window.addEventListener('beforeunload', (e) => {
+  if (mostrarFormulario.value && Object.keys(datosFormulario.value).length > 0) {
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  }
+});
 </script>
 
 <style scoped>

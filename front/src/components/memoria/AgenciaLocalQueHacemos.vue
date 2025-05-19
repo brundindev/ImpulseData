@@ -47,6 +47,51 @@
       </button>
     </div>
 
+    <div class="areas">
+      <div v-for="(area, index) in datos.areas" :key="index" class="area-item">
+        <div class="area-header">
+          <h4>Área {{ index + 1 }}</h4>
+          <button 
+            @click="eliminarArea(index)" 
+            class="btn btn-danger"
+            type="button"
+            v-if="datos.areas.length > 1"
+          >
+            Eliminar
+          </button>
+        </div>
+        
+        <div class="form-group">
+          <label>Título</label>
+          <input 
+            type="text" 
+            v-model="area.titulo" 
+            class="form-control"
+            placeholder="Nombre del área"
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea 
+            v-model="area.descripcion" 
+            class="form-control"
+            rows="4"
+            placeholder="Descripción detallada del área"
+          ></textarea>
+        </div>
+      </div>
+
+      <button 
+        @click="agregarArea" 
+        class="btn btn-secondary"
+        type="button"
+        v-if="datos.areas.length < 4"
+      >
+        Agregar Área
+      </button>
+    </div>
+
     <div class="form-actions">
       <button 
         @click="$emit('anterior')" 
@@ -91,6 +136,13 @@ if (!datos.value.lineasEstrategicas) {
   }];
 }
 
+if (!datos.value.areas) {
+  datos.value.areas = [{
+    titulo: '',
+    descripcion: ''
+  }];
+}
+
 const agregarLinea = () => {
   if (datos.value.lineasEstrategicas.length < 4) {
     datos.value.lineasEstrategicas.push({
@@ -106,9 +158,26 @@ const eliminarLinea = (index) => {
   }
 };
 
+const agregarArea = () => {
+  if (datos.value.areas.length < 5) {
+    datos.value.areas.push({
+      titulo: '',
+      descripcion: ''
+    });
+  }
+};
+
+const eliminarArea = (index) => {
+  if (datos.value.areas.length > 1) {
+    datos.value.areas.splice(index, 1);
+  }
+};
+
 const esValido = computed(() => {
   return datos.value.lineasEstrategicas.every(linea => 
     linea.titulo && linea.descripcion
+  ) && datos.value.areas.every(area =>
+    area.titulo && area.descripcion
   );
 });
 </script>
@@ -206,5 +275,25 @@ textarea.form-control {
   margin-top: 2rem;
   display: flex;
   justify-content: space-between;
+}
+
+.area-item {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.area-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.area-header h4 {
+  margin: 0;
+  color: #004698;
+  font-size: 1.2rem;
 }
 </style> 

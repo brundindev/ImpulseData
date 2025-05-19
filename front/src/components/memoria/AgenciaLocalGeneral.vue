@@ -38,10 +38,21 @@
     
     <div class="cifras-grid">
       <div class="form-group">
-        <label>Presupuesto inicial (€)</label>
+        <label>Presupuesto(€)</label>
         <input 
           type="number" 
           v-model="datos.cifras.presupuestoInicial" 
+          class="form-control"
+          min="0"
+          step="0.01"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Presupuesto ajustado (€)</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.presupuestoAjustado" 
           class="form-control"
           min="0"
           step="0.01"
@@ -61,7 +72,7 @@
         >
       </div>
 
-      <div class="form-group" v-if="mostrarPorcentajeEjecucion">
+      <div class="form-group">
         <label>Porcentaje de ejecución (%)</label>
         <input 
           type="number" 
@@ -94,6 +105,120 @@
       </div>
 
       <div class="form-group">
+        <label>Nº Personas atendidas en orientación</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.personasOrientacion" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Actividades formativas realizadas</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.actividadesFormativas" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Horas de orientación laboral realizadas</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.horasOrientacion" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Horas de formación</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.horasFormacion" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Ofertas de empleo gestionadas</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.ofertasEmpleo" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Participantes en actividades formativas</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.participantesFormacion" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Puestos de trabajo</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.puestosGenerados" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Asesoramientos a empresas y emprendedores</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.asesoramientos" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+
+      <div class="form-group">
+        <label>Personas contratadas</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.personasContratadas" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label>Empresas creadas</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.empresasCreadas" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Empresas en viveros</label>
+        <input 
+          type="number" 
+          v-model="datos.cifras.empresasViveros" 
+          class="form-control"
+          min="0"
+        >
+      </div>
+
+
+
+      
+      <div class="form-group">
         <label>Ayudas concedidas a empresas (€)</label>
         <input 
           type="number" 
@@ -115,115 +240,6 @@
         >
       </div>
 
-      <div class="form-group">
-        <label>Personas atendidas en orientación</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.personasOrientacion" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Ofertas de empleo gestionadas</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.ofertasEmpleo" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Personas contratadas</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.personasContratadas" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Horas de orientación realizadas</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.horasOrientacion" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Puestos de trabajo generados</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.puestosGenerados" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Actividades formativas realizadas</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.actividadesFormativas" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Participantes en actividades formativas</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.participantesFormacion" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Empresas creadas</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.empresasCreadas" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Empresas en viveros</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.empresasViveros" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Horas de formación</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.horasFormacion" 
-          class="form-control"
-          min="0"
-        >
-      </div>
-
-      <div class="form-group">
-        <label>Asesoramientos a empresas y emprendedores</label>
-        <input 
-          type="number" 
-          v-model="datos.cifras.asesoramientos" 
-          class="form-control"
-          min="0"
-        >
-      </div>
     </div>
 
     <div class="form-actions">
@@ -288,9 +304,9 @@ const esValido = computed(() => {
 const mostrarPorcentajeEjecucion = ref(false);
 
 const calcularPorcentajeEjecucion = () => {
-  if (datos.value.cifras.presupuestoInicial && datos.value.cifras.presupuestoEjecutado) {
+  if (datos.value.cifras.presupuestoAjustado && datos.value.cifras.presupuestoEjecutado) {
     mostrarPorcentajeEjecucion.value = true;
-    const porcentaje = (datos.value.cifras.presupuestoEjecutado / datos.value.cifras.presupuestoInicial) * 100;
+    const porcentaje = (datos.value.cifras.presupuestoEjecutado / datos.value.cifras.presupuestoAjustado) * 100;
     datos.value.cifras.porcentajeEjecucion = Number(porcentaje.toFixed(2));
   } else {
     mostrarPorcentajeEjecucion.value = false;
