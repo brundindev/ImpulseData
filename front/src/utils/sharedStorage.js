@@ -7,7 +7,7 @@ import {
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 // Constantes para identificar la empresa
-const IMPULSALICANTE_ID = "impulsalicante";
+const IMPULSALICANTE_ID = "impulsalicante_global"; // Cambiado a un ID global único
 
 // Colecciones de Firestore
 const COMPANIES_COLLECTION = "companies";
@@ -22,13 +22,97 @@ let activeListeners = [];
  * @returns {Promise<boolean>} True si está trabajando con Impulsalicante
  */
 async function isImpulsalicante() {
+  // Siempre devolvemos true y usamos la instancia global
+  return true;
+}
+
+/**
+ * Crea una instancia global única de Impulsalicante
+ * @returns {Promise<boolean>} True si se creó correctamente
+ */
+async function forceGlobalImpulsalicante() {
   try {
-    // En un entorno real, esto vendría de la autenticación del usuario
-    // pero para este ejemplo asumiremos que siempre es Impulsalicante
+    console.log("Forzando creación de instancia global de Impulsalicante...");
+    
+    // Primero, intentar eliminar cualquier instancia antigua
+    try {
+      const oldCompanyRef = doc(db, COMPANIES_COLLECTION, "impulsalicante");
+      const oldCompanyDoc = await getDoc(oldCompanyRef);
+      if (oldCompanyDoc.exists()) {
+        // Eliminar subcolecciones primero
+        await deleteCompanyData(oldCompanyRef);
+        // Luego eliminar el documento principal
+        await deleteDoc(oldCompanyRef);
+        console.log("Instancia antigua de Impulsalicante eliminada");
+      }
+    } catch (error) {
+      console.error("Error al eliminar instancia antigua:", error);
+      // Continuamos de todas formas
+    }
+    
+    // Crear/actualizar la instancia global
+    const companyRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID);
+    const companyDoc = await getDoc(companyRef);
+    
+    if (!companyDoc.exists()) {
+      // Crear documento para la empresa global
+      await setDoc(companyRef, {
+        name: "Impulsalicante Global",
+        createdAt: new Date().toISOString(),
+        isGlobal: true
+      });
+      
+      // Crear documento inicial para el formulario
+      const formDataRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, FORM_DATA_COLLECTION, "mainForm");
+      await setDoc(formDataRef, {
+        "portada-titulo": "MEMORIA<br>DE ACTIVIDAD",
+        "portada-year": "20<span class=\"year-highlight\">25</span>",
+        "portada-year-highlight": "25",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      console.log("⭐ Instancia global de Impulsalicante creada correctamente");
+    } else {
+      // Actualizar para marcarla como global
+      await updateDoc(companyRef, {
+        isGlobal: true,
+        updatedAt: new Date().toISOString()
+      });
+      console.log("⭐ Instancia global de Impulsalicante actualizada");
+    }
+    
     return true;
   } catch (error) {
-    console.error("Error verificando empresa:", error);
-    return true; // Para desarrollo, forzamos que sí
+    console.error("Error creando instancia global:", error);
+    return false;
+  }
+}
+
+/**
+ * Elimina todas las subcolecciones y documentos de una empresa
+ * @param {DocumentReference} companyRef - Referencia al documento de la empresa
+ */
+async function deleteCompanyData(companyRef) {
+  try {
+    // Eliminar subcolección de imágenes
+    const imagesRef = collection(companyRef, IMAGES_COLLECTION);
+    const imagesSnapshot = await getDocs(imagesRef);
+    
+    const imageDeletePromises = imagesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(imageDeletePromises);
+    
+    // Eliminar subcolección de datos de formulario
+    const formDataRef = collection(companyRef, FORM_DATA_COLLECTION);
+    const formDataSnapshot = await getDocs(formDataRef);
+    
+    const formDataDeletePromises = formDataSnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(formDataDeletePromises);
+    
+    console.log("Subcolecciones eliminadas correctamente");
+  } catch (error) {
+    console.error("Error eliminando subcolecciones:", error);
+    throw error;
   }
 }
 
@@ -56,6 +140,7 @@ async function loadSharedImages() {
       images[imageId] = imageData.base64Data;
     });
     
+    console.log(`Cargadas ${Object.keys(images).length} imágenes desde Firestore para la instancia global`);
     return images;
   } catch (error) {
     console.error("Error cargando imágenes compartidas:", error);
@@ -85,7 +170,7 @@ async function saveSharedImage(imageId, base64Data) {
       updatedAt: new Date().toISOString()
     });
     
-    console.log(`Imagen ${imageId} guardada en Firebase`);
+    console.log(`Imagen ${imageId} guardada en Firebase para instancia global`);
     return true;
   } catch (error) {
     console.error("Error guardando imagen compartida:", error);
@@ -111,6 +196,7 @@ async function loadSharedFormData() {
     const docSnap = await getDoc(formDataRef);
     
     if (docSnap.exists()) {
+      console.log("Datos de formulario cargados desde Firestore para instancia global");
       return docSnap.data();
     }
     
@@ -157,7 +243,7 @@ async function saveSharedFormField(fieldId, value) {
       });
     }
     
-    console.log(`Campo ${fieldId} guardado en Firebase`);
+    console.log(`Campo ${fieldId} guardado en Firebase para instancia global`);
     return true;
   } catch (error) {
     console.error("Error guardando campo compartido:", error);
@@ -181,6 +267,7 @@ function subscribeToSharedData(callback) {
     const unsubscribe = onSnapshot(formDataRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
+        console.log("📱 Cambio detectado en formulario de instancia global");
         
         // Para cada campo, notificar el cambio
         Object.entries(data).forEach(([fieldId, value]) => {
@@ -205,6 +292,8 @@ function subscribeToSharedData(callback) {
         if (change.type === "added" || change.type === "modified") {
           const imageId = change.doc.id;
           const imageData = change.doc.data();
+          
+          console.log(`📱 Cambio detectado en imagen ${imageId} de instancia global`);
           
           // Notificar el cambio de imagen
           callback({ 
@@ -235,35 +324,17 @@ function subscribeToSharedData(callback) {
  */
 async function initializeDatabase() {
   try {
-    // Verificar si ya existe el documento de la empresa
-    const companyRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID);
-    const companyDoc = await getDoc(companyRef);
-    
-    if (!companyDoc.exists()) {
-      // Crear documento para la empresa
-      await setDoc(companyRef, {
-        name: "Impulsalicante",
-        createdAt: new Date().toISOString()
-      });
-      
-      // Crear documento inicial para el formulario
-      const formDataRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, FORM_DATA_COLLECTION, "mainForm");
-      await setDoc(formDataRef, {
-        "portada-titulo": "MEMORIA<br>DE ACTIVIDAD",
-        "portada-year": "20<span class=\"year-highlight\">25</span>",
-        "portada-year-highlight": "25",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-      
-      console.log("Base de datos inicializada para Impulsalicante");
-    }
+    // Forzar la creación de la instancia global
+    await forceGlobalImpulsalicante();
   } catch (error) {
     console.error("Error inicializando base de datos:", error);
   }
 }
 
-// Función para limpiar el almacenamiento si es necesario
+/**
+ * Función para limpiar el almacenamiento si es necesario
+ * @returns {Promise<boolean>} - True si se limpió correctamente
+ */
 async function resetSharedStorage() {
   try {
     const isImpulsalicanteCompany = await isImpulsalicante();
@@ -289,7 +360,7 @@ async function resetSharedStorage() {
       updatedAt: new Date().toISOString()
     });
     
-    console.log("Almacenamiento compartido reiniciado en Firebase");
+    console.log("Almacenamiento compartido reiniciado en Firebase para instancia global");
     return true;
   } catch (error) {
     console.error("Error al reiniciar almacenamiento:", error);
@@ -307,5 +378,6 @@ export {
   loadSharedFormData, 
   saveSharedFormField,
   subscribeToSharedData,
-  resetSharedStorage
+  resetSharedStorage,
+  forceGlobalImpulsalicante // Exportamos la función para uso directo
 }; 
