@@ -377,9 +377,9 @@ button.noselect:hover .text {
 
 /* Añadir estilos específicos para las animaciones */
 .company-card {
-  transform: translateY(50px);
-  opacity: 0;
-  transition: transform 0.8s ease, opacity 0.8s ease, box-shadow 0.3s ease;
+  transform: translateY(20px);
+  opacity: 0.2;
+  transition: transform 0.4s ease-out, opacity 0.4s ease-out, box-shadow 0.3s ease;
 }
 
 .company-card.animate-in {
@@ -387,46 +387,47 @@ button.noselect:hover .text {
   opacity: 1;
 }
 
-/* Efecto para tarjetas cuando estén en estado animado */
+/* Reducir la intensidad de los efectos de pulsación */
 .form-card:nth-child(odd).animate-in {
-  animation: pulseCardOdd 3s infinite ease-in-out;
-  animation-delay: 1s;
+  animation: pulseCardOdd 5s ease-in-out;
+  animation-delay: 0.5s;
 }
 
 .form-card:nth-child(even).animate-in {
-  animation: pulseCardEven 3s infinite ease-in-out;
-  animation-delay: 1.5s;
+  animation: pulseCardEven 5s ease-in-out;
+  animation-delay: 0.75s;
 }
 
 @keyframes pulseCardOdd {
   0%, 100% {
-    box-shadow: 0 8px 16px rgba(156, 39, 176, 0.2);
+    box-shadow: 0 4px 8px rgba(156, 39, 176, 0.1);
   }
   50% {
-    box-shadow: 0 10px 20px rgba(156, 39, 176, 0.4);
+    box-shadow: 0 6px 12px rgba(156, 39, 176, 0.2);
   }
 }
 
 @keyframes pulseCardEven {
   0%, 100% {
-    box-shadow: 0 8px 16px rgba(233, 30, 99, 0.2);
+    box-shadow: 0 4px 8px rgba(233, 30, 99, 0.1);
   }
   50% {
-    box-shadow: 0 10px 20px rgba(233, 30, 99, 0.4);
+    box-shadow: 0 6px 12px rgba(233, 30, 99, 0.2);
   }
 }
 
 /* Asegurarse de que las animaciones respetan la preferencia de movimiento reducido */
 @media (prefers-reduced-motion: reduce) {
   .company-card {
-    transform: none;
-    opacity: 1;
-    transition: none;
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
   }
   
   .form-card:nth-child(odd).animate-in,
   .form-card:nth-child(even).animate-in {
-    animation: none;
+    animation: none !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
   }
 }
 </style> 

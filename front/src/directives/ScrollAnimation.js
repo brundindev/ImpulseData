@@ -3,28 +3,29 @@ export default {
   install(app) {
     app.directive('scroll-animate', {
       mounted(el, binding) {
-        // Opciones para el Intersection Observer
+        // Opciones para el Intersection Observer - modificadas para mejorar rendimiento
         const options = {
           root: null, // viewport
           rootMargin: '0px',
-          threshold: 0.2 // Se activará cuando al menos el 20% del elemento sea visible
+          threshold: 0.05 // Se activará cuando solo el 5% del elemento sea visible (más rápido)
         };
         
         // Clase CSS que se añadirá cuando el elemento sea visible
         const animationClass = binding.value || 'animate-in';
         
-        // Delay opcional
-        const delay = binding.arg ? parseInt(binding.arg) : 0;
+        // Delay opcional (limitado para evitar bloqueos)
+        const delay = binding.arg ? Math.min(parseInt(binding.arg), 300) : 0;
         
-        // Por defecto, los elementos comienzan invisibles
+        // Por defecto, los elementos comienzan invisibles pero con opacidad no tan baja
+        // para hacer la transición más suave
         el.classList.add('scroll-animate-hidden');
         
         // Función callback para cuando el elemento es visible
         const onIntersect = (entries, observer) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              // Si se especificó un delay, aplicarlo
-              if (delay) {
+              // Agregar clase inmediatamente para evitar bloqueos en scroll rápido
+              if (delay && delay > 0) {
                 setTimeout(() => {
                   el.classList.add(animationClass);
                 }, delay);
@@ -37,7 +38,7 @@ export default {
           });
         };
         
-        // Crear el observer
+        // Crear el observer con opciones de rendimiento mejoradas
         const observer = new IntersectionObserver(onIntersect, options);
         
         // Comenzar a observar el elemento

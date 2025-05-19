@@ -6,7 +6,7 @@
     </div>
     <div class="action-buttons" v-scroll-animate:200="'animate-right'">
       <button @click="$emit('create-company')" class="btn btn-primary btn-create">
-        <span class="icon">+</span> Crear empresa
+        <span class="icon">+</span> Crear entidad
       </button>
       <button 
         type="button" 
@@ -16,7 +16,7 @@
       >
         <span class="icon">↓</span>
         <span v-if="importando">Importando...</span>
-        <span v-else>Importar Empresas</span>
+        <span v-else>Importar entidad</span>
       </button>
       <input 
         ref="fileInput"

@@ -26,6 +26,12 @@ const html = `<!DOCTYPE html>
   --color-marketing: #64D2FF; /* Azul claro Apple */
   --color-default-section: #8E8E93; /* Gris Apple */
   
+  /* Nuevos colores para la portada moderna */
+  --portada-gradient-1: #3a7bd5;
+  --portada-gradient-2: #00d2ff;
+  --portada-accent: #FFCC00;
+  --portada-text: #ffffff;
+  
   /* Márgenes fijos para todas las páginas */
   --margin-top: 30mm;
   --margin-bottom: 30mm;
@@ -570,55 +576,158 @@ tbody tr:hover { background-color: #F0F0F2; }
 }
 .full-width { width: 100%; max-width: 100%; }
 
-/* Portada */
+/* Portada - Diseño modernizado */
 #portada {
-    background: linear-gradient(135deg, #0066CC, #5AC8FA); /* Degradado al estilo Apple */
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--portada-gradient-1), var(--portada-gradient-2));
+    color: var(--portada-text);
     text-align: center;
-    padding: 60px 20px; /* Más padding vertical */
-    border-radius: 12px 12px 0 0;
+    padding: 80px 20px; /* Más padding vertical */
+    border-radius: 0;
     margin: -30px -40px 40px -40px;
-    box-shadow: 0 10px 20px rgba(0, 102, 204, 0.1); /* Sombra sutil */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
 }
-#portada .portada-content { padding: 0; }
+
+/* Efecto de círculos decorativos en el fondo */
+#portada:before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 1;
+}
+
+#portada:after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: -80px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    z-index: 1;
+}
+
+#portada .portada-content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
 #portada h1 { 
-    color: #ffffff;
-    font-size: 3.2em;
-    line-height: 1.1;
-    margin: 20px 0;
-    border: none;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-}
-#portada .year { 
-    font-size: 6.5em;
-    font-weight: 700;
-    color: #ffffff;
-    margin: 10px 0 30px 0;
+    color: var(--portada-text);
+    font-size: 3.8em;
     line-height: 1;
-    letter-spacing: -0.04em;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-#portada .year-highlight { 
-    color: #FFCC00; /* Amarillo Apple */
+    margin: 30px 0 10px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
     position: relative;
 }
-#portada .logos-portada-top, #portada .logos-portada-bottom { 
-    margin-bottom: 25px;
+
+#portada h1:after {
+    content: '';
+    display: block;
+    width: 100px;
+    height: 4px;
+    background: var(--portada-accent);
+    margin: 25px auto 30px;
+    border-radius: 2px;
+}
+
+#portada .year { 
+    font-size: 7em;
+    font-weight: 800;
+    color: var(--portada-text);
+    margin: 20px 0 40px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(90deg, rgba(255,255,255,1) 30%, rgba(255,204,0,1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    display: inline-block;
+}
+
+#portada .year:after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#portada .year-highlight { 
+    color: var(--portada-accent);
+    position: relative;
+    display: inline-block;
+    -webkit-text-fill-color: var(--portada-accent);
+}
+
+/* Contenedores de logos modernizados */
+#portada .logos-portada-top { 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+#portada .logos-portada-top:after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#portada .logos-portada-bottom {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 25px;
+    margin-top: 10px;
+    padding-top: 20px;
 }
+
+/* Estilo para los logos individuales */
+#portada .logos-portada-top img,
 #portada .logos-portada-bottom img { 
-    filter: brightness(0) invert(1);
-    opacity: 0.9;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    filter: brightness(1.05);
+    max-height: 65px;
+    width: auto;
 }
+
+#portada .logos-portada-top img {
+    max-height: 80px;
+}
+
+#portada .logos-portada-top img:hover,
 #portada .logos-portada-bottom img:hover {
-    opacity: 1;
-    transform: scale(1.05);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.25);
 }
 
 .center-content { text-align: center; }
@@ -1108,20 +1217,20 @@ tbody tr:nth-child(even) {
         <section id="portada" class="page section-portada">
             <div class="portada-content">
                 <div class="logos-portada-top">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAADFUlEQVR4nHVUTUhjVxQ+L2ZiiJnEGCVqaWzS2lS0o60/2EJbSqF1ioJQKAUXdlGKQnFRsBulLkQQXHQj4kJciMWFi7pwIVLqoou6KIgVFDQRkxiN5r03mpc3L9/pCWPHRnrgcH/Oub/nnnt+VHieB41GA+x2O9TrdajX62QRCAQUFZH6Pp9PaLVagAooQhAAMIvFQoOh0WhktFptoVqtGkulUs/JycnLm5ubgSyiU8Tj8Q9arfZnEbnk9XrPIpFIbm9vD4xGo2Q2m2V0fnh4qHe73Vc8z99JJBKKTCajR7nkcDhkzPd2d3eFbDar12g0t7QIY4rH43GlUCiMLpdr4Wko9Pb09DSSTCa93d3ddCQIAmiEh3a7/S4QCPxQrVZ3o9HoNxcXF6+XlpZ2CVQB1ul0wsrKSpFUVigURoPBIHR0dFC5ymOq1+v9qXN1dfUjLKEfV1dXv8VnSi0Wi/xsNmsaGBjQTk9P/4SHk7FYTL+5ucnm83nFZrN9gKDvYGkewZfJZEgPD3Ug6eLi4m/I2c+Li4vfUw4V9Bt5AUGvr6+/R/ZMZ2dnyqvV6uft7e3Fvb29B3w+JRrJ0tLSn2dnZ2OlUolNeL3eX5aXl3/DdR8vLCx8vbW19eLW1pYRVUDgsvDo6Oh7ZDlSLBYZr9f7dTabfR4Oh6HZbA4PDw8/wHzR6/XKWCxm6Ow0TuTx8TGtra2N4vPrLpfrevzp/8/Ozv4SDAbfxuPxt4PB4Lf4fM1ms0nokDAZ5SSTyYTJyclvCACnXOHzee3p/Twe+F2mh4eHBxQ0NTU1EQqFvhwbG/uSDhkfH/9ieHj4c3oGXF1dAZ5H16enpxO0Z25u7v3Z2dmP0BrPlUqlEWxTWFhYeJGsQlFPcTEIRVbHORljXq+3ijFKvV7v6OrqSo+OjobOz8+VUCiUQ29S2ICLaJRyxWJRDwaDn2HT38KFtc3NzedoSR91tNGKE3uYTCY5HA7rlUrF3NfXV2AYBiKRSAeDEwg4qIEkQPAOmrSn0WhMYBffW15e/ufPYZFRBm1EnUZZI+IHJAJQw9Q9/QUAAAAASUVORK5CYII=" alt="Logo Impulsalicante" class="image-placeholder logo" style="width: 200px; height: 80px;"/>
-                    <img src="https://i.imgur.com/jYUY0vE.jpeg" alt="Logo Ayuntamiento de Alicante" class="image-placeholder logo" style="width: 150px; height: 70px;"/>
-          </div>
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAADFUlEQVR4nHVUTUhjVxQ+L2ZiiJnEGCVqaWzS2lS0o60/2EJbSqF1ioJQKAUXdlGKQnFRsBulLkQQXHQj4kJciMWFi7pwIVLqoou6KIgVFDQRkxiN5r03mpc3L9/pCWPHRnrgcH/Oub/nnnt+VHieB41GA+x2O9TrdajX62QRCAQUFZH6Pp9PaLVagAooQhAAMIvFQoOh0WhktFptoVqtGkulUs/JycnLm5ubgSyiU8Tj8Q9arfZnEbnk9XrPIpFIbm9vD4xGo2Q2m2V0fnh4qHe73Vc8z99JJBKKTCajR7nkcDhkzPd2d3eFbDar12g0t7QIY4rH43GlUCiMLpdr4Wko9Pb09DSSTCa93d3ddCQIAmiEh3a7/S4QCPxQrVZ3o9HoNxcXF6+XlpZ2CVQB1ul0wsrKSpFUVigURoPBIHR0dFC5ymOq1+v9qXN1dfUjLKEfV1dXv8VnSi0Wi/xsNmsaGBjQTk9P/4SHk7FYTL+5ucnm83nFZrN9gKDvYGkewZfJZEgPD3Ug6eLi4m/I2c+Li4vfUw4V9Bt5AUGvr6+/R/ZMZ2dnyqvV6uft7e3Fvb29B3w+JRrJ0tLSn2dnZ2OlUolNeL3eX5aXl3/DdR8vLCx8vbW19eLW1pYRVUDgsvDo6Oh7ZDlSLBYZr9f7dTabfR4Oh6HZbA4PDw8/wHzR6/XKWCxm6Ow0TuTx8TGtra2N4vPrLpfrevzp/8/Ozv4SDAbfxuPxt4PB4Lf4fM1ms0nokDAZ5SSTyYTJyclvCACnXOHzee3p/Twe+F2mh4eHBxQ0NTU1EQqFvhwbG/uSDhkfH/9ieHj4c3oGXF1dAZ5H16enpxO0Z25u7v3Z2dmP0BrPlUqlEWxTWFhYeJGsQlFPcTEIRVbHORljXq+3ijFKvV7v6OrqSo+OjobOz8+VUCiUQ29S2ICLaJRyxWJRDwaDn2HT38KFtc3NzedoSR91tNGKE3uYTCY5HA7rlUrF3NfXV2AYBiKRSAeDEwg4qIEkQPAOmrSn0WhMYBffW15e/ufPYZFRBm1EnUZZI+IHJAJQw9Q9/QUAAAAASUVORK5CYII=" alt="Logo Impulsalicante" class="image-placeholder logo selectable-image" data-image-id="logo-top-1" style="width: auto; height: 80px;"/>
+                    <img src="https://i.imgur.com/jYUY0vE.jpeg" alt="Logo Ayuntamiento de Alicante" class="image-placeholder logo selectable-image" data-image-id="logo-top-2" style="width: auto; height: 80px;"/>
+                </div>
                 <h1>MEMORIA<br>DE ACTIVIDAD</h1>
                 <div class="year">20<span class="year-highlight">25</span></div>
                 <div class="logos-portada-bottom">
-                     <img src="" alt="Logo Observatorio" class="image-placeholder logo-small" style="width: 90px; height: 45px;">
-                    <img src="" alt="Logo Pacto Alicante" class="image-placeholder logo-small" style="width: 90px; height: 45px;">
-                    <img src="" alt="Logo GVA" class="image-placeholder logo-small" style="width: 90px; height: 45px;">
-                    <img src="" alt="Logo Labora" class="image-placeholder logo-small" style="width: 90px; height: 45px;">
-                    <img src="" alt="Logo Ministerio" class="image-placeholder logo-small" style="width: 90px; height: 45px;">
-                    <img src="" alt="Logo SEPE" class="image-placeholder logo-small" style="width: 70px; height: 35px;">
-              </div>
-          </div>
+                    <img src="" alt="Logo 1" class="image-placeholder logo-small selectable-image" data-image-id="logo-bottom-1" style="width: auto; height: 55px;">
+                    <img src="" alt="Logo 2" class="image-placeholder logo-small selectable-image" data-image-id="logo-bottom-2" style="width: auto; height: 55px;">
+                    <img src="" alt="Logo 3" class="image-placeholder logo-small selectable-image" data-image-id="logo-bottom-3" style="width: auto; height: 55px;">
+                    <img src="" alt="Logo 4" class="image-placeholder logo-small selectable-image" data-image-id="logo-bottom-4" style="width: auto; height: 55px;">
+                    <img src="" alt="Logo 5" class="image-placeholder logo-small selectable-image" data-image-id="logo-bottom-5" style="width: auto; height: 55px;">
+                    <img src="" alt="Logo 6" class="image-placeholder logo-small selectable-image" data-image-id="logo-bottom-6" style="width: auto; height: 55px;">
+                </div>
+            </div>
         </section>
 
         <div class="pagebreak"></div>
@@ -2017,6 +2126,9 @@ tbody tr:nth-child(even) {
     </body>
 </html>`
 
+// Importar el servicio de almacenamiento compartido
+import { loadSharedImages, saveSharedImage, isImpulsalicante } from './sharedStorage';
+
 // Función auxiliar para crear la plantilla HTML con el contenido personalizado
 export async function crearPlantillaPDF() {
     try {
@@ -2032,25 +2144,41 @@ export async function crearPlantillaPDF() {
         // Crear un placeholder base64 para que las imágenes se muestren
         const placeholderImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAyCAYAAACqNX6+AAAACXBIWXMAAAsTAAALEwEAmpwYAAAEOklEQVR4nO2cW27bMBCGp4/tqkBOIJ+gQBYoeoKgJ0ib9LHICdKcoMgJmhO06QnSnCDNCdrnAn1q0RMUaFFUHiRbHJJDUpTlhUX9AwZsLNnk/OTMcGZIhyASiUQikUgkEolEIpFIJBIJGQC3AewA+ExEFRHVeATnOwBeArhTluUrpZRCYMqyxPl85iTG87wvRVG8BvDQNAullDiV1lpXSu2I6BOAt7Zt22GapnUQBOcAbpmmWRVF8SMIgg8AntByJ87X67XUdd3wOF8sFnA9DMPwptPpewBvbJ9xPp9Dr74Z3/fb0+lUl2UJ9r+UUsi9RpIkCIKgZbquqyiKQoQwRkEQFGEYVnEcV2w8Ho8ZNKSvubdwbNu2V2maXs9msz7nQRB8DcOwStO0SpKkbttW7eJFmmYvgzRNw/d9HXM+m80wHo8RRVH3dxiGKIpiy9jsMHEcFy7P7JthmiYejwej6aNlU8AZx1GD5yYZZ/oZTbmxyzXbtgMAK+YSAJ9d181cAq5WK+R5jrqudcZ93zdKszzvvM/zHEopY64cDAZ6jTzPUVUVkiS5fq7neTfcn5vNJhaLBZIkQZqmOtRxcUzT1BhKoijq5tJsNkMYhtfWjeO4832e57Bt276vj9bzDMNQuLYoCtR1jfl83pnb8zydmPM818/jue99jPP5HGVZGkGaptVoNMJ0OsVkMukSfxAE2rtc+2dZpkE+nU4Nj+TCnKbptQewx7Ixf5bCNrZarYxnHEKAKIrqXc/uDftbfZ2/1+Gfv9e29dgmjdHb29Z6z+uFHFpbWVWVMWfUdd0Zwxb+8G39Lmvc1qvfFw67lWmaOmx1eOHN3/D4tv2Mvu+39/X8IYRbzDRtbP/sMmzbNnrP42LNZKIoCjFYE1qWpXMYyPNcex7P8ZozGAwwHA61l7TZF7WKQ0N7XVmWsG0bWutdszyluztN0yBJEjx6Bq7VYV0FjhXGLr7BVWy+7/J1vqZpGq5Xw3VdreVf+UJR6z4nk8lRnmDbtl4D1zE7RJvN5ufKWblc7lu/0xxZlv242Gw2Z7VWL9brNd4DuNh33fF4/LFt20daa6SXl/h0B0CWZZfX/ZjF9/0zz/POLcu6hcNNWqc+1ut1q5TaAri8q/HiOP7ouq5mE4bhrWVZr3dd53neudZ6DeDxnzbnE631h9VqhbeMw3AThqH2CsZdxnQ6RV8Gd5V0NptBa90J2uXlJebz+d7wF4YhkiTRibxvTsuy+o5PuOXuqxZt2z6zbdto8PaVf1mWbTrUXQqKfrXJ11xVk4aN4V1N4b7yvq+87Hv+vtptX9PXtc8xjd9Vfai27P8aR7fOl2XZjSAIHpRluX848y5clPXvvI2zzp+/ZXkL4P6h+0QikUgkEolEIpFIJBKJRCLRb9UvkR6lzA/rWkAAAAAASUVORK5CYII=';
 
+        // Verificar si estamos trabajando con Impulsalicante para cargar imágenes compartidas
+        const isImpulsalicanteCompany = await isImpulsalicante();
+        let sharedImages = {};
+        
+        if (isImpulsalicanteCompany) {
+            console.log("Trabajando con Impulsalicante - Cargando imágenes compartidas");
+            sharedImages = await loadSharedImages();
+        }
+
         // Reemplazar todas las imágenes placeholder vacías o con URLs inválidas
         // y hacer que todas las imágenes sean seleccionables
         const imagenes = tempDiv.querySelectorAll('img');
         imagenes.forEach((img, index) => {
+            const imageId = `img-${index}`;
+            
             // Añadir clases y atributos para hacer todas las imágenes seleccionables
             img.classList.add('selectable-image');
-            img.setAttribute('data-image-id', `img-${index}`);
+            img.setAttribute('data-image-id', imageId);
             img.style.cursor = 'pointer';
 
+            // Si estamos en Impulsalicante y la imagen existe en el almacenamiento compartido, usarla
+            if (isImpulsalicanteCompany && sharedImages[imageId]) {
+                console.log(`Usando imagen compartida para ${imageId}`);
+                img.src = sharedImages[imageId];
+            }
             // Si la imagen no tiene src, está vacía o intenta cargar desde localhost
             // Pero NO reemplazar imágenes que ya tienen formato base64
-            if ((!img.src ||
+            else if ((!img.src ||
                 img.src === '' ||
                 img.src === 'about:blank' ||
                 img.src.startsWith('http://localhost/') ||
                 img.src.startsWith('/')) &&
                 !img.src.startsWith('data:image')) {
 
-                console.log("Corrigiendo imagen con src:", img.src);
+                console.log(`Corrigiendo imagen con src: ${img.src}`);
                 img.src = placeholderImg;
 
                 // Asegurarnos de que no se intente cargar desde una ruta relativa
@@ -2065,6 +2193,20 @@ export async function crearPlantillaPDF() {
             img.style.opacity = "1";
             img.style.visibility = "visible";
             img.style.display = "inline-block";
+            
+            // Añadir un atributo de data para saber si la imagen está en el almacenamiento compartido
+            if (isImpulsalicanteCompany && sharedImages[imageId]) {
+                img.setAttribute('data-from-shared', 'true');
+            }
+            
+            // Añadir listener para guardar en almacenamiento compartido cuando se cambia la imagen
+            img.addEventListener('imageUpdated', async function(e) {
+                if (isImpulsalicanteCompany) {
+                    const newSrc = e.detail.newSrc;
+                    await saveSharedImage(imageId, newSrc);
+                    console.log(`Imagen ${imageId} guardada en almacenamiento compartido`);
+                }
+            });
         });
 
         // Tratamiento especial para la sección de logos en la parte inferior de la portada
