@@ -129,7 +129,6 @@ async function loadSharedImages() {
       return {}; // No es Impulsalicante, no hay imágenes compartidas
     }
     
-    // Obtener las imágenes de Firebase
     const imagesRef = collection(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID, IMAGES_COLLECTION);
     const querySnapshot = await getDocs(imagesRef);
     
