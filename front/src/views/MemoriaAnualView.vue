@@ -73,6 +73,40 @@
           </button>
         </div>
       </div>
+
+      <!-- ÁREA DE GESTIÓN -->
+      <div class="seccion-card" :class="{ 'completa': secciones.gestion.completa, 'parcial': secciones.gestion.parcial }">
+        <div class="seccion-header">
+          <h2>Área de Gestión</h2>
+          <div class="estado-indicador">
+            <span v-if="secciones.gestion.completa" class="check">✓</span>
+            <span v-else-if="secciones.gestion.parcial" class="parcial">-</span>
+          </div>
+        </div>
+        <div class="seccion-content">
+          <p>Gestión administrativa y financiera</p>
+          <button @click="abrirFormulario('gestion')" class="btn-llenar">
+            {{ secciones.gestion.completa ? 'Editar' : 'Rellenar' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- DEPARTAMENTO DE MARKETING Y COMUNICACIÓN -->
+      <div class="seccion-card" :class="{ 'completa': secciones.marketing.completa, 'parcial': secciones.marketing.parcial }">
+        <div class="seccion-header">
+          <h2>Departamento de Marketing y Comunicación</h2>
+          <div class="estado-indicador">
+            <span v-if="secciones.marketing.completa" class="check">✓</span>
+            <span v-else-if="secciones.marketing.parcial" class="parcial">-</span>
+          </div>
+        </div>
+        <div class="seccion-content">
+          <p>Marketing y estrategias de comunicación</p>
+          <button @click="abrirFormulario('marketing')" class="btn-llenar">
+            {{ secciones.marketing.completa ? 'Editar' : 'Rellenar' }}
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal de Formulario Multistep -->
@@ -157,6 +191,17 @@ import DesarrolloLocalResultados from '../components/memoria/DesarrolloLocalResu
 import DesarrolloLocalObjetivos from '../components/memoria/DesarrolloLocalObjetivos.vue';
 import DesarrolloLocalConclusiones from '../components/memoria/DesarrolloLocalConclusiones.vue';
 
+// Importar componentes de Gestión
+import GestionGeneral from '../components/memoria/GestionGeneral.vue';
+import GestionFinanciera from '../components/memoria/GestionFinanciera.vue';
+
+// Importar componentes de Marketing
+import MarketingGeneral from '../components/memoria/MarketingGeneral.vue';
+import MarketingEstrategias from '../components/memoria/MarketingEstrategias.vue';
+import MarketingResultados from '../components/memoria/MarketingResultados.vue';
+import MarketingObjetivos from '../components/memoria/MarketingObjetivos.vue';
+import MarketingConclusiones from '../components/memoria/MarketingConclusiones.vue';
+
 const router = useRouter();
 
 // Estado de las secciones
@@ -164,7 +209,9 @@ const secciones = ref({
   agenciaLocal: { completa: false, parcial: false },
   empleoFormacion: { completa: false, parcial: false },
   promocionEconomica: { completa: false, parcial: false },
-  desarrolloLocal: { completa: false, parcial: false }
+  desarrolloLocal: { completa: false, parcial: false },
+  gestion: { completa: false, parcial: false },
+  marketing: { completa: false, parcial: false }
 });
 
 // Estado del formulario
@@ -179,45 +226,64 @@ const tituloFormulario = computed(() => {
     agenciaLocal: 'Agencia Local',
     empleoFormacion: 'Departamento de Empleo y Formación',
     promocionEconomica: 'Departamento de Promoción Económica',
-    desarrolloLocal: 'Programas de Desarrollo Local Estratégico'
+    desarrolloLocal: 'Programas de Desarrollo Local Estratégico',
+    gestion: 'Área de Gestión',
+    marketing: 'Departamento de Marketing y Comunicación'
   };
   return titulos[seccionActual.value] || '';
 });
 
 // Pasos del formulario actual
 const pasosActuales = computed(() => {
-  const pasos = {
-    agenciaLocal: [
-      { titulo: 'LA AGENCIA LOCAL EN CIFRAS', componente: AgenciaLocalGeneral },
-      { titulo: 'Qué hacemos', componente: AgenciaLocalQueHacemos },
-      { titulo: 'CÓMO ESTAMOS ORGANIZADOS', componente: AgenciaLocalEstructura },
-      { titulo: 'Dónde estamos', componente: AgenciaLocalSedes }
-    ],
-    empleoFormacion: [
-      { titulo: 'Programas de Empleo', componente: EmpleoFormacionProgramas },
-      { titulo: 'Formación', componente: EmpleoFormacionFormacion },
-      { titulo: 'Estadísticas', componente: EmpleoFormacionEstadisticas },
-      { titulo: 'Objetivos', componente: EmpleoFormacionObjetivos },
-      { titulo: 'Conclusiones', componente: EmpleoFormacionConclusiones },
-      { titulo: 'Anexos', componente: EmpleoFormacionAnexos }
-    ],
-    promocionEconomica: [
-      { titulo: 'Información General', componente: PromocionEconomicaGeneral },
-      { titulo: 'Programas y Proyectos', componente: PromocionEconomicaProgramas },
-      { titulo: 'Empresas y Emprendedores', componente: PromocionEconomicaEmpresas },
-      { titulo: 'Resultados', componente: PromocionEconomicaResultados },
-      { titulo: 'Objetivos', componente: PromocionEconomicaObjetivos },
-      { titulo: 'Conclusiones', componente: PromocionEconomicaConclusiones }
-    ],
-    desarrolloLocal: [
-      { titulo: 'Información General', componente: DesarrolloLocalGeneral },
-      { titulo: 'Programas Estratégicos', componente: DesarrolloLocalProgramas },
-      { titulo: 'Resultados', componente: DesarrolloLocalResultados },
-      { titulo: 'Objetivos', componente: DesarrolloLocalObjetivos },
-      { titulo: 'Conclusiones', componente: DesarrolloLocalConclusiones }
-    ]
-  };
-  return pasos[seccionActual.value] || [];
+  switch (seccionActual.value) {
+    case 'agenciaLocal':
+      return [
+        { titulo: 'LA AGENCIA LOCAL EN CIFRAS', componente: AgenciaLocalGeneral },
+        { titulo: 'Qué hacemos', componente: AgenciaLocalQueHacemos },
+        { titulo: 'CÓMO ESTAMOS ORGANIZADOS', componente: AgenciaLocalEstructura },
+        { titulo: 'Dónde estamos', componente: AgenciaLocalSedes }
+      ];
+    case 'empleoFormacion':
+      return [
+        { titulo: 'Programas de Empleo', componente: EmpleoFormacionProgramas },
+        { titulo: 'Formación', componente: EmpleoFormacionFormacion },
+        { titulo: 'Estadísticas', componente: EmpleoFormacionEstadisticas },
+        { titulo: 'Objetivos', componente: EmpleoFormacionObjetivos },
+        { titulo: 'Conclusiones', componente: EmpleoFormacionConclusiones },
+        { titulo: 'Anexos', componente: EmpleoFormacionAnexos }
+      ];
+    case 'promocionEconomica':
+      return [
+        { titulo: 'Información General', componente: PromocionEconomicaGeneral },
+        { titulo: 'Programas y Proyectos', componente: PromocionEconomicaProgramas },
+        { titulo: 'Empresas y Emprendedores', componente: PromocionEconomicaEmpresas },
+        { titulo: 'Resultados', componente: PromocionEconomicaResultados },
+        { titulo: 'Objetivos', componente: PromocionEconomicaObjetivos },
+        { titulo: 'Conclusiones', componente: PromocionEconomicaConclusiones }
+      ];
+    case 'desarrolloLocal':
+      return [
+        { titulo: 'Información General', componente: DesarrolloLocalGeneral },
+        { titulo: 'Programas Estratégicos', componente: DesarrolloLocalProgramas },
+        { titulo: 'Resultados', componente: DesarrolloLocalResultados },
+        { titulo: 'Objetivos', componente: DesarrolloLocalObjetivos },
+        { titulo: 'Conclusiones', componente: DesarrolloLocalConclusiones }
+      ];
+    case 'gestion':
+      return [
+        { titulo: 'Información General', componente: GestionGeneral },
+        { titulo: 'Gestión Financiera', componente: GestionFinanciera }
+      ];
+    case 'marketing':
+      return [
+        { titulo: 'Información General', componente: MarketingGeneral },
+        { titulo: 'Estrategias', componente: MarketingEstrategias },
+        { titulo: 'Resultados', componente: MarketingResultados },
+        { titulo: 'Objetivos', componente: MarketingObjetivos }
+      ];
+    default:
+      return [];
+  }
 });
 
 // Funciones
