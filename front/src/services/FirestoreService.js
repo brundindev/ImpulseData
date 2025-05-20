@@ -32,6 +32,7 @@ const EMPRESA_POR_DEFECTO = {
   ],
   // Metadatos adicionales
   esEmpresaPorDefecto: true,
+  esEmpresaGlobal: true,
   fechaCreacionSistema: new Date().toISOString(),
   numDepartamentos: 3,
   numCentros: 2,
@@ -139,14 +140,13 @@ class FirestoreService {
         return null;
       }
       
-      console.log("Verificando si ya existe la empresa por defecto para:", user.email);
+      console.log("Verificando si ya existe la empresa global de Impulsalicante");
       
-      // Verificar si ya existe la empresa por defecto para este usuario
+      // Verificar si ya existe la empresa global
       const empresasRef = collection(db, "empresas");
       const q = query(
         empresasRef,
-        where("creadoPor", "==", user.uid),
-        where("esEmpresaPorDefecto", "==", true)
+        where("esEmpresaGlobal", "==", true)
       );
       
       const querySnapshot = await getDocs(q);
@@ -154,29 +154,26 @@ class FirestoreService {
       // Si ya existe, retornar su ID
       if (!querySnapshot.empty) {
         const existingDoc = querySnapshot.docs[0];
-        console.log("La empresa por defecto ya existe con ID:", existingDoc.id);
+        console.log("La empresa global ya existe con ID:", existingDoc.id);
         return existingDoc.id;
       }
       
-      // Si no existe, crear la empresa por defecto
-      console.log("Creando empresa por defecto para:", user.email);
-      const empresaDoc = doc(empresasRef);
-      const empresaId = empresaDoc.id;
+      // Si no existe, crear la empresa global
+      console.log("Creando empresa global de Impulsalicante");
+      const empresaDoc = doc(empresasRef, EMPRESA_POR_DEFECTO.id);
       
-      // Preparar datos de la empresa por defecto con el ID y usuario actual
+      // Preparar datos de la empresa global
       const empresaData = {
         ...EMPRESA_POR_DEFECTO,
-        id: empresaId,
-        nombre: "Impulsalicante",
         creadoPor: user.uid,
         creadorEmail: user.email,
         fechaCreacionSistema: new Date().toISOString(),
-        esEmpresaPorDefecto: true
+        esEmpresaGlobal: true
       };
       
-      // Guardar la empresa por defecto
+      // Guardar la empresa global
       await setDoc(empresaDoc, empresaData);
-      console.log("✅ Empresa por defecto creada con ID:", empresaId);
+      console.log("✅ Empresa global creada con ID:", empresaDoc.id);
       
       // Crear departamentos
       for (const depto of EMPRESA_POR_DEFECTO.departamentos) {
@@ -211,10 +208,10 @@ class FirestoreService {
         });
       }
       
-      console.log("✅ Todos los datos de la empresa por defecto creados correctamente");
-      return empresaId;
+      console.log("✅ Todos los datos de la empresa global creados correctamente");
+      return empresaDoc.id;
     } catch (error) {
-      console.error("Error al crear empresa por defecto:", error);
+      console.error("Error al crear empresa global:", error);
       return null;
     }
   }
@@ -268,183 +265,83 @@ class FirestoreService {
    */
   static async obtenerEmpresas() {
     try {
-      // Verificar si hay usuario autenticado
-      let user = auth.currentUser;
-      
-      // Si no hay usuario pero hay token JWT y UID almacenado, intentar usar el UID directamente
-      if (!user) {
-        console.warn("No hay usuario de Firebase en obtenerEmpresas, verificando alternativas");
-        const jwtToken = localStorage.getItem('authToken');
-        const storedUid = sessionStorage.getItem('firebaseUid');
-        
-        if (jwtToken && storedUid) {
-          
-          try {
-            // Primera consulta: verificar y obtener la colección de empresas usando el UID almacenado
-            const empresasRef = collection(db, "empresas");
-            
-            // Asegurar que estamos filtrando por el UID almacenado
-            const q = query(
-              empresasRef, 
-              where("creadoPor", "==", storedUid)
-            );
-            
-            const querySnapshot = await getDocs(q);
-            console.log(`Consulta completada usando UID almacenado. Documentos encontrados: ${querySnapshot.size}`);
-            
-            if (querySnapshot.size > 0) {
-              const empresas = [];
-              const empresasIds = [];
-              
-              // Filtrar estrictamente los documentos que pertenecen al usuario
-              for (const empresaDoc of querySnapshot.docs) {
-                const data = empresaDoc.data();
-                
-                if (data.creadoPor === storedUid) {
-                  console.log(`Empresa encontrada: ${data.nombre} (ID: ${empresaDoc.id}) - Creada por: ${data.creadoPor}`);
-                  
-                  // Verificar si ya hemos procesado esta empresa (evitar duplicados)
-                  if (empresasIds.includes(empresaDoc.id)) {
-                    console.warn(`Empresa duplicada detectada y omitida: ${empresaDoc.id}`);
-                    continue;
-                  }
-                  
-                  empresasIds.push(empresaDoc.id);
-                  
-                  // Contar departamentos
-                  const depSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/departamentos`));
-                  const numDepartamentos = depSnapshot.size;
-                  
-                  // Contar centros
-                  const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/centros`));
-                  const numCentros = centrosSnapshot.size;
-                  
-                  // Contar formaciones
-                  const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/formaciones`));
-                  const numFormaciones = formacionesSnapshot.size;
-                  
-                  // Agregar empresa
-                  empresas.push({
-                    id: empresaDoc.id,
-                    ...data,
-                    fechaCreacion: data.fechaCreacion,
-                    numDepartamentos, 
-                    numCentros,
-                    numFormaciones,
-                    // Marcar explícitamente como propiedad del usuario actual
-                    perteneceAlUsuarioActual: true
-                  });
-                }
-              }
-              
-              // Añadir la empresa por defecto al inicio del arreglo
-              empresas.unshift({...EMPRESA_POR_DEFECTO, perteneceAlUsuarioActual: true});
-              
-              return empresas;
-            } else {
-              console.log("No se encontraron empresas usando el UID almacenado");
-              // Retornar solo la empresa por defecto si no hay otras
-              return [{ ...EMPRESA_POR_DEFECTO, perteneceAlUsuarioActual: true }];
-            }
-          } catch (error) {
-            console.error("Error al intentar obtener empresas usando UID almacenado:", error);
-          }
-          
-          // Si llegamos aquí, falló el intento con UID almacenado, intentar recuperar la sesión
-          try {
-            // Importar FirebaseAuthService para usar reautenticar
-            const FirebaseAuthService = await import('./FirebaseAuthService').then(module => module.default);
-            await FirebaseAuthService.reautenticar();
-            
-            // Verificar si se recuperó el usuario
-            user = auth.currentUser;
-            if (user) {
-              console.log("Sesión de Firebase recuperada exitosamente:", user.email);
-            } else {
-              console.warn("No se pudo recuperar sesión de Firebase tras reautenticación");
-            }
-          } catch (authError) {
-            console.error("Error al intentar recuperar sesión:", authError);
-          }
-        }
-      }
-      
-      // Si después de intentar recuperar todavía no hay usuario, retornar la empresa por defecto
+      const user = auth.currentUser;
       if (!user) {
         console.error("No hay usuario autenticado en obtenerEmpresas");
-        
-        // En lugar de fallar, retornamos la empresa por defecto
         return [{ ...EMPRESA_POR_DEFECTO, perteneceAlUsuarioActual: true }];
+      }
+
+      // Primero obtener la empresa global
+      const empresasRef = collection(db, "empresas");
+      const qGlobal = query(
+        empresasRef,
+        where("esEmpresaGlobal", "==", true)
+      );
+      
+      const querySnapshotGlobal = await getDocs(qGlobal);
+      const empresas = [];
+      
+      if (!querySnapshotGlobal.empty) {
+        const empresaGlobal = querySnapshotGlobal.docs[0];
+        const data = empresaGlobal.data();
+        
+        // Contar departamentos, centros y formaciones
+        const depSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/departamentos`));
+        const numDepartamentos = depSnapshot.size;
+        
+        const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/centros`));
+        const numCentros = centrosSnapshot.size;
+        
+        const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/formaciones`));
+        const numFormaciones = formacionesSnapshot.size;
+        
+        empresas.push({
+          id: empresaGlobal.id,
+          ...data,
+          fechaCreacion: data.fechaCreacion,
+          numDepartamentos,
+          numCentros,
+          numFormaciones,
+          perteneceAlUsuarioActual: true
+        });
+      }
+
+      // Luego obtener las empresas personales del usuario
+      const qPersonal = query(
+        empresasRef,
+        where("creadoPor", "==", user.uid),
+        where("esEmpresaGlobal", "==", false)
+      );
+      
+      const querySnapshotPersonal = await getDocs(qPersonal);
+      
+      for (const empresaDoc of querySnapshotPersonal.docs) {
+        const data = empresaDoc.data();
+        
+        // Contar departamentos, centros y formaciones
+        const depSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/departamentos`));
+        const numDepartamentos = depSnapshot.size;
+        
+        const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/centros`));
+        const numCentros = centrosSnapshot.size;
+        
+        const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/formaciones`));
+        const numFormaciones = formacionesSnapshot.size;
+        
+        empresas.push({
+          id: empresaDoc.id,
+          ...data,
+          fechaCreacion: data.fechaCreacion,
+          numDepartamentos,
+          numCentros,
+          numFormaciones,
+          perteneceAlUsuarioActual: true
+        });
       }
       
-      try {
-        // Primera consulta: verificar y obtener la colección de empresas
-        const empresasRef = collection(db, "empresas");
-        
-        // Asegurar que estamos filtrando por el usuario actual
-        const q = query(
-          empresasRef, 
-          where("creadoPor", "==", user.uid)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        
-        const empresas = [];
-        const empresasIds = [];
-        
-        // Filtrar estrictamente los documentos que pertenecen al usuario actual
-        for (const empresaDoc of querySnapshot.docs) {
-          const data = empresaDoc.data();
-          
-          if (data.creadoPor === user.uid) {
-            console.log(`Empresa encontrada: ${data.nombre} (ID: ${empresaDoc.id}) - Creada por: ${data.creadoPor}`);
-            
-            // Verificar si ya hemos procesado esta empresa (evitar duplicados)
-            if (empresasIds.includes(empresaDoc.id)) {
-              console.warn(`Empresa duplicada detectada y omitida: ${empresaDoc.id}`);
-              continue;
-            }
-            
-            empresasIds.push(empresaDoc.id);
-            
-            // Contar departamentos, centros y formaciones
-            const depSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/departamentos`));
-            const numDepartamentos = depSnapshot.size;
-            
-            const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/centros`));
-            const numCentros = centrosSnapshot.size;
-            
-            const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaDoc.id}/formaciones`));
-            const numFormaciones = formacionesSnapshot.size;
-            
-            // Agregar empresa
-            empresas.push({
-              id: empresaDoc.id,
-              ...data,
-              fechaCreacion: data.fechaCreacion,
-              numDepartamentos, 
-              numCentros,
-              numFormaciones,
-              // Marcar explícitamente como propiedad del usuario actual
-              perteneceAlUsuarioActual: true
-            });
-          }
-        }
-        
-        // Añadir la empresa por defecto al inicio del arreglo
-        empresas.unshift({...EMPRESA_POR_DEFECTO, perteneceAlUsuarioActual: true});
-        
-        return empresas;
-      } catch (error) {
-        console.error("Error al obtener empresas:", error);
-        
-        // Si hay un error, al menos retornamos la empresa por defecto
-        return [{ ...EMPRESA_POR_DEFECTO, perteneceAlUsuarioActual: true }];
-      }
+      return empresas;
     } catch (error) {
-      console.error("Error general en obtenerEmpresas:", error);
-      
-      // Si hay un error general, retornamos la empresa por defecto
+      console.error("Error al obtener empresas:", error);
       return [{ ...EMPRESA_POR_DEFECTO, perteneceAlUsuarioActual: true }];
     }
   }

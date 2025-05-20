@@ -71,6 +71,15 @@ class FirebaseAuthService {
       // Enviar correo de verificación
       await sendEmailVerification(user);
       
+      // Crear la empresa por defecto para este usuario
+      try {
+        console.log("🏢 Verificando/creando empresa global de Impulsalicante...");
+        await FirestoreService.crearEmpresaPorDefecto();
+      } catch (empresaError) {
+        console.error("Error al intentar crear empresa global:", empresaError);
+        // No bloqueamos el flujo de autenticación por este error
+      }
+      
       return user;
     } catch (error) {
       console.error('Error al registrar con Firebase:', error);
@@ -162,10 +171,10 @@ class FirebaseAuthService {
       
       // Crear la empresa por defecto para este usuario
       try {
-        console.log("🏢 Verificando/creando empresa por defecto para el usuario...");
+        console.log("🏢 Verificando/creando empresa global de Impulsalicante...");
         await FirestoreService.crearEmpresaPorDefecto();
       } catch (empresaError) {
-        console.error("Error al intentar crear empresa por defecto:", empresaError);
+        console.error("Error al intentar crear empresa global:", empresaError);
         // No bloqueamos el flujo de autenticación por este error
       }
       
@@ -286,10 +295,10 @@ class FirebaseAuthService {
       
       // Crear la empresa por defecto para este usuario
       try {
-        console.log("🏢 Verificando/creando empresa por defecto para el usuario de Google...");
+        console.log("🏢 Verificando/creando empresa global de Impulsalicante...");
         await FirestoreService.crearEmpresaPorDefecto();
       } catch (empresaError) {
-        console.error("Error al intentar crear empresa por defecto para usuario de Google:", empresaError);
+        console.error("Error al intentar crear empresa global:", empresaError);
         // No bloqueamos el flujo de autenticación por este error
       }
       
