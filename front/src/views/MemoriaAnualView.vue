@@ -192,8 +192,8 @@ import DesarrolloLocalObjetivos from '../components/memoria/DesarrolloLocalObjet
 import DesarrolloLocalConclusiones from '../components/memoria/DesarrolloLocalConclusiones.vue';
 
 // Importar componentes de Gestión
-import GestionGeneral from '../components/memoria/GestionGeneral.vue';
-import GestionFinanciera from '../components/memoria/GestionFinanciera.vue';
+import GestionAuditorio from '../components/memoria/GestionAuditorio.vue';
+import GestionJuridica from '../components/memoria/GestionJuridica.vue';
 
 // Importar componentes de Marketing
 import MarketingGeneral from '../components/memoria/MarketingGeneral.vue';
@@ -271,8 +271,8 @@ const pasosActuales = computed(() => {
       ];
     case 'gestion':
       return [
-        { titulo: 'Información General', componente: GestionGeneral },
-        { titulo: 'Gestión Financiera', componente: GestionFinanciera }
+        { titulo: 'Auditorio', componente: GestionAuditorio },
+        { titulo: 'Departamento Jurídico Administrativo', componente: GestionJuridica }
       ];
     case 'marketing':
       return [
