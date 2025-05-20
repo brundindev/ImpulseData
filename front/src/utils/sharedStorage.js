@@ -7,7 +7,7 @@ import {
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 // Constantes para identificar la empresa
-const IMPULSALICANTE_ID = "impulsalicante_global"; // Cambiado a un ID global único
+const IMPULSALICANTE_ID = "impulsalicante_global"; // ID global único para todos los usuarios
 
 // Colecciones de Firestore
 const COMPANIES_COLLECTION = "companies";
@@ -22,44 +22,33 @@ let activeListeners = [];
  * @returns {Promise<boolean>} True si está trabajando con Impulsalicante
  */
 async function isImpulsalicante() {
-  // Siempre devolvemos true y usamos la instancia global
+  // Siempre devolvemos true para trabajar con la instancia global
+  // Esto hace que todos los usuarios accederán a la misma instancia
   return true;
 }
 
 /**
- * Crea una instancia global única de Impulsalicante
+ * Crea una instancia global única de Impulsalicante si no existe
  * @returns {Promise<boolean>} True si se creó correctamente
  */
 async function forceGlobalImpulsalicante() {
   try {
-    console.log("Forzando creación de instancia global de Impulsalicante...");
+    console.log("Verificando instancia global de Impulsalicante...");
     
-    // Primero, intentar eliminar cualquier instancia antigua
-    try {
-      const oldCompanyRef = doc(db, COMPANIES_COLLECTION, "impulsalicante");
-      const oldCompanyDoc = await getDoc(oldCompanyRef);
-      if (oldCompanyDoc.exists()) {
-        // Eliminar subcolecciones primero
-        await deleteCompanyData(oldCompanyRef);
-        // Luego eliminar el documento principal
-        await deleteDoc(oldCompanyRef);
-        console.log("Instancia antigua de Impulsalicante eliminada");
-      }
-    } catch (error) {
-      console.error("Error al eliminar instancia antigua:", error);
-      // Continuamos de todas formas
-    }
-    
-    // Crear/actualizar la instancia global
+    // Verificar si ya existe la instancia global
     const companyRef = doc(db, COMPANIES_COLLECTION, IMPULSALICANTE_ID);
     const companyDoc = await getDoc(companyRef);
     
     if (!companyDoc.exists()) {
+      // No existe, crearla
+      console.log("Creando instancia global de Impulsalicante para todos los usuarios...");
+      
       // Crear documento para la empresa global
       await setDoc(companyRef, {
         name: "Impulsalicante Global",
         createdAt: new Date().toISOString(),
-        isGlobal: true
+        isGlobal: true,
+        sharedByAllUsers: true
       });
       
       // Crear documento inicial para el formulario
@@ -74,17 +63,23 @@ async function forceGlobalImpulsalicante() {
       
       console.log("⭐ Instancia global de Impulsalicante creada correctamente");
     } else {
-      // Actualizar para marcarla como global
-      await updateDoc(companyRef, {
-        isGlobal: true,
-        updatedAt: new Date().toISOString()
-      });
-      console.log("⭐ Instancia global de Impulsalicante actualizada");
+      // Ya existe, actualizar si es necesario
+      if (!companyDoc.data().sharedByAllUsers) {
+        // Actualizar para marcarla como compartida por todos
+        await updateDoc(companyRef, {
+          isGlobal: true,
+          sharedByAllUsers: true,
+          updatedAt: new Date().toISOString()
+        });
+        console.log("⭐ Instancia de Impulsalicante actualizada como global para todos");
+      } else {
+        console.log("✅ Instancia global de Impulsalicante ya existe y está disponible para todos");
+      }
     }
     
     return true;
   } catch (error) {
-    console.error("Error creando instancia global:", error);
+    console.error("Error verificando/creando instancia global:", error);
     return false;
   }
 }
@@ -323,8 +318,14 @@ function subscribeToSharedData(callback) {
  */
 async function initializeDatabase() {
   try {
-    // Forzar la creación de la instancia global
-    await forceGlobalImpulsalicante();
+    // Forzar la creación de la instancia global única para todos los usuarios
+    console.log("Inicializando la base de datos con instancia global...");
+    const result = await forceGlobalImpulsalicante();
+    if (result) {
+      console.log("✅ Base de datos inicializada con instancia global de Impulsalicante");
+    } else {
+      console.error("❌ Error al inicializar la base de datos con instancia global");
+    }
   } catch (error) {
     console.error("Error inicializando base de datos:", error);
   }
