@@ -730,12 +730,15 @@ tbody tr:hover { background-color: #F0F0F2; }
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     max-height: 65px;
-    width: auto;
+    width: auto !important; /* Forzar ancho automático */
+    height: auto !important; /* Altura automática para mantener proporción */
+    max-width: 100%; /* Asegurar que no exceda el contenedor */
     border: 1px solid rgba(11, 42, 94, 0.1); /* Borde sutil con el azul oscuro */
 }
 
 #portada .logos-portada-top img {
     max-height: 80px;
+    width: auto !important;
 }
 
 #portada .logos-portada-top img:hover,
@@ -1279,7 +1282,7 @@ tbody tr:nth-child(even) {
             <div class="portada-content">
                 <div class="logos-portada-top">
                     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAADFUlEQVR4nHVUTUhjVxQ+L2ZiiJnEGCVqaWzS2lS0o60/2EJbSqF1ioJQKAUXdlGKQnFRsBulLkQQXHQj4kJciMWFi7pwIVLqoou6KIgVFDQRkxiN5r03mpc3L9/pCWPHRnrgcH/Oub/nnnt+VHieB41GA+x2O9TrdajX62QRCAQUFZH6Pp9PaLVagAooQhAAMIvFQoOh0WhktFptoVqtGkulUs/JycnLm5ubgSyiU8Tj8Q9arfZnEbnk9XrPIpFIbm9vD4xGo2Q2m2V0fnh4qHe73Vc8z99JJBKKTCajR7nkcDhkzPd2d3eFbDar12g0t7QIY4rH43GlUCiMLpdr4Wko9Pb09DSSTCa93d3ddCQIAmiEh3a7/S4QCPxQrVZ3o9HoNxcXF6+XlpZ2CVQB1ul0wsrKSpFUVigURoPBIHR0dFC5ymOq1+v9qXN1dfUjLKEfV1dXv8VnSi0Wi/xsNmsaGBjQTk9P/4SHk7FYTL+5ucnm83nFZrN9gKDvYGkewZfJZEgPD3Ug6eLi4m/I2c+Li4vfUw4V9Bt5AUGvr6+/R/ZMZ2dnyqvV6uft7e3Fvb29B3w+JRrJ0tLSn2dnZ2OlUolNeL3eX5aXl3/DdR8vLCx8vbW19eLW1pYRVUDgsvDo6Oh7ZDlSLBYZr9f7dTabfR4Oh6HZbA4PDw8/wHzR6/XKWCxm6Ow0TuTx8TGtra2N4vPrLpfrevzp/8/Ozv4SDAbfxuPxt4PB4Lf4fM1ms0nokDAZ5SSTyYTJyclvCACnXOHzee3p/Twe+F2mh4eHBxQ0NTU1EQqFvhwbG/uSDhkfH/9ieHj4c3oGXF1dAZ5H16enpxO0Z25u7v3Z2dmP0BrPlUqlEWxTWFhYeJGsQlFPcTEIRVbHORljXq+3ijFKvV7v6OrqSo+OjobOz8+VUCiUQ29S2ICLaJRyxWJRDwaDn2HT38KFtc3NzedoSR91tNGKE3uYTCY5HA7rlUrF3NfXV2AYBiKRSAeDEwg4qIEkQPAOmrSn0WhMYBffW15e/ufPYZFRBm1EnUZZI+IHJAJQw9Q9/QUAAAAASUVORK5CYII=" alt="Logo Impulsalicante" class="image-placeholder logo selectable-image" data-image-id="logo-top-1" style="width: auto; height: 80px;"/>
-                    <img src="https://i.imgur.com/jYUY0vE.jpeg" alt="Logo Ayuntamiento de Alicante" class="image-placeholder logo selectable-image" data-image-id="logo-top-2" style="width: auto; height: 80px;"/>
+                    <img src="" alt="Logo Ayuntamiento de Alicante" class="image-placeholder logo selectable-image" data-image-id="logo-top-2" style="width: auto; height: 80px;"/>
                 </div>
                 <h1>MEMORIA<br>DE ACTIVIDAD</h1>
                 <div class="year">20<span class="year-highlight">25</span></div>
@@ -2266,6 +2269,15 @@ export async function crearPlantillaPDF() {
                     const newSrc = e.detail.newSrc;
                     await saveSharedImage(imageId, newSrc);
                     console.log(`Imagen ${imageId} guardada en almacenamiento compartido`);
+                    
+                    // Mantener propiedades responsivas después del cambio de imagen
+                    if (img.classList.contains('logo-small')) {
+                        img.style.width = "auto";
+                        img.style.height = "55px";
+                    } else if (img.classList.contains('logo')) {
+                        img.style.width = "auto";
+                        img.style.height = "80px";
+                    }
                 }
             });
         });
@@ -2279,13 +2291,15 @@ export async function crearPlantillaPDF() {
                 img.style.display = "inline-block";
                 img.style.margin = "5px 10px";
                 img.style.maxWidth = "90px";
+                img.style.width = "auto";
+                img.style.height = "55px";
                 img.style.opacity = "1";
 
                 // Añadir z-index para asegurarse de que estén por encima de otros elementos
                 img.style.position = "relative";
                 img.style.zIndex = "5";
 
-                console.log(`Ajustando imagen de logos-portada-bottom ${idx}: ${img.alt}`);
+                console.log(`Ajustando imagen responsiva de logos-portada-bottom ${idx}: ${img.alt}`);
             });
         }
 
