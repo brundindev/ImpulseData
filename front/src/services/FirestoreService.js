@@ -142,7 +142,17 @@ class FirestoreService {
       
       console.log("Verificando si ya existe la empresa global de Impulsalicante");
       
-      // Verificar si ya existe la empresa global
+      // Primero verificar si existe la empresa global con el ID específico
+      const empresaGlobalRef = doc(db, "empresas", "impulsalicante_global");
+      const empresaGlobalDoc = await getDoc(empresaGlobalRef);
+      
+      // Si existe la empresa global con el ID correcto, retornar su ID
+      if (empresaGlobalDoc.exists()) {
+        console.log("✅ La empresa global existe con el ID esperado:", empresaGlobalRef.id);
+        return empresaGlobalRef.id;
+      }
+      
+      // Como plan B, verificar si existe alguna empresa marcada como global
       const empresasRef = collection(db, "empresas");
       const q = query(
         empresasRef,
@@ -151,67 +161,22 @@ class FirestoreService {
       
       const querySnapshot = await getDocs(q);
       
-      // Si ya existe, retornar su ID
+      // Si ya existe una empresa global pero con otro ID, actualizarla
       if (!querySnapshot.empty) {
         const existingDoc = querySnapshot.docs[0];
-        console.log("La empresa global ya existe con ID:", existingDoc.id);
-        return existingDoc.id;
+        console.log("⚠️ La empresa global existe pero con otro ID:", existingDoc.id);
+        
+        // Migrar datos a la nueva ubicación con ID fijo
+        await this.crearEmpresaPorDefectoGlobal();
+        
+        return "impulsalicante_global";
       }
       
-      // Si no existe, crear la empresa global
-      console.log("Creando empresa global de Impulsalicante");
-      const empresaDoc = doc(empresasRef, EMPRESA_POR_DEFECTO.id);
-      
-      // Preparar datos de la empresa global
-      const empresaData = {
-        ...EMPRESA_POR_DEFECTO,
-        creadoPor: user.uid,
-        creadorEmail: user.email,
-        fechaCreacionSistema: new Date().toISOString(),
-        esEmpresaGlobal: true
-      };
-      
-      // Guardar la empresa global
-      await setDoc(empresaDoc, empresaData);
-      console.log("✅ Empresa global creada con ID:", empresaDoc.id);
-      
-      // Crear departamentos
-      for (const depto of EMPRESA_POR_DEFECTO.departamentos) {
-        const deptoRef = doc(collection(empresaDoc, "departamentos"));
-        await setDoc(deptoRef, {
-          id: deptoRef.id,
-          nombre: depto.nombre,
-          creadoPor: user.uid
-        });
-      }
-      
-      // Crear centros
-      for (const centro of EMPRESA_POR_DEFECTO.centros) {
-        const centroRef = doc(collection(empresaDoc, "centros"));
-        await setDoc(centroRef, {
-          id: centroRef.id,
-          nombre: centro.nombre,
-          direccion: centro.direccion || "",
-          creadoPor: user.uid
-        });
-      }
-      
-      // Crear formaciones
-      for (const formacion of EMPRESA_POR_DEFECTO.formaciones) {
-        const formacionRef = doc(collection(empresaDoc, "formaciones"));
-        await setDoc(formacionRef, {
-          id: formacionRef.id,
-          nombre: formacion.nombre,
-          tipo: formacion.tipo || "presencial",
-          duracion: formacion.duracion || 0,
-          creadoPor: user.uid
-        });
-      }
-      
-      console.log("✅ Todos los datos de la empresa global creados correctamente");
-      return empresaDoc.id;
+      // Si no existe ninguna empresa global, crearla
+      console.log("No se encontró ninguna empresa global, creando una nueva");
+      return await this.crearEmpresaPorDefectoGlobal();
     } catch (error) {
-      console.error("Error al crear empresa global:", error);
+      console.error("Error al verificar/crear empresa por defecto:", error);
       return null;
     }
   }
@@ -273,37 +238,86 @@ class FirestoreService {
 
       // Primero obtener la empresa global
       const empresasRef = collection(db, "empresas");
-      const qGlobal = query(
-        empresasRef,
-        where("esEmpresaGlobal", "==", true)
-      );
       
-      const querySnapshotGlobal = await getDocs(qGlobal);
+      // Buscar la empresa con el ID específico global que debe estar disponible para todos
+      const empresaGlobalRef = doc(empresasRef, "impulsalicante_global");
+      const empresaGlobalDoc = await getDoc(empresaGlobalRef);
+      
       const empresas = [];
       
-      if (!querySnapshotGlobal.empty) {
-        const empresaGlobal = querySnapshotGlobal.docs[0];
-        const data = empresaGlobal.data();
+      // Si existe la empresa global con ID específico
+      if (empresaGlobalDoc.exists()) {
+        const data = empresaGlobalDoc.data();
+        
+        console.log("✅ Empresa global de Impulsalicante encontrada para el usuario");
         
         // Contar departamentos, centros y formaciones
-        const depSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/departamentos`));
+        const depSnapshot = await getDocs(collection(db, `empresas/${empresaGlobalDoc.id}/departamentos`));
         const numDepartamentos = depSnapshot.size;
         
-        const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/centros`));
+        const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaGlobalDoc.id}/centros`));
         const numCentros = centrosSnapshot.size;
         
-        const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/formaciones`));
+        const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaGlobalDoc.id}/formaciones`));
         const numFormaciones = formacionesSnapshot.size;
         
         empresas.push({
-          id: empresaGlobal.id,
+          id: empresaGlobalDoc.id,
           ...data,
           fechaCreacion: data.fechaCreacion,
           numDepartamentos,
           numCentros,
           numFormaciones,
-          perteneceAlUsuarioActual: true
+          perteneceAlUsuarioActual: true,
+          esCompartida: true
         });
+      } else {
+        // Como plan B, buscar cualquier empresa marcada como global
+        const qGlobal = query(
+          empresasRef,
+          where("esEmpresaGlobal", "==", true)
+        );
+        
+        const querySnapshotGlobal = await getDocs(qGlobal);
+        
+        if (!querySnapshotGlobal.empty) {
+          const empresaGlobal = querySnapshotGlobal.docs[0];
+          const data = empresaGlobal.data();
+          
+          console.log("⚠️ Empresa global encontrada pero no tiene el ID esperado:", empresaGlobal.id);
+          
+          // Contar departamentos, centros y formaciones
+          const depSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/departamentos`));
+          const numDepartamentos = depSnapshot.size;
+          
+          const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/centros`));
+          const numCentros = centrosSnapshot.size;
+          
+          const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/formaciones`));
+          const numFormaciones = formacionesSnapshot.size;
+          
+          empresas.push({
+            id: empresaGlobal.id,
+            ...data,
+            fechaCreacion: data.fechaCreacion,
+            numDepartamentos,
+            numCentros,
+            numFormaciones,
+            perteneceAlUsuarioActual: true,
+            esCompartida: true
+          });
+        } else {
+          // Si no hay empresa global, crear una
+          console.log("⚠️ No se encontró ninguna empresa global, creando una ahora");
+          await this.crearEmpresaPorDefectoGlobal();
+          
+          // Añadir la empresa por defecto a la lista
+          empresas.push({ 
+            ...EMPRESA_POR_DEFECTO, 
+            perteneceAlUsuarioActual: true,
+            esCompartida: true
+          });
+        }
       }
 
       // Luego obtener las empresas personales del usuario
@@ -755,6 +769,83 @@ class FirestoreService {
     } catch (error) {
       console.error("Error al obtener formaciones:", error);
       return [];
+    }
+  }
+
+  /**
+   * Crea la empresa por defecto global que será compartida por todos los usuarios
+   * @returns {Promise<string>} - ID de la empresa global
+   */
+  static async crearEmpresaPorDefectoGlobal() {
+    try {
+      // Verificar que hay un usuario autenticado
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("No hay usuario autenticado para crear empresa global");
+        return null;
+      }
+      
+      console.log("Creando empresa global compartida para todos los usuarios");
+      
+      // Crear la empresa global con ID fijo
+      const empresasRef = collection(db, "empresas");
+      const empresaDoc = doc(empresasRef, "impulsalicante_global");
+      
+      // Preparar datos de la empresa global
+      const empresaData = {
+        ...EMPRESA_POR_DEFECTO,
+        id: "impulsalicante_global",
+        nombre: "Impulsalicante (Compartida)",
+        descripcion: "Empresa compartida para todos los usuarios de la plataforma. Las modificaciones que realices serán visibles para todos.",
+        creadoPor: user.uid,
+        creadorEmail: user.email,
+        fechaCreacionSistema: new Date().toISOString(),
+        esEmpresaGlobal: true,
+        esCompartida: true,
+        sharedByAllUsers: true
+      };
+      
+      // Guardar la empresa global
+      await setDoc(empresaDoc, empresaData);
+      console.log("✅ Empresa global compartida creada con ID:", empresaDoc.id);
+      
+      // Crear departamentos
+      for (const depto of EMPRESA_POR_DEFECTO.departamentos) {
+        const deptoRef = doc(collection(empresaDoc, "departamentos"));
+        await setDoc(deptoRef, {
+          id: deptoRef.id,
+          nombre: depto.nombre,
+          creadoPor: user.uid
+        });
+      }
+      
+      // Crear centros
+      for (const centro of EMPRESA_POR_DEFECTO.centros) {
+        const centroRef = doc(collection(empresaDoc, "centros"));
+        await setDoc(centroRef, {
+          id: centroRef.id,
+          nombre: centro.nombre,
+          direccion: centro.direccion || "",
+          creadoPor: user.uid
+        });
+      }
+      
+      // Crear formaciones
+      for (const formacion of EMPRESA_POR_DEFECTO.formaciones) {
+        const formacionRef = doc(collection(empresaDoc, "formaciones"));
+        await setDoc(formacionRef, {
+          id: formacionRef.id,
+          nombre: formacion.nombre,
+          tipo: formacion.tipo || "presencial",
+          duracion: formacion.duracion || 0,
+          creadoPor: user.uid
+        });
+      }
+      
+      return empresaDoc.id;
+    } catch (error) {
+      console.error("Error al crear empresa global compartida:", error);
+      return null;
     }
   }
 }

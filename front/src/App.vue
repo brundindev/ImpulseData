@@ -7,6 +7,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import FirebaseAuthService from './services/FirebaseAuthService';
 import ChatbotAssistant from './components/ChatbotAssistant.vue';
 import CookieConsent from '@/components/CookieConsent.vue';
+import FirestoreService from './services/FirestoreService';
 
 const router = useRouter();
 const auth = getAuth();
@@ -241,6 +242,21 @@ onMounted(async () => {
   auth.onAuthStateChanged(async (user) => {
     console.log(user ? "Firebase: Usuario autenticado" : "Firebase: No hay usuario autenticado");
     await actualizarEstadoUsuario();
+    
+    // Si hay usuario autenticado, verificar y crear empresa global compartida
+    if (user) {
+      try {
+        console.log("Verificando empresa global compartida para todos los usuarios...");
+        const empresaId = await FirestoreService.crearEmpresaPorDefecto();
+        if (empresaId) {
+          console.log("✅ Empresa global disponible con ID:", empresaId);
+        } else {
+          console.error("❌ No se pudo verificar/crear la empresa global");
+        }
+      } catch (error) {
+        console.error("Error al verificar empresa global:", error);
+      }
+    }
   });
   
   // Escuchar eventos personalizados para cambios en la autenticación
