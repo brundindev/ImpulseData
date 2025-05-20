@@ -536,15 +536,20 @@ tbody tr:hover { background-color: #F0F0F2; }
 /* Placeholders de imagen */
 .image-placeholder {
     display: flex;
-    background-color: var(--placeholder-bg);
-    border: none; /* Sin borde */
-    border-radius: 8px; /* Bordes redondeados */
     margin: 15px auto;
-    color: var(--text-secondary);
-    text-align: center;
     overflow: hidden;
     align-items: center;
     justify-content: center;
+}
+
+/* Estilo solo para imágenes placeholder sin imagen real */
+.image-placeholder[src=""],
+.image-placeholder[src^="data:image/png;base64"] {
+    background-color: var(--placeholder-bg);
+    border: none; /* Sin borde */
+    border-radius: 8px; /* Bordes redondeados */
+    color: var(--text-secondary);
+    text-align: center;
     font-size: 0.9em;
     font-style: italic;
     min-height: 100px;
@@ -553,14 +558,23 @@ tbody tr:hover { background-color: #F0F0F2; }
     display: inline-block;
     vertical-align: middle;
     margin: 5px 10px;
+}
+
+.logo[src=""],
+.logo[src^="data:image/png;base64"] {
     background-color: var(--placeholder-bg);
     border: none;
     border-radius: 6px;
 }
+
 .logo-small { 
     display: inline-block;
     vertical-align: middle;
     margin: 3px 5px;
+}
+
+.logo-small[src=""],
+.logo-small[src^="data:image/png;base64"] {
     background-color: var(--placeholder-bg);
     border: none;
     border-radius: 6px;
@@ -724,15 +738,22 @@ tbody tr:hover { background-color: #F0F0F2; }
 /* Estilo para los logos individuales */
 #portada .logos-portada-top img,
 #portada .logos-portada-bottom img { 
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     max-height: 65px;
     width: auto !important; /* Forzar ancho automático */
     height: auto !important; /* Altura automática para mantener proporción */
     max-width: 100%; /* Asegurar que no exceda el contenedor */
+}
+
+/* Estilo solo para imágenes placeholder (sin imagen real) */
+#portada .logos-portada-top img[src=""],
+#portada .logos-portada-bottom img[src=""],
+#portada .logos-portada-top img[src^="data:image/png;base64"],
+#portada .logos-portada-bottom img[src^="data:image/png;base64"] {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(11, 42, 94, 0.1); /* Borde sutil con el azul oscuro */
 }
 
@@ -2232,6 +2253,15 @@ export async function crearPlantillaPDF() {
             if (isImpulsalicanteCompany && sharedImages[imageId]) {
                 console.log(`Usando imagen compartida para ${imageId}`);
                 img.src = sharedImages[imageId];
+                
+                // Si la imagen no es un placeholder, quitar los estilos decorativos
+                if (!img.src.startsWith('data:image/png;base64')) {
+                    img.style.background = "none";
+                    img.style.backgroundColor = "transparent";
+                    img.style.boxShadow = "none";
+                    img.style.border = "none";
+                    img.style.padding = "0";
+                }
             }
             // Si la imagen no tiene src, está vacía o intenta cargar desde localhost
             // Pero NO reemplazar imágenes que ya tienen formato base64
@@ -2248,6 +2278,14 @@ export async function crearPlantillaPDF() {
                 // Asegurarnos de que no se intente cargar desde una ruta relativa
                 img.removeAttribute('srcset');
                 img.removeAttribute('data-src');
+            }
+            // Si la imagen ya tiene un src real (no placeholder), quitar estilos decorativos
+            else if (img.src && !img.src.startsWith('data:image')) {
+                img.style.background = "none";
+                img.style.backgroundColor = "transparent";
+                img.style.boxShadow = "none";
+                img.style.border = "none";
+                img.style.padding = "0";
             }
 
             // Añadir un título para mejorar la UX
@@ -2269,6 +2307,16 @@ export async function crearPlantillaPDF() {
                     const newSrc = e.detail.newSrc;
                     await saveSharedImage(imageId, newSrc);
                     console.log(`Imagen ${imageId} guardada en almacenamiento compartido`);
+                    
+                    // Cuando se actualiza la imagen, quitar estilos de placeholder
+                    if (newSrc && !newSrc.startsWith('data:image/png;base64')) {
+                        // Quitar el fondo y estilos decorativos para imágenes reales
+                        img.style.background = "none";
+                        img.style.backgroundColor = "transparent";
+                        img.style.boxShadow = "none";
+                        img.style.border = "none";
+                        img.style.padding = "0";
+                    }
                     
                     // Mantener propiedades responsivas después del cambio de imagen
                     if (img.classList.contains('logo-small')) {
