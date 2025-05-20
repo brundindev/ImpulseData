@@ -239,14 +239,52 @@ class FirestoreService {
       // Primero obtener la empresa global
       const empresasRef = collection(db, "empresas");
       
-      // Buscar la empresa con el ID específico global que debe estar disponible para todos
+      // SIEMPRE BUSCAR PRIMERO LA EMPRESA GLOBAL CON ID ESPECÍFICO
       const empresaGlobalRef = doc(empresasRef, "impulsalicante_global");
       const empresaGlobalDoc = await getDoc(empresaGlobalRef);
       
       const empresas = [];
       
-      // Si existe la empresa global con ID específico
-      if (empresaGlobalDoc.exists()) {
+      // Si no existe la empresa global, crearla
+      if (!empresaGlobalDoc.exists()) {
+        console.log("⚠️ La empresa global no existe, creándola ahora...");
+        const empresaId = await this.crearEmpresaPorDefectoGlobal();
+        
+        // Volver a intentar obtenerla
+        const empresaGlobalDocNueva = await getDoc(doc(empresasRef, "impulsalicante_global"));
+        if (empresaGlobalDocNueva.exists()) {
+          const data = empresaGlobalDocNueva.data();
+          
+          // Contar departamentos, centros y formaciones
+          const depSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/departamentos`));
+          const numDepartamentos = depSnapshot.size;
+          
+          const centrosSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/centros`));
+          const numCentros = centrosSnapshot.size;
+          
+          const formacionesSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/formaciones`));
+          const numFormaciones = formacionesSnapshot.size;
+          
+          empresas.push({
+            id: "impulsalicante_global",
+            ...data,
+            fechaCreacion: data.fechaCreacion,
+            numDepartamentos,
+            numCentros,
+            numFormaciones,
+            perteneceAlUsuarioActual: true,
+            esCompartida: true
+          });
+        } else {
+          // Si falla la creación, añadir versión por defecto
+          empresas.push({ 
+            ...EMPRESA_POR_DEFECTO, 
+            perteneceAlUsuarioActual: true,
+            esCompartida: true
+          });
+        }
+      } else {
+        // La empresa global ya existe
         const data = empresaGlobalDoc.data();
         
         console.log("✅ Empresa global de Impulsalicante encontrada para el usuario");
@@ -271,53 +309,6 @@ class FirestoreService {
           perteneceAlUsuarioActual: true,
           esCompartida: true
         });
-      } else {
-        // Como plan B, buscar cualquier empresa marcada como global
-        const qGlobal = query(
-          empresasRef,
-          where("esEmpresaGlobal", "==", true)
-        );
-        
-        const querySnapshotGlobal = await getDocs(qGlobal);
-        
-        if (!querySnapshotGlobal.empty) {
-          const empresaGlobal = querySnapshotGlobal.docs[0];
-          const data = empresaGlobal.data();
-          
-          console.log("⚠️ Empresa global encontrada pero no tiene el ID esperado:", empresaGlobal.id);
-          
-          // Contar departamentos, centros y formaciones
-          const depSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/departamentos`));
-          const numDepartamentos = depSnapshot.size;
-          
-          const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/centros`));
-          const numCentros = centrosSnapshot.size;
-          
-          const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaGlobal.id}/formaciones`));
-          const numFormaciones = formacionesSnapshot.size;
-          
-          empresas.push({
-            id: empresaGlobal.id,
-            ...data,
-            fechaCreacion: data.fechaCreacion,
-            numDepartamentos,
-            numCentros,
-            numFormaciones,
-            perteneceAlUsuarioActual: true,
-            esCompartida: true
-          });
-        } else {
-          // Si no hay empresa global, crear una
-          console.log("⚠️ No se encontró ninguna empresa global, creando una ahora");
-          await this.crearEmpresaPorDefectoGlobal();
-          
-          // Añadir la empresa por defecto a la lista
-          empresas.push({ 
-            ...EMPRESA_POR_DEFECTO, 
-            perteneceAlUsuarioActual: true,
-            esCompartida: true
-          });
-        }
       }
 
       // Luego obtener las empresas personales del usuario
@@ -790,6 +781,20 @@ class FirestoreService {
       // Crear la empresa global con ID fijo
       const empresasRef = collection(db, "empresas");
       const empresaDoc = doc(empresasRef, "impulsalicante_global");
+      
+      // Verificar si ya existe
+      const empresaDocSnap = await getDoc(empresaDoc);
+      if (empresaDocSnap.exists()) {
+        console.log("✅ La empresa global ya existe, actualizando sus propiedades...");
+        // Actualizar para asegurar que tiene las propiedades correctas
+        await updateDoc(empresaDoc, {
+          esEmpresaGlobal: true,
+          esCompartida: true,
+          sharedByAllUsers: true,
+          updatedAt: new Date().toISOString()
+        });
+        return empresaDoc.id;
+      }
       
       // Preparar datos de la empresa global
       const empresaData = {

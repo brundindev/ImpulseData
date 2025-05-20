@@ -8,6 +8,7 @@ import FirebaseAuthService from './services/FirebaseAuthService';
 import ChatbotAssistant from './components/ChatbotAssistant.vue';
 import CookieConsent from '@/components/CookieConsent.vue';
 import FirestoreService from './services/FirestoreService';
+import { ensureGlobalCompanyForAllUsers } from './utils/globalStorage';
 
 const router = useRouter();
 const auth = getAuth();
@@ -247,11 +248,33 @@ onMounted(async () => {
     if (user) {
       try {
         console.log("Verificando empresa global compartida para todos los usuarios...");
-        const empresaId = await FirestoreService.crearEmpresaPorDefecto();
-        if (empresaId) {
-          console.log("✅ Empresa global disponible con ID:", empresaId);
+        
+        // Usar sistema unificado para garantizar empresa global
+        const isGlobalCompanyAvailable = await ensureGlobalCompanyForAllUsers();
+        
+        if (isGlobalCompanyAvailable) {
+          console.log("🌍 Empresa global disponible y compartida para todos los usuarios");
         } else {
-          console.error("❌ No se pudo verificar/crear la empresa global");
+          console.warn("⚠️ Problemas con la empresa global, intentando métodos alternativos...");
+          
+          // Plan B: Método tradicional
+          const empresaId = await FirestoreService.crearEmpresaPorDefecto();
+          
+          if (empresaId) {
+            console.log("✅ Empresa global disponible con ID:", empresaId);
+          } else {
+            console.error("❌ No se pudo verificar/crear la empresa global con método estándar");
+            
+            // Plan C: Método directo
+            console.log("Intentando crear empresa global directamente...");
+            const empresaIdDirecto = await FirestoreService.crearEmpresaPorDefectoGlobal();
+            
+            if (empresaIdDirecto) {
+              console.log("✅ Empresa global creada directamente con ID:", empresaIdDirecto);
+            } else {
+              console.error("⚠️ No se pudo crear la empresa global por ningún método");
+            }
+          }
         }
       } catch (error) {
         console.error("Error al verificar empresa global:", error);
