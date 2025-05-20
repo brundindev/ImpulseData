@@ -17,8 +17,10 @@ export default {
         const delay = binding.arg ? Math.min(parseInt(binding.arg), 300) : 0;
         
         // Por defecto, los elementos comienzan invisibles pero con opacidad no tan baja
-        // para hacer la transición más suave
+        // Evitamos que los elementos inicialmente invisibles bloqueen el scroll
         el.classList.add('scroll-animate-hidden');
+        el.style.visibility = 'visible'; // Aseguramos que sea visible para interacción
+        el.style.pointerEvents = 'auto'; // Permitimos interacción con el elemento
         
         // Función callback para cuando el elemento es visible
         const onIntersect = (entries, observer) => {

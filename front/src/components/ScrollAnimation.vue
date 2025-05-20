@@ -22,6 +22,18 @@ const animatedElements = [
 let observer = null;
 
 onMounted(() => {
+  // Permitir scroll inmediato antes de inicializar las animaciones
+  document.body.style.overflowY = 'auto';
+  document.documentElement.style.overflowY = 'auto';
+  
+  // Asegurarnos que el usuario pueda interactuar con la página inmediatamente
+  animatedElements.forEach(selector => {
+    document.querySelectorAll(selector).forEach(element => {
+      element.style.visibility = 'visible';
+      element.style.pointerEvents = 'auto';
+    });
+  });
+  
   // Esperar un momento antes de inicializar para evitar problemas con el scroll
   setTimeout(() => {
     // Configurar el observador con un margen para que la animación comience un poco antes
@@ -46,7 +58,7 @@ onMounted(() => {
     // Aplicamos las clases fade-up-element a todos los elementos que queremos animar
     animatedElements.forEach(selector => {
       document.querySelectorAll(selector).forEach((element, index) => {
-        // Añadir la clase base de animación
+        // Añadir la clase base de animación pero mantener la visibilidad
         element.classList.add('fade-up-element');
         
         // Añadir retardos diferentes según el tipo y posición
@@ -83,6 +95,8 @@ onUnmounted(() => {
   transform: translateY(30px);
   transition: opacity 0.6s ease, transform 0.6s ease;
   will-change: opacity, transform;
+  pointer-events: auto !important; /* Permite interacción con el elemento aunque esté invisible */
+  visibility: visible !important; /* Mantiene visibilidad para interacción */
 }
 
 .fade-up-element.visible {

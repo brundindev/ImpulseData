@@ -5,6 +5,9 @@
   transition: opacity 0.4s ease-out, 
               transform 0.4s ease-out; /* Transición más rápida y curva más simple */
   will-change: opacity, transform;
+  pointer-events: auto !important; /* Permite interacción con el elemento aunque sea invisble */
+  visibility: visible !important; /* Asegura que sea visible para interacción */
+  position: relative; /* Asegura que ocupe espacio en el flujo del documento */
 }
 
 /* Estilos cuando el elemento aparece */
@@ -247,12 +250,13 @@
 .home-page {
   perspective: 1px;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: auto !important; /* Forzar scroll vertical siempre */
 }
 
 .parallax-section {
   transform-style: preserve-3d;
   position: relative;
+  pointer-events: auto !important; /* Permite interacción */
 }
 
 .parallax-bg {
@@ -263,6 +267,7 @@
   left: 0;
   transform: translateZ(-1px) scale(2);
   z-index: -1;
+  pointer-events: none; /* No bloquea la interacción */
 }
 
 /* Asegurarse de que las animaciones solo ocurran en dispositivos que no prefieran reducción de movimiento */

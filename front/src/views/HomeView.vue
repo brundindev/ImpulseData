@@ -1062,13 +1062,17 @@ const confirmarEliminar = (empresa) => {
   mostrarConfirmacion.value = true;
 };
 
-// Función para aplicar animaciones a las tarjetas de empresa
+// Función para aplicar animaciones a las tarjetas de empresas
 const applyCompanyCardAnimations = () => {
   const companyCards = document.querySelectorAll('.company-card');
   if (companyCards.length > 0) {
     companyCards.forEach((card, index) => {
       // Añadir clase para el selector de la directiva
       card.classList.add('scroll-animate-hidden');
+      
+      // Asegurar que el elemento sea interactivo desde el principio
+      card.style.visibility = 'visible';
+      card.style.pointerEvents = 'auto';
       
       // Configurar opciones de Intersection Observer
       const options = {
@@ -1107,6 +1111,10 @@ const applyStatCardAnimations = () => {
     statCards.forEach((card, index) => {
       card.classList.add('scroll-animate-hidden');
       
+      // Asegurar que el elemento sea interactivo desde el principio
+      card.style.visibility = 'visible';
+      card.style.pointerEvents = 'auto';
+      
       const options = {
         root: null,
         rootMargin: '0px',
@@ -1134,6 +1142,10 @@ const applyStatCardAnimations = () => {
 
 // Observar cuando las empresas cambian para aplicar animaciones
 watch(() => empresas.value, () => {
+  // Permitir scroll inmediato sin esperar animaciones
+  document.body.style.overflowY = 'auto';
+  document.documentElement.style.overflowY = 'auto';
+  
   // Esperar a que el DOM se actualice
   setTimeout(() => {
     applyCompanyCardAnimations();
@@ -1142,6 +1154,10 @@ watch(() => empresas.value, () => {
 
 // Aplicar animaciones adicionales cuando el componente se monta
 onMounted(() => {
+  // Permitir scroll inmediato sin esperar animaciones
+  document.body.style.overflowY = 'auto';
+  document.documentElement.style.overflowY = 'auto';
+  
   // Aplicar animaciones a las estadísticas
   setTimeout(() => {
     applyStatCardAnimations();
