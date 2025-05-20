@@ -46,6 +46,11 @@ const props = defineProps({
   }
 });
 
+const esValido = computed(() => {
+  return datos.value.actividades && 
+         datos.value.asistentes;
+});
+
 const emit = defineEmits(['update:modelValue', 'siguiente']);
 
 const datos = computed({
