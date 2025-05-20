@@ -1,16 +1,17 @@
-# Documentación ImpulseData
+# Documentación ImpulseData - https://impulsedata.vercel.app
 
 ## Índice
 1. [Introducción](#introducción)
-2. [Arquitectura](#arquitectura)
-3. [Tecnologías y Frameworks](#tecnologías-y-frameworks)
-4. [Estructura del Proyecto](#estructura-del-proyecto)
-5. [Características Principales](#características-principales)
-6. [Instalación y Despliegue](#instalación-y-despliegue)
-7. [Configuración](#configuración)
-8. [Guía de Desarrollo](#guía-de-desarrollo)
-9. [Mantenimiento](#mantenimiento)
-10. [Seguridad](#seguridad)
+2. [Despliegue](#despliegue)
+3. [Arquitectura](#arquitectura)
+4. [Tecnologías y Frameworks](#tecnologías-y-frameworks)
+5. [Estructura del Proyecto](#estructura-del-proyecto)
+6. [Características Principales](#características-principales)
+7. [Instalación y Despliegue](#instalación-y-despliegue)
+8. [Configuración](#configuración)
+9. [Guía de Desarrollo](#guía-de-desarrollo)
+10. [Mantenimiento](#mantenimiento)
+11. [Seguridad](#seguridad)
 
 ## Introducción
 
@@ -23,6 +24,10 @@ La aplicación ofrece funcionalidades como:
 - Importación de datos desde archivos CSV y JSON
 - Interfaz adaptativa con animaciones y efectos visuales
 - Autenticación y gestión de usuarios
+
+## Despliegue
+
+El proyecto está desplegado en: https://impulsedata.vercel.app donde podréis ver el proyecto desplegado y totalmente funcional.
 
 ## Arquitectura
 
@@ -50,18 +55,18 @@ ImpulseData sigue una arquitectura de aplicación de una sola página (SPA) con 
 - **JavaScript ES6+**: Lenguaje de programación principal
 
 ### Backend y Servicios
-- **Firebase**: Plataforma de desarrollo
+- **Java**: Plataforma de desarrollo
+- **Firebase**: Base de datos
   - **Firebase Authentication**: Sistema de autenticación
   - **Firestore**: Base de datos NoSQL para almacenamiento
-  - **Firebase Storage**: Almacenamiento de archivos
-  - **Firebase Hosting**: Alojamiento de la aplicación
 
 ### Librerías Adicionales
 - **Intersection Observer API**: Para animaciones activadas por scroll
 - **PDF Service**: Generación de documentos PDF
 - **File Import Service**: Importación de datos desde archivos
 - **Axios**: Cliente HTTP para peticiones a API
-- **html2pdf**: Conversión de HTML a PDF
+- **html2canva**: Conversión de HTML & CSS a PDF
+- **JSPDF**: Manejador de HTML a PDF
 
 ### Estilos y Diseño
 - **CSS Personalizado**: Estilos específicos para componentes
