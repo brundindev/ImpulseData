@@ -27,9 +27,9 @@ const html = `<!DOCTYPE html>
   --color-default-section: #8E8E93; /* Gris Apple */
   
   /* Nuevos colores para la portada moderna */
-  --portada-gradient-1: #3a7bd5;
-  --portada-gradient-2: #00d2ff;
-  --portada-accent: #FFCC00;
+  --portada-gradient-1: #0B2A5E; /* Azul oscuro más elegante */
+  --portada-gradient-2: #1A5BA6; /* Azul medio elegante */
+  --portada-accent: #FFD700; /* Dorado más elegante */
   --portada-text: #ffffff;
   
   /* Márgenes fijos para todas las páginas */
@@ -576,9 +576,9 @@ tbody tr:hover { background-color: #F0F0F2; }
 }
 .full-width { width: 100%; max-width: 100%; }
 
-/* Portada - Diseño modernizado */
+/* Portada - Diseño modernizado con figuras diagonales */
 #portada {
-    background: linear-gradient(135deg, var(--portada-gradient-1), var(--portada-gradient-2));
+    background-color: white; /* Fondo base blanco */
     color: var(--portada-text);
     text-align: center;
     padding: 80px 20px; /* Más padding vertical */
@@ -589,46 +589,63 @@ tbody tr:hover { background-color: #F0F0F2; }
     overflow: hidden;
 }
 
-/* Efecto de círculos decorativos en el fondo */
+/* Figuras diagonales decorativas */
 #portada:before {
     content: '';
     position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        var(--portada-gradient-1) 0%, 
+        var(--portada-gradient-1) 25%, 
+        transparent 25%, 
+        transparent 50%, 
+        var(--portada-gradient-2) 50%, 
+        var(--portada-gradient-2) 75%, 
+        transparent 75%, 
+        transparent 100%);
+    background-size: 150px 150px;
+    opacity: 0.9;
     z-index: 1;
 }
 
+/* Capa decorativa adicional con triángulos */
 #portada:after {
     content: '';
     position: absolute;
-    bottom: -80px;
-    left: -80px;
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(45deg, transparent 33.33%, var(--portada-gradient-1) 33.33%, var(--portada-gradient-1) 66.66%, transparent 66.66%),
+        linear-gradient(135deg, transparent 33.33%, var(--portada-gradient-2) 33.33%, var(--portada-gradient-2) 66.66%, transparent 66.66%);
+    background-size: 80px 80px;
+    opacity: 0.4;
     z-index: 1;
 }
 
 #portada .portada-content {
     position: relative;
-    z-index: 2;
+    z-index: 3; /* Mayor z-index para estar encima de los fondos decorativos */
     max-width: 900px;
     margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.9); /* Fondo semi-transparente para el contenido */
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 #portada h1 { 
-    color: var(--portada-text);
+    color: var(--portada-gradient-1); /* Color azul oscuro para el título */
     font-size: 3.8em;
     line-height: 1;
     margin: 30px 0 10px;
     font-weight: 800;
     letter-spacing: -0.03em;
-    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     position: relative;
 }
 
@@ -645,14 +662,11 @@ tbody tr:hover { background-color: #F0F0F2; }
 #portada .year { 
     font-size: 7em;
     font-weight: 800;
-    color: var(--portada-text);
+    color: var(--portada-gradient-1);
     margin: 20px 0 40px;
     line-height: 1;
     letter-spacing: -0.04em;
-    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
-    background: linear-gradient(90deg, rgba(255,255,255,1) 30%, rgba(255,204,0,1) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
     position: relative;
     display: inline-block;
 }
@@ -665,7 +679,7 @@ tbody tr:hover { background-color: #F0F0F2; }
     transform: translateX(-50%);
     width: 150px;
     height: 2px;
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--portada-gradient-2);
 }
 
 #portada .year-highlight { 
@@ -673,6 +687,7 @@ tbody tr:hover { background-color: #F0F0F2; }
     position: relative;
     display: inline-block;
     -webkit-text-fill-color: var(--portada-accent);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Contenedores de logos modernizados */
@@ -693,7 +708,7 @@ tbody tr:hover { background-color: #F0F0F2; }
     transform: translateX(-50%);
     width: 50%;
     height: 1px;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--portada-gradient-2);
 }
 
 #portada .logos-portada-bottom {
@@ -709,14 +724,14 @@ tbody tr:hover { background-color: #F0F0F2; }
 /* Estilo para los logos individuales */
 #portada .logos-portada-top img,
 #portada .logos-portada-bottom img { 
-    background: rgba(255, 255, 255, 0.15);
+    background: white;
     padding: 15px;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    filter: brightness(1.05);
     max-height: 65px;
     width: auto;
+    border: 1px solid rgba(11, 42, 94, 0.1); /* Borde sutil con el azul oscuro */
 }
 
 #portada .logos-portada-top img {
@@ -908,11 +923,111 @@ tbody tr:hover { background-color: #F0F0F2; }
 
 /* Contraportada */
 #contraportada {
-    background-color: #ffffff; padding: 30px; margin-top: 30px;
-    border-top: 2px solid var(--primary-blue);
+    background-color: white; /* Fondo base blanco como la portada */
+    color: var(--portada-gradient-1);
+    text-align: center;
+    padding: 60px 20px;
+    border-radius: 0 0 12px 12px;
+    margin: 40px -40px -30px -40px;
+    box-shadow: 0 -10px 20px rgba(0, 102, 204, 0.1);
+    position: relative;
+    overflow: hidden;
 }
-#contraportada img { margin-bottom: 15px; }
-#contraportada p { font-size: 1.1em; }
+
+/* Figuras diagonales decorativas para la contraportada (invertidas respecto a la portada) */
+#contraportada:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(-135deg, 
+        var(--portada-gradient-1) 0%, 
+        var(--portada-gradient-1) 25%, 
+        transparent 25%, 
+        transparent 50%, 
+        var(--portada-gradient-2) 50%, 
+        var(--portada-gradient-2) 75%, 
+        transparent 75%, 
+        transparent 100%);
+    background-size: 150px 150px;
+    opacity: 0.9;
+    z-index: 1;
+}
+
+/* Capa decorativa adicional con triángulos para la contraportada */
+#contraportada:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(-45deg, transparent 33.33%, var(--portada-gradient-2) 33.33%, var(--portada-gradient-2) 66.66%, transparent 66.66%),
+        linear-gradient(-135deg, transparent 33.33%, var(--portada-gradient-1) 33.33%, var(--portada-gradient-1) 66.66%, transparent 66.66%);
+    background-size: 80px 80px;
+    opacity: 0.4;
+    z-index: 1;
+}
+
+#contraportada .contraportada-content {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 3;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+#contraportada h2 {
+    color: var(--portada-gradient-1);
+    font-size: 2em;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+    border: none;
+}
+
+#contraportada p {
+    margin-bottom: 20px;
+    font-size: 1.05em;
+    line-height: 1.6;
+    color: var(--text-color);
+}
+
+#contraportada .contact-info {
+    margin-top: 30px;
+    font-size: 0.9em;
+    color: var(--text-color);
+}
+
+#contraportada .social-links {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+#contraportada .social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--portada-gradient-1);
+    color: white;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#contraportada .social-links a:hover {
+    background-color: var(--portada-gradient-2);
+    transform: scale(1.1);
+}
 
 /* Asegurar que todos los fondos son blancos */
 .column-content, .subsection-grid, .internal-columns, 
@@ -1087,60 +1202,6 @@ tbody tr:nth-child(even) {
     border-top: 1px solid #F5F5F7;
     font-size: 0.85em;
     color: var(--text-secondary);
-}
-
-/* Contraportada */
-#contraportada {
-    background: linear-gradient(135deg, #5AC8FA, #0066CC); /* Degradado inverso a la portada */
-    color: #ffffff;
-    text-align: center;
-    padding: 60px 20px;
-    border-radius: 0 0 12px 12px;
-    margin: 40px -40px -30px -40px;
-    box-shadow: 0 -10px 20px rgba(0, 102, 204, 0.1);
-}
-#contraportada .contraportada-content {
-    max-width: 600px;
-    margin: 0 auto;
-}
-#contraportada h2 {
-    color: #ffffff;
-    font-size: 2em;
-    font-weight: 600;
-    margin-bottom: 20px;
-    letter-spacing: -0.02em;
-    border: none;
-}
-#contraportada p {
-    margin-bottom: 20px;
-    font-size: 1.05em;
-    line-height: 1.6;
-}
-#contraportada .contact-info {
-    margin-top: 30px;
-    font-size: 0.9em;
-    opacity: 0.9;
-}
-#contraportada .social-links {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-}
-#contraportada .social-links a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-#contraportada .social-links a:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
 }
 
 /* Botones al estilo Apple */
