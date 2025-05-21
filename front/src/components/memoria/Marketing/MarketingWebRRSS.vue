@@ -1,193 +1,219 @@
 <template>
   <div class="form-step">
     <h3>6.1 Web y Redes Sociales</h3>
+    
+    <div class="form-group">
+      <label>Web Impulsalicante</label>
+      <input 
+        v-model="datos.webImpulsalicante" 
+        class="form-control"
+        placeholder="URL de la web principal"
+        :value="datos.webImpulsalicante || 'www.impulsalicante.es'"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Web Portalemp</label>
+      <input 
+        v-model="datos.webPortalemp" 
+        class="form-control"
+        placeholder="URL de la web de empleo"
+        :value="datos.webPortalemp || 'https://impulsalicante.portalemp.com/'"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Nº publicaciones en la página web</label>
+      <div class="input-with-info">
+        <input 
+          type="number" 
+          v-model="datos.publicacionesWeb" 
+          class="form-control"
+          min="0"
+          placeholder="Nº de publicaciones (noticias y eventos)"
+          :value="datos.publicacionesWeb"
+        >
+        <small class="text-muted">Incluye {{ Math.round((datos.publicacionesWeb || 443) * 0.78) }} noticias y {{ Math.round((datos.publicacionesWeb || 443) * 0.22) }} eventos</small>
+      </div>
+    </div>
+         
+    <div class="form-group">
+      <label>Nº de cursos y píldoras formativas difundidas a través de Portalemp</label>
+      <input 
+        type="number" 
+        v-model="datos.cursosPortalemp" 
+        class="form-control"
+        min="0"
+        placeholder="Nº de cursos"
+        :value="datos.cursosPortalemp"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Nº de empresas que han difundido ofertas de trabajo a través de Portalemp</label>
+      <input 
+        type="number" 
+        v-model="datos.empresasPortalemp" 
+        class="form-control"
+        min="0"
+        placeholder="Nº de empresas"  
+        :value="datos.empresasPortalemp"
+      >
+    </div>
+
+    <div class="redes-section">
+      <h4>Redes Sociales</h4>
+      
+      <div class="redes-table">
+        <div class="redes-header">
+          <div class="red-col">Red Social</div>
+          <div class="stats-col">Nº Seguidores</div>
+          <div class="stats-col">Publicaciones</div>
+        </div>
         
-        <div class="form-group">
-          <label>Web ImpulsaAlicante</label>
-          <input 
-            v-model="datos.webImpulsaAlicante" 
-            class="form-control"
-            placeholder="URL de la web principal"
-          >
-        </div>
-
-        <div class="form-group">
-          <label>Web Portalempleo</label>
-          <input 
-            v-model="datos.webPortalempleo" 
-            class="form-control"
-            placeholder="URL de la web de empleo"
-          >
-        </div>
-
-        <div class="form-group">
-          <label>Nº publicaciones en la página web</label>
-          <div class="input-with-info">
+        <div class="redes-row">
+          <div class="red-col">Facebook</div>
+          <div class="stats-col">
             <input 
               type="number" 
-              v-model="datos.publicacionesWeb" 
+              v-model="datos.seguidoresFacebook" 
               class="form-control"
               min="0"
-              placeholder="Nº de publicaciones"
+              :value="datos.seguidoresFacebook"
             >
-            <span class="input-info">Incluir noticias y eventos</span>
+          </div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.publicacionesFacebook" 
+              class="form-control"
+              min="0"
+              :value="datos.publicacionesFacebook"
+            >
           </div>
         </div>
-               
-        <div class="form-group">
-          <label>Nº de cursos y píldoras formativas difundidas a través de PortalEmpleo</label>
-          <input 
-            type="number" 
-            v-model="datos.cursosPortalempleo" 
-            class="form-control"
-            min="0"
-            placeholder="Nº de cursos"
-          >
-        </div>
-
-        <div class="form-group">
-          <label>Nº de empresas que han difundido ofertas de trabajo a través de PortalEmpleo</label>
-          <input 
-            type="number" 
-            v-model="datos.empresasPortalempleo" 
-            class="form-control"
-            min="0"
-            placeholder="Nº de empresas"
-          >
-        </div>
-
-        <div class="form-section">
-          <h4>Redes Sociales - Seguidores</h4>
-          <div class="social-grid">
-            <div class="social-item">
-              <label>Facebook</label>
-              <input 
-                type="number" 
-                v-model="datos.seguidoresFacebook" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de seguidores"
-              >
-            </div>
-            <div class="social-item">
-              <label>Twitter</label>
-              <input 
-                type="number" 
-                v-model="datos.seguidoresTwitter" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de seguidores"
-              >
-            </div>
-            <div class="social-item">
-              <label>Instagram</label>
-              <input 
-                type="number" 
-                v-model="datos.seguidoresInstagram" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de seguidores"
-              >
-            </div>
-            <div class="social-item">
-              <label>YouTube</label>
-              <input 
-                type="number" 
-                v-model="datos.seguidoresYoutube" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de seguidores"
-              >
-            </div>
-            <div class="social-item">
-              <label>LinkedIn</label>
-              <input 
-                type="number" 
-                v-model="datos.seguidoresLinkedin" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de seguidores"
-              >
-            </div>
-            <div class="social-item">
-              <label>Telegram</label>
-              <input 
-                type="number" 
-                v-model="datos.seguidoresTelegram" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de seguidores"
-              >
-            </div>
+        
+        <div class="redes-row">
+          <div class="red-col">Twitter</div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.seguidoresTwitter" 
+              class="form-control"
+              min="0"
+              :value="datos.seguidoresTwitter"
+            >
+          </div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.publicacionesTwitter" 
+              class="form-control"
+              min="0"
+              :value="datos.publicacionesTwitter"
+            >
           </div>
         </div>
-
-        <div class="form-section">
-          <h4>Redes Sociales - Publicaciones</h4>
-          <div class="social-grid">
-            <div class="social-item">
-              <label>Facebook</label>
-              <input 
-                type="number" 
-                v-model="datos.publicacionesFacebook" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de publicaciones"
-              >
-            </div>
-            <div class="social-item">
-              <label>Twitter</label>
-              <input 
-                type="number" 
-                v-model="datos.publicacionesTwitter" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de publicaciones"
-              >
-            </div>
-            <div class="social-item">
-              <label>Instagram</label>
-              <input 
-                type="number" 
-                v-model="datos.publicacionesInstagram" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de publicaciones"
-              >
-            </div>
-            <div class="social-item">
-              <label>YouTube</label>
-              <input 
-                type="number" 
-                v-model="datos.publicacionesYoutube" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de publicaciones"
-              >
-            </div>
-            <div class="social-item">
-              <label>LinkedIn</label>
-              <input 
-                type="number" 
-                v-model="datos.publicacionesLinkedin" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de publicaciones"
-              >
-            </div>
-            <div class="social-item">
-              <label>Telegram</label>
-              <input 
-                type="number" 
-                v-model="datos.publicacionesTelegram" 
-                class="form-control"
-                min="0"
-                placeholder="Nº de publicaciones"
-              >
-            </div>
+        
+        <div class="redes-row">
+          <div class="red-col">Instagram</div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.seguidoresInstagram" 
+              class="form-control"
+              min="0"
+              :value="datos.seguidoresInstagram"
+            >
+          </div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.publicacionesInstagram" 
+              class="form-control"
+              min="0"
+              :value="datos.publicacionesInstagram"
+            >
+          </div>
+        </div>
+        
+        <div class="redes-row">
+          <div class="red-col">YouTube</div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.seguidoresYoutube" 
+              class="form-control"
+              min="0"
+              :value="datos.seguidoresYoutube"
+            >
+          </div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.publicacionesYoutube" 
+              class="form-control"
+              min="0"
+              :value="datos.publicacionesYoutube"
+            >
+          </div>
+        </div>
+        
+        <div class="redes-row">
+          <div class="red-col">LinkedIn</div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.seguidoresLinkedin" 
+              class="form-control"
+              min="0"
+              :value="datos.seguidoresLinkedin"
+            >
+          </div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.publicacionesLinkedin" 
+              class="form-control"
+              min="0"
+              :value="datos.publicacionesLinkedin"
+            >
+          </div>
+        </div>
+        
+        <div class="redes-row">
+          <div class="red-col">Telegram</div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.seguidoresTelegram" 
+              class="form-control"
+              min="0"
+              :value="datos.seguidoresTelegram"
+            >
+          </div>
+          <div class="stats-col">
+            <input 
+              type="number" 
+              v-model="datos.publicacionesTelegram" 
+              class="form-control"
+              min="0"
+              :value="datos.publicacionesTelegram"
+            >
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="form-actions">
+      <button 
+        @click="$emit('siguiente')" 
+        class="btn btn-primary"
+      >
+        Siguiente
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -208,40 +234,14 @@ const datos = computed({
 });
 
 // Inicializar datos si no existen
-if (!datos.value.descripcion) datos.value.descripcion = '';
-if (!datos.value.personal) {
-  datos.value.personal = [{
-    nombre: '',
-    cargo: '',
-    formacion: '',
-    experiencia: ''
-  }];
-}
-if (!datos.value.presupuestoAnual) datos.value.presupuestoAnual = 0;
-if (!datos.value.herramientas) datos.value.herramientas = '';
-if (!datos.value.recursosMateriales) datos.value.recursosMateriales = '';
+if (!datos.value.webImpulsalicante) datos.value.webImpulsalicante = 'www.impulsalicante.es';
+if (!datos.value.webPortalemp) datos.value.webPortalemp = 'https://impulsalicante.portalemp.com/';
 
-const agregarPersona = () => {
-  datos.value.personal.push({
-    nombre: '',
-    cargo: '',
-    formacion: '',
-    experiencia: ''
-  });
-};
-
-const eliminarPersona = (index) => {
-  if (datos.value.personal.length > 1) {
-    datos.value.personal.splice(index, 1);
-  }
-};
 
 const esValido = computed(() => {
-  return datos.value.descripcion &&
-         datos.value.personal.every(persona => 
-           persona.nombre && persona.cargo
-         ) &&
-         datos.value.presupuestoAnual >= 0;
+  return datos.value.webImpulsalicante && 
+         datos.value.webPortalemp &&
+         datos.value.publicacionesWeb > 0;
 });
 </script>
 
@@ -255,30 +255,62 @@ const esValido = computed(() => {
   margin-bottom: 1.5rem;
 }
 
-.persona-item {
+.input-with-info {
+  position: relative;
+}
+
+.text-muted {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.redes-section {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
 
-.persona-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.redes-section h4 {
+  margin-top: 0;
+  color: #004698;
+  font-size: 1.2rem;
   margin-bottom: 1rem;
 }
 
-.persona-header h4 {
-  margin: 0;
-  color: #004698;
-  font-size: 1.2rem;
+.redes-table {
+  width: 100%;
 }
 
-.recursos {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
+.redes-header {
+  display: flex;
+  background: #004698;
+  color: white;
+  font-weight: 500;
+  border-radius: 4px 4px 0 0;
+}
+
+.redes-row {
+  display: flex;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.redes-row:last-child {
+  border-bottom: none;
+}
+
+.red-col {
+  flex: 1;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.stats-col {
+  flex: 1;
+  padding: 0.5rem;
 }
 
 label {
@@ -353,4 +385,4 @@ label {
   display: flex;
   justify-content: flex-end;
 }
-</style> 
+</style>

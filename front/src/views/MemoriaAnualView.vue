@@ -169,36 +169,36 @@ import AgenciaLocalEstructura from '../components/memoria/AgenciaLocal/AgenciaLo
 import AgenciaLocalSedes from '../components/memoria/AgenciaLocal/AgenciaLocalSedes.vue';
 
 // Importar componentes de Empleo y Formación
-import EmpleoFormacionProgramas from '../components/memoria/EmpleoFormacionProgramas.vue';
-import EmpleoFormacionFormacion from '../components/memoria/EmpleoFormacionFormacion.vue';
-import EmpleoFormacionEstadisticas from '../components/memoria/EmpleoFormacionEstadisticas.vue';
-import EmpleoFormacionObjetivos from '../components/memoria/EmpleoFormacionObjetivos.vue';
-import EmpleoFormacionConclusiones from '../components/memoria/EmpleoFormacionConclusiones.vue';
-import EmpleoFormacionAnexos from '../components/memoria/EmpleoFormacionAnexos.vue';
+import EmpleoFormacionProgramas from '../components/memoria/EmpleoFormacion/EmpleoFormacionProgramas.vue';
+import EmpleoFormacionFormacion from '../components/memoria/EmpleoFormacion/EmpleoFormacionFormacion.vue';
+import EmpleoFormacionEstadisticas from '../components/memoria/EmpleoFormacion/EmpleoFormacionEstadisticas.vue';
+import EmpleoFormacionObjetivos from '../components/memoria/EmpleoFormacion/EmpleoFormacionObjetivos.vue';
+import EmpleoFormacionConclusiones from '../components/memoria/EmpleoFormacion/EmpleoFormacionConclusiones.vue';
+import EmpleoFormacionAnexos from '../components/memoria/EmpleoFormacion/EmpleoFormacionAnexos.vue';
 
 // Importar componentes de Promoción Económica
-import PromocionEconomicaGeneral from '../components/memoria/PromocionEconomicaGeneral.vue';
-import PromocionEconomicaProgramas from '../components/memoria/PromocionEconomicaProgramas.vue';
-import PromocionEconomicaEmpresas from '../components/memoria/PromocionEconomicaEmpresas.vue';
-import PromocionEconomicaResultados from '../components/memoria/PromocionEconomicaResultados.vue';
-import PromocionEconomicaObjetivos from '../components/memoria/PromocionEconomicaObjetivos.vue';
-import PromocionEconomicaConclusiones from '../components/memoria/PromocionEconomicaConclusiones.vue';
+import PromocionEconomicaGeneral from '../components/memoria/PromocionEconomica/PromocionEconomicaGeneral.vue';
+import PromocionEconomicaProgramas from '../components/memoria/PromocionEconomica/PromocionEconomicaProgramas.vue';
+import PromocionEconomicaEmpresas from '../components/memoria/PromocionEconomica/PromocionEconomicaEmpresas.vue';
+import PromocionEconomicaResultados from '../components/memoria/PromocionEconomica/PromocionEconomicaResultados.vue';
+import PromocionEconomicaObjetivos from '../components/memoria/PromocionEconomica/PromocionEconomicaObjetivos.vue';
+import PromocionEconomicaConclusiones from '../components/memoria/PromocionEconomica/PromocionEconomicaConclusiones.vue';
 
 // Importar componentes de Desarrollo Local
-import DesarrolloLocalGeneral from '../components/memoria/DesarrolloLocalGeneral.vue';
-import DesarrolloLocalProgramas from '../components/memoria/DesarrolloLocalProgramas.vue';
-import DesarrolloLocalResultados from '../components/memoria/DesarrolloLocalResultados.vue';
-import DesarrolloLocalObjetivos from '../components/memoria/DesarrolloLocalObjetivos.vue';
-import DesarrolloLocalConclusiones from '../components/memoria/DesarrolloLocalConclusiones.vue';
+import DesarrolloLocalGeneral from '../components/memoria/DesarrolloLocal/DesarrolloLocalGeneral.vue';
+import DesarrolloLocalProgramas from '../components/memoria/DesarrolloLocal/DesarrolloLocalProgramas.vue';
+import DesarrolloLocalResultados from '../components/memoria/DesarrolloLocal/DesarrolloLocalResultados.vue';
+import DesarrolloLocalObjetivos from '../components/memoria/DesarrolloLocal/DesarrolloLocalObjetivos.vue';
+import DesarrolloLocalConclusiones from '../components/memoria/DesarrolloLocal/DesarrolloLocalConclusiones.vue';
 
 // Importar componentes de Gestión
-import GestionAuditorio from '../components/memoria/GestionAuditorio.vue';
-import GestionJuridica from '../components/memoria/GestionJuridica.vue';
+import GestionAuditorio from '../components/memoria/Gestion/GestionAuditorio.vue';
+import GestionJuridica from '../components/memoria/Gestion/GestionJuridica.vue';
 
 // Importar componentes de Marketing
-import MarketingWebRRSS from '../components/memoria/MarketingWebRRSS.vue';
-import MarketingCanales from '../components/memoria/MarketingCanales.vue';
-import MarketingCampañas from '@/components/memoria/MarketingCampañas.vue';
+import MarketingWebRRSS from '../components/memoria/Marketing/MarketingWebRRSS.vue';
+import MarketingCanales from '../components/memoria/Marketing/MarketingCanales.vue';
+import MarketingCampañas from '@/components/memoria/Marketing/MarketingCampañas.vue';
 
 const router = useRouter();
 
