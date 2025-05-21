@@ -163,10 +163,10 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 // Importar componentes de Agencia Local
-import AgenciaLocalGeneral from '../components/memoria/AgenciaLocalGeneral.vue';
-import AgenciaLocalQueHacemos from '../components/memoria/AgenciaLocalQueHacemos.vue';
-import AgenciaLocalEstructura from '../components/memoria/AgenciaLocalEstructura.vue';
-import AgenciaLocalSedes from '../components/memoria/AgenciaLocalSedes.vue';
+import AgenciaLocalGeneral from '../components/memoria/AgenciaLocal/AgenciaLocalGeneral.vue';
+import AgenciaLocalQueHacemos from '../components/memoria/AgenciaLocal/AgenciaLocalQueHacemos.vue';
+import AgenciaLocalEstructura from '../components/memoria/AgenciaLocal/AgenciaLocalEstructura.vue';
+import AgenciaLocalSedes from '../components/memoria/AgenciaLocal/AgenciaLocalSedes.vue';
 
 // Importar componentes de Empleo y Formación
 import EmpleoFormacionProgramas from '../components/memoria/EmpleoFormacionProgramas.vue';
@@ -196,11 +196,9 @@ import GestionAuditorio from '../components/memoria/GestionAuditorio.vue';
 import GestionJuridica from '../components/memoria/GestionJuridica.vue';
 
 // Importar componentes de Marketing
-import MarketingGeneral from '../components/memoria/MarketingGeneral.vue';
-import MarketingEstrategias from '../components/memoria/MarketingEstrategias.vue';
-import MarketingResultados from '../components/memoria/MarketingResultados.vue';
-import MarketingObjetivos from '../components/memoria/MarketingObjetivos.vue';
-import MarketingConclusiones from '../components/memoria/MarketingConclusiones.vue';
+import MarketingWebRRSS from '../components/memoria/MarketingWebRRSS.vue';
+import MarketingCanales from '../components/memoria/MarketingCanales.vue';
+import MarketingCampañas from '@/components/memoria/MarketingCampañas.vue';
 
 const router = useRouter();
 
@@ -276,10 +274,9 @@ const pasosActuales = computed(() => {
       ];
     case 'marketing':
       return [
-        { titulo: 'Información General', componente: MarketingGeneral },
-        { titulo: 'Estrategias', componente: MarketingEstrategias },
-        { titulo: 'Resultados', componente: MarketingResultados },
-        { titulo: 'Objetivos', componente: MarketingObjetivos }
+        { titulo: 'Web y Redes Sociales', componente: MarketingWebRRSS },
+        { titulo: 'Otros Canales Online', componente: MarketingCanales },
+        { titulo: 'Campañas de Marketing y Publicidad', componente: MarketingCampañas }
       ];
     default:
       return [];
