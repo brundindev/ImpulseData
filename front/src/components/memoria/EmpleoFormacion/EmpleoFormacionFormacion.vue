@@ -1,232 +1,211 @@
 <template>
   <div class="form-step">
-    <h3>Formación</h3>
+    <h3>Objetivos y Metas</h3>
     
     <div class="form-group">
-      <label>Cursos de Formación</label>
-      <div class="cursos">
-        <div v-for="(curso, index) in datos.cursos" :key="index" class="curso-item">
-          <div class="curso-header">
-            <h4>Curso {{ index + 1 }}</h4>
+      <label>Objetivos Generales</label>
+      <div class="objetivos-generales">
+        <div v-for="(objetivo, index) in datos.objetivosGenerales" :key="index" class="objetivo-item">
+          <div class="objetivo-header">
+            <h4>Objetivo {{ index + 1 }}</h4>
             <button 
-              @click="eliminarCurso(index)" 
+              @click="eliminarObjetivo(index, 'general')" 
               class="btn btn-danger"
               type="button"
-              v-if="datos.cursos.length > 1"
+              v-if="datos.objetivosGenerales.length > 1"
             >
               Eliminar
             </button>
           </div>
           
           <div class="form-group">
-            <label>Nombre del Curso</label>
-            <input 
-              type="text" 
-              v-model="curso.nombre" 
-              class="form-control"
-              placeholder="Nombre del curso"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Área de Formación</label>
-            <select v-model="curso.area" class="form-control">
-              <option value="">Seleccione un área</option>
-              <option value="tecnologia">Tecnología</option>
-              <option value="administracion">Administración</option>
-              <option value="idiomas">Idiomas</option>
-              <option value="habilidades">Habilidades Blandas</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Modalidad</label>
-            <select v-model="curso.modalidad" class="form-control">
-              <option value="">Seleccione una modalidad</option>
-              <option value="presencial">Presencial</option>
-              <option value="online">Online</option>
-              <option value="hibrido">Híbrido</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Duración (horas)</label>
-            <input 
-              type="number" 
-              v-model="curso.duracion" 
-              class="form-control"
-              min="0"
-              placeholder="Duración en horas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha de Inicio</label>
-            <input 
-              type="date" 
-              v-model="curso.fechaInicio" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha de Fin</label>
-            <input 
-              type="date" 
-              v-model="curso.fechaFin" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Número de Plazas</label>
-            <input 
-              type="number" 
-              v-model="curso.plazas" 
-              class="form-control"
-              min="0"
-              placeholder="Número total de plazas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Plazas Ocupadas</label>
-            <input 
-              type="number" 
-              v-model="curso.plazasOcupadas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de plazas ocupadas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
+            <label>Descripción del Objetivo</label>
             <textarea 
-              v-model="curso.descripcion" 
+              v-model="objetivo.descripcion" 
               class="form-control"
               rows="3"
-              placeholder="Describa el contenido y objetivos del curso"
+              placeholder="Describa el objetivo general"
             ></textarea>
           </div>
           
           <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="curso.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
+            <label>Metas Asociadas</label>
+            <div v-for="(meta, metaIndex) in objetivo.metas" :key="metaIndex" class="meta-item">
+              <div class="meta-header">
+                <h5>Meta {{ metaIndex + 1 }}</h5>
+                <button 
+                  @click="eliminarMeta(index, metaIndex)" 
+                  class="btn btn-danger"
+                  type="button"
+                  v-if="objetivo.metas.length > 1"
+                >
+                  Eliminar
+                </button>
+              </div>
+              
+              <div class="form-group">
+                <label>Descripción de la Meta</label>
+                <textarea 
+                  v-model="meta.descripcion" 
+                  class="form-control"
+                  rows="2"
+                  placeholder="Describa la meta"
+                ></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>Indicador de Éxito</label>
+                <input 
+                  type="text" 
+                  v-model="meta.indicador" 
+                  class="form-control"
+                  placeholder="Indicador para medir el éxito"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>Valor Objetivo</label>
+                <input 
+                  type="number" 
+                  v-model="meta.valorObjetivo" 
+                  class="form-control"
+                  min="0"
+                  placeholder="Valor objetivo a alcanzar"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>Valor Alcanzado</label>
+                <input 
+                  type="number" 
+                  v-model="meta.valorAlcanzado" 
+                  class="form-control"
+                  min="0"
+                  placeholder="Valor alcanzado"
+                >
+              </div>
+            </div>
+            
+            <button 
+              @click="agregarMeta(index)" 
+              class="btn btn-secondary"
+              type="button"
+            >
+              Agregar Meta
+            </button>
           </div>
         </div>
         
         <button 
-          @click="agregarCurso" 
+          @click="agregarObjetivo('general')" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Curso
+          Agregar Objetivo General
         </button>
       </div>
     </div>
 
     <div class="form-group">
-      <label>Talleres y Seminarios</label>
-      <div class="talleres">
-        <div v-for="(taller, index) in datos.talleres" :key="index" class="taller-item">
-          <div class="taller-header">
-            <h4>Taller {{ index + 1 }}</h4>
+      <label>Objetivos Específicos</label>
+      <div class="objetivos-especificos">
+        <div v-for="(objetivo, index) in datos.objetivosEspecificos" :key="index" class="objetivo-item">
+          <div class="objetivo-header">
+            <h4>Objetivo {{ index + 1 }}</h4>
             <button 
-              @click="eliminarTaller(index)" 
+              @click="eliminarObjetivo(index, 'especifico')" 
               class="btn btn-danger"
               type="button"
-              v-if="datos.talleres.length > 1"
+              v-if="datos.objetivosEspecificos.length > 1"
             >
               Eliminar
             </button>
           </div>
           
           <div class="form-group">
-            <label>Nombre del Taller</label>
-            <input 
-              type="text" 
-              v-model="taller.nombre" 
-              class="form-control"
-              placeholder="Nombre del taller o seminario"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Tipo</label>
-            <select v-model="taller.tipo" class="form-control">
-              <option value="">Seleccione un tipo</option>
-              <option value="taller">Taller</option>
-              <option value="seminario">Seminario</option>
-              <option value="workshop">Workshop</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha</label>
-            <input 
-              type="date" 
-              v-model="taller.fecha" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Duración (horas)</label>
-            <input 
-              type="number" 
-              v-model="taller.duracion" 
-              class="form-control"
-              min="0"
-              placeholder="Duración en horas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Participantes</label>
-            <input 
-              type="number" 
-              v-model="taller.participantes" 
-              class="form-control"
-              min="0"
-              placeholder="Número de participantes"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
+            <label>Descripción del Objetivo</label>
             <textarea 
-              v-model="taller.descripcion" 
+              v-model="objetivo.descripcion" 
               class="form-control"
               rows="3"
-              placeholder="Describa el contenido y objetivos del taller"
+              placeholder="Describa el objetivo específico"
             ></textarea>
           </div>
           
           <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="taller.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
+            <label>Metas Asociadas</label>
+            <div v-for="(meta, metaIndex) in objetivo.metas" :key="metaIndex" class="meta-item">
+              <div class="meta-header">
+                <h5>Meta {{ metaIndex + 1 }}</h5>
+                <button 
+                  @click="eliminarMetaEspecifica(index, metaIndex)" 
+                  class="btn btn-danger"
+                  type="button"
+                  v-if="objetivo.metas.length > 1"
+                >
+                  Eliminar
+                </button>
+              </div>
+              
+              <div class="form-group">
+                <label>Descripción de la Meta</label>
+                <textarea 
+                  v-model="meta.descripcion" 
+                  class="form-control"
+                  rows="2"
+                  placeholder="Describa la meta"
+                ></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>Indicador de Éxito</label>
+                <input 
+                  type="text" 
+                  v-model="meta.indicador" 
+                  class="form-control"
+                  placeholder="Indicador para medir el éxito"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>Valor Objetivo</label>
+                <input 
+                  type="number" 
+                  v-model="meta.valorObjetivo" 
+                  class="form-control"
+                  min="0"
+                  placeholder="Valor objetivo a alcanzar"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>Valor Alcanzado</label>
+                <input 
+                  type="number" 
+                  v-model="meta.valorAlcanzado" 
+                  class="form-control"
+                  min="0"
+                  placeholder="Valor alcanzado"
+                >
+              </div>
+            </div>
+            
+            <button 
+              @click="agregarMetaEspecifica(index)" 
+              class="btn btn-secondary"
+              type="button"
+            >
+              Agregar Meta
+            </button>
           </div>
         </div>
         
         <button 
-          @click="agregarTaller" 
+          @click="agregarObjetivo('especifico')" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Taller
+          Agregar Objetivo Específico
         </button>
       </div>
     </div>
@@ -268,82 +247,101 @@ const datos = computed({
 });
 
 // Inicializar datos si no existen
-if (!datos.value.cursos) {
-  datos.value.cursos = [{
-    nombre: '',
-    area: '',
-    modalidad: '',
-    duracion: 0,
-    fechaInicio: '',
-    fechaFin: '',
-    plazas: 0,
-    plazasOcupadas: 0,
+if (!datos.value.objetivosGenerales) {
+  datos.value.objetivosGenerales = [{
     descripcion: '',
-    resultados: ''
+    metas: [{
+      descripcion: '',
+      indicador: '',
+      valorObjetivo: 0,
+      valorAlcanzado: 0
+    }]
   }];
 }
 
-if (!datos.value.talleres) {
-  datos.value.talleres = [{
-    nombre: '',
-    tipo: '',
-    fecha: '',
-    duracion: 0,
-    participantes: 0,
+if (!datos.value.objetivosEspecificos) {
+  datos.value.objetivosEspecificos = [{
     descripcion: '',
-    resultados: ''
+    metas: [{
+      descripcion: '',
+      indicador: '',
+      valorObjetivo: 0,
+      valorAlcanzado: 0
+    }]
   }];
 }
 
-const agregarCurso = () => {
-  datos.value.cursos.push({
-    nombre: '',
-    area: '',
-    modalidad: '',
-    duracion: 0,
-    fechaInicio: '',
-    fechaFin: '',
-    plazas: 0,
-    plazasOcupadas: 0,
+const agregarObjetivo = (tipo) => {
+  const nuevoObjetivo = {
     descripcion: '',
-    resultados: ''
-  });
-};
-
-const eliminarCurso = (index) => {
-  if (datos.value.cursos.length > 1) {
-    datos.value.cursos.splice(index, 1);
+    metas: [{
+      descripcion: '',
+      indicador: '',
+      valorObjetivo: 0,
+      valorAlcanzado: 0
+    }]
+  };
+  
+  if (tipo === 'general') {
+    datos.value.objetivosGenerales.push(nuevoObjetivo);
+  } else {
+    datos.value.objetivosEspecificos.push(nuevoObjetivo);
   }
 };
 
-const agregarTaller = () => {
-  datos.value.talleres.push({
-    nombre: '',
-    tipo: '',
-    fecha: '',
-    duracion: 0,
-    participantes: 0,
+const eliminarObjetivo = (index, tipo) => {
+  if (tipo === 'general' && datos.value.objetivosGenerales.length > 1) {
+    datos.value.objetivosGenerales.splice(index, 1);
+  } else if (tipo === 'especifico' && datos.value.objetivosEspecificos.length > 1) {
+    datos.value.objetivosEspecificos.splice(index, 1);
+  }
+};
+
+const agregarMeta = (objetivoIndex) => {
+  datos.value.objetivosGenerales[objetivoIndex].metas.push({
     descripcion: '',
-    resultados: ''
+    indicador: '',
+    valorObjetivo: 0,
+    valorAlcanzado: 0
   });
 };
 
-const eliminarTaller = (index) => {
-  if (datos.value.talleres.length > 1) {
-    datos.value.talleres.splice(index, 1);
+const eliminarMeta = (objetivoIndex, metaIndex) => {
+  if (datos.value.objetivosGenerales[objetivoIndex].metas.length > 1) {
+    datos.value.objetivosGenerales[objetivoIndex].metas.splice(metaIndex, 1);
+  }
+};
+
+const agregarMetaEspecifica = (objetivoIndex) => {
+  datos.value.objetivosEspecificos[objetivoIndex].metas.push({
+    descripcion: '',
+    indicador: '',
+    valorObjetivo: 0,
+    valorAlcanzado: 0
+  });
+};
+
+const eliminarMetaEspecifica = (objetivoIndex, metaIndex) => {
+  if (datos.value.objetivosEspecificos[objetivoIndex].metas.length > 1) {
+    datos.value.objetivosEspecificos[objetivoIndex].metas.splice(metaIndex, 1);
   }
 };
 
 const esValido = computed(() => {
-  return datos.value.cursos.every(curso => 
-    curso.nombre && curso.area && curso.modalidad && 
-    curso.duracion > 0 && curso.fechaInicio && curso.fechaFin &&
-    curso.plazas >= 0 && curso.plazasOcupadas >= 0
-  ) &&
-  datos.value.talleres.every(taller => 
-    taller.nombre && taller.tipo && taller.fecha && 
-    taller.duracion > 0 && taller.participantes >= 0
-  );
+  const validarObjetivos = (objetivos) => {
+    return objetivos.every(objetivo => 
+      objetivo.descripcion && 
+      objetivo.metas.every(meta => 
+        meta.descripcion && 
+        meta.indicador && 
+        meta.valorObjetivo >= 0 && 
+        meta.valorAlcanzado >= 0
+      )
+    );
+  };
+
+  return validarObjetivos(datos.value.objetivosGenerales) && 
+         validarObjetivos(datos.value.objetivosEspecificos);
 });
 </script>
 
@@ -357,27 +355,41 @@ const esValido = computed(() => {
   margin-bottom: 1.5rem;
 }
 
-.curso-item,
-.taller-item {
+.objetivo-item {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
 
-.curso-header,
-.taller-header {
+.meta-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+}
+
+.objetivo-header,
+.meta-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.curso-header h4,
-.taller-header h4 {
+.objetivo-header h4,
+.meta-header h5 {
   margin: 0;
   color: #004698;
+}
+
+.objetivo-header h4 {
   font-size: 1.2rem;
+}
+
+.meta-header h5 {
+  font-size: 1rem;
 }
 
 label {

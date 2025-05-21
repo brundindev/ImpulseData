@@ -1,224 +1,153 @@
 <template>
   <div class="form-step">
-    <h3>Programas de Empleo</h3>
+    <h3>Conclusiones y Recomendaciones</h3>
     
     <div class="form-group">
-      <label>Programas de Orientación</label>
-      <div class="programas">
-        <div v-for="(programa, index) in datos.programasOrientacion" :key="index" class="programa-item">
-          <div class="programa-header">
-            <h4>Programa {{ index + 1 }}</h4>
+      <label>Conclusiones</label>
+      <div class="conclusiones">
+        <div v-for="(conclusion, index) in datos.conclusiones" :key="index" class="conclusion-item">
+          <div class="conclusion-header">
+            <h4>Conclusión {{ index + 1 }}</h4>
             <button 
-              @click="eliminarPrograma(index, 'orientacion')" 
+              @click="eliminarConclusion(index)" 
               class="btn btn-danger"
               type="button"
-              v-if="datos.programasOrientacion.length > 1"
+              v-if="datos.conclusiones.length > 1"
             >
               Eliminar
             </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre del Programa</label>
-            <input 
-              type="text" 
-              v-model="programa.nombre" 
-              class="form-control"
-              placeholder="Nombre del programa de orientación"
-            >
           </div>
           
           <div class="form-group">
             <label>Descripción</label>
             <textarea 
-              v-model="programa.descripcion" 
+              v-model="conclusion.descripcion" 
               class="form-control"
               rows="3"
-              placeholder="Describa el programa y sus objetivos"
+              placeholder="Describa la conclusión"
             ></textarea>
           </div>
           
           <div class="form-group">
-            <label>Personas Atendidas</label>
-            <input 
-              type="number" 
-              v-model="programa.personasAtendidas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de personas atendidas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="programa.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarPrograma('orientacion')" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Programa de Orientación
-        </button>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Programas de Inserción</label>
-      <div class="programas">
-        <div v-for="(programa, index) in datos.programasInsercion" :key="index" class="programa-item">
-          <div class="programa-header">
-            <h4>Programa {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarPrograma(index, 'insercion')" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.programasInsercion.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre del Programa</label>
-            <input 
-              type="text" 
-              v-model="programa.nombre" 
-              class="form-control"
-              placeholder="Nombre del programa de inserción"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="programa.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el programa y sus objetivos"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Personas Inscritas</label>
-            <input 
-              type="number" 
-              v-model="programa.personasInscritas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de personas inscritas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Personas Insertadas</label>
-            <input 
-              type="number" 
-              v-model="programa.personasInsertadas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de personas insertadas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="programa.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarPrograma('insercion')" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Programa de Inserción
-        </button>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Colaboraciones con Empresas</label>
-      <div class="colaboraciones">
-        <div v-for="(colaboracion, index) in datos.colaboracionesEmpresas" :key="index" class="colaboracion-item">
-          <div class="colaboracion-header">
-            <h4>Colaboración {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarColaboracion(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.colaboracionesEmpresas.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre de la Empresa</label>
-            <input 
-              type="text" 
-              v-model="colaboracion.empresa" 
-              class="form-control"
-              placeholder="Nombre de la empresa colaboradora"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Tipo de Colaboración</label>
-            <select v-model="colaboracion.tipo" class="form-control">
-              <option value="">Seleccione un tipo</option>
-              <option value="practicas">Prácticas</option>
-              <option value="contratacion">Contratación</option>
+            <label>Área Relacionada</label>
+            <select v-model="conclusion.area" class="form-control">
+              <option value="">Seleccione un área</option>
+              <option value="empleo">Empleo</option>
               <option value="formacion">Formación</option>
+              <option value="orientacion">Orientación</option>
+              <option value="insercion">Inserción</option>
               <option value="otro">Otro</option>
             </select>
           </div>
           
           <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="colaboracion.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa la colaboración y sus resultados"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Personas Beneficiadas</label>
-            <input 
-              type="number" 
-              v-model="colaboracion.personasBeneficiadas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de personas beneficiadas"
-            >
+            <label>Impacto</label>
+            <select v-model="conclusion.impacto" class="form-control">
+              <option value="">Seleccione el impacto</option>
+              <option value="alto">Alto</option>
+              <option value="medio">Medio</option>
+              <option value="bajo">Bajo</option>
+            </select>
           </div>
         </div>
         
         <button 
-          @click="agregarColaboracion" 
+          @click="agregarConclusion" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Colaboración
+          Agregar Conclusión
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Recomendaciones</label>
+      <div class="recomendaciones">
+        <div v-for="(recomendacion, index) in datos.recomendaciones" :key="index" class="recomendacion-item">
+          <div class="recomendacion-header">
+            <h4>Recomendación {{ index + 1 }}</h4>
+            <button 
+              @click="eliminarRecomendacion(index)" 
+              class="btn btn-danger"
+              type="button"
+              v-if="datos.recomendaciones.length > 1"
+            >
+              Eliminar
+            </button>
+          </div>
+          
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea 
+              v-model="recomendacion.descripcion" 
+              class="form-control"
+              rows="3"
+              placeholder="Describa la recomendación"
+            ></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Área de Aplicación</label>
+            <select v-model="recomendacion.area" class="form-control">
+              <option value="">Seleccione un área</option>
+              <option value="empleo">Empleo</option>
+              <option value="formacion">Formación</option>
+              <option value="orientacion">Orientación</option>
+              <option value="insercion">Inserción</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Prioridad</label>
+            <select v-model="recomendacion.prioridad" class="form-control">
+              <option value="">Seleccione la prioridad</option>
+              <option value="alta">Alta</option>
+              <option value="media">Media</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Plazo de Implementación</label>
+            <select v-model="recomendacion.plazo" class="form-control">
+              <option value="">Seleccione el plazo</option>
+              <option value="corto">Corto Plazo (0-6 meses)</option>
+              <option value="medio">Medio Plazo (6-12 meses)</option>
+              <option value="largo">Largo Plazo (más de 12 meses)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Recursos Necesarios</label>
+            <textarea 
+              v-model="recomendacion.recursos" 
+              class="form-control"
+              rows="2"
+              placeholder="Describa los recursos necesarios para implementar la recomendación"
+            ></textarea>
+          </div>
+        </div>
+        
+        <button 
+          @click="agregarRecomendacion" 
+          class="btn btn-secondary"
+          type="button"
+        >
+          Agregar Recomendación
         </button>
       </div>
     </div>
 
     <div class="form-actions">
+      <button 
+        @click="$emit('anterior')" 
+        class="btn btn-secondary"
+        type="button"
+      >
+        Anterior
+      </button>
       <button 
         @click="$emit('siguiente')" 
         class="btn btn-primary"
@@ -240,7 +169,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:modelValue', 'siguiente']);
+const emit = defineEmits(['update:modelValue', 'siguiente', 'anterior']);
 
 const datos = computed({
   get: () => props.modelValue,
@@ -248,86 +177,63 @@ const datos = computed({
 });
 
 // Inicializar datos si no existen
-if (!datos.value.programasOrientacion) {
-  datos.value.programasOrientacion = [{
-    nombre: '',
+if (!datos.value.conclusiones) {
+  datos.value.conclusiones = [{
     descripcion: '',
-    personasAtendidas: 0,
-    resultados: ''
+    area: '',
+    impacto: ''
   }];
 }
 
-if (!datos.value.programasInsercion) {
-  datos.value.programasInsercion = [{
-    nombre: '',
+if (!datos.value.recomendaciones) {
+  datos.value.recomendaciones = [{
     descripcion: '',
-    personasInscritas: 0,
-    personasInsertadas: 0,
-    resultados: ''
+    area: '',
+    prioridad: '',
+    plazo: '',
+    recursos: ''
   }];
 }
 
-if (!datos.value.colaboracionesEmpresas) {
-  datos.value.colaboracionesEmpresas = [{
-    empresa: '',
-    tipo: '',
+const agregarConclusion = () => {
+  datos.value.conclusiones.push({
     descripcion: '',
-    personasBeneficiadas: 0
-  }];
-}
-
-const agregarPrograma = (tipo) => {
-  if (tipo === 'orientacion') {
-    datos.value.programasOrientacion.push({
-      nombre: '',
-      descripcion: '',
-      personasAtendidas: 0,
-      resultados: ''
-    });
-  } else {
-    datos.value.programasInsercion.push({
-      nombre: '',
-      descripcion: '',
-      personasInscritas: 0,
-      personasInsertadas: 0,
-      resultados: ''
-    });
-  }
-};
-
-const eliminarPrograma = (index, tipo) => {
-  if (tipo === 'orientacion' && datos.value.programasOrientacion.length > 1) {
-    datos.value.programasOrientacion.splice(index, 1);
-  } else if (tipo === 'insercion' && datos.value.programasInsercion.length > 1) {
-    datos.value.programasInsercion.splice(index, 1);
-  }
-};
-
-const agregarColaboracion = () => {
-  datos.value.colaboracionesEmpresas.push({
-    empresa: '',
-    tipo: '',
-    descripcion: '',
-    personasBeneficiadas: 0
+    area: '',
+    impacto: ''
   });
 };
 
-const eliminarColaboracion = (index) => {
-  if (datos.value.colaboracionesEmpresas.length > 1) {
-    datos.value.colaboracionesEmpresas.splice(index, 1);
+const eliminarConclusion = (index) => {
+  if (datos.value.conclusiones.length > 1) {
+    datos.value.conclusiones.splice(index, 1);
+  }
+};
+
+const agregarRecomendacion = () => {
+  datos.value.recomendaciones.push({
+    descripcion: '',
+    area: '',
+    prioridad: '',
+    plazo: '',
+    recursos: ''
+  });
+};
+
+const eliminarRecomendacion = (index) => {
+  if (datos.value.recomendaciones.length > 1) {
+    datos.value.recomendaciones.splice(index, 1);
   }
 };
 
 const esValido = computed(() => {
-  return datos.value.programasOrientacion.every(programa => 
-    programa.nombre && programa.descripcion && programa.personasAtendidas >= 0
+  return datos.value.conclusiones.every(conclusion => 
+    conclusion.descripcion && conclusion.area && conclusion.impacto
   ) &&
-  datos.value.programasInsercion.every(programa => 
-    programa.nombre && programa.descripcion && 
-    programa.personasInscritas >= 0 && programa.personasInsertadas >= 0
-  ) &&
-  datos.value.colaboracionesEmpresas.every(colaboracion => 
-    colaboracion.empresa && colaboracion.tipo && colaboracion.descripcion
+  datos.value.recomendaciones.every(recomendacion => 
+    recomendacion.descripcion && 
+    recomendacion.area && 
+    recomendacion.prioridad && 
+    recomendacion.plazo
   );
 });
 </script>
@@ -342,24 +248,24 @@ const esValido = computed(() => {
   margin-bottom: 1.5rem;
 }
 
-.programa-item,
-.colaboracion-item {
+.conclusion-item,
+.recomendacion-item {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
 
-.programa-header,
-.colaboracion-header {
+.conclusion-header,
+.recomendacion-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.programa-header h4,
-.colaboracion-header h4 {
+.conclusion-header h4,
+.recomendacion-header h4 {
   margin: 0;
   color: #004698;
   font-size: 1.2rem;
@@ -427,6 +333,6 @@ textarea.form-control {
 .form-actions {
   margin-top: 2rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 </style> 

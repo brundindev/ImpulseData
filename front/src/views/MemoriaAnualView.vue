@@ -169,27 +169,28 @@ import AgenciaLocalEstructura from '../components/memoria/AgenciaLocal/AgenciaLo
 import AgenciaLocalSedes from '../components/memoria/AgenciaLocal/AgenciaLocalSedes.vue';
 
 // Importar componentes de Empleo y Formación
-import EmpleoFormacionProgramas from '../components/memoria/EmpleoFormacion/EmpleoFormacionProgramas.vue';
+import EmpleoFormacionDatos from '../components/memoria/EmpleoFormacion/EmpleoFormacionDatos.vue';
+import EmpleoFormacionCentros from '../components/memoria/EmpleoFormacion/EmpleoFormacionCentros.vue';
+import EmpleoFormacionServicios from '../components/memoria/EmpleoFormacion/EmpleoFormacionServicios.vue';
 import EmpleoFormacionFormacion from '../components/memoria/EmpleoFormacion/EmpleoFormacionFormacion.vue';
-import EmpleoFormacionEstadisticas from '../components/memoria/EmpleoFormacion/EmpleoFormacionEstadisticas.vue';
-import EmpleoFormacionObjetivos from '../components/memoria/EmpleoFormacion/EmpleoFormacionObjetivos.vue';
-import EmpleoFormacionConclusiones from '../components/memoria/EmpleoFormacion/EmpleoFormacionConclusiones.vue';
-import EmpleoFormacionAnexos from '../components/memoria/EmpleoFormacion/EmpleoFormacionAnexos.vue';
+import EmpleoFormacionProgramas from '../components/memoria/EmpleoFormacion/EmpleoFormacionProgramas.vue';
+import EmpleoFormacionSubvenciones from '../components/memoria/EmpleoFormacion/EmpleoFormacionSubvenciones.vue';
+import EmpleoFormacionOtros from '../components/memoria/EmpleoFormacion/EmpleoFormacionOtros.vue';
 
 // Importar componentes de Promoción Económica
-import PromocionEconomicaGeneral from '../components/memoria/PromocionEconomica/PromocionEconomicaGeneral.vue';
 import PromocionEconomicaProgramas from '../components/memoria/PromocionEconomica/PromocionEconomicaProgramas.vue';
-import PromocionEconomicaEmpresas from '../components/memoria/PromocionEconomica/PromocionEconomicaEmpresas.vue';
-import PromocionEconomicaResultados from '../components/memoria/PromocionEconomica/PromocionEconomicaResultados.vue';
-import PromocionEconomicaObjetivos from '../components/memoria/PromocionEconomica/PromocionEconomicaObjetivos.vue';
-import PromocionEconomicaConclusiones from '../components/memoria/PromocionEconomica/PromocionEconomicaConclusiones.vue';
+import PromocionEconomicaViveros from '../components/memoria/PromocionEconomica/PromocionEconomicaViveros.vue';
+import PromocionEconomicaAyudasEconomicas from '../components/memoria/PromocionEconomica/PromocionEconomicaAyudasEconomicas.vue';
+import PromocionEconomicaColaboracion from '../components/memoria/PromocionEconomica/PromocionEconomicaColaboracion.vue';
 
 // Importar componentes de Desarrollo Local
-import DesarrolloLocalGeneral from '../components/memoria/DesarrolloLocal/DesarrolloLocalGeneral.vue';
-import DesarrolloLocalProgramas from '../components/memoria/DesarrolloLocal/DesarrolloLocalProgramas.vue';
-import DesarrolloLocalResultados from '../components/memoria/DesarrolloLocal/DesarrolloLocalResultados.vue';
-import DesarrolloLocalObjetivos from '../components/memoria/DesarrolloLocal/DesarrolloLocalObjetivos.vue';
-import DesarrolloLocalConclusiones from '../components/memoria/DesarrolloLocal/DesarrolloLocalConclusiones.vue';
+import DesarrolloLocalPrograma from '../components/memoria/DesarrolloLocal/DesarrolloLocalPrograma.vue';
+import DesarrolloLocalObservatorio from '../components/memoria/DesarrolloLocal/DesarrolloLocalObservatorio.vue';
+import DesarrolloLocalAlicanteFutura from '../components/memoria/DesarrolloLocal/DesarrolloLocalAlicanteFutura.vue';
+import DesarrolloLocalALIA from '../components/memoria/DesarrolloLocal/DesarrolloLocalALIA.vue';
+import DesarrolloLocalCILAB from '../components/memoria/DesarrolloLocal/DesarrolloLocalCILAB.vue';
+import DesarrolloLocalOficinaProyEuropeos from '../components/memoria/DesarrolloLocal/DesarrolloLocalOficinaProyEuropeos.vue';
+import DesarrolloLocalParticipacion from '../components/memoria/DesarrolloLocal/DesarrolloLocalParticipacion.vue';
 
 // Importar componentes de Gestión
 import GestionAuditorio from '../components/memoria/Gestion/GestionAuditorio.vue';
@@ -198,7 +199,7 @@ import GestionJuridica from '../components/memoria/Gestion/GestionJuridica.vue';
 // Importar componentes de Marketing
 import MarketingWebRRSS from '../components/memoria/Marketing/MarketingWebRRSS.vue';
 import MarketingCanales from '../components/memoria/Marketing/MarketingCanales.vue';
-import MarketingCampañas from '@/components/memoria/Marketing/MarketingCampañas.vue';
+import MarketingCampañas from '../components/memoria/Marketing/MarketingCampañas.vue';
 
 const router = useRouter();
 
@@ -236,36 +237,37 @@ const pasosActuales = computed(() => {
   switch (seccionActual.value) {
     case 'agenciaLocal':
       return [
-        { titulo: 'LA AGENCIA LOCAL EN CIFRAS', componente: AgenciaLocalGeneral },
+        { titulo: 'La agencia local en cifras', componente: AgenciaLocalGeneral },
         { titulo: 'Qué hacemos', componente: AgenciaLocalQueHacemos },
-        { titulo: 'CÓMO ESTAMOS ORGANIZADOS', componente: AgenciaLocalEstructura },
+        { titulo: 'Cómo estamos organizados', componente: AgenciaLocalEstructura },
         { titulo: 'Dónde estamos', componente: AgenciaLocalSedes }
       ];
     case 'empleoFormacion':
       return [
-        { titulo: 'Programas de Empleo', componente: EmpleoFormacionProgramas },
+        { titulo: 'Datos Totales', componente: EmpleoFormacionDatos },
+        { titulo: 'Nuestros Centros', componente: EmpleoFormacionCentros },
+        { titulo: 'Nuestros Servicios', componente: EmpleoFormacionServicios },
         { titulo: 'Formación', componente: EmpleoFormacionFormacion },
-        { titulo: 'Estadísticas', componente: EmpleoFormacionEstadisticas },
-        { titulo: 'Objetivos', componente: EmpleoFormacionObjetivos },
-        { titulo: 'Conclusiones', componente: EmpleoFormacionConclusiones },
-        { titulo: 'Anexos', componente: EmpleoFormacionAnexos }
+        { titulo: 'Programas y Proyectos', componente: EmpleoFormacionProgramas },
+        { titulo: 'Subvenciones', componente: EmpleoFormacionSubvenciones },
+        { titulo: 'Otros', componente: EmpleoFormacionOtros }
       ];
     case 'promocionEconomica':
       return [
-        { titulo: 'Información General', componente: PromocionEconomicaGeneral },
-        { titulo: 'Programas y Proyectos', componente: PromocionEconomicaProgramas },
-        { titulo: 'Empresas y Emprendedores', componente: PromocionEconomicaEmpresas },
-        { titulo: 'Resultados', componente: PromocionEconomicaResultados },
-        { titulo: 'Objetivos', componente: PromocionEconomicaObjetivos },
-        { titulo: 'Conclusiones', componente: PromocionEconomicaConclusiones }
+        { titulo: 'Programas de Fomento de Emprendimiento', componente: PromocionEconomicaProgramas },
+        { titulo: 'Viveros Empresariales', componente: PromocionEconomicaViveros },
+        { titulo: 'Ayudas Económicas a Empresas de la ciudad de Alicante', componente: PromocionEconomicaAyudasEconomicas },
+        { titulo: 'Colaboración en eventos de emprendimiento y promoción empresarial', componente: PromocionEconomicaColaboracion }
       ];
     case 'desarrolloLocal':
       return [
-        { titulo: 'Información General', componente: DesarrolloLocalGeneral },
-        { titulo: 'Programas Estratégicos', componente: DesarrolloLocalProgramas },
-        { titulo: 'Resultados', componente: DesarrolloLocalResultados },
-        { titulo: 'Objetivos', componente: DesarrolloLocalObjetivos },
-        { titulo: 'Conclusiones', componente: DesarrolloLocalConclusiones }
+        { titulo: 'Programa de dinamización de Polígonos Industriales y Nuevos espacios productivos', componente: DesarrolloLocalPrograma },
+        { titulo: 'Observatorio de Estrategias del Pacto Territorial por el empleo de la ciudad de Alicante', componente: DesarrolloLocalObservatorio },
+        { titulo: 'Alicante Futura', componente: DesarrolloLocalAlicanteFutura },
+        { titulo: 'Oficina de Atracción de Inversiones - OAI', componente: DesarrolloLocalALIA },
+        { titulo: 'Proyecto CILAB Alicante Fase II', componente: DesarrolloLocalCILAB },
+        { titulo: 'Oficina de Proyectos Europeos', componente: DesarrolloLocalOficinaProyEuropeos },
+        { titulo: 'Participación en eventos y congresos', componente: DesarrolloLocalParticipacion }
       ];
     case 'gestion':
       return [
