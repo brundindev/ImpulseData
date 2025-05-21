@@ -286,7 +286,7 @@ const esValido = computed(() => {
 
 .redes-header {
   display: flex;
-  background: #004698;
+  background: #8a6d57;  ;
   color: white;
   font-weight: 500;
   border-radius: 4px 4px 0 0;

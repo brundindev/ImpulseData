@@ -1,34 +1,51 @@
 <template>
   <div class="form-step">
-    <h3>Otros Canales Online</h3>
+    <h3>6.2 Otros Canales Online</h3>
     
-    <div class="form-group">
-      <label>MailChimp</label>
-      <input 
-        type="number"
-        v-model="datos.mailChimp"
-        class="form-control"
-        min="0"
-        placeholder="Nº de contactos"
-      > 
-      <input 
-        type="number"
-        v-model="datos.mailChimp"
-        class="form-control"
-        min="0"
-        placeholder="Nº de suscritos"
-      > 
+    <div class="canales-section">
+      <h4>MailChimp</h4>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Nº de contactos</label>
+          <input 
+            type="number"
+            v-model="datos.mailchimpContactos"
+            class="form-control"
+            min="0"
+            placeholder="Nº de contactos"
+            :value="datos.mailchimpContactos"
+          > 
+        </div>
+        <div class="form-group">
+          <label>Nº de suscritos</label>
+          <input 
+            type="number"
+            v-model="datos.mailchimpSuscritos"
+            class="form-control"
+            min="0"
+            placeholder="Nº de suscritos"
+            :value="datos.mailchimpSuscritos"
+          > 
+        </div>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label>Zoom</label>
-      <input 
-        type="number"
-        v-model="datos.zoom"
-        class="form-control"
-        min="0"
-        placeholder="Nº de actividades formativas, con una media de 25 asistentes por sesión"
-      >
+    <div class="canales-section">
+      <h4>Zoom</h4>
+      <div class="form-group">
+        <label>Nº de actividades formativas</label>
+        <div class="input-with-info">
+          <input 
+            type="number"
+            v-model="datos.zoomActividades"
+            class="form-control"
+            min="0"
+            placeholder="Nº de actividades formativas"
+            :value="datos.zoomActividades"
+          >
+          <small class="text-muted">Media de <input type="number" v-model="datos.zoomAsistentes" class="form-control" min="0" placeholder="Nº de asistentes" :value="datos.zoomAsistentes"> asistentes por sesión</small>
+        </div>
+      </div>
     </div>
 
     <div class="form-actions">
@@ -66,27 +83,11 @@ const datos = computed({
   set: (value) => emit('update:modelValue', value)
 });
 
-// Inicializar datos si no existen
-if (!datos.value.mailChimp) {
-  datos.value.mailChimp = [{
-    contactos: '',
-    suscritos: ''
-  }];
-}
-if (!datos.value.zoom) {
-  datos.value.zoom = [{
-    actividades: ''
-  }];
-}
 
 const esValido = computed(() => {
-  return datos.value.mailChimp.every(resultado => 
-    resultado.contactos && 
-    resultado.suscritos
-  ) &&
-  datos.value.zoom.every(resultado => 
-    resultado.actividades
-  );
+  return datos.value.mailchimpContactos > 0 && 
+         datos.value.mailchimpSuscritos > 0 &&
+         datos.value.zoomActividades > 0;
 });
 </script>
 
@@ -100,44 +101,35 @@ const esValido = computed(() => {
   margin-bottom: 1.5rem;
 }
 
-.item {
+.canales-section {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
 
-.item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.item-header h4 {
-  margin: 0;
+.canales-section h4 {
+  margin-top: 0;
   color: #004698;
   font-size: 1.2rem;
-}
-
-.metrica-item {
-  background: white;
-  padding: 1rem;
-  border-radius: 4px;
   margin-bottom: 1rem;
 }
 
-.metrica-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
-.metrica-header h5 {
-  margin: 0;
-  color: #004698;
-  font-size: 1rem;
+.input-with-info {
+  position: relative;
+}
+
+.text-muted {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
 }
 
 label {
@@ -212,4 +204,4 @@ label {
   display: flex;
   justify-content: space-between;
 }
-</style> 
+</style>

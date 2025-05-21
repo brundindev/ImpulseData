@@ -1,15 +1,73 @@
 <template>
   <div class="form-step">
-    <h3>Campañas de Marketing y Publicidad</h3>
+    <h3>6.3 Campañas de Marketing y Publicidad</h3>
     
-    <div class="form-group">
-      <label>Campañas de Marketing</label>
-      <input 
-            type="text" 
-            v-model="estrategia.campaña" 
-            class="form-control"
-            placeholder="Campaña de Marketing"
-      >
+    <div class="campanias-section">
+      <div class="campanias-grid">
+        <div 
+          v-for="(campania, index) in datos.campanias" 
+          :key="index" 
+          class="campania-item"
+        >
+          <div class="campania-header">
+            <h4>Campaña {{ index + 1 }}</h4>
+            <button 
+              v-if="datos.campanias.length > 1" 
+              @click="eliminarCampania(index)" 
+              class="btn btn-sm btn-danger"
+            >
+              <span class="btn-icon">×</span>
+            </button>
+          </div>
+          <div class="form-group">
+            <label>Nombre de la campaña</label>
+            <input 
+              v-model="campania.nombre" 
+              class="form-control"
+              placeholder="Nombre de la campaña"
+            >
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea 
+              v-model="campania.descripcion" 
+              class="form-control"
+              rows="2"
+              placeholder="Descripción de la campaña"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+      <button @click="agregarCampania" class="btn btn-primary">
+        <span class="btn-icon">+</span> Agregar Campaña
+      </button>
+    </div>
+
+    <div class="preview-section">
+      <h4>Vista previa de las campañas</h4>
+      <div class="report-section">
+        <div class="report-header">
+          <div class="report-number">6.3</div>
+          <div class="report-title">CAMPAÑAS DE MARKETING Y PUBLICIDAD</div>
+        </div>
+        
+        <div class="report-content">
+          <div class="campaigns-display">
+            <div class="campaigns-column">
+              <div v-for="(campania, index) in campaniasColumn1" :key="'camp1-'+index" class="campaign-bullet">
+                <div class="bullet">•</div>
+                <div class="campaign-text">{{ campania.nombre || 'Campaña ' + (index+1) }}</div>
+              </div>
+            </div>
+            <div class="campaigns-column">
+              <div v-for="(campania, index) in campaniasColumn2" :key="'camp2-'+index" class="campaign-bullet">
+                <div class="bullet">•</div>
+                <div class="campaign-text">{{ campania.nombre || 'Campaña ' + (index+1+campaniasColumn1.length) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="form-actions">
@@ -47,37 +105,49 @@ const datos = computed({
   set: (value) => emit('update:modelValue', value)
 });
 
-// Inicializar datos si no existen
-if (!datos.value.estrategiasDigitales) {
-  datos.value.estrategiasDigitales = [{
-    plataforma: '',
-    descripcion: '',
-    resultadosEsperados: ''
-  }];
-}
-if (!datos.value.estrategiasTradicionales) {
-  datos.value.estrategiasTradicionales = [{
-    medio: '',
-    descripcion: '',
-    resultadosEsperados: ''
-  }];
+// Inicializar campanias si no existen
+if (!datos.value.campanias || !datos.value.campanias.length) {
+  datos.value.campanias = [
+    { nombre: 'Catálogo de exportadores', descripcion: '' },
+    { nombre: 'Alicante Plaza', descripcion: '' },
+    { nombre: 'Revista Atalaya Empresarial', descripcion: '' },
+    { nombre: 'Web Aplicaciones', descripcion: '' },
+    { nombre: 'Asociación de Periodistas de Alicante', descripcion: '' },
+    { nombre: 'Portal Líder', descripcion: '' },
+    { nombre: 'Guía estudiantes UA', descripcion: '' },
+    { nombre: 'Onda Cero', descripcion: '' }
+  ];
 }
 
+// Dividir las campañas en dos columnas para el informe
+const campaniasColumn1 = computed(() => {
+  const mitad = Math.ceil(datos.value.campanias.length / 2);
+  return datos.value.campanias.slice(0, mitad);
+});
+
+const campaniasColumn2 = computed(() => {
+  const mitad = Math.ceil(datos.value.campanias.length / 2);
+  return datos.value.campanias.slice(mitad);
+});
+
+const agregarCampania = () => {
+  datos.value.campanias.push({
+    nombre: '',
+    descripcion: ''
+  });
+};
+
+const eliminarCampania = (index) => {
+  datos.value.campanias.splice(index, 1);
+};
+
 const esValido = computed(() => {
-  return datos.value.estrategiasDigitales.every(estrategia => 
-    estrategia.plataforma && estrategia.descripcion && estrategia.resultadosEsperados
-  ) &&
-  datos.value.estrategiasTradicionales.every(estrategia => 
-    estrategia.medio && estrategia.descripcion && estrategia.resultadosEsperados
-  );
+  return datos.value.campanias.length > 0 && 
+         datos.value.campanias.every(campania => campania.nombre);
 });
 
 function guardarYFinalizar() {
-  // Actualizar los valores totales antes de enviar
-  datos.value.importeAdjudicacion = importeTotal.value;
-  datos.value.importeTotalAdjudicacion = importeTotal.value;
-  
-  // Guardar los datos
+  // Guardar los datos 
   emit('guardar', datos.value);
   
   // Si todo está completo, avanzar
@@ -93,28 +163,111 @@ function guardarYFinalizar() {
   margin: 0 auto;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
+.campanias-section {
+  margin-bottom: 2rem;
 }
 
-.item {
+.campanias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.campania-item {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
-  margin-bottom: 1.5rem;
 }
 
-.item-header {
+.campania-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.item-header h4 {
+.campania-header h4 {
   margin: 0;
   color: #004698;
   font-size: 1.2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Preview section */
+.preview-section {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.preview-section h4 {
+  margin-top: 0;
+  color: #004698;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.report-section {
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+}
+
+.report-number {
+  background: #8a6d57;
+  color: white;
+  width: 40px;
+  /* height: 47px; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: .5rem 1rem;
+}
+
+.report-title {
+  background: #8a6d57;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex: 1;
+}
+
+.report-content {
+  padding: 1.5rem;
+}
+
+.campaigns-display {
+  display: flex;
+  gap: 2rem;
+}
+
+.campaigns-column {
+  flex: 1;
+}
+
+.campaign-bullet {
+  display: flex;
+  margin-bottom: 0.75rem;
+}
+
+.bullet {
+  margin-right: 0.5rem;
+  color: #004698;
+  font-weight: bold;
 }
 
 label {
@@ -189,4 +342,4 @@ label {
   display: flex;
   justify-content: space-between;
 }
-</style> 
+</style>
