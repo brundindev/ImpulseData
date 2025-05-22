@@ -9,6 +9,11 @@ import './assets/main.css'
 import './assets/ScrollAnimations.css'
 import '@fortawesome/fontawesome-free/css/all.css';
 
+// Importar Firebase y el observador de empresa global
+import { auth } from './firebase'
+import { onAuthStateChanged } from 'firebase/auth'
+import { startGlobalCompanyObserver, stopGlobalCompanyObserver } from './utils/globalCompanyObserver'
+
 // Importar y registrar la directiva de animación de scroll
 import ScrollAnimation from './directives/ScrollAnimation'
 
@@ -69,5 +74,18 @@ app.use(createPinia())
 app.use(router)
 app.use(store)
 app.use(ScrollAnimation)
+
+// Configurar el observador de autenticación para iniciar/detener el observador de empresa global
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Usuario autenticado, iniciar observador de empresa global
+    console.log("Usuario autenticado, iniciando observador de empresa global");
+    startGlobalCompanyObserver();
+  } else {
+    // Usuario desconectado, detener observador
+    console.log("Usuario desconectado, deteniendo observador de empresa global");
+    stopGlobalCompanyObserver();
+  }
+});
 
 app.mount('#app')

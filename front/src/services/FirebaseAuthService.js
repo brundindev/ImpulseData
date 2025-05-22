@@ -80,6 +80,14 @@ class FirebaseAuthService {
         // No bloqueamos el flujo de autenticación por este error
       }
       
+      // Asegurarnos de que la empresa global existe y está disponible para todos
+      try {
+        await FirestoreService.crearEmpresaPorDefectoGlobal();
+        console.log("✅ Empresa global creada/verificada durante el registro");
+      } catch (empresaError) {
+        console.warn("⚠️ Error al crear empresa global:", empresaError);
+      }
+      
       return user;
     } catch (error) {
       console.error('Error al registrar con Firebase:', error);
@@ -176,6 +184,14 @@ class FirebaseAuthService {
       } catch (empresaError) {
         console.error("Error al intentar crear empresa global:", empresaError);
         // No bloqueamos el flujo de autenticación por este error
+      }
+      
+      // Una vez autenticado, asegurarnos de que la empresa global está disponible
+      try {
+        await FirestoreService.crearEmpresaPorDefectoGlobal();
+        console.log("✅ Verificada la existencia de la empresa global durante el login");
+      } catch (empresaError) {
+        console.warn("⚠️ No se pudo verificar la empresa global:", empresaError);
       }
       
       return userCredential.user;
@@ -300,6 +316,14 @@ class FirebaseAuthService {
       } catch (empresaError) {
         console.error("Error al intentar crear empresa global:", empresaError);
         // No bloqueamos el flujo de autenticación por este error
+      }
+      
+      // Una vez autenticado, asegurarnos de que la empresa global está disponible
+      try {
+        await FirestoreService.crearEmpresaPorDefectoGlobal();
+        console.log("✅ Verificada la existencia de la empresa global durante el login");
+      } catch (empresaError) {
+        console.warn("⚠️ No se pudo verificar la empresa global:", empresaError);
       }
       
       return user;

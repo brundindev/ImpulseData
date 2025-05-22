@@ -532,12 +532,16 @@ class FirestoreService {
       const user = auth.currentUser;
       if (!user) throw new Error("Usuario no autenticado");
       
-      // Verificar que la empresa pertenezca al usuario
+      // Verificar que la empresa exista
       const empresaRef = doc(db, "empresas", empresaId);
       const empresaDoc = await getDoc(empresaRef);
       
       if (!empresaDoc.exists()) throw new Error("Empresa no encontrada");
-      if (empresaDoc.data().creadoPor !== user.uid) throw new Error("No tienes permiso para editar esta empresa");
+      
+      // Si NO es la empresa global, verificar que el usuario tenga permisos
+      if (empresaId !== "impulsalicante_global" && empresaDoc.data().creadoPor !== user.uid) {
+        throw new Error("No tienes permiso para editar esta empresa");
+      }
       
       // Mantener los campos que no deben cambiarse
       const datosOriginales = empresaDoc.data();
@@ -546,11 +550,22 @@ class FirestoreService {
       const datosActualizados = {
         ...datosOriginales,  // Mantener todos los datos originales
         ...empresaData,      // Sobrescribir con los nuevos datos
-        creadoPor: datosOriginales.creadoPor,
-        creadorEmail: datosOriginales.creadorEmail,
-        fechaCreacionSistema: datosOriginales.fechaCreacionSistema,
-        fechaActualizacion: new Date().toISOString()
+        fechaActualizacion: new Date().toISOString(),
+        ultimaActualizacionPor: user.uid,
+        ultimaActualizacionEmail: user.email
       };
+      
+      // Para la empresa global, asegurar que mantenga sus propiedades especiales
+      if (empresaId === "impulsalicante_global") {
+        datosActualizados.esEmpresaGlobal = true;
+        datosActualizados.esCompartida = true;
+        datosActualizados.sharedByAllUsers = true;
+      } else {
+        // Para empresas normales, mantener el creador original
+        datosActualizados.creadoPor = datosOriginales.creadoPor;
+        datosActualizados.creadorEmail = datosOriginales.creadorEmail;
+        datosActualizados.fechaCreacionSistema = datosOriginales.fechaCreacionSistema;
+      }
       
       console.log("Actualizando empresa con datos:", datosActualizados);
       
@@ -584,10 +599,14 @@ class FirestoreService {
       const user = auth.currentUser;
       if (!user) throw new Error("Usuario no autenticado");
       
-      // Verificar que la empresa pertenezca al usuario
+      // Verificar que la empresa exista
       const empresaDoc = await getDoc(doc(db, "empresas", empresaId));
       if (!empresaDoc.exists()) throw new Error("Empresa no encontrada");
-      if (empresaDoc.data().creadoPor !== user.uid) throw new Error("No tienes permiso para editar esta empresa");
+      
+      // Si NO es la empresa global, verificar que el usuario tenga permisos
+      if (empresaId !== "impulsalicante_global" && empresaDoc.data().creadoPor !== user.uid) {
+        throw new Error("No tienes permiso para editar esta empresa");
+      }
       
       const empresaRef = doc(db, "empresas", empresaId);
       
@@ -612,7 +631,9 @@ class FirestoreService {
             const depData = {
               id: depRef.id,
               nombre: departamento.nombre,
-              creadoPor: user.uid
+              creadoPor: user.uid,
+              ultimaActualizacionPor: user.uid,
+              fechaActualizacion: new Date().toISOString()
             };
             
             await setDoc(depRef, depData);
@@ -642,7 +663,9 @@ class FirestoreService {
               id: centroRef.id,
               nombre: centro.nombre,
               direccion: centro.direccion || "",
-              creadoPor: user.uid
+              creadoPor: user.uid,
+              ultimaActualizacionPor: user.uid,
+              fechaActualizacion: new Date().toISOString()
             };
             
             await setDoc(centroRef, centroData);
@@ -673,13 +696,22 @@ class FirestoreService {
               nombre: formacion.nombre,
               tipo: formacion.tipo || "presencial",
               duracion: formacion.duracion || 0,
-              creadoPor: user.uid
+              creadoPor: user.uid,
+              ultimaActualizacionPor: user.uid,
+              fechaActualizacion: new Date().toISOString()
             };
             
             await setDoc(formacionRef, formacionData);
           }
         }
       }
+      
+      // Actualizar la fecha de modificación en el documento principal de la empresa
+      await updateDoc(empresaRef, { 
+        fechaActualizacion: new Date().toISOString(),
+        ultimaActualizacionPor: user.uid,
+        ultimaActualizacionEmail: user.email
+      });
       
       return true;
     } catch (error) {
