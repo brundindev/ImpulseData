@@ -444,7 +444,9 @@ onMounted(() => {
       // Si no hay usuario, redirigir al login
       router.push('/login');
     }
-  });
+  
+  document.body.classList.add('home-bg-black');
+});
   
   // Añadir evento para escuchar cuando el chatbot quiere abrir el modal de empresa
   window.addEventListener('abrir-modal-empresa', abrirModalEmpresa);
@@ -459,6 +461,8 @@ const abrirModalEmpresa = () => {
 // Limpieza del evento al desmontar el componente
 onUnmounted(() => {
   window.removeEventListener('abrir-modal-empresa', abrirModalEmpresa);
+
+  document.body.classList.remove('home-bg-black');
 });
 
 // Funciones para manejar los departamentos
@@ -1188,6 +1192,11 @@ onUnmounted(() => {
 <style src="../assets/Home.css"></style>
 
 <style>
+body.home-bg-black {
+  background-color: #000 !important;
+}
+
+
 /* Añadir estilos específicos para el HomeView */
 .section-title {
   margin-bottom: 20px;

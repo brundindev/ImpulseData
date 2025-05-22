@@ -31,13 +31,13 @@ El proyecto está desplegado en: https://impulsedata.vercel.app donde podréis v
 
 ## Arquitectura
 
-ImpulseData sigue una arquitectura de aplicación de una sola página (SPA) con el frontend desarrollado en Vue.js y el backend basado en servicios de Firebase. Esta separación permite un desarrollo ágil y una experiencia de usuario fluida.
+ImpulseData sigue una arquitectura de aplicación de una sola página (SPA) con el frontend desarrollado en Vue.js y el backend basado en servicios de Firebase y gestión con Java Springboot. Esta separación permite un desarrollo ágil y una experiencia de usuario fluida.
 
 ### Diagrama de Arquitectura
 
 ```
 ┌─────────────┐     ┌─────────────────────┐     ┌──────────────────┐
-│             │     │                     │     │                  │
+│             │     │                     │     │  Springboot,     │
 │  Cliente    │────►│  Frontend (Vue.js)  │────►│  Firebase        │
 │  (Navegador)│     │                     │     │  (Autenticación, │
 │             │◄────│                     │◄────│  Firestore, etc) │

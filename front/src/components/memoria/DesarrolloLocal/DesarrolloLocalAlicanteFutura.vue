@@ -1,6 +1,6 @@
 <template>
   <div class="form-step">
-    <h3>Objetivos</h3>
+    <h3>Objetivos y Metas</h3>
     
     <div class="form-group">
       <label>Objetivos Estratégicos</label>
@@ -29,122 +29,78 @@
           </div>
           
           <div class="form-group">
-            <label>Indicadores de Éxito</label>
-            <div class="indicadores">
-              <div v-for="(indicador, iIndex) in objetivo.indicadores" :key="iIndex" class="indicador-item">
-                <div class="indicador-header">
-                  <h5>Indicador {{ iIndex + 1 }}</h5>
+            <label>Metas Asociadas</label>
+            <div class="metas">
+              <div v-for="(meta, metaIndex) in objetivo.metas" :key="metaIndex" class="meta-item">
+                <div class="meta-header">
+                  <h5>Meta {{ metaIndex + 1 }}</h5>
                   <button 
-                    @click="eliminarIndicador(index, iIndex)" 
-                    class="btn btn-danger btn-sm"
+                    @click="eliminarMeta(index, metaIndex)" 
+                    class="btn btn-danger"
                     type="button"
-                    v-if="objetivo.indicadores.length > 1"
+                    v-if="objetivo.metas.length > 1"
                   >
                     Eliminar
                   </button>
                 </div>
                 
                 <div class="form-group">
-                  <label>Descripción del Indicador</label>
-                  <input 
-                    type="text" 
-                    v-model="indicador.descripcion" 
-                    class="form-control"
-                    placeholder="Describa el indicador de éxito"
-                  >
-                </div>
-                
-                <div class="form-group">
-                  <label>Meta</label>
-                  <input 
-                    type="text" 
-                    v-model="indicador.meta" 
-                    class="form-control"
-                    placeholder="Especifique la meta a alcanzar"
-                  >
-                </div>
-                
-                <div class="form-group">
-                  <label>Plazo</label>
-                  <input 
-                    type="date" 
-                    v-model="indicador.plazo" 
-                    class="form-control"
-                  >
-                </div>
-              </div>
-              
-              <button 
-                @click="agregarIndicador(index)" 
-                class="btn btn-secondary btn-sm"
-                type="button"
-              >
-                Agregar Indicador
-              </button>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>Acciones Necesarias</label>
-            <div class="acciones">
-              <div v-for="(accion, aIndex) in objetivo.acciones" :key="aIndex" class="accion-item">
-                <div class="accion-header">
-                  <h5>Acción {{ aIndex + 1 }}</h5>
-                  <button 
-                    @click="eliminarAccion(index, aIndex)" 
-                    class="btn btn-danger btn-sm"
-                    type="button"
-                    v-if="objetivo.acciones.length > 1"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-                
-                <div class="form-group">
-                  <label>Descripción de la Acción</label>
+                  <label>Descripción de la Meta</label>
                   <textarea 
-                    v-model="accion.descripcion" 
+                    v-model="meta.descripcion" 
                     class="form-control"
                     rows="2"
-                    placeholder="Describa la acción necesaria"
+                    placeholder="Describa la meta"
                   ></textarea>
                 </div>
                 
                 <div class="form-group">
-                  <label>Responsable</label>
+                  <label>Indicador de Cumplimiento</label>
                   <input 
                     type="text" 
-                    v-model="accion.responsable" 
+                    v-model="meta.indicador" 
                     class="form-control"
-                    placeholder="Nombre del responsable"
+                    placeholder="Indicador de cumplimiento"
                   >
                 </div>
                 
                 <div class="form-group">
-                  <label>Fecha de Inicio</label>
+                  <label>Valor Objetivo</label>
                   <input 
-                    type="date" 
-                    v-model="accion.fechaInicio" 
+                    type="number" 
+                    v-model="meta.valorObjetivo" 
                     class="form-control"
+                    min="0"
+                    placeholder="Valor objetivo"
                   >
                 </div>
                 
                 <div class="form-group">
-                  <label>Fecha de Fin</label>
+                  <label>Unidad de Medida</label>
+                  <input 
+                    type="text" 
+                    v-model="meta.unidad" 
+                    class="form-control"
+                    placeholder="Unidad de medida"
+                  >
+                </div>
+                
+                <div class="form-group">
+                  <label>Fecha de Cumplimiento</label>
                   <input 
                     type="date" 
-                    v-model="accion.fechaFin" 
+                    v-model="meta.fechaCumplimiento" 
                     class="form-control"
                   >
                 </div>
               </div>
               
               <button 
-                @click="agregarAccion(index)" 
-                class="btn btn-secondary btn-sm"
+                @click="agregarMeta(index)" 
+                class="btn btn-secondary"
                 type="button"
               >
-                Agregar Acción
+                Agregar Meta
               </button>
             </div>
           </div>
@@ -156,6 +112,81 @@
           type="button"
         >
           Agregar Objetivo
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Plan de Acción</label>
+      <div class="plan-accion">
+        <div v-for="(accion, index) in datos.planAccion" :key="index" class="accion-item">
+          <div class="accion-header">
+            <h4>Acción {{ index + 1 }}</h4>
+            <button 
+              @click="eliminarAccion(index)" 
+              class="btn btn-danger"
+              type="button"
+              v-if="datos.planAccion.length > 1"
+            >
+              Eliminar
+            </button>
+          </div>
+          
+          <div class="form-group">
+            <label>Descripción de la Acción</label>
+            <textarea 
+              v-model="accion.descripcion" 
+              class="form-control"
+              rows="3"
+              placeholder="Describa la acción"
+            ></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Responsable</label>
+            <input 
+              type="text" 
+              v-model="accion.responsable" 
+              class="form-control"
+              placeholder="Responsable de la acción"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Fecha de Inicio</label>
+            <input 
+              type="date" 
+              v-model="accion.fechaInicio" 
+              class="form-control"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Fecha de Finalización</label>
+            <input 
+              type="date" 
+              v-model="accion.fechaFin" 
+              class="form-control"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Recursos Necesarios</label>
+            <textarea 
+              v-model="accion.recursos" 
+              class="form-control"
+              rows="2"
+              placeholder="Describa los recursos necesarios"
+            ></textarea>
+          </div>
+        </div>
+        
+        <button 
+          @click="agregarAccion" 
+          class="btn btn-secondary"
+          type="button"
+        >
+          Agregar Acción
         </button>
       </div>
     </div>
@@ -200,33 +231,35 @@ const datos = computed({
 if (!datos.value.objetivos) {
   datos.value.objetivos = [{
     descripcion: '',
-    indicadores: [{
+    metas: [{
       descripcion: '',
-      meta: '',
-      plazo: ''
-    }],
-    acciones: [{
-      descripcion: '',
-      responsable: '',
-      fechaInicio: '',
-      fechaFin: ''
+      indicador: '',
+      valorObjetivo: 0,
+      unidad: '',
+      fechaCumplimiento: ''
     }]
+  }];
+}
+
+if (!datos.value.planAccion) {
+  datos.value.planAccion = [{
+    descripcion: '',
+    responsable: '',
+    fechaInicio: '',
+    fechaFin: '',
+    recursos: ''
   }];
 }
 
 const agregarObjetivo = () => {
   datos.value.objetivos.push({
     descripcion: '',
-    indicadores: [{
+    metas: [{
       descripcion: '',
-      meta: '',
-      plazo: ''
-    }],
-    acciones: [{
-      descripcion: '',
-      responsable: '',
-      fechaInicio: '',
-      fechaFin: ''
+      indicador: '',
+      valorObjetivo: 0,
+      unidad: '',
+      fechaCumplimiento: ''
     }]
   });
 };
@@ -237,49 +270,55 @@ const eliminarObjetivo = (index) => {
   }
 };
 
-const agregarIndicador = (objetivoIndex) => {
-  datos.value.objetivos[objetivoIndex].indicadores.push({
+const agregarMeta = (objetivoIndex) => {
+  datos.value.objetivos[objetivoIndex].metas.push({
     descripcion: '',
-    meta: '',
-    plazo: ''
+    indicador: '',
+    valorObjetivo: 0,
+    unidad: '',
+    fechaCumplimiento: ''
   });
 };
 
-const eliminarIndicador = (objetivoIndex, indicadorIndex) => {
-  if (datos.value.objetivos[objetivoIndex].indicadores.length > 1) {
-    datos.value.objetivos[objetivoIndex].indicadores.splice(indicadorIndex, 1);
+const eliminarMeta = (objetivoIndex, metaIndex) => {
+  if (datos.value.objetivos[objetivoIndex].metas.length > 1) {
+    datos.value.objetivos[objetivoIndex].metas.splice(metaIndex, 1);
   }
 };
 
-const agregarAccion = (objetivoIndex) => {
-  datos.value.objetivos[objetivoIndex].acciones.push({
+const agregarAccion = () => {
+  datos.value.planAccion.push({
     descripcion: '',
     responsable: '',
     fechaInicio: '',
-    fechaFin: ''
+    fechaFin: '',
+    recursos: ''
   });
 };
 
-const eliminarAccion = (objetivoIndex, accionIndex) => {
-  if (datos.value.objetivos[objetivoIndex].acciones.length > 1) {
-    datos.value.objetivos[objetivoIndex].acciones.splice(accionIndex, 1);
+const eliminarAccion = (index) => {
+  if (datos.value.planAccion.length > 1) {
+    datos.value.planAccion.splice(index, 1);
   }
 };
 
 const esValido = computed(() => {
   return datos.value.objetivos.every(objetivo => 
     objetivo.descripcion &&
-    objetivo.indicadores.every(indicador => 
-      indicador.descripcion && 
-      indicador.meta && 
-      indicador.plazo
-    ) &&
-    objetivo.acciones.every(accion => 
-      accion.descripcion && 
-      accion.responsable && 
-      accion.fechaInicio && 
-      accion.fechaFin
+    objetivo.metas.every(meta => 
+      meta.descripcion && 
+      meta.indicador && 
+      meta.valorObjetivo >= 0 && 
+      meta.unidad && 
+      meta.fechaCumplimiento
     )
+  ) &&
+  datos.value.planAccion.every(accion => 
+    accion.descripcion && 
+    accion.responsable && 
+    accion.fechaInicio && 
+    accion.fechaFin && 
+    accion.recursos
   );
 });
 </script>
@@ -294,44 +333,44 @@ const esValido = computed(() => {
   margin-bottom: 1.5rem;
 }
 
-.objetivo-item {
+.objetivo-item,
+.accion-item {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
 
-.objetivo-header {
+.objetivo-header,
+.accion-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.objetivo-header h4 {
+.objetivo-header h4,
+.accion-header h4 {
   margin: 0;
   color: #004698;
   font-size: 1.2rem;
 }
 
-.indicador-item,
-.accion-item {
+.meta-item {
   background: white;
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 1rem;
 }
 
-.indicador-header,
-.accion-header {
+.meta-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
 }
 
-.indicador-header h5,
-.accion-header h5 {
+.meta-header h5 {
   margin: 0;
   color: #004698;
   font-size: 1rem;
@@ -370,11 +409,6 @@ textarea.form-control {
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
 }
 
 .btn-primary {

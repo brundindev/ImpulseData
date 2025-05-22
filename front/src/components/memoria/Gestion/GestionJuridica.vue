@@ -145,9 +145,6 @@
               </div>
               <div class="form-group flex-0">
                 <label>&nbsp;</label>
-                <button @click="eliminarContratoIndividual(index)" class="btn btn-danger btn-sm">
-                  Eliminar
-                </button>
               </div>
             </div>
           </div>
@@ -311,10 +308,6 @@ function editarGrupo(tipo) {
   contratosCopia.value = JSON.parse(JSON.stringify(datos.value.contratos));
   
   mostrarModalEdicion.value = true;
-}
-
-function eliminarContratoIndividual(index) {
-  contratosEditando.value.splice(index, 1);
 }
 
 function confirmarEliminarGrupo(tipo) {

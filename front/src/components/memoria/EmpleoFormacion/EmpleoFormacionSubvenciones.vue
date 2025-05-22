@@ -1,107 +1,62 @@
 <template>
   <div class="form-step">
-    <h3>Conclusiones</h3>
+    <h3>Conclusiones y Recomendaciones</h3>
     
     <div class="form-group">
-      <label>Resumen Ejecutivo</label>
-      <textarea 
-        v-model="datos.resumenEjecutivo" 
-        class="form-control"
-        rows="4"
-        placeholder="Describa un resumen ejecutivo de las actividades y resultados del departamento"
-      ></textarea>
-    </div>
-
-    <div class="form-group">
-      <label>Logros Principales</label>
-      <div class="logros">
-        <div v-for="(logro, index) in datos.logros" :key="index" class="logro-item">
-          <div class="logro-header">
-            <h4>Logro {{ index + 1 }}</h4>
+      <label>Conclusiones</label>
+      <div class="conclusiones">
+        <div v-for="(conclusion, index) in datos.conclusiones" :key="index" class="conclusion-item">
+          <div class="conclusion-header">
+            <h4>Conclusión {{ index + 1 }}</h4>
             <button 
-              @click="eliminarLogro(index)" 
+              @click="eliminarConclusion(index)" 
               class="btn btn-danger"
               type="button"
-              v-if="datos.logros.length > 1"
+              v-if="datos.conclusiones.length > 1"
             >
               Eliminar
             </button>
           </div>
           
           <div class="form-group">
-            <label>Descripción del Logro</label>
+            <label>Descripción</label>
             <textarea 
-              v-model="logro.descripcion" 
+              v-model="conclusion.descripcion" 
               class="form-control"
               rows="3"
-              placeholder="Describa el logro alcanzado"
+              placeholder="Describa la conclusión"
             ></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Área Relacionada</label>
+            <select v-model="conclusion.area" class="form-control">
+              <option value="">Seleccione un área</option>
+              <option value="empleo">Empleo</option>
+              <option value="formacion">Formación</option>
+              <option value="orientacion">Orientación</option>
+              <option value="insercion">Inserción</option>
+              <option value="otro">Otro</option>
+            </select>
           </div>
           
           <div class="form-group">
             <label>Impacto</label>
-            <textarea 
-              v-model="logro.impacto" 
-              class="form-control"
-              rows="2"
-              placeholder="Describa el impacto del logro"
-            ></textarea>
+            <select v-model="conclusion.impacto" class="form-control">
+              <option value="">Seleccione el impacto</option>
+              <option value="alto">Alto</option>
+              <option value="medio">Medio</option>
+              <option value="bajo">Bajo</option>
+            </select>
           </div>
         </div>
         
         <button 
-          @click="agregarLogro" 
+          @click="agregarConclusion" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Logro
-        </button>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Desafíos y Dificultades</label>
-      <div class="desafios">
-        <div v-for="(desafio, index) in datos.desafios" :key="index" class="desafio-item">
-          <div class="desafio-header">
-            <h4>Desafío {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarDesafio(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.desafios.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción del Desafío</label>
-            <textarea 
-              v-model="desafio.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el desafío o dificultad encontrada"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Medidas Tomadas</label>
-            <textarea 
-              v-model="desafio.medidas" 
-              class="form-control"
-              rows="2"
-              placeholder="Describa las medidas tomadas para enfrentar el desafío"
-            ></textarea>
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarDesafio" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Desafío
+          Agregar Conclusión
         </button>
       </div>
     </div>
@@ -123,7 +78,7 @@
           </div>
           
           <div class="form-group">
-            <label>Descripción de la Recomendación</label>
+            <label>Descripción</label>
             <textarea 
               v-model="recomendacion.descripcion" 
               class="form-control"
@@ -133,12 +88,44 @@
           </div>
           
           <div class="form-group">
-            <label>Justificación</label>
+            <label>Área de Aplicación</label>
+            <select v-model="recomendacion.area" class="form-control">
+              <option value="">Seleccione un área</option>
+              <option value="empleo">Empleo</option>
+              <option value="formacion">Formación</option>
+              <option value="orientacion">Orientación</option>
+              <option value="insercion">Inserción</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Prioridad</label>
+            <select v-model="recomendacion.prioridad" class="form-control">
+              <option value="">Seleccione la prioridad</option>
+              <option value="alta">Alta</option>
+              <option value="media">Media</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Plazo de Implementación</label>
+            <select v-model="recomendacion.plazo" class="form-control">
+              <option value="">Seleccione el plazo</option>
+              <option value="corto">Corto Plazo (0-6 meses)</option>
+              <option value="medio">Medio Plazo (6-12 meses)</option>
+              <option value="largo">Largo Plazo (más de 12 meses)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Recursos Necesarios</label>
             <textarea 
-              v-model="recomendacion.justificacion" 
+              v-model="recomendacion.recursos" 
               class="form-control"
               rows="2"
-              placeholder="Justifique la recomendación"
+              placeholder="Describa los recursos necesarios para implementar la recomendación"
             ></textarea>
           </div>
         </div>
@@ -151,16 +138,6 @@
           Agregar Recomendación
         </button>
       </div>
-    </div>
-
-    <div class="form-group">
-      <label>Perspectivas Futuras</label>
-      <textarea 
-        v-model="datos.perspectivas" 
-        class="form-control"
-        rows="4"
-        placeholder="Describa las perspectivas futuras del departamento"
-      ></textarea>
     </div>
 
     <div class="form-actions">
@@ -200,61 +177,45 @@ const datos = computed({
 });
 
 // Inicializar datos si no existen
-if (!datos.value.resumenEjecutivo) datos.value.resumenEjecutivo = '';
-
-if (!datos.value.logros) {
-  datos.value.logros = [{
+if (!datos.value.conclusiones) {
+  datos.value.conclusiones = [{
     descripcion: '',
+    area: '',
     impacto: ''
-  }];
-}
-
-if (!datos.value.desafios) {
-  datos.value.desafios = [{
-    descripcion: '',
-    medidas: ''
   }];
 }
 
 if (!datos.value.recomendaciones) {
   datos.value.recomendaciones = [{
     descripcion: '',
-    justificacion: ''
+    area: '',
+    prioridad: '',
+    plazo: '',
+    recursos: ''
   }];
 }
 
-if (!datos.value.perspectivas) datos.value.perspectivas = '';
-
-const agregarLogro = () => {
-  datos.value.logros.push({
+const agregarConclusion = () => {
+  datos.value.conclusiones.push({
     descripcion: '',
+    area: '',
     impacto: ''
   });
 };
 
-const eliminarLogro = (index) => {
-  if (datos.value.logros.length > 1) {
-    datos.value.logros.splice(index, 1);
-  }
-};
-
-const agregarDesafio = () => {
-  datos.value.desafios.push({
-    descripcion: '',
-    medidas: ''
-  });
-};
-
-const eliminarDesafio = (index) => {
-  if (datos.value.desafios.length > 1) {
-    datos.value.desafios.splice(index, 1);
+const eliminarConclusion = (index) => {
+  if (datos.value.conclusiones.length > 1) {
+    datos.value.conclusiones.splice(index, 1);
   }
 };
 
 const agregarRecomendacion = () => {
   datos.value.recomendaciones.push({
     descripcion: '',
-    justificacion: ''
+    area: '',
+    prioridad: '',
+    plazo: '',
+    recursos: ''
   });
 };
 
@@ -265,20 +226,15 @@ const eliminarRecomendacion = (index) => {
 };
 
 const esValido = computed(() => {
-  return datos.value.resumenEjecutivo &&
-         datos.value.logros.every(logro => 
-           logro.descripcion && 
-           logro.impacto
-         ) &&
-         datos.value.desafios.every(desafio => 
-           desafio.descripcion && 
-           desafio.medidas
-         ) &&
-         datos.value.recomendaciones.every(recomendacion => 
-           recomendacion.descripcion && 
-           recomendacion.justificacion
-         ) &&
-         datos.value.perspectivas;
+  return datos.value.conclusiones.every(conclusion => 
+    conclusion.descripcion && conclusion.area && conclusion.impacto
+  ) &&
+  datos.value.recomendaciones.every(recomendacion => 
+    recomendacion.descripcion && 
+    recomendacion.area && 
+    recomendacion.prioridad && 
+    recomendacion.plazo
+  );
 });
 </script>
 
@@ -292,8 +248,7 @@ const esValido = computed(() => {
   margin-bottom: 1.5rem;
 }
 
-.logro-item,
-.desafio-item,
+.conclusion-item,
 .recomendacion-item {
   background: #f8f9fa;
   padding: 1.5rem;
@@ -301,8 +256,7 @@ const esValido = computed(() => {
   margin-bottom: 1.5rem;
 }
 
-.logro-header,
-.desafio-header,
+.conclusion-header,
 .recomendacion-header {
   display: flex;
   justify-content: space-between;
@@ -310,8 +264,7 @@ const esValido = computed(() => {
   margin-bottom: 1rem;
 }
 
-.logro-header h4,
-.desafio-header h4,
+.conclusion-header h4,
 .recomendacion-header h4 {
   margin: 0;
   color: #004698;
