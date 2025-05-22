@@ -1,178 +1,211 @@
 <template>
   <div class="form-step">
-    <h3>Programas y Actividades</h3>
+    <h3 class="program-title">4.2 OBSERVATORIO DE ESTRATEGIAS DEL PACTO TERRITORIAL POR EL EMPLEO DE LA CIUDAD DE ALICANTE</h3>
     
     <div class="form-group">
-      <label>Programas Desarrollados</label>
-      <div class="programas">
-        <div v-for="(programa, index) in datos.programas" :key="index" class="programa-item">
-          <div class="programa-header">
-            <h4>Programa {{ index + 1 }}</h4>
+      <label>Subvención programa (€)</label>
+      <input 
+        type="text" 
+        v-model="datos.subvencionPrograma" 
+        class="form-control" 
+        placeholder="Ej: 184.814,59"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Descripción General</label>
+      <textarea 
+        v-model="datos.descripcion" 
+        class="form-control" 
+        rows="4" 
+        placeholder="Durante el año se ha puesto en marcha el Observatorio de Estrategias del Pacto Territorial por el Empleo de la ciudad de Alicante..."
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Nº personas contratadas</label>
+      <input 
+        type="text" 
+        v-model="datos.contratados" 
+        class="form-control" 
+        placeholder="Ej: 3"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Descripción adicional del Observatorio</label>
+      <textarea 
+        v-model="datos.descripcionObservatorio" 
+        class="form-control" 
+        rows="3" 
+        placeholder="El Observatorio, financiado por un programa de LABORA para pactos territoriales..."
+      ></textarea>
+    </div>
+    
+    <div class="form-group">
+      <label>Objetivos</label>
+      <div class="objetivos-container">
+        <div v-for="(objetivo, index) in datos.objetivos" :key="index" class="objetivo-item">
+          <div class="objetivo-header">
+            <h4>Objetivo {{ index + 1 }}</h4>
             <button 
-              @click="eliminarPrograma(index)" 
-              class="btn btn-danger"
+              @click="eliminarObjetivo(index)" 
+              class="btn btn-danger btn-sm"
               type="button"
-              v-if="datos.programas.length > 1"
+              v-if="datos.objetivos.length > 1"
             >
               Eliminar
             </button>
           </div>
           
           <div class="form-group">
-            <label>Nombre del Programa</label>
+            <label>Título del Objetivo</label>
             <input 
               type="text" 
-              v-model="programa.nombre" 
+              v-model="objetivo.titulo" 
               class="form-control"
-              placeholder="Nombre del programa"
+              placeholder="Ej: Gestión del Pacto Territorial"
             >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="programa.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el programa"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Objetivos</label>
-            <textarea 
-              v-model="programa.objetivos" 
-              class="form-control"
-              rows="2"
-              placeholder="Describa los objetivos del programa"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Población Objetivo</label>
-            <textarea 
-              v-model="programa.poblacionObjetivo" 
-              class="form-control"
-              rows="2"
-              placeholder="Describa la población objetivo"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Presupuesto</label>
-            <input 
-              type="number" 
-              v-model="programa.presupuesto" 
-              class="form-control"
-              min="0"
-              placeholder="Presupuesto en euros"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="programa.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
           </div>
         </div>
         
         <button 
-          @click="agregarPrograma" 
+          @click="agregarObjetivo" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Programa
+          Agregar Objetivo
         </button>
       </div>
     </div>
 
+    <h4 class="section-title">4.2.1 Laboratorio de Nuevas Estrategias de Futuro</h4>
+
     <div class="form-group">
-      <label>Actividades Realizadas</label>
-      <div class="actividades">
-        <div v-for="(actividad, index) in datos.actividades" :key="index" class="actividad-item">
-          <div class="actividad-header">
-            <h4>Actividad {{ index + 1 }}</h4>
+      <label>Descripción del Laboratorio</label>
+      <textarea 
+        v-model="datos.descripcionLaboratorio" 
+        class="form-control" 
+        rows="4" 
+        placeholder="El Laboratorio de Nuevas Estrategias de Futuro es un espacio colaborativo para la actualización continua de las estrategias del Pacto Territorial..."
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Actuaciones realizadas en el año</label>
+      <div class="actuaciones-container">
+        <div v-for="(actuacion, index) in datos.actuaciones" :key="index" class="actuacion-item">
+          <div class="actuacion-header">
+            <h4>Actuación {{ index + 1 }}</h4>
             <button 
-              @click="eliminarActividad(index)" 
-              class="btn btn-danger"
+              @click="eliminarActuacion(index)" 
+              class="btn btn-danger btn-sm"
               type="button"
-              v-if="datos.actividades.length > 1"
+              v-if="datos.actuaciones.length > 1"
             >
               Eliminar
             </button>
           </div>
           
           <div class="form-group">
-            <label>Nombre de la Actividad</label>
+            <label>Nombre de la Actuación</label>
             <input 
               type="text" 
-              v-model="actividad.nombre" 
+              v-model="actuacion.nombre" 
               class="form-control"
-              placeholder="Nombre de la actividad"
+              placeholder="Ej: Presentación del Observatorio a la Red de Entidades por el Empleo de la ciudad de Alicante"
             >
           </div>
           
+            
           <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="actividad.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa la actividad"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha de Realización</label>
-            <input 
-              type="date" 
-              v-model="actividad.fecha" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Lugar</label>
+            <label>Fecha de realización</label>
             <input 
               type="text" 
-              v-model="actividad.lugar" 
+              v-model="actuacion.fecha" 
               class="form-control"
-              placeholder="Lugar de realización"
+              placeholder="Ej: 20 de septiembre de 2023"
             >
-          </div>
-          
-          <div class="form-group">
-            <label>Participantes</label>
-            <input 
-              type="number" 
-              v-model="actividad.participantes" 
-              class="form-control"
-              min="0"
-              placeholder="Número de participantes"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="actividad.resultados" 
-              class="form-control"
-              rows="2"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
           </div>
         </div>
         
         <button 
-          @click="agregarActividad" 
+          @click="agregarActuacion" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Actividad
+          Agregar Actuación
+        </button>
+      </div>
+    </div>
+
+    <h4 class="section-title">4.2.2 Análisis socioeconómico de la ciudad de Alicante</h4>
+
+    <div class="analisis-container">
+      <div class="form-group">
+        <label>Nº informes de la Encuesta de Población Activa (EPA)</label>
+        <input 
+          type="text" 
+          v-model="datos.informesEPA" 
+          class="form-control" 
+          placeholder="Ej: 4"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label>Nº informes mensuales de empleo y paro registrado</label>
+        <input 
+          type="text" 
+          v-model="datos.informesEmpleoParo" 
+          class="form-control" 
+          placeholder="Ej: 12"
+        >
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Anexos generados</label>
+      <div class="anexos-container">
+        <div v-for="(anexo, index) in datos.anexos" :key="index" class="anexo-item">
+          <div class="anexo-header">
+            <h4>Anexo {{ index + 1 }}</h4>
+            <button 
+              @click="eliminarAnexo(index)" 
+              class="btn btn-danger btn-sm"
+              type="button"
+              v-if="datos.anexos.length > 1"
+            >
+              Eliminar
+            </button>
+          </div>
+          
+          <div class="form-group">
+            <label>Número del Anexo</label>
+            <input 
+              type="text" 
+              v-model="anexo.numero" 
+              class="form-control"
+              placeholder="Ej: Anexo 39"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Título del Anexo</label>
+            <input 
+              type="text" 
+              v-model="anexo.titulo" 
+              class="form-control"
+              placeholder="Ej: Informe EPA 4º trimestre de 2023"
+            >
+          </div>
+        </div>
+        
+        <button 
+          @click="agregarAnexo" 
+          class="btn btn-secondary"
+          type="button"
+        >
+          Agregar Anexo
         </button>
       </div>
     </div>
@@ -188,7 +221,6 @@
       <button 
         @click="$emit('siguiente')" 
         class="btn btn-primary"
-        :disabled="!esValido"
       >
         Siguiente
       </button>
@@ -213,79 +245,56 @@ const datos = computed({
   set: (value) => emit('update:modelValue', value)
 });
 
-// Inicializar datos si no existen
-if (!datos.value.programas) {
-  datos.value.programas = [{
-    nombre: '',
-    descripcion: '',
-    objetivos: '',
-    poblacionObjetivo: '',
-    presupuesto: 0,
-    resultados: ''
-  }];
+// Inicializar estructura vacía solo si no existe
+if (!datos.value.objetivos) {
+  datos.value.objetivos = [
+    { titulo: 'Gestión del Pacto Territorial', descripcion: '' },
+    { titulo: 'Laboratorio de Nuevas Estrategias de Futuro', descripcion: '' },
+    { titulo: 'Evaluación y seguimiento de las acciones del Pacto', descripcion: '' },
+    { titulo: 'Relaciones con otros Pactos y Avalem Territori', descripcion: '' }
+  ];
 }
 
-if (!datos.value.actividades) {
-  datos.value.actividades = [{
-    nombre: '',
-    descripcion: '',
-    fecha: '',
-    lugar: '',
-    participantes: 0,
-    resultados: ''
-  }];
+if (!datos.value.actuaciones) {
+  datos.value.actuaciones = [{}];
 }
 
-const agregarPrograma = () => {
-  datos.value.programas.push({
-    nombre: '',
-    descripcion: '',
-    objetivos: '',
-    poblacionObjetivo: '',
-    presupuesto: 0,
-    resultados: ''
-  });
+if (!datos.value.anexos) {
+  datos.value.anexos = [
+    { numero: 'Anexo 39', titulo: '', descripcion: '' },
+    { numero: 'Anexo 40', titulo: '', descripcion: '' }
+  ];
+}
+
+const agregarObjetivo = () => {
+  datos.value.objetivos.push({ titulo: '', descripcion: '' });
 };
 
-const eliminarPrograma = (index) => {
-  if (datos.value.programas.length > 1) {
-    datos.value.programas.splice(index, 1);
+const eliminarObjetivo = (index) => {
+  if (datos.value.objetivos.length > 1) {
+    datos.value.objetivos.splice(index, 1);
   }
 };
 
-const agregarActividad = () => {
-  datos.value.actividades.push({
-    nombre: '',
-    descripcion: '',
-    fecha: '',
-    lugar: '',
-    participantes: 0,
-    resultados: ''
-  });
+const agregarActuacion = () => {
+  datos.value.actuaciones.push({});
 };
 
-const eliminarActividad = (index) => {
-  if (datos.value.actividades.length > 1) {
-    datos.value.actividades.splice(index, 1);
+const eliminarActuacion = (index) => {
+  if (datos.value.actuaciones.length > 1) {
+    datos.value.actuaciones.splice(index, 1);
   }
 };
 
-const esValido = computed(() => {
-  return datos.value.programas.every(programa => 
-    programa.nombre && 
-    programa.descripcion && 
-    programa.objetivos && 
-    programa.poblacionObjetivo && 
-    programa.presupuesto >= 0
-  ) &&
-  datos.value.actividades.every(actividad => 
-    actividad.nombre && 
-    actividad.descripcion && 
-    actividad.fecha && 
-    actividad.lugar && 
-    actividad.participantes >= 0
-  );
-});
+const agregarAnexo = () => {
+  datos.value.anexos.push({ numero: '', titulo: '', descripcion: '' });
+};
+
+const eliminarAnexo = (index) => {
+  if (datos.value.anexos.length > 1) {
+    datos.value.anexos.splice(index, 1);
+  }
+};
 </script>
 
 <style scoped>
@@ -294,30 +303,61 @@ const esValido = computed(() => {
   margin: 0 auto;
 }
 
+.program-title {
+  background-color: #ac3b61;
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.section-title {
+  color: #ac3b61;
+  border-bottom: 2px solid #ac3b61;
+  padding-bottom: 8px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
 .form-group {
   margin-bottom: 1.5rem;
 }
 
-.programa-item,
-.actividad-item {
+.analisis-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 1.5rem;
+}
+
+.objetivo-item,
+.actuacion-item,
+.anexo-item {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
+  border-left: 4px solid #ac3b61;
 }
 
-.programa-header,
-.actividad-header {
+.objetivo-header,
+.actuacion-header,
+.anexo-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.programa-header h4,
-.actividad-header h4 {
+.objetivo-header h4,
+.actuacion-header h4,
+.anexo-header h4 {
   margin: 0;
-  color: #004698;
+  color: #ac3b61;
   font-size: 1.2rem;
 }
 
@@ -338,8 +378,8 @@ label {
 
 .form-control:focus {
   outline: none;
-  border-color: #004698;
-  box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.1);
+  border-color: #ac3b61;
+  box-shadow: 0 0 0 2px rgba(172, 59, 97, 0.1);
 }
 
 textarea.form-control {
@@ -356,8 +396,13 @@ textarea.form-control {
   transition: all 0.3s ease;
 }
 
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
 .btn-primary {
-  background: #004698;
+  background: #ac3b61;
   color: white;
 }
 
@@ -385,4 +430,4 @@ textarea.form-control {
   display: flex;
   justify-content: space-between;
 }
-</style> 
+</style>
