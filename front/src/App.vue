@@ -592,4 +592,35 @@ body:not(.welcome-open) {
 .dropdown-toggle .user-name:hover {
   color: #000000 !important;
 }
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e9f5 100%);
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Asegurarse de que el contenido ocupe todo el espacio disponible */
+.container-fluid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilos para el fondo del dashboard */
+.dashboard-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #2a1b3d 0%, #44318d 100%);
+  z-index: -1;
+}
 </style>

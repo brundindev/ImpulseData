@@ -1286,4 +1286,23 @@ body.home-bg-black {
     animation: none;
   }
 }
+
+.home-container {
+  min-height: 100vh;
+  padding: 2rem;
+  position: relative;
+  background: linear-gradient(135deg, #2a1b3d 0%, #44318d 100%);
+  color: white;
+}
+
+.dashboard-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Asegurarse de que el contenido ocupe todo el espacio */
+.row {
+  margin: 0;
+  min-height: calc(100vh - 4rem); /* 4rem es el padding del container (2rem * 2) */
+}
 </style>
