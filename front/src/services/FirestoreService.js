@@ -237,90 +237,43 @@ class FirestoreService {
       }
 
       const empresas = [];
-      
-      // Primero obtener la empresa global
       const empresasRef = collection(db, "empresas");
-      
-      // SIEMPRE BUSCAR PRIMERO LA EMPRESA GLOBAL CON ID ESPECÍFICO
+
+      // 1. Obtener SIEMPRE la empresa global
       const empresaGlobalRef = doc(empresasRef, "impulsalicante_global");
       const empresaGlobalDoc = await getDoc(empresaGlobalRef);
-      
-      // Si no existe la empresa global, crearla
-      if (!empresaGlobalDoc.exists()) {
-        console.log("⚠️ La empresa global no existe, creándola ahora...");
-        const empresaId = await this.crearEmpresaPorDefectoGlobal();
-        
-        // Volver a intentar obtenerla
-        const empresaGlobalDocNueva = await getDoc(doc(empresasRef, "impulsalicante_global"));
-        if (empresaGlobalDocNueva.exists()) {
-          const data = empresaGlobalDocNueva.data();
-          
-          // Contar departamentos, centros y formaciones
-          const depSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/departamentos`));
-          const numDepartamentos = depSnapshot.size;
-          
-          const centrosSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/centros`));
-          const numCentros = centrosSnapshot.size;
-          
-          const formacionesSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/formaciones`));
-          const numFormaciones = formacionesSnapshot.size;
-          
-          empresas.push({
-            id: "impulsalicante_global",
-            ...data,
-            fechaCreacion: data.fechaCreacion,
-            numDepartamentos,
-            numCentros,
-            numFormaciones,
-            perteneceAlUsuarioActual: true,
-            esEmpresaGlobal: true,
-            esCompartida: true,
-            sharedByAllUsers: true,
-            creadoPor: user.uid,
-            creadorEmail: user.email
-          });
-        }
-      } else {
-        // La empresa global ya existe
+
+      if (empresaGlobalDoc.exists()) {
         const data = empresaGlobalDoc.data();
-        
-        console.log("✅ Empresa global de Impulsalicante encontrada para el usuario");
-        
-        // Contar departamentos, centros y formaciones
-        const depSnapshot = await getDocs(collection(db, `empresas/${empresaGlobalDoc.id}/departamentos`));
+        const depSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/departamentos`));
         const numDepartamentos = depSnapshot.size;
-        
-        const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaGlobalDoc.id}/centros`));
+        const centrosSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/centros`));
         const numCentros = centrosSnapshot.size;
-        
-        const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaGlobalDoc.id}/formaciones`));
+        const formacionesSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/formaciones`));
         const numFormaciones = formacionesSnapshot.size;
-        
+
         empresas.push({
-          id: empresaGlobalDoc.id,
+          id: "impulsalicante_global",
           ...data,
           fechaCreacion: data.fechaCreacion,
           numDepartamentos,
           numCentros,
           numFormaciones,
-          perteneceAlUsuarioActual: true,
+          perteneceAlUsuarioActual: true, // Para que se muestre en el frontend
           esEmpresaGlobal: true,
           esCompartida: true,
-          sharedByAllUsers: true,
-          creadoPor: user.uid,
-          creadorEmail: user.email
+          sharedByAllUsers: true
         });
       }
 
-      // Luego obtener las empresas personales del usuario
+      // 2. Obtener las empresas personales del usuario
       const qPersonal = query(
         empresasRef,
         where("creadoPor", "==", user.uid),
         where("esEmpresaGlobal", "==", false)
       );
-      
       const querySnapshotPersonal = await getDocs(qPersonal);
-      
+
       querySnapshotPersonal.forEach((doc) => {
         const data = doc.data();
         empresas.push({
