@@ -155,6 +155,12 @@
         </div>
       </div>
     </teleport>
+
+    <SaveConfirmationModal
+      :show="mostrarConfirmacion"
+      @save="guardarProgreso"
+      @discard="cerrarFormulario"
+    />
   </div>
 </template>
 
@@ -201,6 +207,9 @@ import MarketingWebRRSS from '../components/memoria/Marketing/MarketingWebRRSS.v
 import MarketingCanales from '../components/memoria/Marketing/MarketingCanales.vue';
 import MarketingCampañas from '../components/memoria/Marketing/MarketingCampañas.vue';
 
+//Importar componente de confirmacion de guardado
+import SaveConfirmationModal from '../components/memoria/SaveConfirmationModal.vue';
+
 const router = useRouter();
 
 // Estado de las secciones
@@ -218,6 +227,7 @@ const mostrarFormulario = ref(false);
 const seccionActual = ref('');
 const pasoActual = ref(0);
 const datosFormulario = ref({});
+const mostrarConfirmacion = ref(false);
 
 // Título del formulario actual
 const tituloFormulario = computed(() => {
@@ -302,16 +312,14 @@ const abrirFormulario = (seccion) => {
 };
 
 const cerrarFormulario = () => {
-  // Verificar si hay datos sin guardar
   if (Object.keys(datosFormulario.value).length > 0 && !secciones.value[seccionActual.value].completa) {
-    if (confirm('¿Deseas guardar tu progreso antes de salir?')) {
-      guardarProgreso();
-    }
+    mostrarConfirmacion.value = true;
+  } else {
+    mostrarFormulario.value = false;
+    seccionActual.value = '';
+    pasoActual.value = 0;
+    datosFormulario.value = {};
   }
-  mostrarFormulario.value = false;
-  seccionActual.value = '';
-  pasoActual.value = 0;
-  datosFormulario.value = {};
 };
 
 const siguientePaso = () => {
@@ -353,10 +361,13 @@ const guardarProgreso = async () => {
     // Guardar en localStorage como respaldo
     localStorage.setItem(`memoria_${seccionActual.value}`, JSON.stringify(datosFormulario.value));
     
-    alert('Progreso guardado correctamente');
+    mostrarConfirmacion.value = false;
+    mostrarFormulario.value = false;
+    seccionActual.value = '';
+    pasoActual.value = 0;
+    datosFormulario.value = {};
   } catch (error) {
     console.error('Error al guardar el progreso:', error);
-    alert('Error al guardar el progreso');
   }
 };
 
