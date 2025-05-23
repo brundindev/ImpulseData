@@ -610,7 +610,6 @@ const sendResetPasswordEmail = async () => {
   background-color: #ffffff !important;
 }
 
-/* Eliminar cualquier gradiente o color de fondo que pueda estar interfiriendo */
 :deep(body),
 :deep(html),
 :deep(#app) {
