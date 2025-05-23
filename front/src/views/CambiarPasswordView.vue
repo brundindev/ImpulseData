@@ -56,13 +56,13 @@
             </div>
           </div>
           
-          <div v-if="profileError" class="alert alert-danger error-box">
+          <!-- <div v-if="profileError" class="alert alert-danger error-box">
             <div class="error-icon">✖</div>
             <div class="error-content">
               <div class="error-title">Error</div>
               <p>{{ profileError }}</p>
             </div>
-          </div>
+          </div> -->
           
           <div class="actions">
             <button type="button" class="btn btn-primary" @click="actualizarPerfil" :disabled="loadingProfile">
