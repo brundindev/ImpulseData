@@ -379,32 +379,51 @@ class FirestoreService {
       let formacionesCount = 0;
 
       try {
-        // Contar empresas
-        const empresasRef = collection(db, "empresas");
-        const empresasQuery = query(empresasRef, where("creadoPor", "==", user.uid));
-        const empresasSnapshot = await getDocs(empresasQuery);
-        empresasCount = empresasSnapshot.size;
+        // Primero contar los elementos de la empresa global
+        const empresaGlobalRef = doc(db, "empresas", "impulsalicante_global");
+        const empresaGlobalDoc = await getDoc(empresaGlobalRef);
         
-        // Para cada empresa, contar sus subcolecciones
-        for (const empresaDoc of empresasSnapshot.docs) {
-          const data = empresaDoc.data();
+        if (empresaGlobalDoc.exists()) {
+          // Contar la empresa global
+          empresasCount++;
           
-          // Verificar que la empresa realmente pertenece al usuario actual
-          if (data.creadoPor === user.uid) {
-            const empresaId = empresaDoc.id;
-            
-            // Contar departamentos de esta empresa
-            const depSnapshot = await getDocs(collection(db, `empresas/${empresaId}/departamentos`));
-            departamentosCount += depSnapshot.size;
-            
-            // Contar centros de esta empresa
-            const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaId}/centros`));
-            centrosCount += centrosSnapshot.size;
-            
-            // Contar formaciones de esta empresa
-            const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaId}/formaciones`));
-            formacionesCount += formacionesSnapshot.size;
-          }
+          // Contar departamentos de la empresa global
+          const depGlobalSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/departamentos`));
+          departamentosCount += depGlobalSnapshot.size;
+          
+          // Contar centros de la empresa global
+          const centrosGlobalSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/centros`));
+          centrosCount += centrosGlobalSnapshot.size;
+          
+          // Contar formaciones de la empresa global
+          const formacionesGlobalSnapshot = await getDocs(collection(db, `empresas/impulsalicante_global/formaciones`));
+          formacionesCount += formacionesGlobalSnapshot.size;
+        }
+        
+        // Luego contar las empresas personales del usuario
+        const empresasRef = collection(db, "empresas");
+        const empresasQuery = query(empresasRef, 
+          where("creadoPor", "==", user.uid),
+          where("esEmpresaGlobal", "==", false)
+        );
+        const empresasSnapshot = await getDocs(empresasQuery);
+        empresasCount += empresasSnapshot.size;
+        
+        // Para cada empresa personal, contar sus subcolecciones
+        for (const empresaDoc of empresasSnapshot.docs) {
+          const empresaId = empresaDoc.id;
+          
+          // Contar departamentos de esta empresa
+          const depSnapshot = await getDocs(collection(db, `empresas/${empresaId}/departamentos`));
+          departamentosCount += depSnapshot.size;
+          
+          // Contar centros de esta empresa
+          const centrosSnapshot = await getDocs(collection(db, `empresas/${empresaId}/centros`));
+          centrosCount += centrosSnapshot.size;
+          
+          // Contar formaciones de esta empresa
+          const formacionesSnapshot = await getDocs(collection(db, `empresas/${empresaId}/formaciones`));
+          formacionesCount += formacionesSnapshot.size;
         }
                 
       } catch (error) {
