@@ -275,7 +275,9 @@ class FirestoreService {
             perteneceAlUsuarioActual: true,
             esEmpresaGlobal: true,
             esCompartida: true,
-            sharedByAllUsers: true
+            sharedByAllUsers: true,
+            creadoPor: user.uid,
+            creadorEmail: user.email
           });
         }
       } else {
@@ -304,7 +306,9 @@ class FirestoreService {
           perteneceAlUsuarioActual: true,
           esEmpresaGlobal: true,
           esCompartida: true,
-          sharedByAllUsers: true
+          sharedByAllUsers: true,
+          creadoPor: user.uid,
+          creadorEmail: user.email
         });
       }
 
@@ -825,7 +829,9 @@ class FirestoreService {
           sharedByAllUsers: true,
           updatedAt: new Date().toISOString(),
           ultimaActualizacionPor: user.uid,
-          ultimaActualizacionEmail: user.email
+          ultimaActualizacionEmail: user.email,
+          creadoPor: user.uid, // Mantener el creador original
+          creadorEmail: user.email
         });
         return empresaDoc.id;
       }
@@ -844,7 +850,8 @@ class FirestoreService {
         sharedByAllUsers: true,
         ultimaActualizacionPor: user.uid,
         ultimaActualizacionEmail: user.email,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        usuariosCompartidos: ["*"] // Marcar como compartida con todos los usuarios
       };
       
       // Guardar la empresa global
@@ -859,7 +866,8 @@ class FirestoreService {
           nombre: depto.nombre,
           creadoPor: user.uid,
           esCompartido: true,
-          esGlobal: true
+          esGlobal: true,
+          usuariosCompartidos: ["*"]
         });
       }
       
@@ -872,7 +880,8 @@ class FirestoreService {
           direccion: centro.direccion || "",
           creadoPor: user.uid,
           esCompartido: true,
-          esGlobal: true
+          esGlobal: true,
+          usuariosCompartidos: ["*"]
         });
       }
       
@@ -886,7 +895,8 @@ class FirestoreService {
           duracion: formacion.duracion || 0,
           creadoPor: user.uid,
           esCompartido: true,
-          esGlobal: true
+          esGlobal: true,
+          usuariosCompartidos: ["*"]
         });
       }
       
