@@ -160,6 +160,16 @@ import FirebaseAuthService from '../services/FirebaseAuthService';
 import { getAuth } from 'firebase/auth'; // Importar getAuth para obtener la instancia de auth
 import { auth } from '../firebase';
 
+// Añadir clase al body cuando se monta el componente
+onMounted(() => {
+  document.body.classList.add('login-page');
+});
+
+// Remover la clase cuando se desmonta el componente
+onUnmounted(() => {
+  document.body.classList.remove('login-page');
+});
+
 // Configurar un manejador global para suprimir errores de red en consola
 // Solo para este componente
 const originalConsoleError = console.error;
@@ -593,3 +603,17 @@ const sendResetPasswordEmail = async () => {
 </script>
 
 <style src="../assets/Login.css"></style>
+
+<style>
+/* Asegurarse de que el fondo sea blanco */
+:deep(.login-container) {
+  background-color: #ffffff !important;
+}
+
+/* Eliminar cualquier gradiente o color de fondo que pueda estar interfiriendo */
+:deep(body),
+:deep(html),
+:deep(#app) {
+  background: #ffffff !important;
+}
+</style>
