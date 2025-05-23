@@ -273,14 +273,9 @@ class FirestoreService {
             numCentros,
             numFormaciones,
             perteneceAlUsuarioActual: true,
-            esEmpresaGlobal: true
-          });
-        } else {
-          // Si falla la creación, añadir versión por defecto
-          empresas.push({ 
-            ...EMPRESA_POR_DEFECTO, 
-            perteneceAlUsuarioActual: true,
-            esEmpresaGlobal: true
+            esEmpresaGlobal: true,
+            esCompartida: true,
+            sharedByAllUsers: true
           });
         }
       } else {
@@ -307,7 +302,9 @@ class FirestoreService {
           numCentros,
           numFormaciones,
           perteneceAlUsuarioActual: true,
-          esEmpresaGlobal: true
+          esEmpresaGlobal: true,
+          esCompartida: true,
+          sharedByAllUsers: true
         });
       }
 
@@ -826,7 +823,9 @@ class FirestoreService {
           esEmpresaGlobal: true,
           esCompartida: true,
           sharedByAllUsers: true,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
+          ultimaActualizacionPor: user.uid,
+          ultimaActualizacionEmail: user.email
         });
         return empresaDoc.id;
       }
@@ -842,7 +841,10 @@ class FirestoreService {
         fechaCreacionSistema: new Date().toISOString(),
         esEmpresaGlobal: true,
         esCompartida: true,
-        sharedByAllUsers: true
+        sharedByAllUsers: true,
+        ultimaActualizacionPor: user.uid,
+        ultimaActualizacionEmail: user.email,
+        updatedAt: new Date().toISOString()
       };
       
       // Guardar la empresa global
@@ -855,7 +857,9 @@ class FirestoreService {
         await setDoc(deptoRef, {
           id: deptoRef.id,
           nombre: depto.nombre,
-          creadoPor: user.uid
+          creadoPor: user.uid,
+          esCompartido: true,
+          esGlobal: true
         });
       }
       
@@ -866,7 +870,9 @@ class FirestoreService {
           id: centroRef.id,
           nombre: centro.nombre,
           direccion: centro.direccion || "",
-          creadoPor: user.uid
+          creadoPor: user.uid,
+          esCompartido: true,
+          esGlobal: true
         });
       }
       
@@ -878,7 +884,9 @@ class FirestoreService {
           nombre: formacion.nombre,
           tipo: formacion.tipo || "presencial",
           duracion: formacion.duracion || 0,
-          creadoPor: user.uid
+          creadoPor: user.uid,
+          esCompartido: true,
+          esGlobal: true
         });
       }
       
