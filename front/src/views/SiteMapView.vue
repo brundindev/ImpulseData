@@ -51,7 +51,9 @@
         <!-- Mapa de Google -->
         <section class="map-section">
           <h2>Ubicación</h2>
-          <div class="map-container" ref="mapContainer"></div>
+          <div class="map-container" ref="mapContainer">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d25032.696936313725!2d-0.52874545!3d38.34696565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2ses!4v1748000017919!5m2!1ses!2ses" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
         </section>
       </div>
     </div>
