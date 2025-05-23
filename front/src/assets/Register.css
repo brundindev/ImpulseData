@@ -1,30 +1,25 @@
-.register-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  background-image: linear-gradient(to bottom right, #f5f5f5, #e0e9f5);
-}
+/* Importar estilos base del login */
+@import './Login.css';
 
+/* Sobrescribir el contenedor para el registro */
 .register-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  background-image: linear-gradient(to bottom right, #f5f5f5, #e0e9f5);
+  min-height: calc(100vh - 60px); /* Ajustado para el navbar */
+  background-color: #ffffff;
+  padding: 2rem;
+  margin-top: 60px; /* Espacio para el navbar */
 }
 
 .register-card {
   width: 100%;
-  max-width: 500px;
+  max-width: 450px;
   padding: 2.5rem;
   background-color: white;
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 70, 152, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  margin: 2rem 1rem;
 }
 
 .register-card:hover {
@@ -280,28 +275,26 @@ label {
 }
 
 .loading-state {
-  background-color: rgba(255, 255, 255, 0.8);
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #f8f9fa;
   border-radius: 8px;
-  padding: 12px;
-  margin: 15px 0;
   text-align: center;
-  border: 1px solid #e0e0e0;
 }
 
 .loading-message {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  color: #555 !important;
-  font-size: 0.9rem;
+  gap: 0.5rem;
+  color: #666;
 }
 
 .spinner-small {
   width: 20px;
   height: 20px;
-  border: 3px solid #e0e9f5;
-  border-top: 3px solid #004698;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -383,77 +376,59 @@ label {
   color: #333 !important;
 }
 
-/* Requisitos de contraseña */
+/* Estilos específicos para el formulario de registro */
 .password-requirements {
   margin-top: 0.5rem;
-  padding: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 4px;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
   font-size: 0.9rem;
-  display: none;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .password-requirements.active {
-  display: block;
-  animation: fadeIn 0.3s ease-out;
-}
-
-.password-requirements p {
-  margin-bottom: 0.5rem;
-  color: #333;
-  font-weight: 600;
+  opacity: 1;
+  height: auto;
+  margin-top: 1rem;
 }
 
 .password-requirements ul {
-  padding-left: 0.5rem;
-  margin: 0;
-  list-style-type: none;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
 }
 
 .password-requirements li {
-  margin-bottom: 0.4rem;
-  color: #dc3545;
+  margin: 0.25rem 0;
+  color: #666;
   display: flex;
   align-items: center;
-  transition: color 0.3s;
+}
+
+.requirement-icon {
+  margin-right: 0.5rem;
+  font-size: 1rem;
 }
 
 .password-requirements li.valid {
   color: #4CAF50;
 }
 
-.requirement-icon {
-  margin-right: 8px;
-  display: inline-block;
-  width: 20px;
-  text-align: center;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .password-mismatch {
-  color: #dc3545;
-  font-size: 0.9rem;
+  color: #f44336;
   margin-top: 0.5rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
 }
 
 .password-match {
   color: #4CAF50;
-  font-size: 0.9rem;
   margin-top: 0.5rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
 }

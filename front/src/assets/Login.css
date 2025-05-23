@@ -2,9 +2,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  background-image: linear-gradient(to bottom right, #f5f5f5, #e0e9f5);
+  min-height: calc(100vh - 60px); /* Ajustado para el navbar */
+  background-color: #ffffff;
+  padding: 2rem;
+  margin-top: 60px; /* Espacio para el navbar */
 }
 
 .login-card {
@@ -13,7 +14,7 @@
   padding: 2.5rem;
   background-color: white;
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 70, 152, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
 }
 
