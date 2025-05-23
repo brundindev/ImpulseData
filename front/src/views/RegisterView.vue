@@ -180,7 +180,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import AuthService from '../services/AuthService';
@@ -650,8 +650,9 @@ const registerWithGoogle = async () => {
   }
 };
 
-// Verificar el estado del componente al montar
+// Añadir clase al body cuando se monta el componente
 onMounted(() => {
+  document.body.classList.add('register-page');
   console.log("RegisterView montado, estado inicial:", {
     registroExitoso: registroExitoso.value,
     emailRegistrado: emailRegistrado.value
@@ -663,6 +664,25 @@ onMounted(() => {
     console.log("Modo depuración activado");
   }
 });
+
+// Remover la clase cuando se desmonta el componente
+onUnmounted(() => {
+  document.body.classList.remove('register-page');
+});
 </script>
 
 <style src="../assets/Register.css"></style>
+
+<style>
+/* Asegurarse de que el fondo sea blanco */
+:deep(.register-container) {
+  background-color: #ffffff !important;
+}
+
+/* Eliminar cualquier gradiente o color de fondo que pueda estar interfiriendo */
+:deep(body),
+:deep(html),
+:deep(#app) {
+  background: #ffffff !important;
+}
+</style>

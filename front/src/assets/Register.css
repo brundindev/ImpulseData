@@ -6,10 +6,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px); /* Ajustado para el navbar */
+  min-height: 100vh;
+  width: 100%;
   background-color: #ffffff;
   padding: 2rem;
-  margin-top: 60px; /* Espacio para el navbar */
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .register-card {
@@ -184,6 +186,8 @@ label {
 .small-text {
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-color);
 }
 
 .btn-secondary {
@@ -207,8 +211,12 @@ label {
 
 .verification-message {
   margin-top: 1rem;
-  color: #0f5132;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: rgba(255,255,255,0.7);
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
+  color: var(--text-color) !important;
 }
 
 .success-icon {
@@ -221,19 +229,22 @@ label {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #57bd84;
+  background-color: var(--success-color);
   color: white;
   font-size: 25px;
   line-height: 40px;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  font-family: 'Inter', sans-serif;
 }
 
 .alert-success h2 {
-  color: #0f5132;
+  color: var(--success-color);
   text-align: center;
   margin-bottom: 15px;
   font-size: 1.5rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
 }
 
 .verification-section {
@@ -242,20 +253,15 @@ label {
   border-radius: 8px;
   margin-top: 15px;
   text-align: center;
-  border: 1px dashed #badbcc;
+  border: 1px dashed var(--border-color);
+  font-family: 'Inter', sans-serif;
 }
 
 .btn-secondary {
   /* margin-top: 10px; */
 }
 
-.verification-message {
-  margin-top: 15px;
-  padding: 10px;
-  border-radius: 8px;
-  background-color: rgba(255,255,255,0.7);
-  font-weight: 500;
-}
+/* Mantener el resto de los estilos existentes */
 
 /* Responsive adjustments */
 @media screen and (max-width: 576px) {
@@ -382,6 +388,7 @@ label {
   padding: 1rem;
   background-color: #f8f9fa;
   border-radius: 8px;
+  font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
   opacity: 0;
   height: 0;
@@ -403,9 +410,10 @@ label {
 
 .password-requirements li {
   margin: 0.25rem 0;
-  color: #666;
+  color: var(--light-text);
   display: flex;
   align-items: center;
+  font-family: 'Inter', sans-serif;
 }
 
 .requirement-icon {
@@ -414,21 +422,23 @@ label {
 }
 
 .password-requirements li.valid {
-  color: #4CAF50;
+  color: var(--success-color);
 }
 
 .password-mismatch {
-  color: #f44336;
+  color: var(--danger-color);
   margin-top: 0.5rem;
   font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
   display: flex;
   align-items: center;
 }
 
 .password-match {
-  color: #4CAF50;
+  color: var(--success-color);
   margin-top: 0.5rem;
   font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
   display: flex;
   align-items: center;
 }
