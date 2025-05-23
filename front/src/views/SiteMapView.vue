@@ -52,8 +52,7 @@
         <section class="map-section">
           <h2>Ubicación</h2>
           <div class="map-container">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d25032.696936313725!2d-0.52874545!3d38.34696565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2ses!4v1748000424415!5m2!1ses!2ses" width="600" height="550" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7494.148486983516!2d-0.4865065368424072!3d38.34582365127152!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd6237b04d11e95d%3A0x7d39ba606c50f5cf!2sAyuntamiento%20de%20Alicante!5e0!3m2!1ses!2ses!4v1748000541141!5m2!1ses!2ses" width="600" height="550" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>          </div>
         </section>
       </div>
     </div>
