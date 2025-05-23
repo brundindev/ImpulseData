@@ -51,8 +51,8 @@
         <!-- Mapa de Google -->
         <section class="map-section">
           <h2>Ubicación</h2>
-          <div class="map-container" ref="mapContainer">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d25032.696936313725!2d-0.52874545!3d38.34696565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2ses!4v1748000017919!5m2!1ses!2ses" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <div class="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d25032.696936313725!2d-0.52874545!3d38.34696565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2ses!4v1748000424415!5m2!1ses!2ses" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           </div>
         </section>
       </div>
@@ -61,63 +61,12 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-
-const mapContainer = ref(null);
+import { onMounted } from 'vue';
 
 onMounted(() => {
   // Cambiar el título de la página
   document.title = 'Mapa del Sitio - ImpulseData';
-
-  // Cargar el script de Google Maps
-  const googleMapsScript = document.createElement('script');
-  googleMapsScript.src = `https://maps.googleapis.com/maps/api/js?key=TU_API_KEY`;
-  googleMapsScript.async = true;
-  googleMapsScript.defer = true;
-  
-  googleMapsScript.onload = initMap;
-  document.head.appendChild(googleMapsScript);
-
-  // Cargar Font Awesome
-  const fontAwesomeScript = document.createElement('script');
-  fontAwesomeScript.src = 'https://kit.fontawesome.com/a076d05399.js';
-  fontAwesomeScript.crossOrigin = 'anonymous';
-  document.head.appendChild(fontAwesomeScript);
 });
-
-function initMap() {
-  // Coordenadas del Ayuntamiento de Alicante
-  const ayuntamiento = { lat: 38.345996, lng: -0.481624 };
-  
-  // Crear el mapa
-  const map = new google.maps.Map(mapContainer.value, {
-    zoom: 16,
-    center: ayuntamiento,
-    styles: [
-      {
-        featureType: "all",
-        elementType: "labels.text.fill",
-        stylers: [{ color: "#444444" }]
-      }
-    ]
-  });
-
-  // Añadir marcador
-  const marker = new google.maps.Marker({
-    position: ayuntamiento,
-    map: map,
-    title: 'Ayuntamiento de Alicante'
-  });
-
-  // Añadir ventana de información
-  const infowindow = new google.maps.InfoWindow({
-    content: '<div style="padding: 10px;"><h3>Ayuntamiento de Alicante</h3><p>Plaza del Ayuntamiento, 1<br>03002 Alicante</p></div>'
-  });
-
-  marker.addListener('click', () => {
-    infowindow.open(map, marker);
-  });
-}
 </script>
 
 <style scoped>
