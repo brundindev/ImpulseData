@@ -70,8 +70,11 @@
             </a>
           </div>
           <div class="actions">
-            <button type="submit" class="btn btn-primary" :disabled="loading">
-              {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+            <button type="submit" class="btn btn-primary" :class="{ 'loading': loading }" :disabled="loading">
+              <div class="btn-content">
+                <span v-if="loading" class="btn-spinner"></span>
+                <span>{{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}</span>
+              </div>
             </button>
           </div>
           

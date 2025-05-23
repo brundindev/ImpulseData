@@ -307,66 +307,33 @@ label {
   margin-right: 10px;
 }
 
-/* Estilos para el login con Google */
-.separator {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 1.5rem 0;
+/* Estilos para el spinner del botón */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.separator::before,
-.separator::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #e0e0e0;
+.btn-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  vertical-align: middle;
 }
 
-.separator span {
-  padding: 0 10px;
-  color: #777;
-  font-size: 0.9rem;
-}
-
-.social-login {
-  margin: 1rem 0;
-}
-
-.btn-google {
+.btn-content {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 0.85rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  text-align: center;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: white;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.btn-google:hover:not([disabled]) {
-  background-color: #f8f8f8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.btn-google:active:not([disabled]) {
-  transform: translateY(0);
-}
-
-.btn-google[disabled] {
-  opacity: 0.7;
+/* Ajuste para el botón cuando está cargando */
+.btn-primary.loading {
   cursor: not-allowed;
-}
-
-.google-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 10px;
+  opacity: 0.8;
 }
