@@ -47,7 +47,6 @@ class EmpresaService {
           ciudad: empresaData.ciudad || "",
           fechaActualizacion: new Date().toISOString()
         };
-        
         await FirestoreService.actualizarEmpresa(empresaEditandoId, datosActualizados);
         await FirestoreService.actualizarSubcolecciones(
           empresaEditandoId,
@@ -55,6 +54,7 @@ class EmpresaService {
           empresaData.centros,
           empresaData.formaciones
         );
+        return empresaEditandoId;
       } else {
         // Crear nueva empresa
         const nuevaEmpresaData = {
@@ -65,7 +65,6 @@ class EmpresaService {
           fechaCreacionSistema: new Date().toISOString(),
           fechaActualizacion: new Date().toISOString()
         };
-
         const empresaId = await FirestoreService.guardarEmpresa(nuevaEmpresaData);
         await FirestoreService.actualizarSubcolecciones(
           empresaId,
@@ -73,6 +72,7 @@ class EmpresaService {
           empresaData.centros,
           empresaData.formaciones
         );
+        return empresaId;
       }
     } catch (error) {
       console.error('Error al guardar empresa:', error);

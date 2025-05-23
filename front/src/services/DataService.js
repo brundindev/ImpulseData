@@ -98,6 +98,8 @@ export async function cargarDatos() {
     const empresasRecibidas = await FirestoreService.obtenerEmpresas();
     if (user) {
       empresas.value = empresasRecibidas.filter(empresa => {
+        // Mostrar siempre la empresa global, aunque el creadoPor no coincida
+        if (empresa.esEmpresaGlobal) return true;
         const pertenece = empresa.creadoPor === user.uid;
         if (!pertenece) {
           console.warn(`⚠️ Empresa ajena detectada: ${empresa.nombre}`);
