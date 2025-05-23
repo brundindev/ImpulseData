@@ -12,6 +12,11 @@ import PdfExampleView from '../views/PdfExampleView.vue'
 import CloudinaryTestView from '../views/CloudinaryTestView.vue'
 import DescargarAppView from '../views/DescargarAppView.vue'
 
+// Importar las nuevas vistas
+const PrivacyPolicyView = () => import('@/views/PrivacyPolicyView.vue')
+const TermsOfServiceView = () => import('@/views/TermsOfServiceView.vue')
+const SiteMapView = () => import('@/views/SiteMapView.vue')
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -89,6 +94,30 @@ const router = createRouter({
         requiresAuth: true
       }
     },
+    {
+      path: '/privacy',
+      name: 'privacy',
+      component: PrivacyPolicyView,
+      meta: {
+        title: 'Política de Privacidad'
+      }
+    },
+    {
+      path: '/terms',
+      name: 'terms',
+      component: TermsOfServiceView,
+      meta: {
+        title: 'Términos de Servicio'
+      }
+    },
+    {
+      path: '/sitemap',
+      name: 'sitemap',
+      component: SiteMapView,
+      meta: {
+        title: 'Mapa del Sitio'
+      }
+    }
   ],
   scrollBehavior(to, from, savedPosition) {
     // Si estamos navegando a la ruta PDF, siempre scroll al inicio
