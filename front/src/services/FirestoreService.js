@@ -241,15 +241,9 @@ class FirestoreService {
       // Primero obtener la empresa global
       const empresasRef = collection(db, "empresas");
       
-<<<<<<< Updated upstream
       // SIEMPRE BUSCAR PRIMERO LA EMPRESA GLOBAL CON ID ESPECÍFICO
       const empresaGlobalRef = doc(empresasRef, "impulsalicante_global");
       const empresaGlobalDoc = await getDoc(empresaGlobalRef);
-      
-      const empresas = [];
-=======
-      const querySnapshotGlobal = await getDocs(qGlobal);
->>>>>>> Stashed changes
       
       // Si no existe la empresa global, crearla
       if (!empresaGlobalDoc.exists()) {
@@ -279,14 +273,14 @@ class FirestoreService {
             numCentros,
             numFormaciones,
             perteneceAlUsuarioActual: true,
-            esCompartida: true
+            esEmpresaGlobal: true
           });
         } else {
           // Si falla la creación, añadir versión por defecto
           empresas.push({ 
             ...EMPRESA_POR_DEFECTO, 
             perteneceAlUsuarioActual: true,
-            esCompartida: true
+            esEmpresaGlobal: true
           });
         }
       } else {
@@ -313,23 +307,8 @@ class FirestoreService {
           numCentros,
           numFormaciones,
           perteneceAlUsuarioActual: true,
-<<<<<<< Updated upstream
-          esCompartida: true
-=======
           esEmpresaGlobal: true
->>>>>>> Stashed changes
         });
-      } else {
-        // Si no existe la empresa global, crearla
-        const empresaGlobalId = await this.crearEmpresaPorDefecto();
-        if (empresaGlobalId) {
-          const empresaGlobal = await this.obtenerEmpresa(empresaGlobalId);
-          empresas.push({
-            ...empresaGlobal,
-            perteneceAlUsuarioActual: true,
-            esEmpresaGlobal: true
-          });
-        }
       }
 
       // Luego obtener las empresas personales del usuario
@@ -557,7 +536,6 @@ class FirestoreService {
       const user = auth.currentUser;
       if (!user) throw new Error("Usuario no autenticado");
       
-<<<<<<< Updated upstream
       // Verificar que la empresa exista
       const empresaRef = doc(db, "empresas", empresaId);
       const empresaDoc = await getDoc(empresaRef);
@@ -575,7 +553,7 @@ class FirestoreService {
       // Crear objeto con los datos actualizados
       const datosActualizados = {
         ...datosOriginales,  // Mantener todos los datos originales
-        ...empresaData,      // Sobrescribir con los nuevos datos
+        ...datos,           // Sobrescribir con los nuevos datos
         fechaActualizacion: new Date().toISOString(),
         ultimaActualizacionPor: user.uid,
         ultimaActualizacionEmail: user.email
@@ -602,38 +580,7 @@ class FirestoreService {
       const empresaActualizada = await getDoc(empresaRef);
       if (!empresaActualizada.exists()) {
         throw new Error("Error al verificar la actualización");
-=======
-      // Obtener la empresa actual
-      const empresaRef = doc(db, "empresas", empresaId);
-      const empresaDoc = await getDoc(empresaRef);
-      
-      if (!empresaDoc.exists()) {
-        throw new Error("Empresa no encontrada");
->>>>>>> Stashed changes
       }
-      
-      const empresaData = empresaDoc.data();
-      
-      // Si es una empresa global, permitir actualización
-      if (empresaData.esEmpresaGlobal) {
-        await updateDoc(empresaRef, {
-          ...datos,
-          fechaActualizacion: new Date().toISOString(),
-          actualizadoPor: user.uid,
-          actualizadorEmail: user.email
-        });
-        return true;
-      }
-      
-      // Para empresas no globales, verificar propiedad
-      if (empresaData.creadoPor !== user.uid) {
-        throw new Error("No tienes permiso para actualizar esta empresa");
-      }
-      
-      await updateDoc(empresaRef, {
-        ...datos,
-        fechaActualizacion: new Date().toISOString()
-      });
       
       return true;
     } catch (error) {
