@@ -50,6 +50,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Asegurarse de que el contenido principal ocupe todo el espacio disponible */
 #app {
   min-height: 100vh;
   width: 100vw;
