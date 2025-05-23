@@ -1192,10 +1192,36 @@ onUnmounted(() => {
 <style src="../assets/Home.css"></style>
 
 <style>
-body.home-bg-black {
-  background-color: #000 !important;
+/* Eliminar cualquier background que pueda estar interfiriendo */
+.home-page {
+  min-height: 100vh;
+  width: 100vw;
+  position: relative;
+  background: transparent !important;
 }
 
+.dashboard-container {
+  min-height: 100vh;
+  width: 100%;
+  padding: 2rem;
+  position: relative;
+  background: transparent !important;
+  color: white;
+  z-index: 1;
+}
+
+.dashboard-content {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+
+/* Asegurarse de que el contenido ocupe todo el espacio */
+.row {
+  margin: 0;
+  min-height: calc(100vh - 4rem);
+  background: transparent !important;
+}
 
 /* Añadir estilos específicos para el HomeView */
 .section-title {
@@ -1204,7 +1230,7 @@ body.home-bg-black {
 }
 
 .section-title h2 {
-  color: #9c27b0;
+  color: #ffffff;
   font-size: 1.8rem;
   position: relative;
   display: inline-block;
@@ -1217,7 +1243,7 @@ body.home-bg-black {
   left: 0;
   width: 0;
   height: 3px;
-  background: linear-gradient(90deg, #9c27b0, #e91e63);
+  background: linear-gradient(90deg, #ffffff, #e91e63);
   transition: width 0.8s ease;
 }
 
@@ -1228,11 +1254,15 @@ body.home-bg-black {
 /* Estilos para las animaciones de las tarjetas */
 .company-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .company-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(156, 39, 176, 0.2), 0 10px 15px rgba(233, 30, 99, 0.2);
+  box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1), 0 10px 15px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15) !important;
 }
 
 .company-card-animated {
@@ -1247,22 +1277,22 @@ body.home-bg-black {
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 10px 25px rgba(156, 39, 176, 0.2), 0 5px 10px rgba(233, 30, 99, 0.2);
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1), 0 5px 10px rgba(255, 255, 255, 0.1);
   }
   50% {
-    box-shadow: 0 15px 30px rgba(156, 39, 176, 0.3), 0 8px 15px rgba(233, 30, 99, 0.3);
+    box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2), 0 8px 15px rgba(255, 255, 255, 0.2);
   }
   100% {
-    box-shadow: 0 10px 25px rgba(156, 39, 176, 0.2), 0 5px 10px rgba(233, 30, 99, 0.2);
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1), 0 5px 10px rgba(255, 255, 255, 0.1);
   }
 }
 
 @keyframes glow {
   from {
-    box-shadow: 0 0 5px rgba(156, 39, 176, 0.3), 0 0 10px rgba(233, 30, 99, 0.3);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.2), 0 0 10px rgba(255, 255, 255, 0.2);
   }
   to {
-    box-shadow: 0 0 15px rgba(156, 39, 176, 0.5), 0 0 20px rgba(233, 30, 99, 0.5);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.3);
   }
 }
 
@@ -1285,24 +1315,5 @@ body.home-bg-black {
   .stat-card-animated {
     animation: none;
   }
-}
-
-.home-container {
-  min-height: 100vh;
-  padding: 2rem;
-  position: relative;
-  background: linear-gradient(135deg, #2a1b3d 0%, #44318d 100%);
-  color: white;
-}
-
-.dashboard-content {
-  position: relative;
-  z-index: 1;
-}
-
-/* Asegurarse de que el contenido ocupe todo el espacio */
-.row {
-  margin: 0;
-  min-height: calc(100vh - 4rem); /* 4rem es el padding del container (2rem * 2) */
 }
 </style>

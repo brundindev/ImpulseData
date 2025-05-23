@@ -452,7 +452,7 @@ const mostrarChatbot = computed(() => {
   --success-color: #8e24aa;
   --text-color: #212121;
   --text-secondary: #757575;
-  --background-color: #ffffff;
+  --background-color: transparent;
   --card-background: #ffffff;
   --border-color: #e0e0e0;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -460,12 +460,12 @@ const mostrarChatbot = computed(() => {
 
 /* Sistema de scrollbar invisible pero funcional */
 html {
-  scrollbar-width: none; /* Para Firefox */
-  -ms-overflow-style: none; /* Para Internet Explorer y Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 html::-webkit-scrollbar {
-  width: 0; /* Para Chrome, Safari y Opera */
+  width: 0;
   display: none;
 }
 
@@ -486,39 +486,28 @@ body::-webkit-scrollbar {
 
 /* Resto de estilos globales */
 .main-content {
-  overflow-y: auto !important;
-  min-height: 100vh;
-  height: auto;
+  flex: 1;
+  width: 100%;
+  min-height: calc(100vh - 60px);
   position: relative;
-  scrollbar-width: thin;
-  scrollbar-color: #9c27b0 #f1f1f1;
-  padding-bottom: 4rem;
+  z-index: 1;
+  background: transparent !important;
 }
+
 body, html {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow-x: hidden; /* Solo oculta overflow horizontal */
-  overflow-y: auto !important; /* Permite scroll vertical con !important para priorizar */
-}
-
-.main-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.main-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.main-content::-webkit-scrollbar-thumb {
-  background: #9c27b0;
-  border-radius: 4px;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto !important;
 }
 
 /* Aplicar overflow:hidden solo a la página de bienvenida y no afectar el resto */
 .welcome-page {
   overflow: hidden !important;
   min-height: 100vh;
+  background: transparent !important;
 }
 
 /* Remover la regla global que causaba el problema */
@@ -534,6 +523,40 @@ body:not(.welcome-open) {
   overflow-y: auto !important;
   height: auto !important;
   position: static !important;
+}
+
+#app {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: transparent !important;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: transparent !important;
+}
+
+/* Asegurarse de que el contenido ocupe todo el espacio disponible */
+.container-fluid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: transparent !important;
+}
+
+/* Estilos para el fondo del dashboard */
+.dashboard-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #2a1b3d 0%, #44318d 100%);
+  z-index: -1;
 }
 
 .dropdown-menu {
@@ -591,36 +614,5 @@ body:not(.welcome-open) {
 .user-profile-container .user-name:hover,
 .dropdown-toggle .user-name:hover {
   color: #000000 !important;
-}
-
-#app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(135deg, #f5f5f5 0%, #e0e9f5 100%);
-}
-
-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Asegurarse de que el contenido ocupe todo el espacio disponible */
-.container-fluid {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Estilos para el fondo del dashboard */
-.dashboard-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #2a1b3d 0%, #44318d 100%);
-  z-index: -1;
 }
 </style>
