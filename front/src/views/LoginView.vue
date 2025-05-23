@@ -593,3 +593,37 @@ const sendResetPasswordEmail = async () => {
 </script>
 
 <style src="../assets/Login.css"></style>
+
+<style>
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%) !important;
+  position: relative;
+  z-index: 1;
+}
+
+.login-container {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  z-index: 2;
+}
+
+.login-title {
+  color: #2a1b3d;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* Resto de los estilos existentes... */
+</style>
