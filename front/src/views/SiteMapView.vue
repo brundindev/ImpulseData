@@ -54,48 +54,6 @@
           <div class="map-container" ref="mapContainer"></div>
         </section>
       </div>
-
-      <!-- Enlaces del Sitio -->
-      <section class="links-section">
-        <h2>Enlaces Importantes</h2>
-        <div class="links-grid">
-          <div class="links-column">
-            <h3>Principal</h3>
-            <ul>
-              <li><router-link to="/">Inicio</router-link></li>
-              <li><router-link to="/login">Iniciar Sesión</router-link></li>
-              <li><router-link to="/registro">Registro</router-link></li>
-            </ul>
-          </div>
-
-          <div class="links-column">
-            <h3>Servicios</h3>
-            <ul>
-              <li><router-link to="/dashboard">Dashboard</router-link></li>
-              <li><router-link to="/analytics">Análisis</router-link></li>
-              <li><router-link to="/reports">Informes</router-link></li>
-            </ul>
-          </div>
-
-          <div class="links-column">
-            <h3>Legal</h3>
-            <ul>
-              <li><router-link to="/privacy">Política de Privacidad</router-link></li>
-              <li><router-link to="/terms">Términos de Servicio</router-link></li>
-              <li><router-link to="/cookies">Política de Cookies</router-link></li>
-            </ul>
-          </div>
-
-          <div class="links-column">
-            <h3>Soporte</h3>
-            <ul>
-              <li><router-link to="/help">Centro de Ayuda</router-link></li>
-              <li><router-link to="/faq">FAQ</router-link></li>
-              <li><router-link to="/contact">Contacto</router-link></li>
-            </ul>
-          </div>
-        </div>
-      </section>
     </div>
   </div>
 </template>
