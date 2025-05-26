@@ -499,6 +499,8 @@ window.addEventListener('beforeunload', (e) => {
   max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
+  z-index: 1001;
 }
 
 .modal-header {
