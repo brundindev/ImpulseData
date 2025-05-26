@@ -156,11 +156,13 @@
       </div>
     </teleport>
 
-    <SaveConfirmationModal
-      :show="mostrarConfirmacion"
-      @save="guardarProgreso"
-      @discard="cerrarFormulario"
-    />
+    <teleport to="body">
+      <SaveConfirmationModal
+        :show="mostrarConfirmacion"
+        @save="guardarProgreso"
+        @discard="descartarFormulario"
+      />
+    </teleport>
   </div>
 </template>
 
@@ -371,6 +373,14 @@ const guardarProgreso = async () => {
   } catch (error) {
     console.error('Error al guardar el progreso:', error);
   }
+};
+
+const descartarFormulario = () => {
+  mostrarFormulario.value = false;
+  mostrarConfirmacion.value = false;
+  seccionActual.value = '';
+  pasoActual.value = 0;
+  datosFormulario.value = {};
 };
 
 // Agregar evento para detectar cierre del navegador
