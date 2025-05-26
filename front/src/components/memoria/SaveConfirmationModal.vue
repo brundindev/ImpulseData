@@ -1,8 +1,11 @@
 <template>
-  <div v-if="show" class="save-confirmation-overlay">
+  <div v-if="show" class="save-confirmation-overlay" @click.self="$emit('discard')">
     <div class="save-confirmation-container">
       <div class="save-confirmation-content">
-        <h3>¿Deseas guardar tu progreso antes de salir?</h3>
+        <div class="modal-header">
+          <h3>¿Deseas guardar tu progreso antes de salir?</h3>
+          <button class="btn-close" @click="$emit('discard')">&times;</button>
+        </div>
         <div class="modal-actions">
           <button @click="$emit('save')" class="btn-save">Guardar</button>
           <button @click="$emit('discard')" class="btn-discard">Descartar</button>
@@ -40,20 +43,40 @@ defineEmits(['save', 'discard']);
 .save-confirmation-container {
   background: white;
   border-radius: 10px;
-  padding: 2rem;
   width: 90%;
   max-width: 400px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .save-confirmation-content {
-  text-align: center;
+  padding: 1.5rem;
 }
 
-.save-confirmation-content h3 {
-  color: #333;
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
+  color: #333;
   font-size: 1.2rem;
+  margin: 0;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.btn-close:hover {
+  color: #333;
 }
 
 .modal-actions {

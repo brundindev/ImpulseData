@@ -316,6 +316,7 @@ const cerrarFormulario = () => {
     mostrarConfirmacion.value = true;
   } else {
     mostrarFormulario.value = false;
+    mostrarConfirmacion.value = false;
     seccionActual.value = '';
     pasoActual.value = 0;
     datosFormulario.value = {};
@@ -361,6 +362,7 @@ const guardarProgreso = async () => {
     // Guardar en localStorage como respaldo
     localStorage.setItem(`memoria_${seccionActual.value}`, JSON.stringify(datosFormulario.value));
     
+    // Limpiar el estado
     mostrarConfirmacion.value = false;
     mostrarFormulario.value = false;
     seccionActual.value = '';
