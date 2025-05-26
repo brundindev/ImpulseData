@@ -636,6 +636,7 @@ textarea.form-control {
 .actuaciones-preview h4 {
   color: #495057;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .actuaciones-grid {
