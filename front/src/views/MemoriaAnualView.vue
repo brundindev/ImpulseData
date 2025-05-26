@@ -489,7 +489,7 @@ window.addEventListener('beforeunload', (e) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .modal-container {
@@ -500,7 +500,7 @@ window.addEventListener('beforeunload', (e) => {
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  z-index: 101;
+  z-index: 1001;
 }
 
 .modal-header {

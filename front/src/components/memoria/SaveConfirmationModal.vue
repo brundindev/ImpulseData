@@ -37,7 +37,7 @@ defineEmits(['save', 'discard']);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .save-confirmation-container {
@@ -47,7 +47,7 @@ defineEmits(['save', 'discard']);
   max-width: 400px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   position: relative;
-  z-index: 1001;
+  z-index: 2001;
 }
 
 .save-confirmation-content {
