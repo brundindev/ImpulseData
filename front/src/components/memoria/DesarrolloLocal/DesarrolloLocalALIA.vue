@@ -49,7 +49,7 @@
 
     <!-- Participación en eventos empresariales -->
     <section class="bloque">
-      <h4>Participación en eventos empresariales en 2023</h4>
+      <h4>Participación en eventos empresariales</h4>
       <div v-for="(participacion, index) in datos.participacion" :key="index" class="evento">
         <div class="fila">
           <div class="campo">
@@ -68,7 +68,7 @@
 
     <!-- Actividades de dinamización y focus group -->
     <section class="bloque">
-      <h4>Actividades de dinamización y focus group durante 2023</h4>
+      <h4>Actividades de dinamización y focus group</h4>
       <input type="number" v-model="datos.actividades" class="form-control" min="0" placeholder="Nº actividades">
     </section>
 
@@ -90,8 +90,8 @@
         </p>
 
         <div class="resultados-section">
-          <h6>Resultados 2021-2023:</h6>
-          <h7>Empresas atendidas en 2023:</h7>
+          <h5>Resultados del año:</h5>
+          <h6>Empresas atendidas:</h6>
           
           <div class="metricas-grid">
             <div class="metrica">
@@ -134,7 +134,7 @@
         <div class="eventos-section">
           <div class="eventos-header">
             <div class="eventos-box">
-              <h6>Participación en eventos empresariales en 2023</h6>
+              <h6>Participación en eventos empresariales</h6>
               <div class="eventos-numero">{{ datos.participacion ? datos.participacion.length : 0 }}</div>
             </div>
           </div>
@@ -269,6 +269,10 @@ const esValido = computed(() => {
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid #b71c50;
+}
+
+.btn-secondary{
+  background: #c26685b2;
 }
 
 .numero-seccion {
@@ -527,5 +531,8 @@ textarea::placeholder {
     gap: 1rem;
     text-align: center;
   }
+}
+h3, h5{
+  color: #b71c50;
 }
 </style>

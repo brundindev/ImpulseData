@@ -1,6 +1,6 @@
 <template>
   <div class="form-step">
-    <h3 class="program-title">4.1 PROGRAMA DE DINAMIZACIÓN DE POLÍGONOS INDUSTRIALES Y NUEVOS ESPACIOS PRODUCTIVOS</h3>
+    <h3 class="program-title">Programa de Dinamización de Polígonos Industriales y Nuevos Espacios Productivos</h3>
     
     <div class="form-group">
       <label>Descripción General del Programa</label>
@@ -21,7 +21,7 @@
             type="text" 
             v-model="datos.periodoInversion" 
             class="form-control"
-            placeholder="Ej: 2018-2023"
+            placeholder="Ej: 2018-2025" 
           >
         </div>
         <div class="form-group">
@@ -240,7 +240,7 @@
               type="text" 
               v-model="entidad.año" 
               class="form-control"
-              placeholder="Ej: 2023"
+              placeholder="Ej: 2025"
             >
           </div>
           
@@ -319,7 +319,7 @@
               type="text" 
               v-model="proyecto.fechaFinalizacion" 
               class="form-control"
-              placeholder="Ej: 11 de diciembre de 2023"
+              placeholder="Ej: 11 de diciembre de 2025"
             >
           </div>
         </div>
@@ -378,6 +378,146 @@
       </div>
     </div>
 
+    <!-- Vista previa visual -->
+    <section class="bloque vista-previa">
+      <h4>Vista Previa del Programa</h4>
+      <div class="programa-card">
+        <div class="programa-header">
+          <div class="numero-seccion">4.1</div>
+          <div class="titulo-seccion">
+            <h5>PROGRAMA DE DINAMIZACIÓN DE</h5>
+            <h6>POLÍGONOS INDUSTRIALES Y NUEVOS ESPACIOS PRODUCTIVOS</h6>
+          </div>
+        </div>
+        
+        <p class="descripcion-card">
+          {{ datos.descripcionGeneral || 'Las áreas industriales son el principal motor económico de nuestra ciudad. Tal y como se expone en el III Pacto Territorial por el Empleo de la ciudad de Alicante, en él se establece, como objetivo estratégico, la mejora integral de las áreas industriales de la ciudad de Alicante y ampliación del suelo industrial disponible.' }}
+        </p>
+
+        <!-- Inversión destacada -->
+        <div class="inversion-destacada">
+          <div class="inversion-monto">{{ formatearEuros(datos.importeInversion) || '0 €' }}</div>
+          <div class="inversion-label">Inversión Áreas Industriales {{ datos.periodoInversion || 'Periodo' }}</div>
+        </div>
+
+        <!-- Resumen áreas industriales -->
+        <div class="resumen-section">
+          <div class="areas-numero">{{ datos.numeroAreas || 'nº Áreas' }}</div>
+          <div class="areas-label">Áreas Industriales:</div>
+          
+          <div class="metricas-grid">
+            <div class="metrica-item">
+              <div class="metrica-icono">🏭</div>
+              <div class="metrica-numero">{{ formatearNumero(datos.superficieTotal) || 'm²' }}</div>
+              <div class="metrica-label">m²</div>
+            </div>
+            <div class="metrica-item">
+              <div class="metrica-icono">👥</div>
+              <div class="metrica-numero">{{ formatearNumero(datos.numeroEmpleos) || 'nº Empleos' }}</div>
+              <div class="metrica-label">Empleos</div>
+            </div>
+            <div class="metrica-item">
+              <div class="metrica-icono">💰</div>
+              <div class="metrica-numero">{{ datos.facturacionTotal || 'M.€ Facturación' }}</div>
+              <div class="metrica-label">M.€ Facturación</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secciones del programa -->
+        <div class="seccion-programa">
+          <div class="seccion-numero">4.1.1</div>
+          <div class="seccion-titulo">Ampliación del suelo industrial en Alicante</div>
+          <div class="seccion-descripcion">
+            {{ datos.descripcionAmpliacion || 'A lo largo del año se ha avanzado en los trámites jurídicos y técnicos para ampliar el suelo industrial en EGM de "Atalayas, ciudad empresarial".' }}
+          </div>
+          
+          <!-- Áreas de ampliación -->
+          <div class="areas-ampliacion" v-if="datos.areasAmpliacion && datos.areasAmpliacion.length > 0">
+            <div v-for="(area, index) in datos.areasAmpliacion.filter(a => a.nombre)" :key="index" class="area-ampliacion-item">
+              <div class="area-nombre">{{ area.nombre }}</div>
+              <div class="area-superficie">{{ formatearNumero(area.superficie) }} m²</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="seccion-programa">
+          <div class="seccion-numero">4.1.2</div>
+          <div class="seccion-titulo">Impulso a la creación de Áreas Industriales Avanzadas</div>
+          <div class="seccion-descripcion">
+            {{ datos.descripcionImpulso || 'Desde la Agencia Local se siguen impulsando diferentes proyectos y actuaciones en los polígonos industriales de la ciudad con el fin de convertirlos en Áreas Industriales Avanzadas.' }}
+          </div>
+          
+          <!-- Mejoras seleccionadas -->
+          <div class="mejoras-section" v-if="mejorasSeleccionadas.length > 0">
+            <h6>Mejoras en Áreas Industriales</h6>
+            <div class="mejoras-lista">
+              <div v-for="mejora in mejorasSeleccionadas" :key="mejora" class="mejora-badge">
+                {{ mejora }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="seccion-programa">
+          <div class="seccion-numero">4.1.3</div>
+          <div class="seccion-titulo">Creación de Entidades de Gestión y Modernización</div>
+          <div class="seccion-descripcion">
+            {{ datos.descripcionEntidades || 'La creación de Entidades de Gestión y Modernización (EGM), tiene por objetivo mejorar las áreas industriales de la Comunitat, hacerlas más competitivas y atractivas para la implantación de nuevos proyectos y beneficiar así a vez a las empresas ya instaladas.' }}
+          </div>
+          
+          <!-- Entidades -->
+          <div class="entidades-lista" v-if="datos.entidades && datos.entidades.length > 0">
+            <div v-for="(entidad, index) in datos.entidades.filter(e => e.nombre)" :key="index" class="entidad-item-preview">
+              <div class="entidad-año">{{ entidad.año || 'Año' }}</div>
+              <div class="entidad-nombre">{{ entidad.nombre }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="seccion-programa">
+          <div class="seccion-numero">4.1.4</div>
+          <div class="seccion-titulo">Proyectos Específicos</div>
+          
+          <div class="proyectos-lista" v-if="datos.proyectos && datos.proyectos.length > 0">
+            <div v-for="(proyecto, index) in datos.proyectos.filter(p => p.nombre)" :key="index" class="proyecto-preview">
+              <div class="proyecto-inversion">{{ formatearEuros(proyecto.inversion) }}</div>
+              <div class="proyecto-info">
+                <div class="proyecto-nombre">{{ proyecto.nombre }}</div>
+                <div class="proyecto-fecha" v-if="proyecto.fechaFinalizacion">{{ proyecto.fechaFinalizacion }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="seccion-programa">
+          <div class="seccion-numero">4.1.5</div>
+          <div class="seccion-titulo">Declaración de proyectos prioritarios</div>
+          
+          <div class="proyectos-prioritarios-resumen">
+            <div class="prioritario-item">
+              <div class="prioritario-numero">{{ datos.proyectosTramitados || 'nº de proyectos' }}</div>
+              <div class="prioritario-label">Proyectos tramitados</div>
+            </div>
+            <div class="prioritario-item">
+              <div class="prioritario-numero">{{ formatearEuros(datos.presupuestoEjecucion) || 'Presupuesto de Ejecución' }}</div>
+              <div class="prioritario-label">Presupuesto de Ejecución</div>
+            </div>
+            <div class="prioritario-empleos">
+              <div class="empleo-item">
+                <div class="empleo-numero">{{ datos.puestosEjecucion || 'nº Puestos' }}</div>
+                <div class="empleo-label">Puestos creados durante la ejecución</div>
+              </div>
+              <div class="empleo-item">
+                <div class="empleo-numero">{{ datos.puestosFinalizacion || 'nº Puestos' }}</div>
+                <div class="empleo-label">Puestos que se crearán a la finalización</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="form-actions">
       <button 
         @click="$emit('siguiente')" 
@@ -404,6 +544,26 @@ const emit = defineEmits(['update:modelValue', 'siguiente']);
 const datos = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
+});
+
+// Funciones de formato
+const formatearNumero = (numero) => {
+  if (!numero) return '';
+  return numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
+const formatearEuros = (cantidad) => {
+  if (!cantidad) return '';
+  const numero = cantidad.toString().replace(/[^0-9.,]/g, '');
+  return numero + ' €';
+};
+
+// Computed para mejoras seleccionadas
+const mejorasSeleccionadas = computed(() => {
+  if (!datos.value.mejoras) return [];
+  return datos.value.mejoras
+    .filter(mejora => mejora.seleccionada && mejora.nombre)
+    .map(mejora => mejora.nombre);
 });
 
 // Inicializar estructura vacía solo si no existe
@@ -472,18 +632,17 @@ const eliminarProyecto = (index) => {
 
 <style scoped>
 .form-step {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px #0001;
 }
 
 .program-title {
-  background-color: #ac3b61;
-  color: white;
-  padding: 15px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-  font-weight: bold;
+  color:#b71c50;
+  font-weight: bolder;
 }
 
 .section-title {
@@ -618,5 +777,714 @@ textarea.form-control {
   margin-top: 2rem;
   display: flex;
   justify-content: flex-end;
+}
+
+/* Estilos para la vista previa */
+.bloque {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+
+}
+
+.bloque h4 {
+  color: #ac3b61;
+  margin-bottom: 1rem;
+}
+
+.vista-previa {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  margin-top: 3rem;
+}
+
+.programa-card {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.programa-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid #ac3b61;
+}
+
+.numero-seccion {
+  background: #ac3b61;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-right: 1.5rem;
+}
+
+.titulo-seccion h5 {
+  color: white;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.titulo-seccion h6 {
+  color: #b71c50;
+  font-size: 1rem;
+  font-weight: normal;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.descripcion-card {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+  text-align: justify;
+}
+
+.resultados-section h6 {
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.resultados-section h7 {
+  color: #b71c50;
+  font-size: 0.9rem;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.metricas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metrica {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.metrica-numero {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #b71c50;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.metrica-label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.informes-section {
+  margin-bottom: 1.5rem;
+}
+
+.informes-section h6 {
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.informes-grid {
+  display: flex;
+  gap: 2rem;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.informe-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.informe-numero {
+  background: #b71c50;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  min-width: 40px;
+  text-align: center;
+}
+
+.informe-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.eventos-section {
+  margin-bottom: 1.5rem;
+}
+
+.eventos-header {
+  margin-bottom: 1rem;
+}
+
+.eventos-box {
+  background: #b71c50;
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eventos-box h6 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.eventos-numero {
+  font-size: 2rem;
+  font-weight: bold;
+  background: rgba(255,255,255,0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.eventos-lista {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.evento-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.9rem;
+}
+
+.evento-item:last-child {
+  border-bottom: none;
+}
+
+.eventos-vacia {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+.actividades-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.actividades-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.actividades-numero {
+  background: #b71c50;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+/* Estilos originales del formulario */
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.campo {
+  flex: 1 1 200px;
+  min-width: 200px;
+}
+
+.evento {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  margin-top: 0.5rem;
+}
+
+.form-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(0, 0, 0, 0.6) !important;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .metricas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .informes-grid {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .eventos-box {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .actividades-section {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+h3, h5{
+  color: #b71c50;
+}
+
+/* Estilos para la vista previa del programa */
+.bloque.vista-previa {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.programa-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+/* Header del programa */
+.programa-header {
+  background: white;
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.numero-seccion {
+  background: #ac3b61;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 4px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.titulo-seccion h5 {
+  color: black;
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.titulo-seccion h6 {
+  color: #b71c50;
+  margin: 5px 0 0 0;
+  font-size: 16px;
+  font-weight: revert-layer;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Descripción principal */
+.descripcion-card {
+  padding: 20px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* Inversión destacada */
+.inversion-destacada {
+  background: #c2185b;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin: 0 20px 20px 20px;
+  border-radius: 8px;
+}
+
+.inversion-monto {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.inversion-label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Resumen de áreas industriales */
+.resumen-section {
+  padding: 20px;
+  background: #f8f9fa;
+  margin: 0 20px 20px 20px;
+  border-radius: 8px;
+}
+
+.areas-numero {
+  font-size: 48px;
+  font-weight: bold;
+  color: #c2185b;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.areas-label {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.metricas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.metrica-item {
+  text-align: center;
+  background: white;
+  padding: 15px 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metrica-icono {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.metrica-numero {
+  font-size: 20px;
+  font-weight: bold;
+  color: #c2185b;
+  margin-bottom: 5px;
+}
+
+.metrica-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: bold;
+}
+
+/* Secciones del programa */
+.seccion-programa {
+  margin: 20px;
+  padding: 20px;
+  border-left: 4px solid #c2185b;
+  background: #fafafa;
+  border-radius: 0 8px 8px 0;
+}
+
+.seccion-numero {
+  background: #333;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.seccion-titulo {
+  font-size: 18px;
+  font-weight: bold;
+  color: #c2185b;
+  margin-bottom: 10px;
+}
+
+.seccion-descripcion {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* Áreas de ampliación */
+.areas-ampliacion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.area-ampliacion-item {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.area-nombre {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.area-superficie {
+  background: #c2185b;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Mejoras */
+.mejoras-section h6 {
+  color: #c2185b;
+  font-weight: bold;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.mejoras-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mejora-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Entidades */
+.entidades-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.entidad-item-preview {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.entidad-año {
+  background: #c2185b;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.entidad-nombre {
+  flex: 1;
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+/* Proyectos */
+.proyectos-lista {
+  display: grid;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.proyecto-preview {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.proyecto-inversion {
+  background: #c2185b;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 18px;
+  min-width: 150px;
+  text-align: center;
+}
+
+.proyecto-info {
+  flex: 1;
+}
+
+.proyecto-nombre {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+  font-size: 16px;
+}
+
+.proyecto-fecha {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Proyectos prioritarios */
+.proyectos-prioritarios-resumen {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 15px;
+}
+
+.prioritario-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.prioritario-item:last-child {
+  border-bottom: none;
+}
+
+.prioritario-numero {
+  background: #c2185b;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 18px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.prioritario-label {
+  flex: 1;
+  margin-left: 15px;
+  font-weight: 500;
+  color: #333;
+}
+
+.prioritario-empleos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.empleo-item {
+  text-align: center;
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.empleo-numero {
+  font-size: 24px;
+  font-weight: bold;
+  color: #c2185b;
+  margin-bottom: 5px;
+}
+
+.empleo-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .programa-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .metricas-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .areas-ampliacion {
+    grid-template-columns: 1fr;
+  }
+  
+  .entidades-lista {
+    grid-template-columns: 1fr;
+  }
+  
+  .prioritario-empleos {
+    grid-template-columns: 1fr;
+  }
+  
+  .proyecto-preview {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .prioritario-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .prioritario-label {
+    margin-left: 0;
+  }
 }
 </style>
