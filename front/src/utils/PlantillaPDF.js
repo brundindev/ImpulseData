@@ -102,26 +102,53 @@ body {
     page-break-inside: auto; /* Permitir que las listas de índice se dividan entre páginas */
     margin-top: 0;
     padding-top: 0;
-    color: #000000; /* Asegurar que el texto de las listas sea negro */
 }
 
-#indice li, #anexos li {
-    page-break-inside: avoid; /* Evitar que los elementos individuales se corten */
-    margin-bottom: 5px; /* Reducir espacio entre elementos de lista en el índice */
-    color: #000000; /* Asegurar que el texto de los elementos de lista sea negro */
+/* Estilos para los elementos de primer nivel (puntos principales) */
+#indice > ul > li, #anexos > ul > li,
+#indice > ol > li, #anexos > ol > li {
+    page-break-inside: avoid;
+    margin-bottom: 5px;
+    color: var(--section-color) !important; /* Color gris para puntos principales */
+}
+
+/* Estilos para los subelementos (subpuntos) */
+#indice ul ul li, #indice ol ol li,
+#anexos ul ul li, #anexos ol ol li {
+    page-break-inside: avoid;
+    margin-bottom: 5px;
+    color: #000000 !important; /* Color negro para subpuntos */
 }
 
 /* Evitar espacios grandes innecesarios */
 #indice h2 + ul, #indice h2 + ol, #anexos h2 + ul, #anexos h2 + ol {
     margin-top: 10px; /* Reducir espacio después del título del índice */
-    color: #000000; /* Asegurar que el texto sea negro */
 }
 
 /* Títulos de secciones principales del índice */
 #indice h2, #anexos h2 {
     margin-bottom: 15px;
     page-break-after: avoid; /* Evitar que el título quede separado de su contenido */
-    color: var(--section-color); /* Mantener el color de sección para los títulos */
+    color: var(--section-color); /* Color de sección para los títulos */
+}
+
+/* Asegurar que los enlaces en el índice mantengan los colores correctos */
+#indice > ul > li > a, #anexos > ul > li > a,
+#indice > ol > li > a, #anexos > ol > li > a {
+    color: var(--section-color) !important; /* Color gris para enlaces de puntos principales */
+    text-decoration: none;
+}
+
+#indice ul ul a, #indice ol ol a,
+#anexos ul ul a, #anexos ol ol a {
+    color: #000000 !important; /* Color negro para enlaces de subpuntos */
+    text-decoration: none;
+}
+
+/* Mantener el color al pasar el mouse */
+#indice a:hover, #anexos a:hover {
+    text-decoration: none;
+    opacity: 0.8;
 }
 
 h1, h2, h3, h4, h5, h6 {
