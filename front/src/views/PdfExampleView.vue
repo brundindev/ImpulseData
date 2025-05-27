@@ -440,10 +440,12 @@ const imageLoadErrors = ref({});
 
 // Imágenes disponibles por defecto (fallback)
 const availableImages = ref([
-  { publicId: 'sample', alt: 'Muestra general' },
-  { publicId: 'samples/landscapes/nature-mountains', alt: 'Montañas' },
-  { publicId: 'samples/food/pot-mussels', alt: 'Comida' },
-  { publicId: 'samples/ecommerce/accessories-bag', alt: 'Producto' }
+  { publicId: 'docs/models-13', alt: 'Modelo' },
+  { publicId: 'docs/models-12', alt: 'Modelo Trabajo' },
+  { publicId: 'docs/models-11', alt: 'Modelo Reunión' },
+  { publicId: 'docs/models-10', alt: 'Modelo Colaboración' },
+  { publicId: 'docs/models-9', alt: 'Modelo Técnico' },
+  { publicId: 'docs/models-8', alt: 'Modelo Presentación' }
 ]);
 
 // Filtrar imágenes basado en el texto de búsqueda
@@ -483,7 +485,9 @@ const getCloudinaryUrl = (publicId, options = {}) => {
   if (!publicId) return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
   
   try {
-    return SimpleCloudinaryService.getImageUrl(publicId, options);
+    // Asegurarse de que el publicId no comience con 'v1745577235/'
+    const cleanPublicId = publicId.replace(/^v1745577235\//, '');
+    return SimpleCloudinaryService.getImageUrl(cleanPublicId, options);
   } catch (error) {
     console.error('Error al generar URL de Cloudinary:', error);
     return 'https://res.cloudinary.com/drqt6gd5v/image/upload/v1745577235/docs/models-13.png';
@@ -1309,20 +1313,51 @@ h2, h3 {
   color: white;
 }
 
-.image-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem;
 }
 
-.image-item-controls {
-  flex: 1;
+.image-item {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  flex-direction: column;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.image-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.image-item img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  transition: transform 0.3s ease;
+}
+
+.image-item:hover img {
+  transform: scale(1.05);
+}
+
+.image-name {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: #333;
+  text-align: center;
+  background: #f8f9fa;
+  border-top: 1px solid #eee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Estilos para el selector de imágenes */
@@ -1414,59 +1449,6 @@ h2, h3 {
   border-color: #004698;
   outline: none;
   box-shadow: 0 0 0 3px rgba(0, 70, 152, 0.1);
-}
-
-.images-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-  padding: 0.5rem;
-}
-
-.image-item {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.image-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.image-preview-container {
-  position: relative;
-  padding-top: 100%;
-  overflow: hidden;
-}
-
-.image-preview {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.image-item:hover .image-preview {
-  transform: scale(1.05);
-}
-
-.image-name {
-  padding: 0.75rem;
-  font-size: 0.9rem;
-  color: #333;
-  text-align: center;
-  background: #f8f9fa;
-  border-top: 1px solid #eee;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .loading-images {

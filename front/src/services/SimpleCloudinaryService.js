@@ -36,7 +36,7 @@ class SimpleCloudinaryService {
   }
 
   /**
-   * Genera una URL para una imagen de Cloudinary
+   * Genera una URL de Cloudinary para una imagen
    * @param {string} publicId - ID público de la imagen
    * @param {Object} options - Opciones de transformación
    * @returns {string} - URL de la imagen
@@ -45,59 +45,31 @@ class SimpleCloudinaryService {
     if (!publicId) return this.defaultImageUrl;
     
     try {
-      const { width, height, format, quality } = options;
+      // Limpiar el publicId de cualquier prefijo de versión
+      const cleanPublicId = publicId.replace(/^v\d+\//, '');
       
-      // Si el publicId ya es una URL completa, devolverlo directamente
-      if (publicId.startsWith('http')) {
-        return publicId;
+      // URL base de Cloudinary
+      let url = `https://res.cloudinary.com/${this.cloudName}/image/upload`;
+      
+      // Transformaciones
+      const transformations = [];
+      if (options.width) transformations.push(`w_${options.width}`);
+      if (options.height) transformations.push(`h_${options.height}`);
+      if (options.format && options.format !== 'auto') transformations.push(`f_${options.format}`);
+      if (options.quality && options.quality !== 'auto') transformations.push(`q_${options.quality}`);
+      else transformations.push('q_auto');
+      
+      // Añadir transformaciones a la URL
+      if (transformations.length > 0) {
+        url += `/${transformations.join(',')}`;
       }
       
-      // Si ya incluye versión (v12345), usarlo tal cual
-      if (publicId.match(/^v\d+\//)) {
-        // URL base de Cloudinary
-        let url = `https://res.cloudinary.com/${this.cloudName}/image/upload`;
-        
-        // Transformaciones
-        const transformations = [];
-        if (width) transformations.push(`w_${width}`);
-        if (height) transformations.push(`h_${height}`);
-        if (format && format !== 'auto') transformations.push(`f_${format}`);
-        if (quality && quality !== 'auto') transformations.push(`q_${quality}`);
-        else transformations.push('q_auto');
-        
-        // Añadir transformaciones a la URL
-        if (transformations.length > 0) {
-          url += `/${transformations.join(',')}`;
-        }
-        
-        // Añadir el ID público a la URL
-        url += `/${publicId}`;
-        
-        return url;
-      } else {
-        // Para IDs sin versión, usar la versión predeterminada
-        let url = `https://res.cloudinary.com/${this.cloudName}/image/upload`;
-        
-        // Transformaciones
-        const transformations = [];
-        if (width) transformations.push(`w_${width}`);
-        if (height) transformations.push(`h_${height}`);
-        if (format && format !== 'auto') transformations.push(`f_${format}`);
-        if (quality && quality !== 'auto') transformations.push(`q_${quality}`);
-        else transformations.push('q_auto');
-        
-        // Añadir transformaciones a la URL
-        if (transformations.length > 0) {
-          url += `/${transformations.join(',')}`;
-        }
-        
-        // Añadir el ID público a la URL (con versión predeterminada)
-        url += `/v1745577235/${publicId}`;
-        
-        return url;
-      }
+      // Añadir el ID público a la URL
+      url += `/${cleanPublicId}`;
+      
+      return url;
     } catch (error) {
-      console.error(`Error al generar URL para imagen ${publicId}:`, error);
+      console.error('Error al generar URL de Cloudinary:', error);
       return this.defaultImageUrl;
     }
   }
@@ -124,7 +96,7 @@ class SimpleCloudinaryService {
    * @returns {string} - URL de la imagen optimizada para PDF
    */
   getImageUrlForPdf(publicId) {
-    if (!publicId) return '';
+    if (!publicId) return this.defaultImageUrl;
     
     return this.getImageUrl(publicId, {
       format: 'png',
@@ -212,77 +184,21 @@ class SimpleCloudinaryService {
   }
 
   /**
-   * Obtiene todas las imágenes disponibles para la aplicación
-   * @returns {Promise<Array>} - Promise con la lista de imágenes
+   * Obtiene todas las imágenes disponibles
+   * @returns {Promise<Array>} - Array de objetos con publicId y alt
    */
   async getAllImages() {
     try {
-      console.log("Obteniendo imágenes de Cloudinary...");
-      
-      // Iniciar con imágenes de respaldo (funcionamiento offline)
-      const allImages = [...this.fallbackImages];
-      
-      // Verificar si hay red y conexión con el backend
-      try {
-        // Detectar si estamos offline
-        if (!navigator.onLine) {
-          console.log("Navegador offline. Usando imágenes de respaldo.");
-          return allImages;
-        }
-        
-        // Verificar si podemos acceder al backend
-        try {
-          // Ping rápido al endpoint de health (público)
-          await axios.get(`${API_PATH}/cloudinary/health`, { 
-            timeout: 3000,
-            validateStatus: (status) => status === 200
-          });
-        } catch (pingError) {
-          console.log("Backend no disponible. Usando imágenes de respaldo.");
-          return allImages;
-        }
-        
-        // Si llegamos aquí, el backend está disponible
-        // Ahora intentamos obtener las imágenes
-        console.log("Backend disponible. Intentando obtener imágenes...");
-        
-        const response = await axios.get(`${API_PATH}/cloudinary/images`, {
-          timeout: 15000
-        });
-        
-        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-          console.log(`Obtenidas ${response.data.length} imágenes del backend`);
-          
-          const backendImages = response.data.map(img => ({
-            publicId: img.publicId,
-            alt: img.alt || this.formatPublicIdToAlt(img.publicId),
-            url: img.secureUrl || this.getImageUrl(img.publicId),
-            width: img.width,
-            height: img.height
-          }));
-          
-          // Limpiar y añadir imágenes únicas del backend
-          const uniqueImages = [...allImages];
-          backendImages.forEach(img => {
-            if (!uniqueImages.some(existing => 
-                existing.publicId === img.publicId || 
-                (existing.url && img.url && existing.url === img.url)
-            )) {
-              uniqueImages.push(img);
-            }
-          });
-          
-          return uniqueImages;
-        }
-      } catch (backendError) {
-        console.warn("Error al obtener imágenes del backend:", backendError.message);
+      // Primero intentar obtener las imágenes del backend
+      const response = await cloudinaryAxios.get(`${API_PATH}/cloudinary/images`);
+      if (response.data && Array.isArray(response.data)) {
+        return response.data;
       }
       
-      // Si llegamos aquí, hubo un problema o no se pudieron obtener imágenes del backend
-      console.log("Usando imágenes de respaldo (fallback)");
-      return allImages;
+      // Si no hay respuesta del backend, usar las imágenes de fallback
+      return this.fallbackImages;
     } catch (error) {
-      console.error('Error global al obtener imágenes:', error);
+      console.error('Error al obtener imágenes:', error);
       return this.fallbackImages;
     }
   }
