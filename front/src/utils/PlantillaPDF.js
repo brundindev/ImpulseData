@@ -102,22 +102,26 @@ body {
     page-break-inside: auto; /* Permitir que las listas de índice se dividan entre páginas */
     margin-top: 0;
     padding-top: 0;
+    color: #000000; /* Asegurar que el texto de las listas sea negro */
 }
 
 #indice li, #anexos li {
     page-break-inside: avoid; /* Evitar que los elementos individuales se corten */
     margin-bottom: 5px; /* Reducir espacio entre elementos de lista en el índice */
+    color: #000000; /* Asegurar que el texto de los elementos de lista sea negro */
 }
 
 /* Evitar espacios grandes innecesarios */
 #indice h2 + ul, #indice h2 + ol, #anexos h2 + ul, #anexos h2 + ol {
     margin-top: 10px; /* Reducir espacio después del título del índice */
+    color: #000000; /* Asegurar que el texto sea negro */
 }
 
 /* Títulos de secciones principales del índice */
 #indice h2, #anexos h2 {
     margin-bottom: 15px;
     page-break-after: avoid; /* Evitar que el título quede separado de su contenido */
+    color: var(--section-color); /* Mantener el color de sección para los títulos */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -1292,6 +1296,18 @@ tbody tr:nth-child(even) {
 /* Asegurarse de que la primera parte del índice después de la portada mantiene los márgenes */
 .page:first-of-type:not(#portada) {
     margin-top: 30mm;
+}
+
+/* Asegurar que los enlaces en el índice también sean negros */
+#indice a, #anexos a {
+    color: #000000;
+    text-decoration: none;
+}
+
+#indice a:hover, #anexos a:hover {
+    color: #000000;
+    text-decoration: none;
+    opacity: 0.8;
 }
     </style>
 </head>
