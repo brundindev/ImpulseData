@@ -344,6 +344,7 @@ import {
 } from '../services/DataService';
 import ImportConfirmationModal from '@/components/home/ImportConfirmationModal.vue';
 import EmpresaService from '../services/EmpresaService';
+import { crearPortadaSeccion } from '../services/pdfUtils';
 
 import { usePdfNavigator } from '../services/usePdfNavigator';
 import { useEmpresaViewer } from '../services/useEmpresaViewer';
@@ -547,87 +548,6 @@ const editarEmpresaDesdeVista = () => {
   }
 };
 
-// Función para crear una portada para cada sección
-const crearPortadaSeccion = (texto, doc) => {
-  // Añadir nueva página para portada
-  doc.addPage();
-  
-  // Fondo decorativo para toda la página
-  doc.setFillColor(240, 245, 255);
-  doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
-  
-  // Borde decorativo
-  doc.setDrawColor(0, 70, 152);
-  doc.setLineWidth(1.5);
-  doc.rect(20, 20, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40, 'S');
-  
-  // Marco interior
-  doc.setDrawColor(0, 100, 200);
-  doc.setLineWidth(0.5);
-  doc.rect(30, 30, doc.internal.pageSize.width - 60, doc.internal.pageSize.height - 60, 'S');
-  
-  // Líneas decorativas en las esquinas
-  doc.setDrawColor(0, 70, 152);
-  doc.setLineWidth(2);
-  // Esquina superior izquierda
-  doc.line(20, 35, 50, 35);
-  doc.line(35, 20, 35, 50);
-  // Esquina superior derecha
-  doc.line(doc.internal.pageSize.width - 50, 35, doc.internal.pageSize.width - 20, 35);
-  doc.line(doc.internal.pageSize.width - 35, 20, doc.internal.pageSize.width - 35, 50);
-  // Esquina inferior izquierda
-  doc.line(20, doc.internal.pageSize.height - 35, 50, doc.internal.pageSize.height - 35);
-  doc.line(35, doc.internal.pageSize.height - 50, 35, doc.internal.pageSize.height - 20);
-  // Esquina inferior derecha
-  doc.line(doc.internal.pageSize.width - 50, doc.internal.pageSize.height - 35, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 35);
-  doc.line(doc.internal.pageSize.width - 35, doc.internal.pageSize.height - 50, doc.internal.pageSize.width - 35, doc.internal.pageSize.height - 20);
-  
-  // Logo o imagen (dibujamos un círculo para representar un logo)
-  doc.setFillColor(0, 70, 152);
-  doc.circle(doc.internal.pageSize.width / 2, 70, 20, 'F');
-  
-  // Título grande y centrado
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 70, 152);
-  doc.setFontSize(28);
-  const titleWidth = doc.getStringUnitWidth(texto) * doc.getFontSize() / doc.internal.scaleFactor;
-  const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
-  doc.text(texto, titleX, 120);
-  
-  // Línea decorativa bajo el título
-  doc.setLineWidth(1);
-  doc.line(doc.internal.pageSize.width / 2 - 50, 130, doc.internal.pageSize.width / 2 + 50, 130);
-  
-  // Subtítulo o descripción
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(14);
-  doc.setTextColor(100, 100, 100);
-  const subtitulo = `Informe detallado de ${empresaActual.nombre}`;
-  const subtitleWidth = doc.getStringUnitWidth(subtitulo) * doc.getFontSize() / doc.internal.scaleFactor;
-  const subtitleX = (doc.internal.pageSize.width - subtitleWidth) / 2;
-  doc.text(subtitulo, subtitleX, 150);
-  
-  // Fecha del informe
-  const fechaGeneracion = new Date().toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  });
-  doc.setFontSize(12);
-  const fechaWidth = doc.getStringUnitWidth(fechaGeneracion) * doc.getFontSize() / doc.internal.scaleFactor;
-  const fechaX = (doc.internal.pageSize.width - fechaWidth) / 2;
-  doc.text(fechaGeneracion, fechaX, 170);
-  
-  // Añadir paginación al pie de página
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text('ImpulseData - Alicante Futura', doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 20, { align: 'center' });
-  
-  // Añadir una nueva página para comenzar la sección
-  doc.addPage();
-  
-  return 20; // Retorna la posición Y inicial para comenzar la sección
-};
 
 // Función para generar el contenido del PDF
 const generarContenidoPDF = (doc) => {
@@ -681,7 +601,7 @@ const generarContenidoPDF = (doc) => {
   );
   
   // Sección de información general
-  let yPos = crearPortadaSeccion('Información General', doc);
+  let yPos = crearPortadaSeccion('Información General', doc, empresaActual);
   
   // Datos de la empresa
   doc.setFontSize(12);
@@ -711,7 +631,7 @@ const generarContenidoPDF = (doc) => {
   doc.text(textLines, 120, yPos + 30);
   
   // Sección de departamentos
-  yPos = crearPortadaSeccion('Departamentos', doc);
+  yPos = crearPortadaSeccion('Departamentos', doc, empresaActual);
   
   if (empresaActual.departamentos && empresaActual.departamentos.length > 0) {
     // Crear tabla de departamentos
@@ -734,7 +654,7 @@ const generarContenidoPDF = (doc) => {
   }
   
   // Sección de centros
-  yPos = crearPortadaSeccion('Centros', doc);
+  yPos = crearPortadaSeccion('Centros', doc, empresaActual);
   
   if (empresaActual.centros && empresaActual.centros.length > 0) {
     // Crear tabla de centros
@@ -757,7 +677,7 @@ const generarContenidoPDF = (doc) => {
   }
   
   // Sección de formaciones
-  yPos = crearPortadaSeccion('Formaciones', doc);
+  yPos = crearPortadaSeccion('Formaciones', doc, empresaActual);
   
   if (empresaActual.formaciones && empresaActual.formaciones.length > 0) {
     // Crear tabla de formaciones
@@ -1191,129 +1111,4 @@ onUnmounted(() => {
 
 <style src="../assets/Home.css"></style>
 
-<style>
-/* Eliminar cualquier background que pueda estar interfiriendo */
-.home-page {
-  min-height: 100vh;
-  width: 100vw;
-  position: relative;
-  background: transparent !important;
-}
-
-.dashboard-container {
-  min-height: 100vh;
-  width: 100%;
-  padding: 2rem;
-  position: relative;
-  background: transparent !important;
-  color: white;
-  z-index: 1;
-}
-
-.dashboard-content {
-  position: relative;
-  z-index: 1;
-  background: transparent !important;
-}
-
-/* Asegurarse de que el contenido ocupe todo el espacio */
-.row {
-  margin: 0;
-  min-height: calc(100vh - 4rem);
-  background: transparent !important;
-}
-
-/* Añadir estilos específicos para el HomeView */
-.section-title {
-  margin-bottom: 20px;
-  position: relative;
-}
-
-.section-title h2 {
-  color: #ffffff;
-  font-size: 1.8rem;
-  position: relative;
-  display: inline-block;
-}
-
-.section-title h2::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  width: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #ffffff, #e91e63);
-  transition: width 0.8s ease;
-}
-
-.section-title.animate-in h2::after {
-  width: 100%;
-}
-
-/* Estilos para las animaciones de las tarjetas */
-.company-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.company-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1), 0 10px 15px rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.15) !important;
-}
-
-.company-card-animated {
-  animation: pulse 2s infinite ease-in-out;
-  animation-delay: 0.8s;
-}
-
-.stat-card-animated {
-  animation: glow 3s infinite alternate;
-  animation-delay: 0.8s;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1), 0 5px 10px rgba(255, 255, 255, 0.1);
-  }
-  50% {
-    box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2), 0 8px 15px rgba(255, 255, 255, 0.2);
-  }
-  100% {
-    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1), 0 5px 10px rgba(255, 255, 255, 0.1);
-  }
-}
-
-@keyframes glow {
-  from {
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.2), 0 0 10px rgba(255, 255, 255, 0.2);
-  }
-  to {
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.3);
-  }
-}
-
-/* Asegurarse de que las animaciones respetan la preferencia de movimiento reducido */
-@media (prefers-reduced-motion: reduce) {
-  .section-title h2::after {
-    transition: none;
-    width: 100%;
-  }
-  
-  .company-card {
-    transition: none;
-  }
-  
-  .company-card:hover {
-    transform: none;
-  }
-  
-  .company-card-animated,
-  .stat-card-animated {
-    animation: none;
-  }
-}
-</style>
+<style src="../assets/Home.css" ></style>
