@@ -1338,6 +1338,7 @@ h2, h3 {
   align-items: center;
   z-index: 1000;
   padding: 1rem;
+  backdrop-filter: blur(5px);
 }
 
 .image-selector-dialog {
@@ -1348,6 +1349,294 @@ h2, h3 {
   margin: 0 auto;
   height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.image-selector-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.image-selector-header h3 {
+  margin: 0;
+  color: #004698;
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  background: #eee;
+  color: #333;
+}
+
+.image-selector-content {
+  padding: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.search-container {
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #004698;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 70, 152, 0.1);
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.image-item {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.image-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.image-preview-container {
+  position: relative;
+  padding-top: 100%;
+  overflow: hidden;
+}
+
+.image-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.image-item:hover .image-preview {
+  transform: scale(1.05);
+}
+
+.image-name {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: #333;
+  text-align: center;
+  background: #f8f9fa;
+  border-top: 1px solid #eee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.loading-images {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #004698;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.no-images {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.upload-prompt {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #999;
+}
+
+/* Estilos para la paginación */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.page-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-button:hover {
+  background: #f8f9fa;
+  border-color: #004698;
+  color: #004698;
+}
+
+.page-button.active {
+  background: #004698;
+  color: white;
+  border-color: #004698;
+}
+
+.page-button:disabled {
+  background: #f8f9fa;
+  color: #999;
+  cursor: not-allowed;
+  border-color: #ddd;
+}
+
+/* Estilos para el formulario de subida */
+.upload-section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #ddd;
+}
+
+.upload-section h4 {
+  margin-bottom: 1rem;
+  color: #004698;
+}
+
+.file-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.file-input {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.file-upload-label {
+  background: #004698;
+  color: white;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-upload-label:hover {
+  background: #003366;
+  transform: translateY(-2px);
+}
+
+.upload-status {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.upload-status.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.upload-status.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Mantener el resto de los estilos existentes */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.loading-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #004698;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.loading-text {
+  color: #333;
+  font-size: 1.1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Media queries para responsividad */
@@ -1397,6 +1686,18 @@ h2, h3 {
     margin: 0 !important;
     padding: 1rem !important;
   }
+
+  /* Ajustes responsivos para el selector de imágenes */
+  .image-selector-dialog {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
 }
 
 @media (max-width: 480px) {
@@ -1428,46 +1729,24 @@ h2, h3 {
     max-width: 100% !important;
     margin: 0 !important;
   }
-}
 
-/* Mantener el resto de los estilos existentes */
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-}
+  /* Ajustes responsivos adicionales para el selector de imágenes */
+  .image-selector-header {
+    padding: 1rem;
+  }
 
-.loading-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  text-align: center;
-}
+  .image-selector-header h3 {
+    font-size: 1.2rem;
+  }
 
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #004698;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.5rem;
+  }
 
-.loading-text {
-  color: #333;
-  font-size: 1.1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  .image-name {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
 }
 </style> 
