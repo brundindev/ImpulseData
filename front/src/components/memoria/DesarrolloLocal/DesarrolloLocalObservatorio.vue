@@ -343,13 +343,14 @@ const eliminarActuacion = (index) => {
 }
 
 .section-title {
-  color: #b71c50;
+  color: #b71c50 !important;
   border-bottom: 2px solid #ac3b61;
   padding-bottom: 8px;
   margin-top: 30px;
   margin-bottom: 20px;
   font-size: 1.2rem;
   font-weight: bolder;
+  text-shadow: 0 0 white;
 }
 
 .form-group {

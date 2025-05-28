@@ -646,13 +646,14 @@ const eliminarProyecto = (index) => {
 }
 
 .section-title {
-  color: #ac3b61;
+  color: #ac3b61 !important;
   border-bottom: 2px solid #ac3b61;
   padding-bottom: 8px;
   margin-top: 30px;
   margin-bottom: 20px;
   font-size: 1.2rem;
   font-weight: bold;
+  text-shadow: 0 0 white;
 }
 
 .form-group {

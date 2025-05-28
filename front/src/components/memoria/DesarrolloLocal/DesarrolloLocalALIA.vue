@@ -141,7 +141,7 @@
           
           <div class="eventos-lista" v-if="datos.participacion && datos.participacion.length > 0">
             <div v-for="(evento, index) in datos.participacion" :key="index" class="evento-item">
-              <strong>{{ evento.fechas || 'Sin fecha' }}:</strong> {{ evento.nombreEvento || 'Sin nombre' }}
+              <strong style="color: #CA425C">{{ evento.fechas || 'Sin fecha' }}:</strong> {{ evento.nombreEvento || 'Sin nombre' }}
             </div>
           </div>
           <div v-else class="eventos-vacia">
@@ -230,6 +230,22 @@ const esValido = computed(() => {
   padding: 2rem;
   box-shadow: 0 2px 8px #0001;
 }
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #b71c50;
+  box-shadow: 0 0 0 3px rgba(183, 28, 80, 0.1);
+}
+
 
 .subtitulo {
   color: #6c757d;
@@ -440,6 +456,7 @@ const esValido = computed(() => {
 
 .evento-item:last-child {
   border-bottom: none;
+  color:black;
 }
 
 .eventos-vacia {
