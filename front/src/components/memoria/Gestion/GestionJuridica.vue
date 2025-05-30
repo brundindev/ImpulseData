@@ -174,7 +174,69 @@
         </div>
       </div>
     </div>
+ <!-- Vista Previa -->
+ <section class="bloque vista-previa">
+      <h4>Vista Previa del Departamento Jurídico Administrativo</h4>
+      <div class="preview-container">
+        <div class="preview-header">
+          <div class="preview-number">5.2</div>
+          <div class="preview-title-section">
+            <h2 class="preview-main-title">DEPARTAMENTO</h2>
+            <h2 class="preview-subtitle">JURÍDICO ADMINISTRATIVO</h2>
+          </div>
+        </div>
 
+        <div class="preview-description">
+          Una de las principales tareas del Departamento Jurídico Administrativo es la redacción, licitación y adjudicación de los diferentes contratos de obras, servicios y suministros que se solicitan desde las distintas jefaturas de la Agencia Local.
+        </div>
+
+        <div class="preview-stats-section">
+          <div class="preview-main-stat">
+            <div class="main-stat-value">{{ formatCurrency(importeTotal) || 0 }} € </div>
+            <div class="main-stat-label"> Importe adjudicación</div>
+          </div>
+          
+          <div class="contracts-info">
+            <div class="contracts-icon">📄</div>
+            <div class="contracts-number">{{ totalContratos }}</div>
+            <div class="contracts-label">contratos</div>
+          </div>
+        </div>
+
+        <div class="preview-intermediate-text">
+          En 2023 se han gestionado los siguientes contratos:
+        </div>
+
+        <div class="preview-contracts-table">
+          <div class="contracts-table-header">
+            <div class="header-col-tipo">Tipo</div>
+            <div class="header-col-num">Nº contratos</div>
+            <div class="header-col-importe">Importe Total Adjudicación</div>
+          </div>
+          
+          <div class="contracts-table-body">
+            <div v-if="contratosMayores.length > 0" class="contracts-table-row">
+              <div class="row-col-tipo">Contratos mayores</div>
+              <div class="row-col-num">{{ totalContratosMayores }}</div>
+              <div class="row-col-importe">{{ formatCurrency(importeTotalMayores) }} €</div>
+            </div>
+            
+            <div v-if="contratosMenores.length > 0" class="contracts-table-row">
+              <div class="row-col-tipo">Contratos menores</div>
+              <div class="row-col-num">{{ totalContratosMenores }}</div>
+              <div class="row-col-importe">{{ formatCurrency(importeTotalMenores) }} €</div>
+            </div>
+            
+            <div v-if="totalContratos > 0" class="contracts-table-total">
+              <div class="header-col-tipo"></div>
+              <div class="header-col-num">{{ totalContratos }}</div>
+              <div class="header-col-importe">{{ formatCurrency(importeTotal) }} €</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
     <div class="form-actions">
       <button 
         @click="$emit('anterior')" 
@@ -429,6 +491,7 @@ label {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 1rem;
+  color: black;
 }
 
 .table th,
@@ -449,7 +512,7 @@ label {
 
 .total-row {
   font-weight: bold;
-  background-color: #aa86c1;
+  background-color: #8c6f9e;
   color: white;
 }
 
@@ -577,5 +640,222 @@ label {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
+}
+
+/* Vista Previa Styles */
+.bloque {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.vista-previa {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  margin-top: 2rem;
+}
+
+.preview-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.preview-header {
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.preview-number {
+  background-color: #c696c4;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+}
+
+.preview-title-section {
+  flex: 1;
+}
+
+.preview-main-title {
+  color: black;
+  font-size: 1.4rem;
+  margin: 0;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.preview-subtitle {
+  color: #c696c4;
+  font-size: 1.8rem;
+  margin: 0;
+  font-weight: bold;
+  text-decoration: underline;
+  line-height: 1.2;
+}
+
+.preview-content {
+  background: white;
+}
+
+.preview-description {
+  padding: 1.5rem;
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-align: justify;
+}
+
+.preview-stats-section{
+  display: flex;
+  padding: 1rem 1.5rem;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  align-content: space-around;
+}
+
+.preview-main-stat {
+  background: #8C5CA6;
+  color: white;
+  padding: 2rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+}
+
+.main-stat-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.main-stat-label {
+  color: white;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.contracts-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+}
+
+.contracts-icon {
+  font-size: 1.5rem;
+}
+
+.contracts-number {
+  font-size: 1.8rem;
+  font-weight: bold;
+  background-color: #8B5CA5;
+}
+
+.contracts-label {
+  font-size: 1rem;
+  color:black;
+}
+
+.preview-intermediate-text {
+  padding: 1rem 1.5rem;
+  background: white;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.preview-contracts-table {
+  background: white;
+}
+
+.contracts-table-header {
+  background: #8C5CA6;
+  color: white;
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.contracts-table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.contracts-table-total {
+  background: #8C5CA6;
+  color: white;
+  font-weight: bold;
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+}
+
+.header-col-tipo, .row-col-tipo {
+  display: flex;
+  align-items: center;
+}
+
+.header-col-num, .row-col-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-col-importe, .row-col-importe {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .preview-main-stat {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .contracts-info {
+    align-self: stretch;
+    justify-content: center;
+  }
+  
+  .preview-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .contracts-table-header,
+  .contracts-table-row,
+  .contracts-table-total {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .header-col-num, .row-col-num,
+  .header-col-importe, .row-col-importe {
+    justify-content: flex-start;
+  }
 }
 </style>

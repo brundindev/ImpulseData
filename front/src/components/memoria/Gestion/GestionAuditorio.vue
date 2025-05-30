@@ -36,23 +36,16 @@
         </div>
 
         <div class="preview-stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">📅</div>
-            <div class="stat-value">{{ datos.actividades || '0' }}</div>
-            <div class="stat-label">Actividades realizadas</div>
+          <div class="stat-card-gestion">
+            <div class="stat-label-gestion">Actividades:</div>
+            <div class="stat-value-gestion">{{ datos.actividades || '0' }}</div>
           </div>
           
-          <div class="stat-card">
-            <div class="stat-icon">👥</div>
-            <div class="stat-value">{{ datos.asistentes || '0' }}</div>
-            <div class="stat-label">Total asistentes</div>
+          <div class="stat-card-gestion">
+            <div class="stat-label-gestion">Asistentes:</div>
+            <div class="stat-value-gestion">{{ datos.asistentes || '0' }}</div>
           </div>
         </div>
-
-        <!-- <div class="anexo-nota">
-          <div class="anexo-icon">📎</div>
-          <div class="anexo-text">Anexo 50: Actividades realizadas en el auditorio Puerto Ferriza</div>
-        </div> -->
       </div>
     </section>
 
@@ -140,57 +133,51 @@ const datos = computed({
 
 .preview-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 0rem;
   margin: 2rem 0;
+  width: 100%;
+  background-color: #8c5ca6;
+  min-height: 150px;
 }
 
-.stat-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border: 2px solid #b71c50;
-  border-radius: 12px;
-  padding: 2rem;
-  text-align: center;
+.stat-card-gestion {
+  border: none;
+  border-radius: 0;
+  padding: 1.5rem;
+  text-align: left;
+  box-shadow: none;
+  min-height: 100px;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.stat-card-gestion:first-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .stat-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  display: none;
 }
 
-.stat-value {
+.stat-value-gestion {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #b71c50;
-  margin-bottom: 0.5rem;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
+  min-height: auto;
 }
 
-.stat-label {
-  color: #495057;
+.stat-label-gestion {
+  color: #ffffff;
   font-weight: 500;
   font-size: 1.1rem;
+  margin-top: 0.25rem;
+  opacity: 0.9;
 }
-
-/* .anexo-nota {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: #edc7cd;
-  border-radius: 8px;
-  margin-top: 2rem;
-}
-
-.anexo-icon {
-  font-size: 1.5rem;
-}
-
-.anexo-text {
-  color: #b71c50;
-  font-weight: 500;
-  font-size: 0.95rem;
-} */
-
 /* Estilos existentes del formulario */
 .form-step {
   max-width: 1000px;
@@ -202,9 +189,9 @@ const datos = computed({
 }
 
 .program-title {
-  color: #b71c50;
+  color: #C696C4;
   font-weight: bolder;
-  border-bottom: 2px solid #ac3b61;
+  border-bottom: 2px solid #e7aee5;
   padding-bottom: 8px;
 }
 
