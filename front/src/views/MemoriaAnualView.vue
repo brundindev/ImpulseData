@@ -305,8 +305,8 @@ const abrirFormulario = async (seccion) => {
     seccionActual.value = seccion;
     pasoActual.value = 0;
     
-    // Obtener el ID de la empresa actual
-    const empresaId = localStorage.getItem('empresaActual');
+    // Usar el ID de Impulsalicante directamente
+    const empresaId = 'Impulsalicante';
     if (!empresaId) {
       throw new Error('No hay una empresa seleccionada');
     }
@@ -361,8 +361,8 @@ const anteriorPaso = () => {
 
 const guardarFormulario = async () => {
   try {
-    // Obtener el ID de la empresa actual
-    const empresaId = localStorage.getItem('empresaActual');
+    // Usar el ID de Impulsalicante directamente
+    const empresaId = 'Impulsalicante';
     if (!empresaId) {
       throw new Error('No hay una empresa seleccionada');
     }
@@ -396,8 +396,8 @@ const guardarFormulario = async () => {
 
 const guardarProgreso = async () => {
   try {
-    // Obtener el ID de la empresa actual
-    const empresaId = localStorage.getItem('empresaActual');
+    // Usar el ID de Impulsalicante directamente
+    const empresaId = 'Impulsalicante';
     if (!empresaId) {
       throw new Error('No hay una empresa seleccionada');
     }
