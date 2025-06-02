@@ -317,8 +317,13 @@ const calcularPorcentajeEjecucion = () => {
 
 <style scoped>
 .form-step {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px #0001;
+  color:black;
 }
 
 .form-group {

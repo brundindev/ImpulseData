@@ -228,9 +228,9 @@
             </div>
             
             <div v-if="totalContratos > 0" class="contracts-table-total">
-              <div class="header-col-tipo"></div>
-              <div class="header-col-num">{{ totalContratos }}</div>
-              <div class="header-col-importe">{{ formatCurrency(importeTotal) }} €</div>
+              <div class="row-col-tipo"></div>
+              <div class="row-col-num">{{ totalContratos }}</div>
+              <div class="row-col-importe">{{ formatCurrency(importeTotal) }} €</div>
             </div>
           </div>
         </div>
