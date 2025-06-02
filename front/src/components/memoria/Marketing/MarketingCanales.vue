@@ -283,7 +283,6 @@ label {
   font-size: 1.5rem;
   font-weight: 700;
   padding: 1rem 1.2rem;
-  border-radius: 4px;
 }
 
 .preview-main-title {
@@ -331,7 +330,6 @@ label {
   font-size: 1.5rem;
   font-weight: bold;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
   min-width: 60px;
   text-align: center;
 }
