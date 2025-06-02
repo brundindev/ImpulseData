@@ -45,7 +45,8 @@ class EmpresaService {
           descripcion: empresaData.descripcion || "",
           fechaCreacion: empresaData.fechaCreacion,
           ciudad: empresaData.ciudad || "",
-          fechaActualizacion: new Date().toISOString()
+          fechaActualizacion: new Date().toISOString(),
+          memoriaAnual: empresaData.memoriaAnual || {}
         };
         await FirestoreService.actualizarEmpresa(empresaEditandoId, datosActualizados);
         await FirestoreService.actualizarSubcolecciones(
@@ -63,7 +64,159 @@ class EmpresaService {
           descripcion: empresaData.descripcion || "",
           ciudad: empresaData.ciudad || "",
           fechaCreacionSistema: new Date().toISOString(),
-          fechaActualizacion: new Date().toISOString()
+          fechaActualizacion: new Date().toISOString(),
+          memoriaAnual: {
+            agenciaLocal: {
+              estado: 'pendiente',
+              general: {
+                cifras: {
+                  presupuestoInicial: 0,
+                  presupuestoAjustado: 0,
+                  presupuestoEjecutado: 0,
+                  porcentajeEjecucion: 0,
+                  totalUsuarios: 0,
+                  nuevosUsuarios: 0,
+                  personasOrientacion: 0,
+                  actividadesFormativas: 0,
+                  horasOrientacion: 0,
+                  horasFormacion: 0,
+                  ofertasEmpleo: 0,
+                  participantesFormacion: 0,
+                  puestosGenerados: 0,
+                  asesoramientos: 0,
+                  personasContratadas: 0,
+                  empresasCreadas: 0,
+                  empresasViveros: 0,
+                  ayudasEmpresas: 0,
+                  ayudasEntidades: 0
+                }
+              },
+              queHacemos: {},
+              estructura: {},
+              sedes: {
+                recursosHumanos: [],
+                recursosMateriales: [],
+                recursosFinancieros: {
+                  presupuestoTotal: 0,
+                  fuentes: []
+                }
+              }
+            },
+            empleoFormacion: {
+              estado: 'pendiente',
+              datos: {
+                programasOrientacion: [],
+                programasInsercion: [],
+                colaboracionesEmpresas: []
+              },
+              centros: {
+                cursos: [],
+                talleres: []
+              },
+              servicios: {
+                totalPersonasAtendidas: 0,
+                totalPersonasInsertadas: 0,
+                totalCursosImpartidos: 0,
+                totalTalleresImpartidos: 0,
+                totalHorasFormacion: 0,
+                personasMenores25: 0,
+                personasEntre25y45: 0,
+                personasMayores45: 0,
+                contratosIndefinidos: 0,
+                contratosTemporales: 0,
+                contratosFormacion: 0,
+                otrosContratos: 0
+              },
+              formacion: {},
+              programas: {},
+              subvenciones: {},
+              otros: {}
+            },
+            promocionEconomica: {
+              estado: 'pendiente',
+              programas: {
+                programas: [],
+                proyectos: []
+              },
+              viveros: {},
+              ayudasEconomicas: {
+                empresas: [],
+                emprendedores: []
+              },
+              colaboracion: {
+                numeroEmpresas: 0,
+                numeroEmprendedores: 0,
+                inversionTotal: 0,
+                empleosCreados: 0,
+                sectores: [],
+                logros: '',
+                dificultades: '',
+                lecciones: ''
+              }
+            },
+            desarrolloLocal: {
+              estado: 'pendiente',
+              programa: {
+                descripcionGeneral: '',
+                periodoInversion: '',
+                importeInversion: '',
+                areasAmpliacion: [],
+                mejoras: [],
+                entidades: [],
+                proyectos: [],
+                proyectosTramitados: '',
+                presupuestoEjecucion: '',
+                puestosEjecucion: '',
+                puestosFinalizacion: ''
+              },
+              observatorio: {},
+              alicanteFutura: {
+                lineasTrabajo: []
+              },
+              alia: {
+                nProyectos: 0,
+                nEmpleos: 0,
+                nEmpleosDirectos: 0,
+                inversionPotencial: 0,
+                notasDinamicas: 0,
+                informeBimensual: 0,
+                radarInversiones: 0,
+                participacion: [],
+                actividades: 0
+              },
+              cilab: {},
+              oficinaProyEuropeos: {
+                indicadores: [],
+                logrosAlcanzados: '',
+                dificultades: '',
+                leccionesAprendidas: '',
+                impactoSocial: '',
+                impactoEconomico: '',
+                impactoAmbiental: ''
+              },
+              participacion: {}
+            },
+            gestion: {
+              estado: 'pendiente',
+              auditorio: {},
+              juridica: {
+                contratos: []
+              }
+            },
+            marketing: {
+              estado: 'pendiente',
+              webRRSS: {
+                seguidoresInstagram: 0,
+                publicacionesInstagram: 0,
+                seguidoresYoutube: 0,
+                publicacionesYoutube: 0,
+                seguidoresLinkedin: 0,
+                publicacionesLinkedin: 0
+              },
+              canales: {},
+              campanas: {}
+            }
+          }
         };
         const empresaId = await FirestoreService.guardarEmpresa(nuevaEmpresaData);
         await FirestoreService.actualizarSubcolecciones(

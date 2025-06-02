@@ -169,6 +169,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { doc, collection, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 // Importar componentes de Agencia Local
 import AgenciaLocalGeneral from '../components/memoria/AgenciaLocal/AgenciaLocalGeneral.vue';
@@ -298,19 +300,39 @@ const pasosActuales = computed(() => {
 });
 
 // Funciones
-const abrirFormulario = (seccion) => {
-  seccionActual.value = seccion;
-  pasoActual.value = 0;
-  
-  // Intentar cargar datos guardados
-  const datosGuardados = localStorage.getItem(`memoria_${seccion}`);
-  if (datosGuardados) {
-    datosFormulario.value = JSON.parse(datosGuardados);
-  } else {
-    datosFormulario.value = {};
+const abrirFormulario = async (seccion) => {
+  try {
+    seccionActual.value = seccion;
+    pasoActual.value = 0;
+    
+    // Obtener el ID de la empresa actual
+    const empresaId = localStorage.getItem('empresaActual');
+    if (!empresaId) {
+      throw new Error('No hay una empresa seleccionada');
+    }
+
+    // Intentar cargar datos desde Firebase
+    const empresaRef = doc(db, 'empresas', empresaId);
+    const docSnap = await getDoc(empresaRef);
+    
+    if (docSnap.exists() && docSnap.data().memoriaAnual && docSnap.data().memoriaAnual[seccion]) {
+      // Cargar datos existentes
+      const datosGuardados = docSnap.data().memoriaAnual[seccion];
+      datosFormulario.value = datosGuardados;
+      
+      // Actualizar estado de la sección
+      secciones.value[seccion].completa = datosGuardados.estado === 'completo';
+      secciones.value[seccion].parcial = datosGuardados.estado === 'parcial';
+    } else {
+      // Inicializar con datos vacíos
+      datosFormulario.value = {};
+    }
+    
+    mostrarFormulario.value = true;
+  } catch (error) {
+    console.error('Error al cargar datos:', error);
+    // Aquí podrías mostrar un mensaje de error al usuario
   }
-  
-  mostrarFormulario.value = true;
 };
 
 const cerrarFormulario = () => {
@@ -339,30 +361,67 @@ const anteriorPaso = () => {
 
 const guardarFormulario = async () => {
   try {
-    // Aquí iría la lógica para guardar los datos
-    console.log('Guardando datos:', datosFormulario.value);
+    // Obtener el ID de la empresa actual
+    const empresaId = localStorage.getItem('empresaActual');
+    if (!empresaId) {
+      throw new Error('No hay una empresa seleccionada');
+    }
+
+    // Preparar los datos para guardar
+    const datosAGuardar = {
+      memoriaAnual: {
+        [seccionActual.value]: {
+          ...datosFormulario.value,
+          fechaActualizacion: new Date().toISOString(),
+          estado: 'completo'
+        }
+      }
+    };
+
+    // Guardar en Firebase
+    const empresaRef = doc(db, 'empresas', empresaId);
+    await updateDoc(empresaRef, datosAGuardar);
     
     // Actualizar estado de la sección
     secciones.value[seccionActual.value].completa = true;
     secciones.value[seccionActual.value].parcial = false;
     
+    console.log('Datos guardados exitosamente en Firebase');
     cerrarFormulario();
   } catch (error) {
     console.error('Error al guardar:', error);
+    // Aquí podrías mostrar un mensaje de error al usuario
   }
 };
 
 const guardarProgreso = async () => {
   try {
-    // Aquí iría la lógica para guardar el progreso en el backend
-    console.log('Guardando progreso:', datosFormulario.value);
+    // Obtener el ID de la empresa actual
+    const empresaId = localStorage.getItem('empresaActual');
+    if (!empresaId) {
+      throw new Error('No hay una empresa seleccionada');
+    }
+
+    // Preparar los datos para guardar
+    const datosAGuardar = {
+      memoriaAnual: {
+        [seccionActual.value]: {
+          ...datosFormulario.value,
+          fechaActualizacion: new Date().toISOString(),
+          estado: 'parcial'
+        }
+      }
+    };
+
+    // Guardar en Firebase
+    const empresaRef = doc(db, 'empresas', empresaId);
+    await updateDoc(empresaRef, datosAGuardar);
     
-    // Actualizar estado de la sección a parcial
+    // Actualizar estado de la sección
     secciones.value[seccionActual.value].parcial = true;
     secciones.value[seccionActual.value].completa = false;
     
-    // Guardar en localStorage como respaldo
-    localStorage.setItem(`memoria_${seccionActual.value}`, JSON.stringify(datosFormulario.value));
+    console.log('Progreso guardado exitosamente en Firebase');
     
     // Limpiar el estado
     mostrarConfirmacion.value = false;
@@ -372,6 +431,7 @@ const guardarProgreso = async () => {
     datosFormulario.value = {};
   } catch (error) {
     console.error('Error al guardar el progreso:', error);
+    // Aquí podrías mostrar un mensaje de error al usuario
   }
 };
 
