@@ -1,226 +1,146 @@
 <template>
   <div class="form-step">
-    <h3>Programas de Empleo</h3>
-    
-    <div class="form-group">
-      <label>Programas de Orientación</label>
-      <div class="programas">
-        <div v-for="(programa, index) in datos.programasOrientacion" :key="index" class="programa-item">
-          <div class="programa-header">
-            <h4>Programa {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarPrograma(index, 'orientacion')" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.programasOrientacion.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre del Programa</label>
-            <input 
-              type="text" 
-              v-model="programa.nombre" 
-              class="form-control"
-              placeholder="Nombre del programa de orientación"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="programa.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el programa y sus objetivos"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Personas Atendidas</label>
-            <input 
-              type="number" 
-              v-model="programa.personasAtendidas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de personas atendidas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="programa.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarPrograma('orientacion')" 
-          class="btn btn-secondary"
-          type="button"
+    <h3>Datos Totales del Departamento de Empleo y Formación</h3>
+
+    <!-- ORIENTACIÓN E INTERMEDIACIÓN LABORAL -->
+    <div class="form-section">
+      <h4>ORIENTACIÓN E INTERMEDIACIÓN LABORAL</h4>
+      <div class="form-group">
+        <label for="personasAtendidasOrientacion">Personas atendidas</label>
+        <input
+          type="number"
+          id="personasAtendidasOrientacion"
+          v-model="datos.orientacion.personasAtendidas"
+          class="form-control"
+          min="0"
+          placeholder="Número de personas atendidas"
         >
-          Agregar Programa de Orientación
-        </button>
+      </div>
+      <div class="form-group">
+        <label for="nuevasAltasDemandantes">Nuevas altas de demandantes</label>
+        <input
+          type="number"
+          id="nuevasAltasDemandantes"
+          v-model="datos.orientacion.nuevasAltasDemandantes"
+          class="form-control"
+          min="0"
+          placeholder="Número de nuevas altas"
+        >
+      </div>
+      <div class="form-group">
+        <label for="accionesOrientacion">Acciones de orientación</label>
+        <input
+          type="number"
+          id="accionesOrientacion"
+          v-model="datos.orientacion.accionesOrientacion"
+          class="form-control"
+          min="0"
+          placeholder="Número de acciones de orientación"
+        >
+      </div>
+      <div class="form-group">
+        <label for="ofertasTrabajo">Ofertas de trabajo</label>
+        <input
+          type="number"
+          id="ofertasTrabajo"
+          v-model="datos.orientacion.ofertasTrabajo"
+          class="form-control"
+          min="0"
+          placeholder="Número de ofertas de trabajo"
+        >
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Programas de Inserción</label>
-      <div class="programas">
-        <div v-for="(programa, index) in datos.programasInsercion" :key="index" class="programa-item">
-          <div class="programa-header">
-            <h4>Programa {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarPrograma(index, 'insercion')" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.programasInsercion.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre del Programa</label>
-            <input 
-              type="text" 
-              v-model="programa.nombre" 
-              class="form-control"
-              placeholder="Nombre del programa de inserción"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="programa.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el programa y sus objetivos"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Personas Inscritas</label>
-            <input 
-              type="number" 
-              v-model="programa.personasInscritas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de personas inscritas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Personas Insertadas</label>
-            <input 
-              type="number" 
-              v-model="programa.personasInsertadas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de personas insertadas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="programa.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarPrograma('insercion')" 
-          class="btn btn-secondary"
-          type="button"
+    <!-- FORMACIÓN -->
+    <div class="form-section">
+      <h4>FORMACIÓN</h4>
+      <div class="form-group">
+        <label for="actividadesFormacion">Actividades</label>
+        <input
+          type="number"
+          id="actividadesFormacion"
+          v-model="datos.formacion.actividades"
+          class="form-control"
+          min="0"
+          placeholder="Número de actividades"
         >
-          Agregar Programa de Inserción
-        </button>
+      </div>
+      <div class="form-group">
+        <label for="cursosFormacion">Cursos</label>
+        <input
+          type="number"
+          id="cursosFormacion"
+          v-model="datos.formacion.cursos"
+          class="form-control"
+          min="0"
+          placeholder="Número de cursos"
+        >
+      </div>
+      <div class="form-group">
+        <label for="pildorasFormativas">Píldoras formativas</label>
+        <input
+          type="number"
+          id="pildorasFormativas"
+          v-model="datos.formacion.pildorasFormativas"
+          class="form-control"
+          min="0"
+          placeholder="Número de píldoras formativas"
+        >
+      </div>
+      <div class="form-group">
+        <label for="participantesFormacion">Participantes</label>
+        <input
+          type="number"
+          id="participantesFormacion"
+          v-model="datos.formacion.participantes"
+          class="form-control"
+          min="0"
+          placeholder="Número de participantes"
+        >
+      </div>
+      <div class="form-group">
+        <label for="horasFormacion">Horas</label>
+        <input
+          type="number"
+          id="horasFormacion"
+          v-model="datos.formacion.horas"
+          class="form-control"
+          min="0"
+          placeholder="Número de horas"
+        >
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Colaboraciones con Empresas</label>
-      <div class="colaboraciones">
-        <div v-for="(colaboracion, index) in datos.colaboracionesEmpresas" :key="index" class="colaboracion-item">
-          <div class="colaboracion-header">
-            <h4>Colaboración {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarColaboracion(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.colaboracionesEmpresas.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre de la Empresa</label>
-            <input 
-              type="text" 
-              v-model="colaboracion.empresa" 
-              class="form-control"
-              placeholder="Nombre de la empresa colaboradora"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Tipo de Colaboración</label>
-            <select v-model="colaboracion.tipo" class="form-control">
-              <option value="">Seleccione un tipo</option>
-              <option value="practicas">Prácticas</option>
-              <option value="contratacion">Contratación</option>
-              <option value="formacion">Formación</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="colaboracion.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa la colaboración y sus resultados"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Personas Beneficiadas</label>
-            <input 
-              type="number" 
-              v-model="colaboracion.personasBeneficiadas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de personas beneficiadas"
-            >
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarColaboracion" 
-          class="btn btn-secondary"
-          type="button"
+    <!-- ASESORAMIENTO EMPRESARIAL Y AL AUTOEMPLEO -->
+    <div class="form-section">
+      <h4>ASESORAMIENTO EMPRESARIAL Y AL AUTOEMPLEO</h4>
+      <div class="form-group">
+        <label for="personasAtendidasAutoempleo">Personas atendidas en autoempleo</label>
+        <input
+          type="number"
+          id="personasAtendidasAutoempleo"
+          v-model="datos.asesoramiento.personasAtendidas"
+          class="form-control"
+          min="0"
+          placeholder="Número de personas atendidas"
         >
-          Agregar Colaboración
-        </button>
+      </div>
+      <div class="form-group">
+        <label for="empresasCreadas">Empresas creadas</label>
+        <input
+          type="number"
+          id="empresasCreadas"
+          v-model="datos.asesoramiento.empresasCreadas"
+          class="form-control"
+          min="0"
+          placeholder="Número de empresas creadas"
+        >
       </div>
     </div>
 
     <div class="form-actions">
-      <button 
-        @click="$emit('siguiente')" 
+      <button
+        @click="$emit('siguiente')"
         class="btn btn-primary"
         :disabled="!esValido"
       >
@@ -247,88 +167,54 @@ const datos = computed({
   set: (value) => emit('update:modelValue', value)
 });
 
-// Inicializar datos si no existen
-if (!datos.value.programasOrientacion) {
-  datos.value.programasOrientacion = [{
-    nombre: '',
-    descripcion: '',
+// Inicializar datos si no existen con la nueva estructura
+if (!datos.value.orientacion) {
+  datos.value.orientacion = {
     personasAtendidas: 0,
-    resultados: ''
-  }];
+    nuevasAltasDemandantes: 0,
+    accionesOrientacion: 0,
+    ofertasTrabajo: 0,
+  };
 }
 
-if (!datos.value.programasInsercion) {
-  datos.value.programasInsercion = [{
-    nombre: '',
-    descripcion: '',
-    personasInscritas: 0,
-    personasInsertadas: 0,
-    resultados: ''
-  }];
+if (!datos.value.formacion) {
+  datos.value.formacion = {
+    actividades: 0,
+    cursos: 0,
+    pildorasFormativas: 0,
+    participantes: 0,
+    horas: 0,
+  };
 }
 
-if (!datos.value.colaboracionesEmpresas) {
-  datos.value.colaboracionesEmpresas = [{
-    empresa: '',
-    tipo: '',
-    descripcion: '',
-    personasBeneficiadas: 0
-  }];
+if (!datos.value.asesoramiento) {
+  datos.value.asesoramiento = {
+    personasAtendidas: 0,
+    empresasCreadas: 0,
+  };
 }
 
-const agregarPrograma = (tipo) => {
-  if (tipo === 'orientacion') {
-    datos.value.programasOrientacion.push({
-      nombre: '',
-      descripcion: '',
-      personasAtendidas: 0,
-      resultados: ''
-    });
-  } else {
-    datos.value.programasInsercion.push({
-      nombre: '',
-      descripcion: '',
-      personasInscritas: 0,
-      personasInsertadas: 0,
-      resultados: ''
-    });
-  }
-};
-
-const eliminarPrograma = (index, tipo) => {
-  if (tipo === 'orientacion' && datos.value.programasOrientacion.length > 1) {
-    datos.value.programasOrientacion.splice(index, 1);
-  } else if (tipo === 'insercion' && datos.value.programasInsercion.length > 1) {
-    datos.value.programasInsercion.splice(index, 1);
-  }
-};
-
-const agregarColaboracion = () => {
-  datos.value.colaboracionesEmpresas.push({
-    empresa: '',
-    tipo: '',
-    descripcion: '',
-    personasBeneficiadas: 0
-  });
-};
-
-const eliminarColaboracion = (index) => {
-  if (datos.value.colaboracionesEmpresas.length > 1) {
-    datos.value.colaboracionesEmpresas.splice(index, 1);
-  }
-};
-
+// La validación ahora solo verifica que los números no sean negativos (aunque los inputs ya lo hacen con min="0")
+// y que los objetos de datos existan.
 const esValido = computed(() => {
-  return datos.value.programasOrientacion.every(programa => 
-    programa.nombre && programa.descripcion && programa.personasAtendidas >= 0
-  ) &&
-  datos.value.programasInsercion.every(programa => 
-    programa.nombre && programa.descripcion && 
-    programa.personasInscritas >= 0 && programa.personasInsertadas >= 0
-  ) &&
-  datos.value.colaboracionesEmpresas.every(colaboracion => 
-    colaboracion.empresa && colaboracion.tipo && colaboracion.descripcion
-  );
+  const orientacionValido = datos.value.orientacion &&
+    datos.value.orientacion.personasAtendidas >= 0 &&
+    datos.value.orientacion.nuevasAltasDemandantes >= 0 &&
+    datos.value.orientacion.accionesOrientacion >= 0 &&
+    datos.value.orientacion.ofertasTrabajo >= 0;
+
+  const formacionValido = datos.value.formacion &&
+    datos.value.formacion.actividades >= 0 &&
+    datos.value.formacion.cursos >= 0 &&
+    datos.value.formacion.pildorasFormativas >= 0 &&
+    datos.value.formacion.participantes >= 0 &&
+    datos.value.formacion.horas >= 0;
+
+  const asesoramientoValido = datos.value.asesoramiento &&
+    datos.value.asesoramiento.personasAtendidas >= 0 &&
+    datos.value.asesoramiento.empresasCreadas >= 0;
+
+  return orientacionValido && formacionValido && asesoramientoValido;
 });
 </script>
 
@@ -338,32 +224,27 @@ const esValido = computed(() => {
   margin: 0 auto;
 }
 
+.form-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 5px solid #004698; /* Indicative border */
+}
+
+.form-section h4 {
+    margin-top: 0;
+    color: #004698;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
 .form-group {
   margin-bottom: 1.5rem;
 }
 
-.programa-item,
-.colaboracion-item {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-}
-
-.programa-header,
-.colaboracion-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.programa-header h4,
-.colaboracion-header h4 {
-  margin: 0;
-  color: #004698;
-  font-size: 1.2rem;
-}
+/* Removed .programa-item, .colaboracion-item, etc. styles */
 
 label {
   display: block;
