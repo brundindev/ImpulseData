@@ -154,7 +154,7 @@ const esValido = computed(() => {
 
 .canales-section h4 {
   margin-top: 0;
-  color: #004698;
+  color: rgb(95 74 56);
   font-size: 1.2rem;
   margin-bottom: 1rem;
 }

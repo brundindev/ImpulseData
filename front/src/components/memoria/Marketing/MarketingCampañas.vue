@@ -1,6 +1,6 @@
 <template>
   <div class="form-step">
-    <h3>Campañas de Marketing y Publicidad</h3>
+    <h3 style="color: #706052;">Campañas de Marketing y Publicidad</h3>
     
     <div class="campanias-section">
       <div class="campanias-grid">
@@ -27,15 +27,6 @@
               placeholder="Nombre de la campaña"
             >
           </div>
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="campania.descripcion" 
-              class="form-control"
-              rows="2"
-              placeholder="Descripción de la campaña"
-            ></textarea>
-          </div>
         </div>
       </div>
       <button @click="agregarCampania" class="btn btn-primary">
@@ -48,19 +39,22 @@
       <div class="report-section">
         <div class="report-header">
           <div class="report-number">6.3</div>
-          <div class="report-title">CAMPAÑAS DE MARKETING Y PUBLICIDAD</div>
+          <div class="report-title">
+            <h2 class="preview-main-title-black">CAMPAÑAS DE </h2>
+            <h2 class="preview-main-title-brown">MARKETING Y PUBLICIDAD</h2>
+          </div>
         </div>
         
         <div class="report-content">
           <div class="campaigns-display">
             <div class="campaigns-column">
-              <div v-for="(campania, index) in campaniasColumn1" :key="'camp1-'+index" class="campaign-bullet">
+              <div v-for="(campania, index) in campaniasColumn1" :key="'camp1-'+index" class="campaign-item-preview">
                 <div class="bullet">•</div>
                 <div class="campaign-text">{{ campania.nombre || 'Campaña ' + (index+1) }}</div>
               </div>
             </div>
             <div class="campaigns-column">
-              <div v-for="(campania, index) in campaniasColumn2" :key="'camp2-'+index" class="campaign-bullet">
+              <div v-for="(campania, index) in campaniasColumn2" :key="'camp2-'+index" class="campaign-item-preview">
                 <div class="bullet">•</div>
                 <div class="campaign-text">{{ campania.nombre || 'Campaña ' + (index+1+campaniasColumn1.length) }}</div>
               </div>
@@ -108,14 +102,6 @@ const datos = computed({
 // Inicializar campanias si no existen
 if (!datos.value.campanias || !datos.value.campanias.length) {
   datos.value.campanias = [
-    { nombre: 'Catálogo de exportadores', descripcion: '' },
-    { nombre: 'Alicante Plaza', descripcion: '' },
-    { nombre: 'Revista Atalaya Empresarial', descripcion: '' },
-    { nombre: 'Web Aplicaciones', descripcion: '' },
-    { nombre: 'Asociación de Periodistas de Alicante', descripcion: '' },
-    { nombre: 'Portal Líder', descripcion: '' },
-    { nombre: 'Guía estudiantes UA', descripcion: '' },
-    { nombre: 'Onda Cero', descripcion: '' }
   ];
 }
 
@@ -132,8 +118,7 @@ const campaniasColumn2 = computed(() => {
 
 const agregarCampania = () => {
   datos.value.campanias.push({
-    nombre: '',
-    descripcion: ''
+    nombre: ''
   });
 };
 
@@ -165,7 +150,7 @@ function guardarYFinalizar() {
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 2px 8px #0001;
-  color:black;
+  color: black;
 }
 
 .campanias-section {
@@ -230,29 +215,37 @@ function guardarYFinalizar() {
 }
 
 .report-number {
-  background: #8a6d57;
+  background: #8B7D6B;
   color: white;
-  width: 40px;
-  /* height: 47px; */
+  width: 70px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 1.2rem;
-  padding: .5rem 1rem;
+  font-size: 1.8rem;
+  flex-shrink: 0;
 }
 
 .report-title {
-  background: #8a6d57;
-  color: white;
-  padding: 0.5rem 1rem;
-  font-weight: bold;
-  font-size: 1.2rem;
+  padding: 1rem 1.5rem;
+  font-size: 1.4rem;
   flex: 1;
+  letter-spacing: 0.5px;
+}
+
+.preview-main-title-black{
+  color:black;
+}
+
+.preview-main-title-brown{
+  color:#8B7D6B;
+  border-bottom: 2px solid #8B7D6B;
 }
 
 .report-content {
-  padding: 1.5rem;
+  padding: 2rem;
+  background: #f5f5f5;
 }
 
 .campaigns-display {
@@ -262,17 +255,29 @@ function guardarYFinalizar() {
 
 .campaigns-column {
   flex: 1;
+  background: #D4CFC7;
+  padding: 1.5rem;
 }
 
-.campaign-bullet {
+.campaign-item-preview {
   display: flex;
-  margin-bottom: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  line-height: 1.4;
 }
 
 .bullet {
-  margin-right: 0.5rem;
-  color: #004698;
+  margin-right: 0.75rem;
+  color: black;
   font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.campaign-text {
+  color: black;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 label {
