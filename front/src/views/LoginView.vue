@@ -652,8 +652,12 @@ const sendResetPasswordEmail = async () => {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
-  color: #333;
+  color: #333 !important;
   background-color: #fff;
+}
+
+.reset-password-form input::placeholder {
+  color: #999 !important;
 }
 
 .reset-password-form input:focus {
