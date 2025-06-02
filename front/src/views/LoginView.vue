@@ -591,11 +591,18 @@ const sendResetPasswordEmail = async () => {
   resetPasswordError.value = '';
   
   try {
-    await AuthService.resetPassword(resetPasswordEmail.value);
+    // Usar directamente Firebase Auth para enviar el correo de recuperación
+    await FirebaseAuthService.resetPassword(resetPasswordEmail.value);
     resetPasswordSuccess.value = true;
   } catch (error) {
-    resetPasswordError.value = 'No se pudo enviar el correo de recuperación. Verifica que el correo sea correcto.';
     console.error('Error al enviar correo de recuperación:', error);
+    if (error.code === 'auth/user-not-found') {
+      resetPasswordError.value = 'No existe ninguna cuenta con este correo electrónico.';
+    } else if (error.code === 'auth/too-many-requests') {
+      resetPasswordError.value = 'Demasiados intentos. Por favor, espera unos minutos antes de intentarlo de nuevo.';
+    } else {
+      resetPasswordError.value = 'No se pudo enviar el correo de recuperación. Por favor, inténtalo de nuevo más tarde.';
+    }
   } finally {
     loading.value = false;
   }
