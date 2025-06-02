@@ -157,7 +157,7 @@ import { useAuthStore } from '../stores/auth'; // Importar el store de autentica
 import AuthService from '../services/AuthService';
 import axios from 'axios';
 import FirebaseAuthService from '../services/FirebaseAuthService';
-import { getAuth } from 'firebase/auth'; // Importar getAuth para obtener la instancia de auth
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth'; // Importar getAuth y sendPasswordResetEmail
 import { auth } from '../firebase';
 
 // Añadir clase al body cuando se monta el componente
@@ -591,8 +591,9 @@ const sendResetPasswordEmail = async () => {
   resetPasswordError.value = '';
   
   try {
-    // Usar directamente Firebase Auth para enviar el correo de recuperación
-    await FirebaseAuthService.resetPassword(resetPasswordEmail.value);
+    // Usar el método estático de FirebaseAuthService
+    const auth = getAuth();
+    await sendPasswordResetEmail(auth, resetPasswordEmail.value);
     resetPasswordSuccess.value = true;
   } catch (error) {
     console.error('Error al enviar correo de recuperación:', error);
