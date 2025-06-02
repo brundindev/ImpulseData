@@ -9,6 +9,7 @@ import './assets/main.css'
 import './assets/ScrollAnimations.css'
 import '@fortawesome/fontawesome-free/css/all.css';
 
+
 // Importar Firebase y el observador de empresa global
 import { auth } from './firebase'
 import { onAuthStateChanged } from 'firebase/auth'
