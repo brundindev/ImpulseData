@@ -1,6 +1,6 @@
 <template>
   <div class="form-step">
-    <h3>6.3 Campañas de Marketing y Publicidad</h3>
+    <h3>Campañas de Marketing y Publicidad</h3>
     
     <div class="campanias-section">
       <div class="campanias-grid">
@@ -159,8 +159,13 @@ function guardarYFinalizar() {
 
 <style scoped>
 .form-step {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px #0001;
+  color:black;
 }
 
 .campanias-section {
