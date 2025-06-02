@@ -307,31 +307,41 @@ const abrirFormulario = async (seccion) => {
     
     // Usar el ID de Impulsalicante directamente
     const empresaId = 'Impulsalicante';
-    if (!empresaId) {
-      throw new Error('No hay una empresa seleccionada');
-    }
 
     // Intentar cargar datos desde Firebase
     const empresaRef = doc(db, 'empresas', empresaId);
     const docSnap = await getDoc(empresaRef);
     
-    if (docSnap.exists() && docSnap.data().memoriaAnual && docSnap.data().memoriaAnual[seccion]) {
-      // Cargar datos existentes
-      const datosGuardados = docSnap.data().memoriaAnual[seccion];
-      datosFormulario.value = datosGuardados;
-      
-      // Actualizar estado de la sección
-      secciones.value[seccion].completa = datosGuardados.estado === 'completo';
-      secciones.value[seccion].parcial = datosGuardados.estado === 'parcial';
+    if (!docSnap.exists()) {
+      // Si el documento no existe, crearlo con la estructura inicial
+      await setDoc(empresaRef, {
+        nombre: 'Impulsalicante',
+        fechaCreacion: new Date().toISOString(),
+        fechaActualizacion: new Date().toISOString(),
+        memoriaAnual: {
+          agenciaLocal: { estado: 'pendiente' },
+          empleoFormacion: { estado: 'pendiente' },
+          promocionEconomica: { estado: 'pendiente' },
+          desarrolloLocal: { estado: 'pendiente' },
+          gestion: { estado: 'pendiente' },
+          marketing: { estado: 'pendiente' }
+        }
+      });
+    }
+    
+    // Cargar datos existentes o inicializar con datos vacíos
+    const datosActuales = docSnap.exists() ? docSnap.data() : {};
+    if (datosActuales.memoriaAnual && datosActuales.memoriaAnual[seccion]) {
+      datosFormulario.value = datosActuales.memoriaAnual[seccion];
+      secciones.value[seccion].completa = datosActuales.memoriaAnual[seccion].estado === 'completo';
+      secciones.value[seccion].parcial = datosActuales.memoriaAnual[seccion].estado === 'parcial';
     } else {
-      // Inicializar con datos vacíos
       datosFormulario.value = {};
     }
     
     mostrarFormulario.value = true;
   } catch (error) {
     console.error('Error al cargar datos:', error);
-    // Aquí podrías mostrar un mensaje de error al usuario
   }
 };
 
@@ -361,25 +371,35 @@ const anteriorPaso = () => {
 
 const guardarFormulario = async () => {
   try {
-    // Usar el ID de Impulsalicante directamente
     const empresaId = 'Impulsalicante';
-    if (!empresaId) {
-      throw new Error('No hay una empresa seleccionada');
+    const empresaRef = doc(db, 'empresas', empresaId);
+    
+    // Verificar si el documento existe
+    const docSnap = await getDoc(empresaRef);
+    if (!docSnap.exists()) {
+      // Si no existe, crear el documento con la estructura inicial
+      await setDoc(empresaRef, {
+        nombre: 'Impulsalicante',
+        fechaCreacion: new Date().toISOString(),
+        fechaActualizacion: new Date().toISOString(),
+        memoriaAnual: {}
+      });
     }
 
-    // Preparar los datos para guardar
+    // Obtener los datos actuales
+    const datosActuales = docSnap.exists() ? docSnap.data() : {};
+    const memoriaAnualActual = datosActuales.memoriaAnual || {};
+
+    // Preparar los datos para guardar, manteniendo los datos existentes
     const datosAGuardar = {
-      memoriaAnual: {
-        [seccionActual.value]: {
-          ...datosFormulario.value,
-          fechaActualizacion: new Date().toISOString(),
-          estado: 'completo'
-        }
+      [`memoriaAnual.${seccionActual.value}`]: {
+        ...datosFormulario.value,
+        fechaActualizacion: new Date().toISOString(),
+        estado: 'completo'
       }
     };
 
     // Guardar en Firebase
-    const empresaRef = doc(db, 'empresas', empresaId);
     await updateDoc(empresaRef, datosAGuardar);
     
     // Actualizar estado de la sección
@@ -390,31 +410,40 @@ const guardarFormulario = async () => {
     cerrarFormulario();
   } catch (error) {
     console.error('Error al guardar:', error);
-    // Aquí podrías mostrar un mensaje de error al usuario
   }
 };
 
 const guardarProgreso = async () => {
   try {
-    // Usar el ID de Impulsalicante directamente
     const empresaId = 'Impulsalicante';
-    if (!empresaId) {
-      throw new Error('No hay una empresa seleccionada');
+    const empresaRef = doc(db, 'empresas', empresaId);
+    
+    // Verificar si el documento existe
+    const docSnap = await getDoc(empresaRef);
+    if (!docSnap.exists()) {
+      // Si no existe, crear el documento con la estructura inicial
+      await setDoc(empresaRef, {
+        nombre: 'Impulsalicante',
+        fechaCreacion: new Date().toISOString(),
+        fechaActualizacion: new Date().toISOString(),
+        memoriaAnual: {}
+      });
     }
 
-    // Preparar los datos para guardar
+    // Obtener los datos actuales
+    const datosActuales = docSnap.exists() ? docSnap.data() : {};
+    const memoriaAnualActual = datosActuales.memoriaAnual || {};
+
+    // Preparar los datos para guardar, manteniendo los datos existentes
     const datosAGuardar = {
-      memoriaAnual: {
-        [seccionActual.value]: {
-          ...datosFormulario.value,
-          fechaActualizacion: new Date().toISOString(),
-          estado: 'parcial'
-        }
+      [`memoriaAnual.${seccionActual.value}`]: {
+        ...datosFormulario.value,
+        fechaActualizacion: new Date().toISOString(),
+        estado: 'parcial'
       }
     };
 
     // Guardar en Firebase
-    const empresaRef = doc(db, 'empresas', empresaId);
     await updateDoc(empresaRef, datosAGuardar);
     
     // Actualizar estado de la sección
@@ -431,7 +460,6 @@ const guardarProgreso = async () => {
     datosFormulario.value = {};
   } catch (error) {
     console.error('Error al guardar el progreso:', error);
-    // Aquí podrías mostrar un mensaje de error al usuario
   }
 };
 
