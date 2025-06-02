@@ -604,7 +604,7 @@ const sendResetPasswordEmail = async () => {
 
 <style src="../assets/Login.css"></style>
 
-<style>
+<style scoped>
 /* Asegurarse de que el fondo sea blanco */
 :deep(.login-container) {
   background-color: #ffffff !important;
@@ -614,5 +614,133 @@ const sendResetPasswordEmail = async () => {
 :deep(html),
 :deep(#app) {
   background: #ffffff !important;
+}
+
+.reset-password-form {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.reset-password-form h2 {
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.reset-instructions {
+  color: #666;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.reset-password-form .form-group {
+  margin-bottom: 20px;
+}
+
+.reset-password-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.reset-password-form input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #333;
+  background-color: #fff;
+}
+
+.reset-password-form input:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.btn-outline {
+  padding: 12px 24px;
+  border: 2px solid #4a90e2;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #4a90e2;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background-color: #4a90e2;
+  color: #fff;
+}
+
+.btn-outline:disabled {
+  border-color: #ccc;
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  background-color: #4a90e2;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  background-color: #357abd;
+}
+
+.btn-primary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.success-message {
+  text-align: center;
+  color: #28a745;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  color: #dc3545;
+  margin-bottom: 20px;
+  text-align: center;
 }
 </style>
