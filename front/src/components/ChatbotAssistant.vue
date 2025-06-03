@@ -199,14 +199,6 @@
 import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import { GEMINI_CONFIG } from '../config/gemini.config';
 
-// Eliminar estas importaciones que pueden causar problemas
-// import { library } from '@fortawesome/fontawesome-svg-core';
-// import { faRobot, faPaperPlane, faUser, faTimes, faComments } from '@fortawesome/free-solid-svg-icons';
-// import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-
-// Registrar iconos
-// library.add(faRobot, faPaperPlane, faUser, faTimes, faComments);
-
 // Estado del chat
 const isOpen = ref(false);
 const userInput = ref('');
@@ -419,6 +411,37 @@ const setTypingIndicator = (typing) => {
   }
 };
 
+// Función para simular escritura palabra por palabra
+const typeMessageWordByWord = async (messageId, fullText) => {
+  const words = fullText.split(' ');
+  let currentText = '';
+  
+  // Encontrar el mensaje en el array
+  const messageIndex = messages.value.findIndex(msg => msg.id === messageId);
+  if (messageIndex === -1) return;
+  
+  // Escribir palabra por palabra con una velocidad más lenta y natural
+  for (let i = 0; i < words.length; i++) {
+    // Añadir la palabra
+    currentText += (i > 0 ? ' ' : '') + words[i];
+    
+    // Actualizar el mensaje
+    messages.value[messageIndex].text = currentText;
+    
+    // Hacer scroll a medida que se escribe
+    await nextTick();
+    scrollToBottom();
+    
+    // Pausa entre palabras (velocidad más lenta y variable)
+    const baseDelay = 100; // Tiempo base de 200ms
+    const randomDelay = Math.random() * 150; // Variación aleatoria de hasta 300ms
+    const punctuationDelay = /[.,!?]/.test(words[i]) ? 250 : 0; // Pausa extra para signos de puntuación
+    const pauseDuration = baseDelay + randomDelay + punctuationDelay;
+    
+    await new Promise(resolve => setTimeout(resolve, pauseDuration));
+  }
+};
+
 // Método para manejar el envío de mensajes
 const sendMessage = async (messageToRetry = null) => {
   // Asegurarnos de que tenemos un string válido
@@ -449,7 +472,7 @@ const sendMessage = async (messageToRetry = null) => {
     // Construir el contexto de la conversación de manera más simple
     const conversationContext = messages.value
       .filter(msg => !msg.isSystemMessage && !msg.isError)
-      .slice(-4) // Tomar solo los últimos 4 mensajes para mantener el contexto relevante
+      .slice(-4)
       .map(msg => `${msg.isUser ? 'Usuario' : 'Asistente'}: ${msg.text}`)
       .join('\n');
 
@@ -483,17 +506,20 @@ const sendMessage = async (messageToRetry = null) => {
     const data = await response.json();
     const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from AI';
 
-    // Añadir la respuesta del bot al chat
+    // Añadir la respuesta del bot al chat con texto vacío inicialmente
+    const messageId = Date.now() + '_bot';
     messages.value.push({
-      id: Date.now() + '_bot',
-      text: botResponse,
+      id: messageId,
+      text: '',
       isUser: false,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
 
-    // Forzar el scroll al final
+    // Esperar a que el DOM se actualice
     await nextTick();
-    scrollToBottom();
+
+    // Iniciar la animación de escritura
+    await typeMessageWordByWord(messageId, botResponse);
     resetErrorState();
 
   } catch (error) {
@@ -550,32 +576,6 @@ const handleApiError = (error, userMessage) => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
     // No hacemos scroll ni desactivamos typing aquí, se hace en el finally de sendMessage
-  }
-};
-
-// Función para simular escritura palabra por palabra
-const typeMessageWordByWord = async (messageId, fullText) => {
-  const words = fullText.split(' ');
-  let currentText = '';
-  
-  // Encontrar el mensaje en el array
-  const messageIndex = messages.value.findIndex(msg => msg.id === messageId);
-  if (messageIndex === -1) return;
-  
-  // Escribir palabra por palabra con una velocidad realista
-  for (let i = 0; i < words.length; i++) {
-    // Añadir la palabra
-    currentText += (i > 0 ? ' ' : '') + words[i];
-    
-    // Actualizar el mensaje
-    messages.value[messageIndex].text = currentText;
-    
-    // Hacer scroll a medida que se escribe
-    scrollToBottom();
-    
-    // Pausa entre palabras (velocidad variable para parecer más humano)
-    const pauseDuration = Math.random() * 150 + 50; // Entre 50ms y 200ms
-    await new Promise(resolve => setTimeout(resolve, pauseDuration));
   }
 };
 
