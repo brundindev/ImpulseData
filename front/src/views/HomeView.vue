@@ -433,12 +433,13 @@ const formatTipoFormacion = (tipo) => EmpresaService.formatTipoFormacion(tipo);
 const formatDate = (date) => EmpresaService.formatDate(date);
 
 onMounted(() => {
-    cargarDatos();
+    // Eliminar la llamada inicial a cargarDatos()
+    // cargarDatos();
 // Verificar estado de autenticación
   onAuthStateChanged(auth, (user) => {
     if (user) {
       usuario.value = AuthService.getCurrentUser();
-      cargarDatos();
+      cargarDatos(); // Mantener esta llamada dentro del listener
     } else {
       // Si no hay usuario, redirigir al login
       router.push('/login');

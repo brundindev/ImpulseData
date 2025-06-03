@@ -96,7 +96,20 @@ export async function cargarDatos() {
     
     // Obtener empresas
     const empresasRecibidas = await FirestoreService.obtenerEmpresas();
-    empresas.value = empresasRecibidas;
+    if (user) {
+      empresas.value = empresasRecibidas.filter(empresa => {
+        // Mostrar siempre la empresa global, aunque el creadoPor no coincida
+        if (empresa.esEmpresaGlobal) return true;
+        const pertenece = empresa.creadoPor === user.uid;
+        if (!pertenece) {
+          console.warn(`⚠️ Empresa ajena detectada: ${empresa.nombre}`);
+        }
+        return pertenece;
+      });
+    } else {
+      // Sin usuario Firebase, confiar en filtrado backend
+      empresas.value = empresasRecibidas;
+    }
     
   } catch (err) {
     console.error("Error al cargar datos en DataService:", err);
