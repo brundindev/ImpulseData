@@ -518,7 +518,7 @@ window.addEventListener('beforeunload', (e) => {
   left: 0;
   right: 0;
   height: 100%;
-  background: radial-gradient(circle at 15% 15%, rgba(0, 195, 255, 0.1) 0%, transparent 60%);
+  background: radial-gradient(circle at 15% 15%, rgba(255, 105, 180, 0.1) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -529,7 +529,7 @@ window.addEventListener('beforeunload', (e) => {
   right: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 85% 85%, rgba(0, 255, 140, 0.15) 0%, transparent 55%);
+  background: radial-gradient(circle at 85% 85%, rgba(147, 112, 219, 0.15) 0%, transparent 55%);
   pointer-events: none;
 }
 
@@ -657,6 +657,8 @@ window.addEventListener('beforeunload', (e) => {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  overflow-y: auto;
+  padding: 2rem;
 }
 
 .apple-modal {
@@ -674,6 +676,8 @@ window.addEventListener('beforeunload', (e) => {
   max-height: 90vh;
   max-width: 900px;
   width: 90%;
+  display: flex;
+  flex-direction: column;
 }
 
 .apple-modal:hover {
@@ -706,7 +710,7 @@ window.addEventListener('beforeunload', (e) => {
   height: 400px;
   top: -200px;
   right: -200px;
-  background: var(--primary-gradient);
+  background: linear-gradient(90deg, #ff69b4, #9370db);
   animation: float-very-slow 30s ease-in-out infinite alternate;
 }
 
@@ -715,7 +719,7 @@ window.addEventListener('beforeunload', (e) => {
   height: 300px;
   bottom: -150px;
   left: -150px;
-  background: linear-gradient(135deg, #00e1a0, #00ff8c);
+  background: linear-gradient(135deg, #ff69b4, #9370db);
   animation: float-very-slow 25s ease-in-out infinite alternate-reverse;
 }
 
@@ -841,6 +845,8 @@ window.addEventListener('beforeunload', (e) => {
   background-color: white;
   position: relative;
   z-index: 1;
+  overflow-y: auto;
+  flex: 1;
 }
 
 /* Animaciones */
