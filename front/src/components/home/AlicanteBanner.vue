@@ -1,22 +1,22 @@
 <template>
-  <div class="alicante-banner-showcase">
+  <div class="alicante-banner-showcase no-animation">
     <div class="banner-content">
-      <div class="banner-image-container" v-scroll-animate:100="'animate-left'">
-        <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image" />
-        <div class="image-glow"></div>
+      <div class="banner-image-container">
+        <img src="@/assets/img/impulsaalicante.png" alt="Impulsa Alicante" class="banner-image no-animation" />
+        <div class="image-glow no-animation"></div>
       </div>
-      <div class="banner-info" v-scroll-animate:300="'animate-right'">
+      <div class="banner-info">
         <h3>ImpulseData - Alicante Futura</h3>
         <p>Plataforma digital de gestión de datos para la innovación y el desarrollo sostenible de Alicante.</p>
         <div class="banner-action">
-          <button class="btn-apple" @click="openChatbot">Explorar <span class="arrow">→</span></button>
+          <button class="btn-apple no-animation" @click="openChatbot">Explorar <span class="arrow no-animation">→</span></button>
         </div>
       </div>
     </div>
-    <div class="banner-accent-shapes">
-      <div class="accent-shape shape-1" v-scroll-animate:200="'animate-zoom'"></div>
-      <div class="accent-shape shape-2" v-scroll-animate:400="'animate-zoom'"></div>
-      <div class="accent-shape shape-3" v-scroll-animate:600="'animate-zoom'"></div>
+    <div class="banner-accent-shapes no-animation">
+      <div class="accent-shape shape-1 no-animation"></div>
+      <div class="accent-shape shape-2 no-animation"></div>
+      <div class="accent-shape shape-3 no-animation"></div>
     </div>
   </div>
 </template>
@@ -38,14 +38,12 @@ const openChatbot = () => {
               0 1px 3px rgba(0,0,0,0.05);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  transition: transform 0.5s ease, box-shadow 0.5s ease;
 }
 
 .alicante-banner-showcase:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 30px 60px -12px rgba(0,0,0,0.1),
-              0 4px 25px -2px rgba(0,0,0,0.06),
-              0 2px 6px rgba(0,0,0,0.1);
+  transform: none;
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05), 
+              0 1px 3px rgba(0,0,0,0.05);
 }
 
 .banner-content {
@@ -59,20 +57,19 @@ const openChatbot = () => {
 .banner-image-container {
   flex: 0 0 40%;
   position: relative;
-  transform-style: preserve-3d;
-  perspective: 1000px;
+  transform-style: none;
+  perspective: none;
 }
 
 .banner-image {
   width: 100%;
   border-radius: 12px;
-  transform: translateZ(20px) rotateY(-5deg);
+  transform: none;
   box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .alicante-banner-showcase:hover .banner-image {
-  transform: translateZ(40px) rotateY(-8deg);
+  transform: none;
 }
 
 .image-glow {
@@ -84,23 +81,21 @@ const openChatbot = () => {
   border-radius: 12px;
   background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), transparent 70%);
   opacity: 0;
-  transition: opacity 0.6s ease;
   pointer-events: none;
 }
 
 .alicante-banner-showcase:hover .image-glow {
-  opacity: 0.8;
+  opacity: 0;
 }
 
 .banner-info {
   flex: 1;
   padding-left: 40px;
-  transform: translateZ(0);
-  transition: transform 0.4s ease;
+  transform: none;
 }
 
 .alicante-banner-showcase:hover .banner-info {
-  transform: translateZ(10px);
+  transform: none;
 }
 
 .banner-info h3 {
@@ -135,24 +130,23 @@ const openChatbot = () => {
   font-weight: 500;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
 }
 
 .btn-apple:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4);
+  transform: none;
+  box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
 }
 
 .btn-apple .arrow {
   margin-left: 8px;
-  transition: transform 0.3s ease;
+  transform: none;
 }
 
 .btn-apple:hover .arrow {
-  transform: translateX(4px);
+  transform: none;
 }
 
 .banner-accent-shapes {
@@ -179,7 +173,6 @@ const openChatbot = () => {
   height: 300px;
   top: -150px;
   right: -100px;
-  animation: float-slow 10s ease-in-out infinite alternate;
 }
 
 .shape-2 {
@@ -188,7 +181,6 @@ const openChatbot = () => {
   bottom: -100px;
   left: 40%;
   background: linear-gradient(135deg, #5856D6, #AF52DE);
-  animation: float-slow 7s ease-in-out infinite alternate-reverse;
 }
 
 .shape-3 {
@@ -197,36 +189,62 @@ const openChatbot = () => {
   top: 40%;
   left: -50px;
   background: linear-gradient(135deg, #FF9500, #FF2D55);
-  animation: float-slow 12s ease-in-out infinite alternate;
-}
-
-@keyframes float-slow {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(20px, 20px);
-  }
 }
 
 @media (max-width: 768px) {
   .banner-content {
     flex-direction: column;
-    padding: 20px;
+    padding: 30px;
+    text-align: center;
   }
 
   .banner-image-container {
-    flex: 0 0 100%;
-    margin-bottom: 20px;
+    flex: none;
+    width: 80%;
+    margin-bottom: 30px;
   }
 
   .banner-info {
     padding-left: 0;
-    text-align: center;
+  }
+
+  .banner-info h3 {
+    font-size: 24px;
   }
 
   .banner-info p {
+    font-size: 1rem;
     max-width: 100%;
+  }
+
+  .btn-apple {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+
+  .accent-shape {
+    filter: blur(20px);
+  }
+
+  .shape-1 {
+    width: 200px;
+    height: 200px;
+    top: -100px;
+    right: -50px;
+  }
+
+  .shape-2 {
+    width: 150px;
+    height: 150px;
+    bottom: -80px;
+    left: 30%;
+  }
+
+  .shape-3 {
+    width: 100px;
+    height: 100px;
+    top: 50%;
+    left: -30px;
   }
 }
 </style> 
