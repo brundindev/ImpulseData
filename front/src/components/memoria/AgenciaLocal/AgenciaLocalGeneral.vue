@@ -19,7 +19,7 @@
 
     <!-- Formulario -->
     <div v-if="activeTab === 'form'" class="form-content">
-      <h4 class="section-title">La Agencia Local en cifras</h4>
+      <h4 class="section-titulo">La Agencia Local en cifras</h4>
       
       <div class="cifras-grid">
         <div class="form-group">
@@ -498,7 +498,7 @@ const formatNumber = (value) => {
   background-color: aliceblue;
 }
 
-.section-title {
+.section-titulo {
   margin: 2rem 0 1.5rem;
   color: #004698;
   font-size: 1.3rem;
