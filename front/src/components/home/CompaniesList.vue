@@ -231,7 +231,10 @@ const formatDate = (date) => {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-x: auto;
 }
 
 .form-stats span{
