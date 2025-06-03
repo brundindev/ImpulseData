@@ -19,40 +19,6 @@
 
     <!-- Formulario -->
     <div v-if="activeTab === 'form'" class="form-content">
-      <h3>Información General</h3>
-      
-      <div class="form-group">
-        <label for="nombre">Nombre de la Agencia</label>
-        <input 
-          type="text" 
-          id="nombre" 
-          v-model="datos.nombre" 
-          class="form-control"
-          placeholder="Ingrese el nombre de la agencia"
-        >
-      </div>
-
-      <div class="form-group">
-        <label for="fechaCreacion">Fecha de Creación</label>
-        <input 
-          type="date" 
-          id="fechaCreacion" 
-          v-model="datos.fechaCreacion" 
-          class="form-control"
-        >
-      </div>
-
-      <div class="form-group">
-        <label for="descripcion">Descripción</label>
-        <textarea 
-          id="descripcion" 
-          v-model="datos.descripcion" 
-          class="form-control"
-          rows="4"
-          placeholder="Describa brevemente la agencia y sus objetivos principales"
-        ></textarea>
-      </div>
-
       <h4 class="section-title">La Agencia Local en cifras</h4>
       
       <div class="cifras-grid">
@@ -253,7 +219,11 @@
         <div class="preview-section">
           <div class="section-header">
             <span class="section-number">1.1</span>
-            <h3>LA AGENCIA LOCAL<br>EN CIFRAS</h3>
+            <div class="section-title-preview">
+              <h3 class="section-title-black">LA AGENCIA LOCAL </h3>
+              <h2 class="section-title-blue">EN CIFRAS</h2>
+            </div>
+            
           </div>
           
           <div class="budget-section">
@@ -302,11 +272,11 @@
           <div class="users-header">
             <div class="users-box">
               <div class="users-label">Total<br>usuarios:</div>
-              <div class="users-number">{{ formatNumber(datos.cifras.totalUsuarios) }}</div>
+              <div class="users-number">{{ datos.cifras.totalUsuarios }}</div>
             </div>
             <div class="users-box">
               <div class="users-label">Nuevos<br>usuarios:</div>
-              <div class="users-number">{{ formatNumber(datos.cifras.nuevosUsuarios) }}</div>
+              <div class="users-number">{{ datos.cifras.nuevosUsuarios }}</div>
             </div>
           </div>
 
@@ -315,12 +285,12 @@
               <div class="stat-item">
                 <div class="stat-icon">👥</div>
                 <div class="stat-label">Nº personas atendidas en orientación</div>
-                <div class="stat-value">{{ formatNumber(datos.cifras.personasOrientacion) }}</div>
+                <div class="stat-value">{{ datos.cifras.personasOrientacion }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-icon">📚</div>
                 <div class="stat-label">Actividades formativas:</div>
-                <div class="stat-value">{{ formatNumber(datos.cifras.actividadesFormativas) }}</div>
+                <div class="stat-value">{{ datos.cifras.actividadesFormativas }}</div>
               </div>
             </div>
 
@@ -328,12 +298,12 @@
               <div class="stat-item">
                 <div class="stat-icon">⏰</div>
                 <div class="stat-label">Horas de orientación laboral realizadas:</div>
-                <div class="stat-value">{{ formatNumber(datos.cifras.horasOrientacion) }}</div>
+                <div class="stat-value">{{ datos.cifras.horasOrientacion }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-icon">⏱️</div>
                 <div class="stat-label">Horas de formación:</div>
-                <div class="stat-value">{{ formatNumber(datos.cifras.horasFormacion) }}</div>
+                <div class="stat-value">{{ datos.cifras.horasFormacion }}</div>
               </div>
             </div>
 
@@ -341,12 +311,12 @@
               <div class="stat-item">
                 <div class="stat-icon">💼</div>
                 <div class="stat-label">Ofertas de empleo gestionadas:</div>
-                <div class="stat-value">{{ formatNumber(datos.cifras.ofertasEmpleo) }}</div>
+                <div class="stat-value">{{ datos.cifras.ofertasEmpleo }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-icon">👨‍🎓</div>
                 <div class="stat-label">Participantes en actividades formativas:</div>
-                <div class="stat-value">{{ formatNumber(datos.cifras.participantesFormacion) }}</div>
+                <div class="stat-value">{{ datos.cifras.participantesFormacion }}</div>
               </div>
             </div>
 
@@ -354,12 +324,12 @@
               <div class="stat-item">
                 <div class="stat-icon">🏢</div>
                 <div class="stat-label">Puestos de trabajo:</div>
-                <div class="stat-value">{{ formatNumber(datos.cifras.puestosGenerados) }}</div>
+                <div class="stat-value">{{ datos.cifras.puestosGenerados }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-icon">🤝</div>
                 <div class="stat-label">Asesoramiento empresas y emprendedores:</div>
-                <div class="stat-value">{{ formatNumber(datos.cifras.asesoramientos) }}</div>
+                <div class="stat-value">{{ datos.cifras.asesoramientos }}</div>
               </div>
             </div>
 
@@ -403,7 +373,7 @@
       <button 
         @click="$emit('siguiente')" 
         class="btn btn-primary"
-        :disabled="!esValido"
+        
       >
         Siguiente
       </button>
@@ -433,32 +403,32 @@ const datos = computed({
 // Inicializar datos si no existen
 if (!datos.value.cifras) {
   datos.value.cifras = {
-    presupuestoInicial: 6336509.57,
-    presupuestoAjustado: 5923758.36,
-    presupuestoEjecutado: 5025482.34,
-    totalUsuarios: 11662,
-    nuevosUsuarios: 1979,
-    ayudasEmpresas: 3944170.34,
-    ayudasEntidades: 247271.99,
-    personasOrientacion: 4159,
-    ofertasEmpleo: 199,
-    personasContratadas: 338,
-    horasOrientacion: 9552,
-    puestosGenerados: 2038,
-    actividadesFormativas: 248,
-    participantesFormacion: 3389,
-    empresasCreadas: 168,
-    empresasViveros: 14,
-    horasFormacion: 6881,
-    asesoramientos: 913
+    presupuestoInicial: 0,
+    presupuestoAjustado: 0,
+    presupuestoEjecutado: 0,
+    totalUsuarios: 0,
+    nuevosUsuarios: 0,
+    ayudasEmpresas: 0,
+    ayudasEntidades: 0,
+    personasOrientacion: 0,
+    ofertasEmpleo: 0,
+    personasContratadas: 0,
+    horasOrientacion: 0,
+    puestosGenerados: 0,
+    actividadesFormativas: 0,
+    participantesFormacion: 0,
+    empresasCreadas: 0,
+    empresasViveros: 0,
+    horasFormacion: 0,
+    asesoramientos: 0
   };
 }
 
-const esValido = computed(() => {
-  return datos.value.nombre && 
-         datos.value.fechaCreacion && 
-         datos.value.descripcion;
-});
+// const esValido = computed(() => {
+//   return datos.value.nombre && 
+//          datos.value.fechaCreacion && 
+//          datos.value.descripcion;
+// });
 
 const porcentajeEjecucionCalculado = computed(() => {
   if (datos.value.cifras.presupuestoAjustado && datos.value.cifras.presupuestoEjecutado) {
@@ -587,34 +557,45 @@ textarea.form-control {
 }
 
 .section-header {
-  background: #8DB4E2;
-  padding: 1rem;
+  padding: 2rem;
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
 .section-number {
-  background: #1B5E96;
+  background: #779BD1;
   color: white;
   padding: 0.5rem 0.75rem;
-  border-radius: 4px;
   font-weight: bold;
   font-size: 1.1rem;
 }
 
-.section-header h3 {
-  color: #1B5E96;
+.section-title-preview{
+  display:flex;
+  flex-direction: column;
+}
+
+.section-title-black{
+  color:black;
   font-weight: bold;
   margin: 0;
   font-size: 1.2rem;
-  line-height: 1.2;
+}
+
+.section-title-blue{
+  color:#779BD1;
+  font-weight: bold;
+  margin: 0;
+  font-size: 1.8rem;
+  border-bottom: 1px solid #779BD1;
 }
 
 .budget-section {
   background: #1B5E96;
   padding: 2rem;
   color: white;
+  margin: 2rem;
 }
 
 .budget-item {
@@ -623,24 +604,24 @@ textarea.form-control {
 
 .budget-item:last-child {
   margin-bottom: 0;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   padding-bottom: 1rem;
 }
 
 .budget-label {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   margin-bottom: 0.5rem;
+  font-weight: bold;
 }
 
 .budget-value {
   font-size: 1.8rem;
   font-weight: bold;
   color: white;
+  border-bottom: 1px solid white;
 }
 
 .execution-chart {
-  background: #1B5E96;
   padding: 2rem;
   display: flex;
   justify-content: center;
@@ -665,17 +646,21 @@ textarea.form-control {
   font-size: 0.7rem;
   margin-bottom: 0.5rem;
   line-height: 1.1;
+  color:black;
+  font-weight:bold;
 }
 
 .chart-percentage {
   font-size: 1.5rem;
   font-weight: bold;
+  color:black;
 }
 
 .users-header {
   background: #1B5E96;
   display: flex;
   color: white;
+  margin: 2rem;
 }
 
 .users-box {
@@ -750,12 +735,15 @@ textarea.form-control {
   font-weight: bold;
   min-width: 60px;
   text-align: center;
+  opacity: 1 !important;
+  text-shadow: 0 1px 1px rgb(255 254 254 / 70%);
 }
 
 .aid-section {
   background: #1B5E96;
   display: flex;
   color: white;
+  margin: 2rem;
 }
 
 .aid-box {
