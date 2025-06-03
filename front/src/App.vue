@@ -9,6 +9,7 @@ import ChatbotAssistant from './components/ChatbotAssistant.vue';
 import CookieConsent from '@/components/CookieConsent.vue';
 import FirestoreService from './services/FirestoreService';
 import { ensureGlobalCompanyForAllUsers } from './utils/globalStorage';
+import AppFooter from './components/home/AppFooter.vue';
 
 const router = useRouter();
 const auth = getAuth();
@@ -438,6 +439,7 @@ const mostrarChatbot = computed(() => {
     <ChatbotAssistant v-if="mostrarChatbot" />
     <CookieConsent />
   </main>
+  <AppFooter />
 </template>
 
 <style src="./assets/App.css">
