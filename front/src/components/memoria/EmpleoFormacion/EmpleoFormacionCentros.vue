@@ -1,257 +1,170 @@
 <template>
   <div class="form-step">
-    <h3>Formación</h3>
-    
-    <div class="form-group">
-      <label>Cursos de Formación</label>
-      <div class="cursos">
-        <div v-for="(curso, index) in datos.cursos" :key="index" class="curso-item">
-          <div class="curso-header">
-            <h4>Curso {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarCurso(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.cursos.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre del Curso</label>
-            <input 
-              type="text" 
-              v-model="curso.nombre" 
-              class="form-control"
-              placeholder="Nombre del curso"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Área de Formación</label>
-            <select v-model="curso.area" class="form-control">
-              <option value="">Seleccione un área</option>
-              <option value="tecnologia">Tecnología</option>
-              <option value="administracion">Administración</option>
-              <option value="idiomas">Idiomas</option>
-              <option value="habilidades">Habilidades Blandas</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Modalidad</label>
-            <select v-model="curso.modalidad" class="form-control">
-              <option value="">Seleccione una modalidad</option>
-              <option value="presencial">Presencial</option>
-              <option value="online">Online</option>
-              <option value="hibrido">Híbrido</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Duración (horas)</label>
-            <input 
-              type="number" 
-              v-model="curso.duracion" 
-              class="form-control"
-              min="0"
-              placeholder="Duración en horas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha de Inicio</label>
-            <input 
-              type="date" 
-              v-model="curso.fechaInicio" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha de Fin</label>
-            <input 
-              type="date" 
-              v-model="curso.fechaFin" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Número de Plazas</label>
-            <input 
-              type="number" 
-              v-model="curso.plazas" 
-              class="form-control"
-              min="0"
-              placeholder="Número total de plazas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Plazas Ocupadas</label>
-            <input 
-              type="number" 
-              v-model="curso.plazasOcupadas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de plazas ocupadas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="curso.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el contenido y objetivos del curso"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="curso.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarCurso" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Curso
-        </button>
+    <h3>Nuestros Centros</h3>
+
+    <!-- Descripción General -->
+    <div class="form-section">
+      <h4>Descripción General del Departamento</h4>
+      <div class="form-group">
+        <label for="descripcionGeneral">Descripción</label>
+        <textarea
+          id="descripcionGeneral"
+          v-model="datos.descripcionGeneral"
+          class="form-control"
+          rows="4"
+          placeholder="Breve descripción del departamento de empleo y formación y sus centros."
+        ></textarea>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Talleres y Seminarios</label>
-      <div class="talleres">
-        <div v-for="(taller, index) in datos.talleres" :key="index" class="taller-item">
-          <div class="taller-header">
-            <h4>Taller {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarTaller(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.talleres.length > 1"
+    <!-- Lista de Centros -->
+    <div class="centros-list">
+      <div v-for="(centro, centroIndex) in datos.centros" :key="centroIndex" class="centro-item form-section">
+        <div class="centro-header">
+          <h4>Centro {{ centroIndex + 1 }}: {{ centro.nombre || 'Nuevo Centro' }}</h4>
+          <button
+            @click="eliminarCentro(centroIndex)"
+            class="btn btn-danger btn-sm"
+            type="button"
+            v-if="datos.centros.length > 1"
+          >
+            Eliminar Centro
+          </button>
+        </div>
+
+        <!-- Imagen del Centro -->
+        <div class="form-group center-image-upload">
+            <label>Imagen del Centro</label>
+            <img
+                :src="centro.imageUrl || '/placeholder-image.png'"
+                :alt="'Imagen de ' + (centro.nombre || 'Centro')"
+                class="image-placeholder clickable-image"
+                :data-image-id="'centro-image-' + centroIndex"
+                @click="openCloudinaryModal('centro-image-' + centroIndex, centro.imageUrl)"
+                style="width: 100%; max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
+            />
+            <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto del centro.</p>
+        </div>
+
+        <div class="form-group">
+          <label :for="'nombreCentro-' + centroIndex">Nombre del Centro</label>
+          <input
+            type="text"
+            :id="'nombreCentro-' + centroIndex"
+            v-model="centro.nombre"
+            class="form-control"
+            placeholder="Ej: Sede Central 'Puerta Ferrisa'"
+          >
+        </div>
+
+        <!-- Servicios del Centro -->
+        <div class="form-group">
+          <label>Servicios</label>
+          <div v-for="(servicio, servicioIndex) in centro.servicios" :key="servicioIndex" class="input-group mb-2">
+            <input
+              type="text"
+              v-model="centro.servicios[servicioIndex]"
+              class="form-control"
+              placeholder="Ej: Orientación laboral"
             >
-              Eliminar
+            <button
+              @click="eliminarServicio(centroIndex, servicioIndex)"
+              class="btn btn-outline-danger btn-sm"
+              type="button"
+              v-if="centro.servicios.length > 1"
+            >
+              -
             </button>
           </div>
-          
-          <div class="form-group">
-            <label>Nombre del Taller</label>
-            <input 
-              type="text" 
-              v-model="taller.nombre" 
-              class="form-control"
-              placeholder="Nombre del taller o seminario"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Tipo</label>
-            <select v-model="taller.tipo" class="form-control">
-              <option value="">Seleccione un tipo</option>
-              <option value="taller">Taller</option>
-              <option value="seminario">Seminario</option>
-              <option value="workshop">Workshop</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha</label>
-            <input 
-              type="date" 
-              v-model="taller.fecha" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Duración (horas)</label>
-            <input 
-              type="number" 
-              v-model="taller.duracion" 
-              class="form-control"
-              min="0"
-              placeholder="Duración en horas"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Participantes</label>
-            <input 
-              type="number" 
-              v-model="taller.participantes" 
-              class="form-control"
-              min="0"
-              placeholder="Número de participantes"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="taller.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el contenido y objetivos del taller"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="taller.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
-          </div>
+          <button
+            @click="agregarServicio(centroIndex)"
+            class="btn btn-outline-secondary btn-sm"
+            type="button"
+          >
+            + Agregar Servicio
+          </button>
         </div>
-        
-        <button 
-          @click="agregarTaller" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Taller
-        </button>
+
+        <!-- Indicadores Numéricos del Centro -->
+        <div class="form-group">
+          <label>Indicadores Numéricos</label>
+          <div v-for="(indicador, indicadorIndex) in centro.indicadores" :key="indicadorIndex" class="indicator-group mb-2">
+            <input
+              type="text"
+              v-model="indicador.label"
+              class="form-control indicator-label"
+              placeholder="Etiqueta (Ej: Personas atendidas)"
+            >
+            <input
+              type="number"
+              v-model.number="indicador.value"
+              class="form-control indicator-value"
+              min="0"
+              placeholder="Valor numérico"
+            >
+            <button
+              @click="eliminarIndicador(centroIndex, indicadorIndex)"
+              class="btn btn-outline-danger btn-sm"
+              type="button"
+              v-if="centro.indicadores.length > 1"
+            >
+              -
+            </button>
+          </div>
+          <button
+            @click="agregarIndicador(centroIndex)"
+            class="btn btn-outline-secondary btn-sm"
+            type="button"
+          >
+            + Agregar Indicador
+          </button>
+        </div>
       </div>
     </div>
+
+    <!-- Botón para añadir Centro -->
+    <button
+      @click="agregarCentro"
+      class="btn btn-secondary mt-3"
+      type="button"
+    >
+      Agregar Otro Centro
+    </button>
 
     <div class="form-actions">
-      <button 
-        @click="$emit('anterior')" 
+      <button
+        @click="$emit('anterior')"
         class="btn btn-secondary"
         type="button"
       >
         Anterior
       </button>
-      <button 
-        @click="$emit('siguiente')" 
+      <button
+        @click="$emit('siguiente')"
         class="btn btn-primary"
         :disabled="!esValido"
       >
         Siguiente
       </button>
     </div>
+
+    <!-- Modal de selección de imágenes -->
+    <teleport to="body">
+      <ModalImagenesCloudinary
+        :is-visible="showImageModal"
+        :title="modalTitle"
+        @close="closeImageModal"
+        @select="handleImageSelect"
+        @upload="handleImageUpload"
+      />
+    </teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
+import ModalImagenesCloudinary from '../../ModalImagenesCloudinary.vue';
+import SimpleCloudinaryService from '../../../services/SimpleCloudinaryService';
 
 const props = defineProps({
   modelValue: {
@@ -267,83 +180,136 @@ const datos = computed({
   set: (value) => emit('update:modelValue', value)
 });
 
-// Inicializar datos si no existen
-if (!datos.value.cursos) {
-  datos.value.cursos = [{
-    nombre: '',
-    area: '',
-    modalidad: '',
-    duracion: 0,
-    fechaInicio: '',
-    fechaFin: '',
-    plazas: 0,
-    plazasOcupadas: 0,
-    descripcion: '',
-    resultados: ''
-  }];
+// Estado del modal de imágenes
+const showImageModal = ref(false);
+const modalTitle = ref('Seleccionar imagen del centro');
+const currentImageId = ref(null);
+const currentCentroIndex = ref(null);
+
+// Inicializar datos si no existen con la nueva estructura
+if (!datos.value.descripcionGeneral) {
+    datos.value.descripcionGeneral = '';
 }
 
-if (!datos.value.talleres) {
-  datos.value.talleres = [{
+if (!datos.value.centros || datos.value.centros.length === 0) {
+  datos.value.centros = [{
     nombre: '',
-    tipo: '',
-    fecha: '',
-    duracion: 0,
-    participantes: 0,
-    descripcion: '',
-    resultados: ''
+    imageUrl: '', // Campo para la URL de la imagen
+    servicios: [''],
+    indicadores: [
+        { label: 'Nuevas altas de demandantes', value: 0 },
+        { label: 'Citas de orientación', value: 0 },
+        { label: 'Píldoras formativas', value: 0 },
+    ],
   }];
+} else {
+    // Asegurarse de que los centros existentes tengan la nueva estructura
+    datos.value.centros.forEach(centro => {
+        if (!('imageUrl' in centro)) centro.imageUrl = ''; // Inicializar campo de imagen si no existe
+        if (!centro.servicios) centro.servicios = [''];
+        if (!centro.indicadores) centro.indicadores = [];
+    });
 }
 
-const agregarCurso = () => {
-  datos.value.cursos.push({
-    nombre: '',
-    area: '',
-    modalidad: '',
-    duracion: 0,
-    fechaInicio: '',
-    fechaFin: '',
-    plazas: 0,
-    plazasOcupadas: 0,
-    descripcion: '',
-    resultados: ''
-  });
+// Método para abrir el modal de imágenes
+const openCloudinaryModal = (imageId, currentImageUrl) => {
+  currentImageId.value = imageId;
+  currentCentroIndex.value = parseInt(imageId.split('-')[2]);
+  modalTitle.value = `Seleccionar imagen para ${datos.value.centros[currentCentroIndex.value].nombre || 'Centro ' + (currentCentroIndex.value + 1)}`;
+  showImageModal.value = true;
 };
 
-const eliminarCurso = (index) => {
-  if (datos.value.cursos.length > 1) {
-    datos.value.cursos.splice(index, 1);
+// Método para cerrar el modal
+const closeImageModal = () => {
+  showImageModal.value = false;
+  currentImageId.value = null;
+  currentCentroIndex.value = null;
+};
+
+// Método para manejar la selección de una imagen
+const handleImageSelect = (selectedImage) => {
+  if (currentCentroIndex.value !== null) {
+    datos.value.centros[currentCentroIndex.value].imageUrl = selectedImage.url;
+  }
+  closeImageModal();
+};
+
+// Método para manejar la subida de una nueva imagen
+const handleImageUpload = async () => {
+  try {
+    // Aquí implementaremos la lógica de subida de imágenes
+    // Por ahora, cerramos el modal
+    closeImageModal();
+  } catch (error) {
+    console.error('Error al subir la imagen:', error);
+    // Aquí podríamos mostrar un mensaje de error al usuario
   }
 };
 
-const agregarTaller = () => {
-  datos.value.talleres.push({
+const agregarCentro = () => {
+  datos.value.centros.push({
     nombre: '',
-    tipo: '',
-    fecha: '',
-    duracion: 0,
-    participantes: 0,
-    descripcion: '',
-    resultados: ''
+    imageUrl: '', // Campo para la URL de la imagen
+    servicios: [''],
+     indicadores: [
+        { label: '', value: 0 },
+    ],
   });
 };
 
-const eliminarTaller = (index) => {
-  if (datos.value.talleres.length > 1) {
-    datos.value.talleres.splice(index, 1);
+const eliminarCentro = (index) => {
+  if (datos.value.centros.length > 1) {
+    datos.value.centros.splice(index, 1);
+  }
+};
+
+const agregarServicio = (centroIndex) => {
+  datos.value.centros[centroIndex].servicios.push('');
+};
+
+const eliminarServicio = (centroIndex, servicioIndex) => {
+  if (datos.value.centros[centroIndex].servicios.length > 1) {
+    datos.value.centros[centroIndex].servicios.splice(servicioIndex, 1);
+  }
+};
+
+const agregarIndicador = (centroIndex) => {
+  datos.value.centros[centroIndex].indicadores.push({ label: '', value: 0 });
+};
+
+const eliminarIndicador = (centroIndex, indicadorIndex) => {
+  if (datos.value.centros[centroIndex].indicadores.length > 1) {
+    datos.value.centros[centroIndex].indicadores.splice(indicadorIndex, 1);
   }
 };
 
 const esValido = computed(() => {
-  return datos.value.cursos.every(curso => 
-    curso.nombre && curso.area && curso.modalidad && 
-    curso.duracion > 0 && curso.fechaInicio && curso.fechaFin &&
-    curso.plazas >= 0 && curso.plazasOcupadas >= 0
-  ) &&
-  datos.value.talleres.every(taller => 
-    taller.nombre && taller.tipo && taller.fecha && 
-    taller.duracion > 0 && taller.participantes >= 0
-  );
+  // La descripción general es opcional.
+  // Validar que haya al menos un centro
+  if (!datos.value.centros || datos.value.centros.length === 0) {
+    return false;
+  }
+
+  // Validar cada centro
+  const centrosValidos = datos.value.centros.every(centro => {
+    // Validar que el nombre del centro no esté vacío
+    if (!centro.nombre) {
+      return false;
+    }
+    // La imagen es opcional, no se valida su existencia.
+
+    // Validar que haya al menos un servicio y que ninguno esté vacío
+    if (!centro.servicios || centro.servicios.length === 0 || centro.servicios.some(servicio => !servicio || servicio.trim() === '')) {
+        return false;
+    }
+     // Validar que si hay indicadores, cada uno tenga etiqueta y un valor numérico >= 0
+    if (centro.indicadores && centro.indicadores.some(indicador => !indicador.label || indicador.label.trim() === '' || indicador.value < 0 || typeof indicador.value !== 'number')) {
+         return false;
+     }
+    return true; // El centro es válido
+  });
+
+  return centrosValidos;
 });
 </script>
 
@@ -353,31 +319,24 @@ const esValido = computed(() => {
   margin: 0 auto;
 }
 
+.form-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 5px solid #004698; /* Indicative border */
+}
+
+.form-section h4 {
+    margin-top: 0;
+    color: #004698;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
 .form-group {
   margin-bottom: 1.5rem;
-}
-
-.curso-item,
-.taller-item {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-}
-
-.curso-header,
-.taller-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.curso-header h4,
-.taller-header h4 {
-  margin: 0;
-  color: #004698;
-  font-size: 1.2rem;
 }
 
 label {
@@ -415,6 +374,11 @@ textarea.form-control {
   transition: all 0.3s ease;
 }
 
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
 .btn-primary {
   background: #004698;
   color: white;
@@ -444,4 +408,134 @@ textarea.form-control {
   display: flex;
   justify-content: space-between;
 }
-</style> 
+
+/* Estilos específicos para los campos de indicadores */
+.indicator-group {
+    display: flex;
+    gap: 10px; /* Espacio entre etiqueta, valor y botón */
+    align-items: center;
+}
+
+.indicator-group .form-control {
+    flex-grow: 1; /* Permite que los inputs crezcan */
+}
+
+.indicator-label {
+    flex-basis: 60%; /* La etiqueta ocupa más espacio */
+}
+
+.indicator-value {
+    flex-basis: 30%; /* El valor ocupa menos espacio */
+}
+
+.indicator-group .btn-outline-danger {
+    flex-grow: 0; /* El botón no crece */
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+}
+.input-group .form-control {
+    flex-grow: 1;
+    margin-bottom: 0; /* Elimina el margen inferior del form-control dentro del grupo */
+}
+.input-group .btn {
+    margin-left: 5px; /* Espacio entre el input y el botón */
+}
+
+.center-image-upload {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.image-placeholder {
+    display: block;
+    margin: 0.5rem auto 0.8rem auto;
+    max-width: 100%;
+    height: auto;
+}
+
+.image-placeholder[src$="/placeholder-image.png"] {
+    /* Estilos para el placeholder visual cuando no hay imagen */
+    background-color: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-style: italic;
+    min-height: 150px; /* Altura mínima para el placeholder */
+    object-fit: contain; /* Para que el placeholder no se distorsione */
+}
+
+.image-upload-hint {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+.clickable-image {
+    cursor: pointer;
+}
+
+/* Estilos adicionales para el modal de imágenes */
+.image-placeholder {
+    transition: all 0.3s ease;
+}
+
+.image-placeholder:hover {
+    border-color: #004698;
+    box-shadow: 0 0 10px rgba(0, 70, 152, 0.2);
+}
+
+.image-upload-hint {
+    font-size: 0.875rem;
+    color: #666;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.clickable-image {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.clickable-image:hover {
+    transform: scale(1.02);
+}
+
+/* Asegurar que el modal esté siempre en el centro de la pantalla */
+:deep(.image-selector-overlay) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+}
+
+:deep(.image-selector-dialog) {
+    position: relative;
+    margin: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(0);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
