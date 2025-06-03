@@ -146,7 +146,8 @@
                 'isRecovered': message.isRecovered
               }"
             >
-              <p v-html="message.renderedText"></p>
+              <p v-if="!message.isUser" v-html="message.renderedText"></p>
+              <p v-else>{{ message.text }}</p>
               <span class="message-time">{{ message.timestamp }}</span>
             </div>
           </div>
