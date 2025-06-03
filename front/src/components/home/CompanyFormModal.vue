@@ -447,5 +447,4 @@ const eliminarFormacion = (index) => {
   overflow-y: auto;
 }
 
-/* ... resto de los estilos ... */
 </style> 

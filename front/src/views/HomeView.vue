@@ -1092,9 +1092,6 @@ onMounted(() => {
     applyCompanyCardAnimations();
     applyStatCardAnimations();
   });
-  
-  // Resto del código de onMounted...
-  // ... existing code ...
 });
 
 // Limpiar event listeners cuando el componente se desmonta
@@ -1103,9 +1100,6 @@ onUnmounted(() => {
     applyCompanyCardAnimations();
     applyStatCardAnimations();
   });
-  
-  // Resto del código de onUnmounted...
-  // ... existing code ...
 });
 </script>
 

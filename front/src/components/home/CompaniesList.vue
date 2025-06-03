@@ -235,17 +235,22 @@ const formatDate = (date) => {
 }
 
 .form-stats span{
-  color: white !important;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  color: #222 !important;
+  text-shadow: none;
 }
 
 .stat-pill {
-  background-color: rgba(0, 70, 152, 0.7);
-  color: white;
+  background: rgba(255, 255, 255, 0.25);
+  color: #222 !important;
   border-radius: 12px;
   padding: 0.2rem 0.6rem;
   font-size: 0.8rem;
   font-weight: 500;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,0.7);
+  box-shadow: 0 2px 8px rgba(255,255,255,0.08);
+  transition: background 0.2s, color 0.2s;
 }
 
 .button {
