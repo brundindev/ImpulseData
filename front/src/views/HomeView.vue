@@ -873,8 +873,8 @@ const previsualizarPDF = () => {
     // Almacenar los datos de la empresa actual en localStorage para recuperarlos en la página PDF
     localStorage.setItem('empresa_pdf', JSON.stringify(empresaActual));
     
-    // Redirigir a la página /pdf
-    router.push('/pdf');
+    // Redirigir a la página /memoria-anual
+    router.push('/memoria-anual');
   } catch (error) {
     console.error("Error al redirigir a la página PDF:", error);
     alert("Ha ocurrido un error inesperado. Por favor, inténtelo de nuevo.");

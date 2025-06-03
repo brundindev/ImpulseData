@@ -9,8 +9,8 @@ export function usePdfNavigator(showViewModal, empresaActual) {
     // Almacenar los datos de la empresa actual en localStorage para la página PDF
     localStorage.setItem('empresa_pdf', JSON.stringify(empresaActual));
 
-    // Redirigir a la página /pdf
-    router.push('/pdf');
+    // Redirigir a la página /memoria-anual
+    router.push('/memoria-anual');
   };
 
   return { irAPaginaPDF };
