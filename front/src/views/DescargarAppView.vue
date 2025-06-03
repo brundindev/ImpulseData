@@ -84,14 +84,14 @@
           <p>Disfruta de una experiencia más rápida y fluida que en la versión web.</p>
         </div>
         <div class="feature-item">
-          <i class="fas fa-wifi"></i>
-          <h3>Modo Offline</h3>
-          <p>Accede a parte de tus datos aunque no tengas conexión a internet.</p>
+          <i class="fa-solid fa-file-pdf"></i>
+          <h3>Automatización de PDF</h3>
+          <p>Automatiza la generación de PDF de tus memorias corporativas.</p>
         </div>
         <div class="feature-item">
-          <i class="fas fa-bell"></i>
-          <h3>Notificaciones Nativas</h3>
-          <p>Recibe alertas directamente en tu sistema operativo.</p>
+          <i class="fa-solid fa-robot"></i>
+          <h3>Soporte Personalizado</h3>
+          <p>Recibe soporte personalizado para tus necesidades mediante tickets o nuestro chatbot.</p>
         </div>
         <div class="feature-item">
           <i class="fas fa-lock"></i>

@@ -65,6 +65,7 @@ class EmpresaService {
           ciudad: empresaData.ciudad || "",
           fechaCreacionSistema: new Date().toISOString(),
           fechaActualizacion: new Date().toISOString(),
+          esEmpresaGlobal: false,
           memoriaAnual: {
             agenciaLocal: {
               estado: 'pendiente',
