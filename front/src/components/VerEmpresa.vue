@@ -28,7 +28,7 @@ export default {
         localStorage.setItem('empresa_pdf', JSON.stringify(this.empresa));
         
         // Redirigir a la página /pdf
-        this.router.push('/pdf');
+        this.router.push('/memoria-anual');
       } catch (error) {
         console.error('Error al redirigir a la página PDF:', error);
         this.$toast.error('Error al abrir la página de PDF. Por favor, inténtelo de nuevo.');
