@@ -255,6 +255,7 @@ const formatDate = (date) => {
   border: 1.5px solid rgba(255,255,255,0.7);
   box-shadow: 0 2px 8px rgba(255,255,255,0.08);
   transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
 }
 
 .button {
