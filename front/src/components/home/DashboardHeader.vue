@@ -4,7 +4,7 @@
       <h1 class="welcome-title">Dashboard</h1>
       <p class="welcome-subtitle">¡Bienvenido, <span class="user-name">{{ usuario?.nombre || usuario?.displayName || 'Usuario' }}</span>!</p>
     </div>
-    <div class="action-buttons" v-scroll-animate:200="'animate-right'">
+    <!--<div class="action-buttons" v-scroll-animate:200="'animate-right'">
       <button @click="$emit('create-company')" class="btn btn-primary btn-create">
         <span class="icon">+</span> Crear entidad
       </button>
@@ -28,7 +28,7 @@
       <div v-if="errorImportacion" class="error-message" v-scroll-animate:300="'animate-up'">
         {{ errorImportacion }}
       </div>
-    </div>
+    </div>-->
   </div>
 </template>
 
