@@ -52,7 +52,7 @@
       </div>
       
       <div class="footer-bottom" v-scroll-animate:600="'animate-up'">
-        <p>&copy; 2025 ImpulseData - Alicante Futura. Todos los derechos reservados.</p>
+        <p>&copy; 2025 <span href="/home" style="color: var(--primary-gradient);">ImpulseData</span> - Alicante Futura. Todos los derechos reservados.</p>
         <div class="footer-bottom-links">
           <a href="/privacy">Políticas de Privacidad</a>
           <a href="/terms">Términos de Servicio</a>
