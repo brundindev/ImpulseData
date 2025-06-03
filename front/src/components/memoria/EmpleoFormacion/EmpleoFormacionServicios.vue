@@ -1,200 +1,141 @@
 <template>
   <div class="form-step">
-    <h3>Estadísticas</h3>
-    
-    <div class="form-group">
-      <label>Estadísticas Generales</label>
-      <div class="estadisticas-generales">
+    <h3>SERVICIOS PARA EL EMPLEO</h3>
+
+    <!-- ORIENTACIÓN E INTERMEDIACIÓN LABORAL -->
+    <div class="form-section">
+      <h4>ORIENTACIÓN E INTERMEDIACIÓN LABORAL</h4>
+      
+      <!-- Imagen -->
+      <div class="form-group center-image-upload">
+        <label>Foto</label>
+        <img
+          :src="datos.orientacion.imageUrl || '/placeholder-image.png'"
+          alt="Imagen de orientación laboral"
+          class="image-placeholder clickable-image"
+          @click="openCloudinaryModal('orientacion')"
+          style="width: 100%; max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
+        />
+        <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto.</p>
+      </div>
+
+      <!-- Campos numéricos -->
+      <div class="form-group">
+        <label>Demandantes de empleo registrados</label>
+        <input 
+          type="number" 
+          v-model="datos.orientacion.demandantesRegistrados" 
+          class="form-control"
+          min="0"
+          placeholder="Número de demandantes registrados"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Personas atendidas</label>
+        <input 
+          type="number" 
+          v-model="datos.orientacion.personasAtendidas" 
+          class="form-control"
+          min="0"
+          placeholder="Número de personas atendidas"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Perceptoras de prestaciones por desempleo</label>
+        <input 
+          type="number" 
+          v-model="datos.orientacion.perceptorasPrestaciones" 
+          class="form-control"
+          min="0"
+          placeholder="Número de perceptoras de prestaciones"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Pertencientes a colectivos vulnerables</label>
+        <input 
+          type="number" 
+          v-model="datos.orientacion.colectivosVulnerables" 
+          class="form-control"
+          min="0"
+          placeholder="Número de personas de colectivos vulnerables"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Ofertas de empleo</label>
+        <input 
+          type="number" 
+          v-model="datos.orientacion.ofertasEmpleo" 
+          class="form-control"
+          min="0"
+          placeholder="Número de ofertas de empleo"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Inscripciones y derivaciones a ofertas</label>
+        <input 
+          type="number" 
+          v-model="datos.orientacion.inscripcionesDerivaciones" 
+          class="form-control"
+          min="0"
+          placeholder="Número de inscripciones y derivaciones"
+        >
+      </div>
+
+      <!-- Perfil de demandantes -->
+      <div class="form-group">
+        <h5>PERFIL DEMANDANTES ESTE AÑO</h5>
         <div class="form-group">
-          <label>Total de Personas Atendidas</label>
-          <input 
-            type="number" 
-            v-model="datos.totalPersonasAtendidas" 
+          <label>Perfil de demandante promedio</label>
+          <textarea
+            v-model="datos.orientacion.perfilDemandante"
             class="form-control"
-            min="0"
-            placeholder="Número total de personas atendidas"
-          >
+            rows="3"
+            placeholder="Describa el perfil promedio de los demandantes"
+          ></textarea>
         </div>
-        
+
         <div class="form-group">
-          <label>Total de Personas Insertadas</label>
+          <label>Total de nuevos demandantes</label>
           <input 
             type="number" 
-            v-model="datos.totalPersonasInsertadas" 
+            v-model="datos.orientacion.nuevosDemandantes" 
             class="form-control"
             min="0"
-            placeholder="Número total de personas insertadas"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Total de Cursos Impartidos</label>
-          <input 
-            type="number" 
-            v-model="datos.totalCursosImpartidos" 
-            class="form-control"
-            min="0"
-            placeholder="Número total de cursos impartidos"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Total de Talleres Impartidos</label>
-          <input 
-            type="number" 
-            v-model="datos.totalTalleresImpartidos" 
-            class="form-control"
-            min="0"
-            placeholder="Número total de talleres impartidos"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Total de Horas de Formación</label>
-          <input 
-            type="number" 
-            v-model="datos.totalHorasFormacion" 
-            class="form-control"
-            min="0"
-            placeholder="Número total de horas de formación"
+            placeholder="Número total de nuevos demandantes"
           >
         </div>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Estadísticas por Género</label>
-      <div class="estadisticas-genero">
-        <div class="form-group">
-          <label>Personas Atendidas (Hombres)</label>
-          <input 
-            type="number" 
-            v-model="datos.personasAtendidasHombres" 
-            class="form-control"
-            min="0"
-            placeholder="Número de hombres atendidos"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Personas Atendidas (Mujeres)</label>
-          <input 
-            type="number" 
-            v-model="datos.personasAtendidasMujeres" 
-            class="form-control"
-            min="0"
-            placeholder="Número de mujeres atendidas"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Personas Insertadas (Hombres)</label>
-          <input 
-            type="number" 
-            v-model="datos.personasInsertadasHombres" 
-            class="form-control"
-            min="0"
-            placeholder="Número de hombres insertados"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Personas Insertadas (Mujeres)</label>
-          <input 
-            type="number" 
-            v-model="datos.personasInsertadasMujeres" 
-            class="form-control"
-            min="0"
-            placeholder="Número de mujeres insertadas"
-          >
-        </div>
+    <!-- ASESORAMIENTO EMPRESARIAL Y AL AUTOEMPLEO -->
+    <div class="form-section">
+      <h4>ASESORAMIENTO EMPRESARIAL Y AL AUTOEMPLEO</h4>
+      
+      <div class="form-group">
+        <label>Sesiones de asesoramiento</label>
+        <input 
+          type="number" 
+          v-model="datos.asesoramiento.personasAtendidas" 
+          class="form-control"
+          min="0"
+          placeholder="Número de sesiones de asesoramiento"
+        >
       </div>
-    </div>
 
-    <div class="form-group">
-      <label>Estadísticas por Edad</label>
-      <div class="estadisticas-edad">
-        <div class="form-group">
-          <label>Menores de 25 años</label>
-          <input 
-            type="number" 
-            v-model="datos.personasMenores25" 
-            class="form-control"
-            min="0"
-            placeholder="Número de personas menores de 25 años"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Entre 25 y 45 años</label>
-          <input 
-            type="number" 
-            v-model="datos.personasEntre25y45" 
-            class="form-control"
-            min="0"
-            placeholder="Número de personas entre 25 y 45 años"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Mayores de 45 años</label>
-          <input 
-            type="number" 
-            v-model="datos.personasMayores45" 
-            class="form-control"
-            min="0"
-            placeholder="Número de personas mayores de 45 años"
-          >
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Estadísticas por Tipo de Contrato</label>
-      <div class="estadisticas-contrato">
-        <div class="form-group">
-          <label>Contratos Indefinidos</label>
-          <input 
-            type="number" 
-            v-model="datos.contratosIndefinidos" 
-            class="form-control"
-            min="0"
-            placeholder="Número de contratos indefinidos"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Contratos Temporales</label>
-          <input 
-            type="number" 
-            v-model="datos.contratosTemporales" 
-            class="form-control"
-            min="0"
-            placeholder="Número de contratos temporales"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Contratos de Formación</label>
-          <input 
-            type="number" 
-            v-model="datos.contratosFormacion" 
-            class="form-control"
-            min="0"
-            placeholder="Número de contratos de formación"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Otros Tipos de Contrato</label>
-          <input 
-            type="number" 
-            v-model="datos.otrosContratos" 
-            class="form-control"
-            min="0"
-            placeholder="Número de otros tipos de contrato"
-          >
-        </div>
+      <div class="form-group">
+        <label>Nuevas empresas y altas de autónomos</label>
+        <input 
+          type="number" 
+          v-model="datos.asesoramiento.empresasCreadas" 
+          class="form-control"
+          min="0"
+          placeholder="Número de nuevas empresas y altas de autónomos"
+        >
       </div>
     </div>
 
@@ -214,11 +155,23 @@
         Siguiente
       </button>
     </div>
+
+    <!-- Modal de selección de imágenes -->
+    <teleport to="body">
+      <ModalImagenesCloudinary
+        :is-visible="showImageModal"
+        :title="modalTitle"
+        @close="closeImageModal"
+        @select="handleImageSelect"
+        @upload="handleImageUpload"
+      />
+    </teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
+import ModalImagenesCloudinary from '../../ModalImagenesCloudinary.vue';
 
 const props = defineProps({
   modelValue: {
@@ -234,44 +187,81 @@ const datos = computed({
   set: (value) => emit('update:modelValue', value)
 });
 
+// Estado del modal de imágenes
+const showImageModal = ref(false);
+const modalTitle = ref('Seleccionar imagen');
+const currentImageSection = ref(null);
+
 // Inicializar datos si no existen
-if (!datos.value.totalPersonasAtendidas) datos.value.totalPersonasAtendidas = 0;
-if (!datos.value.totalPersonasInsertadas) datos.value.totalPersonasInsertadas = 0;
-if (!datos.value.totalCursosImpartidos) datos.value.totalCursosImpartidos = 0;
-if (!datos.value.totalTalleresImpartidos) datos.value.totalTalleresImpartidos = 0;
-if (!datos.value.totalHorasFormacion) datos.value.totalHorasFormacion = 0;
+if (!datos.value.orientacion) {
+  datos.value.orientacion = {
+    imageUrl: '',
+    demandantesRegistrados: 0,
+    personasAtendidas: 0,
+    perceptorasPrestaciones: 0,
+    colectivosVulnerables: 0,
+    ofertasEmpleo: 0,
+    inscripcionesDerivaciones: 0,
+    perfilDemandante: '',
+    nuevosDemandantes: 0
+  };
+}
 
-if (!datos.value.personasAtendidasHombres) datos.value.personasAtendidasHombres = 0;
-if (!datos.value.personasAtendidasMujeres) datos.value.personasAtendidasMujeres = 0;
-if (!datos.value.personasInsertadasHombres) datos.value.personasInsertadasHombres = 0;
-if (!datos.value.personasInsertadasMujeres) datos.value.personasInsertadasMujeres = 0;
+if (!datos.value.asesoramiento) {
+  datos.value.asesoramiento = {
+    personasAtendidas: 0,
+    empresasCreadas: 0
+  };
+}
 
-if (!datos.value.personasMenores25) datos.value.personasMenores25 = 0;
-if (!datos.value.personasEntre25y45) datos.value.personasEntre25y45 = 0;
-if (!datos.value.personasMayores45) datos.value.personasMayores45 = 0;
+// Método para abrir el modal de imágenes
+const openCloudinaryModal = (section) => {
+  currentImageSection.value = section;
+  modalTitle.value = `Seleccionar imagen para ${section === 'orientacion' ? 'orientación laboral' : 'asesoramiento'}`;
+  showImageModal.value = true;
+};
 
-if (!datos.value.contratosIndefinidos) datos.value.contratosIndefinidos = 0;
-if (!datos.value.contratosTemporales) datos.value.contratosTemporales = 0;
-if (!datos.value.contratosFormacion) datos.value.contratosFormacion = 0;
-if (!datos.value.otrosContratos) datos.value.otrosContratos = 0;
+// Método para cerrar el modal
+const closeImageModal = () => {
+  showImageModal.value = false;
+  currentImageSection.value = null;
+};
+
+// Método para manejar la selección de una imagen
+const handleImageSelect = (selectedImage) => {
+  if (currentImageSection.value === 'orientacion') {
+    datos.value.orientacion.imageUrl = selectedImage.url;
+  }
+  closeImageModal();
+};
+
+// Método para manejar la subida de una nueva imagen
+const handleImageUpload = async () => {
+  try {
+    // Aquí implementaremos la lógica de subida de imágenes
+    // Por ahora, cerramos el modal
+    closeImageModal();
+  } catch (error) {
+    console.error('Error al subir la imagen:', error);
+  }
+};
 
 const esValido = computed(() => {
-  return datos.value.totalPersonasAtendidas >= 0 &&
-         datos.value.totalPersonasInsertadas >= 0 &&
-         datos.value.totalCursosImpartidos >= 0 &&
-         datos.value.totalTalleresImpartidos >= 0 &&
-         datos.value.totalHorasFormacion >= 0 &&
-         datos.value.personasAtendidasHombres >= 0 &&
-         datos.value.personasAtendidasMujeres >= 0 &&
-         datos.value.personasInsertadasHombres >= 0 &&
-         datos.value.personasInsertadasMujeres >= 0 &&
-         datos.value.personasMenores25 >= 0 &&
-         datos.value.personasEntre25y45 >= 0 &&
-         datos.value.personasMayores45 >= 0 &&
-         datos.value.contratosIndefinidos >= 0 &&
-         datos.value.contratosTemporales >= 0 &&
-         datos.value.contratosFormacion >= 0 &&
-         datos.value.otrosContratos >= 0;
+  // Validar que todos los campos numéricos sean >= 0
+  const orientacionValido = 
+    datos.value.orientacion.demandantesRegistrados >= 0 &&
+    datos.value.orientacion.personasAtendidas >= 0 &&
+    datos.value.orientacion.perceptorasPrestaciones >= 0 &&
+    datos.value.orientacion.colectivosVulnerables >= 0 &&
+    datos.value.orientacion.ofertasEmpleo >= 0 &&
+    datos.value.orientacion.inscripcionesDerivaciones >= 0 &&
+    datos.value.orientacion.nuevosDemandantes >= 0;
+
+  const asesoramientoValido = 
+    datos.value.asesoramiento.personasAtendidas >= 0 &&
+    datos.value.asesoramiento.empresasCreadas >= 0;
+
+  return orientacionValido && asesoramientoValido;
 });
 </script>
 
@@ -281,17 +271,29 @@ const esValido = computed(() => {
   margin: 0 auto;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
+.form-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 5px solid #004698;
 }
 
-.estadisticas-generales,
-.estadisticas-genero,
-.estadisticas-edad,
-.estadisticas-contrato {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
+.form-section h4 {
+  margin-top: 0;
+  color: #004698;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.form-section h5 {
+  color: #004698;
+  margin: 1.5rem 0 1rem;
+  font-size: 1.1rem;
+}
+
+.form-group {
   margin-bottom: 1.5rem;
 }
 
@@ -314,6 +316,11 @@ label {
   outline: none;
   border-color: #004698;
   box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.1);
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
 }
 
 .btn {
@@ -348,5 +355,45 @@ label {
   margin-top: 2rem;
   display: flex;
   justify-content: space-between;
+}
+
+.center-image-upload {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.image-placeholder {
+  display: block;
+  margin: 0.5rem auto 0.8rem auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.image-placeholder[src$="/placeholder-image.png"] {
+  background-color: #e9ecef;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+  min-height: 150px;
+  object-fit: contain;
+}
+
+.image-upload-hint {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+.clickable-image {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clickable-image:hover {
+  border-color: #004698;
+  box-shadow: 0 0 10px rgba(0, 70, 152, 0.2);
+  transform: scale(1.02);
 }
 </style> 

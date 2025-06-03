@@ -1,212 +1,303 @@
 <template>
   <div class="form-step">
-    <h3>Objetivos y Metas</h3>
-    
-    <div class="form-group">
-      <label>Objetivos Generales</label>
-      <div class="objetivos-generales">
-        <div v-for="(objetivo, index) in datos.objetivosGenerales" :key="index" class="objetivo-item">
-          <div class="objetivo-header">
-            <h4>Objetivo {{ index + 1 }}</h4>
+    <h3>ACTIVIDADES DE FORMACIÓN</h3>
+
+    <!-- CURSOS LABORA -->
+    <div class="form-section">
+      <h4>CURSOS LABORA</h4>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea 
+          v-model="datos.cursosLabora.descripcion" 
+          class="form-control"
+          rows="3"
+          placeholder="Describa los cursos LABORA"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Cursos</label>
+        <div v-for="(curso, index) in datos.cursosLabora.cursos" :key="index" class="curso-item">
+          <div class="curso-header">
+            <h5>Curso {{ index + 1 }}</h5>
             <button 
-              @click="eliminarObjetivo(index, 'general')" 
+              @click="eliminarCurso('labora', index)" 
               class="btn btn-danger"
               type="button"
-              v-if="datos.objetivosGenerales.length > 1"
+              v-if="datos.cursosLabora.cursos.length > 1"
             >
               Eliminar
             </button>
           </div>
-          
-          <div class="form-group">
-            <label>Descripción del Objetivo</label>
-            <textarea 
-              v-model="objetivo.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el objetivo general"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Metas Asociadas</label>
-            <div v-for="(meta, metaIndex) in objetivo.metas" :key="metaIndex" class="meta-item">
-              <div class="meta-header">
-                <h5>Meta {{ metaIndex + 1 }}</h5>
-                <button 
-                  @click="eliminarMeta(index, metaIndex)" 
-                  class="btn btn-danger"
-                  type="button"
-                  v-if="objetivo.metas.length > 1"
-                >
-                  Eliminar
-                </button>
-              </div>
-              
-              <div class="form-group">
-                <label>Descripción de la Meta</label>
-                <textarea 
-                  v-model="meta.descripcion" 
-                  class="form-control"
-                  rows="2"
-                  placeholder="Describa la meta"
-                ></textarea>
-              </div>
-              
-              <div class="form-group">
-                <label>Indicador de Éxito</label>
-                <input 
-                  type="text" 
-                  v-model="meta.indicador" 
-                  class="form-control"
-                  placeholder="Indicador para medir el éxito"
-                >
-              </div>
-              
-              <div class="form-group">
-                <label>Valor Objetivo</label>
-                <input 
-                  type="number" 
-                  v-model="meta.valorObjetivo" 
-                  class="form-control"
-                  min="0"
-                  placeholder="Valor objetivo a alcanzar"
-                >
-              </div>
-              
-              <div class="form-group">
-                <label>Valor Alcanzado</label>
-                <input 
-                  type="number" 
-                  v-model="meta.valorAlcanzado" 
-                  class="form-control"
-                  min="0"
-                  placeholder="Valor alcanzado"
-                >
-              </div>
-            </div>
-            
-            <button 
-              @click="agregarMeta(index)" 
-              class="btn btn-secondary"
-              type="button"
-            >
-              Agregar Meta
-            </button>
-          </div>
+          <input 
+            type="text" 
+            v-model="curso.nombre" 
+            class="form-control"
+            placeholder="Nombre del curso"
+          >
         </div>
-        
         <button 
-          @click="agregarObjetivo('general')" 
+          @click="agregarCurso('labora')" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Objetivo General
+          Agregar Curso
         </button>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Objetivos Específicos</label>
-      <div class="objetivos-especificos">
-        <div v-for="(objetivo, index) in datos.objetivosEspecificos" :key="index" class="objetivo-item">
-          <div class="objetivo-header">
-            <h4>Objetivo {{ index + 1 }}</h4>
+    <!-- CURSOS PROPIOS CON CERTIFICACIÓN -->
+    <div class="form-section">
+      <h4>CURSOS PROPIOS CON CERTIFICACIÓN</h4>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea 
+          v-model="datos.cursosPropiosCertificados.descripcion" 
+          class="form-control"
+          rows="3"
+          placeholder="Describa los cursos propios con certificación"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Cursos</label>
+        <div v-for="(curso, index) in datos.cursosPropiosCertificados.cursos" :key="index" class="curso-item">
+          <div class="curso-header">
+            <h5>Curso {{ index + 1 }}</h5>
             <button 
-              @click="eliminarObjetivo(index, 'especifico')" 
+              @click="eliminarCurso('propiosCertificados', index)" 
               class="btn btn-danger"
               type="button"
-              v-if="datos.objetivosEspecificos.length > 1"
+              v-if="datos.cursosPropiosCertificados.cursos.length > 1"
             >
               Eliminar
             </button>
           </div>
-          
-          <div class="form-group">
-            <label>Descripción del Objetivo</label>
-            <textarea 
-              v-model="objetivo.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el objetivo específico"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Metas Asociadas</label>
-            <div v-for="(meta, metaIndex) in objetivo.metas" :key="metaIndex" class="meta-item">
-              <div class="meta-header">
-                <h5>Meta {{ metaIndex + 1 }}</h5>
-                <button 
-                  @click="eliminarMetaEspecifica(index, metaIndex)" 
-                  class="btn btn-danger"
-                  type="button"
-                  v-if="objetivo.metas.length > 1"
-                >
-                  Eliminar
-                </button>
-              </div>
-              
-              <div class="form-group">
-                <label>Descripción de la Meta</label>
-                <textarea 
-                  v-model="meta.descripcion" 
-                  class="form-control"
-                  rows="2"
-                  placeholder="Describa la meta"
-                ></textarea>
-              </div>
-              
-              <div class="form-group">
-                <label>Indicador de Éxito</label>
-                <input 
-                  type="text" 
-                  v-model="meta.indicador" 
-                  class="form-control"
-                  placeholder="Indicador para medir el éxito"
-                >
-              </div>
-              
-              <div class="form-group">
-                <label>Valor Objetivo</label>
-                <input 
-                  type="number" 
-                  v-model="meta.valorObjetivo" 
-                  class="form-control"
-                  min="0"
-                  placeholder="Valor objetivo a alcanzar"
-                >
-              </div>
-              
-              <div class="form-group">
-                <label>Valor Alcanzado</label>
-                <input 
-                  type="number" 
-                  v-model="meta.valorAlcanzado" 
-                  class="form-control"
-                  min="0"
-                  placeholder="Valor alcanzado"
-                >
-              </div>
-            </div>
-            
-            <button 
-              @click="agregarMetaEspecifica(index)" 
-              class="btn btn-secondary"
-              type="button"
-            >
-              Agregar Meta
-            </button>
-          </div>
+          <input 
+            type="text" 
+            v-model="curso.nombre" 
+            class="form-control"
+            placeholder="Nombre del curso"
+          >
         </div>
-        
         <button 
-          @click="agregarObjetivo('especifico')" 
+          @click="agregarCurso('propiosCertificados')" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Objetivo Específico
+          Agregar Curso
         </button>
+      </div>
+    </div>
+
+    <!-- CURSOS PROPIOS SIN CERTIFICACIÓN -->
+    <div class="form-section">
+      <h4>CURSOS PROPIOS SIN CERTIFICACIÓN</h4>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea 
+          v-model="datos.cursosPropiosNoCertificados.descripcion" 
+          class="form-control"
+          rows="3"
+          placeholder="Describa los cursos propios sin certificación"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Cursos</label>
+        <div v-for="(curso, index) in datos.cursosPropiosNoCertificados.cursos" :key="index" class="curso-item">
+          <div class="curso-header">
+            <h5>Curso {{ index + 1 }}</h5>
+            <button 
+              @click="eliminarCurso('propiosNoCertificados', index)" 
+              class="btn btn-danger"
+              type="button"
+              v-if="datos.cursosPropiosNoCertificados.cursos.length > 1"
+            >
+              Eliminar
+            </button>
+          </div>
+          <input 
+            type="text" 
+            v-model="curso.nombre" 
+            class="form-control"
+            placeholder="Nombre del curso"
+          >
+        </div>
+        <button 
+          @click="agregarCurso('propiosNoCertificados')" 
+          class="btn btn-secondary"
+          type="button"
+        >
+          Agregar Curso
+        </button>
+      </div>
+    </div>
+
+    <!-- PÍLDORAS FORMATIVAS -->
+    <div class="form-section">
+      <h4>PÍLDORAS FORMATIVAS</h4>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea 
+          v-model="datos.pildorasFormativas.descripcion" 
+          class="form-control"
+          rows="3"
+          placeholder="Describa las píldoras formativas"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Actividades Formativas</label>
+        <div v-for="(actividad, index) in datos.pildorasFormativas.actividades" :key="index" class="actividad-item">
+          <div class="actividad-header">
+            <h5>Actividad {{ index + 1 }}</h5>
+            <button 
+              @click="eliminarActividad(index)" 
+              class="btn btn-danger"
+              type="button"
+              v-if="datos.pildorasFormativas.actividades.length > 1"
+            >
+              Eliminar
+            </button>
+          </div>
+          <input 
+            type="text" 
+            v-model="actividad.nombre" 
+            class="form-control"
+            placeholder="Nombre de la actividad"
+          >
+        </div>
+        <button 
+          @click="agregarActividad" 
+          class="btn btn-secondary"
+          type="button"
+        >
+          Agregar Actividad
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLA DE CENTROS -->
+    <div class="form-section">
+      <h4>TABLA DE CENTROS</h4>
+      <div class="table-controls">
+        <button 
+          @click="agregarCentro" 
+          class="btn btn-secondary"
+          type="button"
+        >
+          Agregar Centro
+        </button>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Centros</th>
+              <th v-for="(centro, index) in datos.centros" :key="index">
+                {{ centro.nombre }}
+                <button 
+                  @click="eliminarCentro(index)" 
+                  class="btn btn-danger btn-sm"
+                  type="button"
+                  v-if="datos.centros.length > 1"
+                >
+                  ×
+                </button>
+              </th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Píldoras</td>
+              <td v-for="(centro, index) in datos.centros" :key="index">
+                <input 
+                  type="number" 
+                  v-model="centro.pildoras" 
+                  class="form-control"
+                  min="0"
+                >
+              </td>
+              <td>{{ totalPildoras }}</td>
+            </tr>
+            <tr>
+              <td>Asistentes</td>
+              <td v-for="(centro, index) in datos.centros" :key="index">
+                <input 
+                  type="number" 
+                  v-model="centro.asistentes" 
+                  class="form-control"
+                  min="0"
+                >
+              </td>
+              <td>{{ totalAsistentes }}</td>
+            </tr>
+            <tr>
+              <td>Horas</td>
+              <td v-for="(centro, index) in datos.centros" :key="index">
+                <input 
+                  type="number" 
+                  v-model="centro.horas" 
+                  class="form-control"
+                  min="0"
+                >
+              </td>
+              <td>{{ totalHoras }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RESUMEN ACTIVIDADES DE FORMACIÓN POR MODALIDAD -->
+    <div class="form-section">
+      <h4>RESUMEN ACTIVIDADES DE FORMACIÓN POR MODALIDAD</h4>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Modalidad</th>
+              <th>Nº de Cursos</th>
+              <th>Horas</th>
+              <th>Participantes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cursos Programación LABORA</td>
+              <td><input type="number" :value="numCursosLaboraResumen" class="form-control" min="0" readonly></td>
+              <td><input type="number" v-model="datos.resumenFormacion.cursosLabora.horas" class="form-control" min="0"></td>
+              <td><input type="number" v-model="datos.resumenFormacion.cursosLabora.participantes" class="form-control" min="0"></td>
+            </tr>
+            <tr>
+              <td>Cursos propios con certificación</td>
+              <td><input type="number" :value="numCursosPropiosCertificadosResumen" class="form-control" min="0" readonly></td>
+              <td><input type="number" v-model="datos.resumenFormacion.propiosCertificados.horas" class="form-control" min="0"></td>
+              <td><input type="number" v-model="datos.resumenFormacion.propiosCertificados.participantes" class="form-control" min="0"></td>
+            </tr>
+            <tr>
+              <td>Cursos propios sin certificación</td>
+              <td><input type="number" :value="numCursosPropiosNoCertificadosResumen" class="form-control" min="0" readonly></td>
+              <td><input type="number" v-model="datos.resumenFormacion.propiosNoCertificados.horas" class="form-control" min="0"></td>
+              <td><input type="number" v-model="datos.resumenFormacion.propiosNoCertificados.participantes" class="form-control" min="0"></td>
+            </tr>
+            <tr>
+              <td>Convenios de formación</td>
+              <td><input type="number" v-model="datos.resumenFormacion.convenios.numCursos" class="form-control" min="0"></td>
+              <td><input type="number" v-model="datos.resumenFormacion.convenios.horas" class="form-control" min="0"></td>
+              <td><input type="number" v-model="datos.resumenFormacion.convenios.participantes" class="form-control" min="0"></td>
+            </tr>
+            <tr class="total-row">
+              <td><strong>Total</strong></td>
+              <td><strong>{{ totalCursosResumen }}</strong></td>
+              <td><strong>{{ totalHorasResumen }}</strong></td>
+              <td><strong>{{ totalParticipantesResumen }}</strong></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -247,122 +338,190 @@ const datos = computed({
 });
 
 // Inicializar datos si no existen
-if (!datos.value.objetivosGenerales) {
-  datos.value.objetivosGenerales = [{
+if (!datos.value.cursosLabora) {
+  datos.value.cursosLabora = {
     descripcion: '',
-    metas: [{
-      descripcion: '',
-      indicador: '',
-      valorObjetivo: 0,
-      valorAlcanzado: 0
-    }]
-  }];
-}
-
-if (!datos.value.objetivosEspecificos) {
-  datos.value.objetivosEspecificos = [{
-    descripcion: '',
-    metas: [{
-      descripcion: '',
-      indicador: '',
-      valorObjetivo: 0,
-      valorAlcanzado: 0
-    }]
-  }];
-}
-
-const agregarObjetivo = (tipo) => {
-  const nuevoObjetivo = {
-    descripcion: '',
-    metas: [{
-      descripcion: '',
-      indicador: '',
-      valorObjetivo: 0,
-      valorAlcanzado: 0
-    }]
+    cursos: [{ nombre: '' }]
   };
-  
-  if (tipo === 'general') {
-    datos.value.objetivosGenerales.push(nuevoObjetivo);
-  } else {
-    datos.value.objetivosEspecificos.push(nuevoObjetivo);
-  }
-};
+}
 
-const eliminarObjetivo = (index, tipo) => {
-  if (tipo === 'general' && datos.value.objetivosGenerales.length > 1) {
-    datos.value.objetivosGenerales.splice(index, 1);
-  } else if (tipo === 'especifico' && datos.value.objetivosEspecificos.length > 1) {
-    datos.value.objetivosEspecificos.splice(index, 1);
-  }
-};
-
-const agregarMeta = (objetivoIndex) => {
-  datos.value.objetivosGenerales[objetivoIndex].metas.push({
+if (!datos.value.cursosPropiosCertificados) {
+  datos.value.cursosPropiosCertificados = {
     descripcion: '',
-    indicador: '',
-    valorObjetivo: 0,
-    valorAlcanzado: 0
+    cursos: [{ nombre: '' }]
+  };
+}
+
+if (!datos.value.cursosPropiosNoCertificados) {
+  datos.value.cursosPropiosNoCertificados = {
+    descripcion: '',
+    cursos: [{ nombre: '' }]
+  };
+}
+
+if (!datos.value.pildorasFormativas) {
+  datos.value.pildorasFormativas = {
+    descripcion: '',
+    actividades: [{ nombre: '' }]
+  };
+}
+
+if (!datos.value.centros) {
+  datos.value.centros = [{
+    nombre: 'Centro 1',
+    pildoras: 0,
+    asistentes: 0,
+    horas: 0
+  }];
+}
+
+// Inicializar datos para la nueva tabla de resumen
+if (!datos.value.resumenFormacion) {
+  datos.value.resumenFormacion = {
+    cursosLabora: { numCursos: 0, horas: 0, participantes: 0 },
+    propiosCertificados: { numCursos: 0, horas: 0, participantes: 0 },
+    propiosNoCertificados: { numCursos: 0, horas: 0, participantes: 0 },
+    convenios: { numCursos: 0, horas: 0, participantes: 0 }
+  };
+}
+
+// Métodos para cursos LABORA
+const agregarCurso = (tipo) => {
+  const nuevoCurso = { nombre: '' };
+  switch(tipo) {
+    case 'labora':
+      datos.value.cursosLabora.cursos.push(nuevoCurso);
+      break;
+    case 'propiosCertificados':
+      datos.value.cursosPropiosCertificados.cursos.push(nuevoCurso);
+      break;
+    case 'propiosNoCertificados':
+      datos.value.cursosPropiosNoCertificados.cursos.push(nuevoCurso);
+      break;
+  }
+};
+
+const eliminarCurso = (tipo, index) => {
+  switch(tipo) {
+    case 'labora':
+      if (datos.value.cursosLabora.cursos.length > 1) {
+        datos.value.cursosLabora.cursos.splice(index, 1);
+      }
+      break;
+    case 'propiosCertificados':
+      if (datos.value.cursosPropiosCertificados.cursos.length > 1) {
+        datos.value.cursosPropiosCertificados.cursos.splice(index, 1);
+      }
+      break;
+    case 'propiosNoCertificados':
+      if (datos.value.cursosPropiosNoCertificados.cursos.length > 1) {
+        datos.value.cursosPropiosNoCertificados.cursos.splice(index, 1);
+      }
+      break;
+  }
+};
+
+// Métodos para píldoras formativas
+const agregarActividad = () => {
+  datos.value.pildorasFormativas.actividades.push({ nombre: '' });
+};
+
+const eliminarActividad = (index) => {
+  if (datos.value.pildorasFormativas.actividades.length > 1) {
+    datos.value.pildorasFormativas.actividades.splice(index, 1);
+  }
+};
+
+// Métodos para centros
+const agregarCentro = () => {
+  datos.value.centros.push({
+    nombre: `Centro ${datos.value.centros.length + 1}`,
+    pildoras: 0,
+    asistentes: 0,
+    horas: 0
   });
 };
 
-const eliminarMeta = (objetivoIndex, metaIndex) => {
-  if (datos.value.objetivosGenerales[objetivoIndex].metas.length > 1) {
-    datos.value.objetivosGenerales[objetivoIndex].metas.splice(metaIndex, 1);
+const eliminarCentro = (index) => {
+  if (datos.value.centros.length > 1) {
+    datos.value.centros.splice(index, 1);
   }
 };
 
-const agregarMetaEspecifica = (objetivoIndex) => {
-  datos.value.objetivosEspecificos[objetivoIndex].metas.push({
-    descripcion: '',
-    indicador: '',
-    valorObjetivo: 0,
-    valorAlcanzado: 0
-  });
-};
+// Totales calculados
+const totalPildoras = computed(() => {
+  return datos.value.centros.reduce((total, centro) => total + (centro.pildoras || 0), 0);
+});
 
-const eliminarMetaEspecifica = (objetivoIndex, metaIndex) => {
-  if (datos.value.objetivosEspecificos[objetivoIndex].metas.length > 1) {
-    datos.value.objetivosEspecificos[objetivoIndex].metas.splice(metaIndex, 1);
-  }
-};
+const totalAsistentes = computed(() => {
+  return datos.value.centros.reduce((total, centro) => total + (centro.asistentes || 0), 0);
+});
 
+const totalHoras = computed(() => {
+  return datos.value.centros.reduce((total, centro) => total + (centro.horas || 0), 0);
+});
+
+// Totales calculados para la nueva tabla de resumen
+const totalCursosResumen = computed(() => {
+  const resumen = datos.value.resumenFormacion;
+  return (datos.value.cursosLabora.cursos.length || 0) +
+         (datos.value.cursosPropiosCertificados.cursos.length || 0) +
+         (datos.value.cursosPropiosNoCertificados.cursos.length || 0) +
+         (resumen.convenios.numCursos || 0);
+});
+
+const totalHorasResumen = computed(() => {
+  const resumen = datos.value.resumenFormacion;
+  return (resumen.cursosLabora.horas || 0) +
+         (resumen.propiosCertificados.horas || 0) +
+         (resumen.propiosNoCertificados.horas || 0) +
+         (resumen.convenios.horas || 0);
+});
+
+const totalParticipantesResumen = computed(() => {
+  const resumen = datos.value.resumenFormacion;
+  return (resumen.cursosLabora.participantes || 0) +
+         (resumen.propiosCertificados.participantes || 0) +
+         (resumen.propiosNoCertificados.participantes || 0) +
+         (resumen.convenios.participantes || 0);
+});
+
+// Añadir computed properties para los counts automáticos en la tabla de resumen
+const numCursosLaboraResumen = computed(() => datos.value.cursosLabora.cursos.length || 0);
+const numCursosPropiosCertificadosResumen = computed(() => datos.value.cursosPropiosCertificados.cursos.length || 0);
+const numCursosPropiosNoCertificadosResumen = computed(() => datos.value.cursosPropiosNoCertificados.cursos.length || 0);
+
+// Validación
 const esValido = computed(() => {
-  const validarObjetivos = (objetivos) => {
-    return objetivos.every(objetivo => 
-      objetivo.descripcion && 
-      objetivo.metas.every(meta => 
-        meta.descripcion && 
-        meta.indicador && 
-        meta.valorObjetivo >= 0 && 
-        meta.valorAlcanzado >= 0
-      )
-    );
-  };
-
-  return validarObjetivos(datos.value.objetivosGenerales) && 
-         validarObjetivos(datos.value.objetivosEspecificos);
+  // Puedes añadir validación aquí si es necesario
+  return true; 
 });
 </script>
 
 <style scoped>
 .form-step {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.objetivo-item {
-  background: #f8f9fa;
+.form-section {
+  margin-bottom: 2rem;
   padding: 1.5rem;
+  background: #f8f9fa;
   border-radius: 8px;
-  margin-bottom: 1.5rem;
+  border-left: 5px solid #004698;
 }
 
-.meta-item {
+.form-section h4 {
+  margin-top: 0;
+  color: #004698;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.curso-item,
+.actividad-item {
   background: white;
   padding: 1rem;
   border-radius: 4px;
@@ -370,33 +529,68 @@ const esValido = computed(() => {
   border: 1px solid #ddd;
 }
 
-.objetivo-header,
-.meta-header {
+.curso-header,
+.actividad-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.objetivo-header h4,
-.meta-header h5 {
+.curso-header h5,
+.actividad-header h5 {
   margin: 0;
   color: #004698;
 }
 
-.objetivo-header h4 {
-  font-size: 1.2rem;
+.table-responsive {
+  overflow-x: auto;
+  margin-top: 1rem;
 }
 
-.meta-header h5 {
-  font-size: 1rem;
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
 }
 
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #333;
+.table th,
+.table td {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  text-align: center;
+  color: #000;
+}
+
+.table th {
+  background: #f8f9fa;
   font-weight: 500;
+  color: #000;
+}
+
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+  font-weight: 500;
+  color: #000;
+}
+
+.table input {
+  color: #000;
+  background-color: #fff;
+}
+
+.table input::placeholder {
+  color: #666;
+}
+
+.table-controls {
+  margin-bottom: 1rem;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
 }
 
 .form-control {
@@ -455,5 +649,14 @@ textarea.form-control {
   margin-top: 2rem;
   display: flex;
   justify-content: space-between;
+}
+
+.total-row {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
+
+.total-row td {
+  font-weight: bold;
 }
 </style> 
