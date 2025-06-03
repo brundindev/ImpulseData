@@ -1,121 +1,135 @@
 <template>
-  <div class="memoria-anual-container">
-    <div class="header">
-      <h1>Memoria Anual</h1>
-      <p class="subtitle">Gestión y seguimiento de la memoria anual</p>
+  <div class="home-page">
+    <AnimatedBackground />
+    <div class="dashboard-container">
+      <div class="dashboard-header">
+        <div class="welcome-section">
+          <h1 class="welcome-title">Memoria Anual</h1>
+          <p class="welcome-subtitle">Gestión y seguimiento de la memoria anual</p>
+        </div>
+      </div>
+
+      <div class="secciones-grid">
+        <!-- AGENCIA LOCAL -->
+        <div class="seccion-card company-card" :class="{ 'completa': secciones.agenciaLocal.completa, 'parcial': secciones.agenciaLocal.parcial }" v-scroll-animate:150="'animate-in'">
+          <div class="seccion-header">
+            <h2>Agencia Local de Desarollo Económico y Social</h2>
+            <div class="estado-indicador">
+              <span v-if="secciones.agenciaLocal.completa" class="check">✓</span>
+              <span v-else-if="secciones.agenciaLocal.parcial" class="parcial">-</span>
+            </div>
+          </div>
+          <div class="seccion-content">
+            <p>Gestión y coordinación de la agencia local</p>
+            <button @click="abrirFormulario('agenciaLocal')" class="btn-llenar">
+              {{ secciones.agenciaLocal.completa ? 'Editar' : 'Rellenar' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- DEPARTAMENTO DE EMPLEO Y FORMACIÓN -->
+        <div class="seccion-card company-card" :class="{ 'completa': secciones.empleoFormacion.completa, 'parcial': secciones.empleoFormacion.parcial }" v-scroll-animate:150="'animate-in'" style="animation-delay: 0.15s">
+          <div class="seccion-header">
+            <h2>Departamento de Empleo y Formación</h2>
+            <div class="estado-indicador">
+              <span v-if="secciones.empleoFormacion.completa" class="check">✓</span>
+              <span v-else-if="secciones.empleoFormacion.parcial" class="parcial">-</span>
+            </div>
+          </div>
+          <div class="seccion-content">
+            <p>Gestión de empleo y programas formativos</p>
+            <button @click="abrirFormulario('empleoFormacion')" class="btn-llenar">
+              {{ secciones.empleoFormacion.completa ? 'Editar' : 'Rellenar' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- DEPARTAMENTO DE PROMOCIÓN ECONÓMICA -->
+        <div class="seccion-card company-card" :class="{ 'completa': secciones.promocionEconomica.completa, 'parcial': secciones.promocionEconomica.parcial }" v-scroll-animate:150="'animate-in'" style="animation-delay: 0.3s">
+          <div class="seccion-header">
+            <h2>Departamento de Promoción Económica</h2>
+            <div class="estado-indicador">
+              <span v-if="secciones.promocionEconomica.completa" class="check">✓</span>
+              <span v-else-if="secciones.promocionEconomica.parcial" class="parcial">-</span>
+            </div>
+          </div>
+          <div class="seccion-content">
+            <p>Promoción y desarrollo económico local</p>
+            <button @click="abrirFormulario('promocionEconomica')" class="btn-llenar">
+              {{ secciones.promocionEconomica.completa ? 'Editar' : 'Rellenar' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- PROGRAMAS DE DESARROLLO LOCAL ESTRATÉGICO -->
+        <div class="seccion-card company-card" :class="{ 'completa': secciones.desarrolloLocal.completa, 'parcial': secciones.desarrolloLocal.parcial }" v-scroll-animate:150="'animate-in'" style="animation-delay: 0.45s">
+          <div class="seccion-header">
+            <h2>Programas de Desarrollo Local Estratégico</h2>
+            <div class="estado-indicador">
+              <span v-if="secciones.desarrolloLocal.completa" class="check">✓</span>
+              <span v-else-if="secciones.desarrolloLocal.parcial" class="parcial">-</span>
+            </div>
+          </div>
+          <div class="seccion-content">
+            <p>Programas estratégicos de desarrollo local</p>
+            <button @click="abrirFormulario('desarrolloLocal')" class="btn-llenar">
+              {{ secciones.desarrolloLocal.completa ? 'Editar' : 'Rellenar' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- ÁREA DE GESTIÓN -->
+        <div class="seccion-card" :class="{ 'completa': secciones.gestion.completa, 'parcial': secciones.gestion.parcial }">
+          <div class="seccion-header">
+            <h2>Área de Gestión</h2>
+            <div class="estado-indicador">
+              <span v-if="secciones.gestion.completa" class="check">✓</span>
+              <span v-else-if="secciones.gestion.parcial" class="parcial">-</span>
+            </div>
+          </div>
+          <div class="seccion-content">
+            <p>Gestión administrativa y financiera</p>
+            <button @click="abrirFormulario('gestion')" class="btn-llenar">
+              {{ secciones.gestion.completa ? 'Editar' : 'Rellenar' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- DEPARTAMENTO DE MARKETING Y COMUNICACIÓN -->
+        <div class="seccion-card" :class="{ 'completa': secciones.marketing.completa, 'parcial': secciones.marketing.parcial }">
+          <div class="seccion-header">
+            <h2>Departamento de Marketing y Comunicación</h2>
+            <div class="estado-indicador">
+              <span v-if="secciones.marketing.completa" class="check">✓</span>
+              <span v-else-if="secciones.marketing.parcial" class="parcial">-</span>
+            </div>
+          </div>
+          <div class="seccion-content">
+            <p>Marketing y estrategias de comunicación</p>
+            <button @click="abrirFormulario('marketing')" class="btn-llenar">
+              {{ secciones.marketing.completa ? 'Editar' : 'Rellenar' }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="secciones-grid">
-      <!-- AGENCIA LOCAL -->
-      <div class="seccion-card" :class="{ 'completa': secciones.agenciaLocal.completa, 'parcial': secciones.agenciaLocal.parcial }">
-        <div class="seccion-header">
-          <h2>Agencia Local de Desarollo Económico y Social</h2>
-          <div class="estado-indicador">
-            <span v-if="secciones.agenciaLocal.completa" class="check">✓</span>
-            <span v-else-if="secciones.agenciaLocal.parcial" class="parcial">-</span>
-          </div>
-        </div>
-        <div class="seccion-content">
-          <p>Gestión y coordinación de la agencia local</p>
-          <button @click="abrirFormulario('agenciaLocal')" class="btn-llenar">
-            {{ secciones.agenciaLocal.completa ? 'Editar' : 'Rellenar' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- DEPARTAMENTO DE EMPLEO Y FORMACIÓN -->
-      <div class="seccion-card" :class="{ 'completa': secciones.empleoFormacion.completa, 'parcial': secciones.empleoFormacion.parcial }">
-        <div class="seccion-header">
-          <h2>Departamento de Empleo y Formación</h2>
-          <div class="estado-indicador">
-            <span v-if="secciones.empleoFormacion.completa" class="check">✓</span>
-            <span v-else-if="secciones.empleoFormacion.parcial" class="parcial">-</span>
-          </div>
-        </div>
-        <div class="seccion-content">
-          <p>Gestión de empleo y programas formativos</p>
-          <button @click="abrirFormulario('empleoFormacion')" class="btn-llenar">
-            {{ secciones.empleoFormacion.completa ? 'Editar' : 'Rellenar' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- DEPARTAMENTO DE PROMOCIÓN ECONÓMICA -->
-      <div class="seccion-card" :class="{ 'completa': secciones.promocionEconomica.completa, 'parcial': secciones.promocionEconomica.parcial }">
-        <div class="seccion-header">
-          <h2>Departamento de Promoción Económica</h2>
-          <div class="estado-indicador">
-            <span v-if="secciones.promocionEconomica.completa" class="check">✓</span>
-            <span v-else-if="secciones.promocionEconomica.parcial" class="parcial">-</span>
-          </div>
-        </div>
-        <div class="seccion-content">
-          <p>Promoción y desarrollo económico local</p>
-          <button @click="abrirFormulario('promocionEconomica')" class="btn-llenar">
-            {{ secciones.promocionEconomica.completa ? 'Editar' : 'Rellenar' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- PROGRAMAS DE DESARROLLO LOCAL ESTRATÉGICO -->
-      <div class="seccion-card" :class="{ 'completa': secciones.desarrolloLocal.completa, 'parcial': secciones.desarrolloLocal.parcial }">
-        <div class="seccion-header">
-          <h2>Programas de Desarrollo Local Estratégico</h2>
-          <div class="estado-indicador">
-            <span v-if="secciones.desarrolloLocal.completa" class="check">✓</span>
-            <span v-else-if="secciones.desarrolloLocal.parcial" class="parcial">-</span>
-          </div>
-        </div>
-        <div class="seccion-content">
-          <p>Programas estratégicos de desarrollo local</p>
-          <button @click="abrirFormulario('desarrolloLocal')" class="btn-llenar">
-            {{ secciones.desarrolloLocal.completa ? 'Editar' : 'Rellenar' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- ÁREA DE GESTIÓN -->
-      <div class="seccion-card" :class="{ 'completa': secciones.gestion.completa, 'parcial': secciones.gestion.parcial }">
-        <div class="seccion-header">
-          <h2>Área de Gestión</h2>
-          <div class="estado-indicador">
-            <span v-if="secciones.gestion.completa" class="check">✓</span>
-            <span v-else-if="secciones.gestion.parcial" class="parcial">-</span>
-          </div>
-        </div>
-        <div class="seccion-content">
-          <p>Gestión administrativa y financiera</p>
-          <button @click="abrirFormulario('gestion')" class="btn-llenar">
-            {{ secciones.gestion.completa ? 'Editar' : 'Rellenar' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- DEPARTAMENTO DE MARKETING Y COMUNICACIÓN -->
-      <div class="seccion-card" :class="{ 'completa': secciones.marketing.completa, 'parcial': secciones.marketing.parcial }">
-        <div class="seccion-header">
-          <h2>Departamento de Marketing y Comunicación</h2>
-          <div class="estado-indicador">
-            <span v-if="secciones.marketing.completa" class="check">✓</span>
-            <span v-else-if="secciones.marketing.parcial" class="parcial">-</span>
-          </div>
-        </div>
-        <div class="seccion-content">
-          <p>Marketing y estrategias de comunicación</p>
-          <button @click="abrirFormulario('marketing')" class="btn-llenar">
-            {{ secciones.marketing.completa ? 'Editar' : 'Rellenar' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Formulario Multistep -->
     <teleport to="body">
       <div v-if="mostrarFormulario" class="modal-overlay" @click.self="cerrarFormulario">
-        <div class="modal-container">
-          <div class="modal-header">
-            <h2>{{ tituloFormulario }}</h2>
-            <button class="btn-close" @click="cerrarFormulario">×</button>
+        <div class="modal-container apple-modal">
+          <div class="modal-accent-shapes">
+            <div class="modal-accent-shape shape-1"></div>
+            <div class="modal-accent-shape shape-2"></div>
+          </div>
+          
+          <div class="modal-header apple-modal-header">
+            <div class="modal-title-wrapper">
+              <div class="modal-icon-container">
+                <span class="modal-icon">📝</span>
+              </div>
+              <h2>{{ tituloFormulario }}</h2>
+            </div>
+            <button class="btn-close apple-btn-close" @click="cerrarFormulario">×</button>
           </div>
           
           <!-- Barra de Progreso -->
@@ -171,6 +185,11 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { doc, collection, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import AnimatedBackground from '../components/AnimatedBackground.vue';
+import ScrollAnimation from '../components/ScrollAnimation.vue';
+
+// Importar estilos
+import '../assets/variables.css';
 
 // Importar componentes de Agencia Local
 import AgenciaLocalGeneral from '../components/memoria/AgenciaLocal/AgenciaLocalGeneral.vue';
@@ -482,25 +501,71 @@ window.addEventListener('beforeunload', (e) => {
 </script>
 
 <style scoped>
-.memoria-anual-container {
-  padding: 2rem;
-  max-width: 1200px;
+.home-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: white;
+}
+
+.home-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: radial-gradient(circle at 15% 15%, rgba(0, 195, 255, 0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.home-page::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 85% 85%, rgba(0, 255, 140, 0.15) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.dashboard-container {
+  flex: 1;
+  padding: 6rem 3rem 3rem;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow-y: visible;
+  min-height: calc(100vh - 100px);
 }
 
-.header {
-  text-align: center;
-  margin-bottom: 3rem;
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
 
-.header h1 {
-  font-size: 2.5rem;
-  color: #004698;
+.welcome-title {
   margin-bottom: 0.5rem;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
 }
 
-.subtitle {
-  color: #666;
+.welcome-subtitle {
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1.1rem;
 }
 
@@ -511,16 +576,18 @@ window.addEventListener('beforeunload', (e) => {
 }
 
 .seccion-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .seccion-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1), 0 10px 15px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .seccion-card.completa {
@@ -540,7 +607,7 @@ window.addEventListener('beforeunload', (e) => {
 
 .seccion-header h2 {
   font-size: 1.2rem;
-  color: #333;
+  color: white;
   margin: 0;
 }
 
@@ -557,23 +624,25 @@ window.addEventListener('beforeunload', (e) => {
 }
 
 .seccion-content {
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .btn-llenar {
-  background: #004698;
+  background: var(--primary-gradient);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 5px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
   margin-top: 1rem;
   width: 100%;
+  font-weight: 600;
 }
 
 .btn-llenar:hover {
-  background: #003366;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 195, 255, 0.3);
 }
 
 /* Estilos del Modal */
@@ -590,42 +659,126 @@ window.addEventListener('beforeunload', (e) => {
   z-index: 1000;
 }
 
-.modal-container {
-  background: white;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
+.apple-modal {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2), 
+              0 0 1px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  overflow: hidden;
   position: relative;
-  z-index: 1001;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translateY(0);
+  max-height: 90vh;
+  max-width: 900px;
+  width: 90%;
 }
 
-.modal-header {
+.apple-modal:hover {
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25),
+              0 0 1px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.modal-accent-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.modal-accent-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  filter: blur(60px);
+}
+
+.modal-accent-shape.shape-1 {
+  width: 400px;
+  height: 400px;
+  top: -200px;
+  right: -200px;
+  background: var(--primary-gradient);
+  animation: float-very-slow 30s ease-in-out infinite alternate;
+}
+
+.modal-accent-shape.shape-2 {
+  width: 300px;
+  height: 300px;
+  bottom: -150px;
+  left: -150px;
+  background: linear-gradient(135deg, #00e1a0, #00ff8c);
+  animation: float-very-slow 25s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes float-very-slow {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate(30px, 30px) rotate(5deg);
+  }
+}
+
+.apple-modal-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
-.modal-header h2 {
-  margin: 0;
-  color: #004698;
+.modal-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.btn-close {
+.modal-icon-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.apple-btn-close {
   background: none;
   border: none;
   font-size: 1.5rem;
-  cursor: pointer;
   color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.apple-btn-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
 }
 
 /* Barra de Progreso */
 .progress-bar {
   padding: 1.5rem;
   background: #f8f9fa;
+  position: relative;
+  z-index: 1;
 }
 
 .progress-steps {
@@ -651,10 +804,11 @@ window.addEventListener('beforeunload', (e) => {
   align-items: center;
   justify-content: center;
   margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
 }
 
 .step.active .step-number {
-  background: #004698;
+  background: var(--primary-gradient);
   color: white;
 }
 
@@ -678,12 +832,49 @@ window.addEventListener('beforeunload', (e) => {
 
 .progress-fill {
   height: 100%;
-  background: #004698;
+  background: var(--primary-gradient);
   transition: width 0.3s ease;
 }
 
 .form-content {
   padding: 1.5rem;
-  background-color: aliceblue;
+  background-color: white;
+  position: relative;
+  z-index: 1;
+}
+
+/* Animaciones */
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: animate-in 0.5s ease forwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 4rem 1.5rem 2rem;
+  }
+
+  .secciones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-title {
+    font-size: 2rem;
+  }
+
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
 }
 </style> 
