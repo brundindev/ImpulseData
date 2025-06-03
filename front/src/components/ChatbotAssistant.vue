@@ -506,25 +506,28 @@ const sendMessage = async (messageToRetry = null) => {
 
   if (!userMessage || isTyping.value) return;
 
-  // Añadir el mensaje del usuario al chat
+  // Añadir el mensaje del usuario al chat SIEMPRE al inicio
+  // La lógica de reintento no debe impedir que el mensaje del usuario se muestre inicialmente
+  messages.value.push({
+    id: Date.now() + '_user',
+    text: userMessage,
+    isUser: true,
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+  
+  // Limpiar input solo si no es un reintento
   if (!messageToRetry) {
     userInput.value = '';
-    messages.value.push({
-      id: Date.now() + '_user',
-      text: userMessage,
-      isUser: true,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
-    scrollToBottom();
   }
 
+  scrollToBottom();
   isTyping.value = true;
 
   try {
     // Construir el contexto de la conversación de manera más simple
     const conversationContext = messages.value
-      .filter(msg => !msg.isSystemMessage && !msg.isError)
-      .slice(-4)
+      .filter(msg => !msg.isSystemMessage && !msg.isError && msg.id.endsWith('_user')) // Solo mensajes de usuario para el contexto
+      .slice(-4) // Últimos 4 mensajes del usuario como contexto
       .map(msg => `${msg.isUser ? 'Usuario' : 'Asistente'}: ${msg.text}`)
       .join('\n');
 
