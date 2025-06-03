@@ -1,0 +1,14 @@
+:root {
+  --primary-gradient: linear-gradient(90deg, #ff69b4, #9370db);
+  --primary-color: #9370db;
+  --primary-hover: #8a2be2;
+  --secondary-color: #ba55d3;
+  --danger-color: #f44336;
+  --success-color: #4CAF50;
+  --border-color: #e0e0e0;
+  --text-color: #333333;
+  --light-text: #666666;
+  --card-background: #ffffff;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --pale-blue: #f8e6ff;
+} 
