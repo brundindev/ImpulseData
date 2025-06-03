@@ -172,7 +172,7 @@
         <input 
           type="text" 
           v-model="userInput" 
-          @keyup.enter="sendMessage"
+          @keydown="handleKeyPress"
           placeholder="Escribe tu mensaje..."
           aria-label="Mensaje"
           :disabled="isOffline || errorState.retryCount > errorState.maxRetries"
@@ -197,6 +197,7 @@
 
 <script setup>
 import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue';
+import { GEMINI_CONFIG } from '../config/gemini.config';
 
 // Eliminar estas importaciones que pueden causar problemas
 // import { library } from '@fortawesome/fontawesome-svg-core';
@@ -228,7 +229,6 @@ const networkRetryTimeout = ref(null);
 // Lista de preguntas sugeridas
 const suggestedQuestions = ref([
   '¿Qué es ImpulseData?',
-  '¿Cómo crear una nueva empresa?',
   '¿Cómo añadir un departamento?',
   '¿Cómo generar informes PDF?',
   '¿Cómo gestionar los centros?',
@@ -237,92 +237,53 @@ const suggestedQuestions = ref([
   '¿Qué medidas de seguridad implementa?'
 ]);
 
-// Simulador para desarrollo sin API - Más extenso para mejorar respuestas
-const chatResponses = {
-  'saludo': [
-    '¡Hola! Soy el asistente virtual de ImpulseData. ¿En qué puedo ayudarte hoy?',
-    '¡Bienvenido a ImpulseData! Estoy aquí para responder tus dudas. ¿En qué puedo ayudarte?',
-    '¡Hola! Soy el asistente de ImpulseData. ¿Cómo puedo ayudarte?'
-  ],
-  'que_es': [
-    'ImpulseData es una plataforma de gestión de datos para empresas que permite organizar información sobre departamentos, centros y formaciones. Facilita la administración y visualización de todos tus datos empresariales en un solo lugar.',
-    'Es una herramienta para gestionar información empresarial, ayudándote a organizar departamentos, centros y formaciones de manera eficiente.',
-    'ImpulseData es un sistema diseñado para empresas que necesitan centralizar y administrar datos sobre su estructura organizativa, ubicaciones y programas de formación.'
-  ],
-  'registrar_empresa': [
-    'Para registrar una nueva empresa, haz clic en el botón "Crear nueva empresa" en la página principal. Completa el formulario con los datos requeridos y guarda los cambios.',
-    'Puedes crear una empresa desde la página principal haciendo clic en "Crear nueva empresa". Rellena los datos solicitados y haz clic en guardar.',
-    'En la pantalla principal encontrarás un botón para crear una nueva empresa. Completa la información de tu empresa y el sistema la registrará automáticamente.'
-  ],
-  'departamento': [
-    'Para añadir un nuevo departamento, primero selecciona la empresa a la que quieres agregarlo. Luego, en la vista de detalles, ve a la sección "Departamentos" y haz clic en "Agregar departamento". Completa los campos requeridos y guarda los cambios.',
-    'Puedes crear departamentos desde la vista de detalles de una empresa. Busca la sección correspondiente y usa el botón de añadir.',
-    'Los departamentos se gestionan dentro de cada empresa. Accede a los detalles de la empresa y utiliza el formulario específico para añadir o modificar departamentos.'
-  ],
-  'pdf': [
-    'Sí, puedes generar informes en PDF. En la vista de detalles de la empresa, encontrarás un botón "Generar PDF" que creará un informe completo con todos los datos de la empresa, incluyendo sus departamentos, centros y formaciones.',
-    'La plataforma permite exportar toda la información de una empresa en formato PDF. Busca esta opción en la vista de detalles de cualquier empresa.',
-    'Los informes en PDF son una función clave de ImpulseData. Puedes generarlos con un solo clic desde la vista de detalles de cualquier empresa.'
-  ],
-  'editar': [
-    'Para editar los datos de una empresa, ve a la lista de empresas, busca la que deseas modificar y haz clic en el botón "Editar" (ícono de lápiz). Se abrirá un formulario con los datos actuales que podrás modificar y guardar.',
-    'La edición de datos es sencilla: busca el botón de editar junto a cada empresa y modifica los campos que necesites actualizar.',
-    'Puedes actualizar la información en cualquier momento usando el botón de editar que aparece junto a cada empresa en el listado principal.'
-  ],
-  'centros': [
-    'Los centros representan las ubicaciones físicas de tu empresa. Puedes añadirlos desde la vista de detalles de la empresa, en la sección "Centros". Cada centro puede tener una dirección y datos de contacto.',
-    'Para gestionar los centros de una empresa, accede a sus detalles y utiliza la sección correspondiente para añadir, editar o eliminar ubicaciones.',
-    'Cada empresa puede tener múltiples centros. Gestiónalos desde la sección específica en la vista de detalles de la empresa.'
-  ],
-  'formaciones': [
-    'Las formaciones son cursos o programas educativos que ofrece tu empresa. Puedes añadirlas desde la vista de detalles, especificando nombre, tipo (presencial, virtual o híbrido) y duración en horas.',
-    'Para registrar formaciones, accede a los detalles de la empresa y busca la sección específica. Podrás indicar el tipo y duración de cada formación.',
-    'El sistema permite registrar diferentes tipos de formaciones (presenciales, virtuales o híbridas) con su correspondiente duración en horas.'
-  ],
-  'estadisticas': [
-    'ImpulseData ofrece visualizaciones estadísticas automáticas basadas en tus datos. En la página principal verás un resumen, y en cada empresa podrás ver gráficos más detallados sobre departamentos, centros y formaciones.',
-    'Las estadísticas son generadas automáticamente a partir de los datos ingresados. Encontrarás visualizaciones tanto en la página principal como en cada empresa.',
-    'El sistema genera gráficos y análisis basados en la información registrada, permitiéndote visualizar la distribución de departamentos, centros y formaciones.'
-  ],
-  'exportar': [
-    'Además de los PDF, puedes exportar los datos a formato Word. Esta opción está disponible en la vista de detalles de cada empresa, junto a la opción de PDF.',
-    'ImpulseData permite exportar la información en formatos PDF y Word, facilitando el compartir datos con terceros.',
-    'Puedes exportar los datos de tus empresas en diferentes formatos desde la vista de detalles, donde encontrarás botones específicos para cada formato disponible.'
-  ],
-  'seguridad': [
-    'La plataforma implementa medidas de seguridad robustas, incluyendo autenticación de usuarios, cifrado de datos y protección contra accesos no autorizados.',
-    'Tus datos están protegidos mediante sistemas de autenticación seguros y cifrado. Solo los usuarios autorizados pueden acceder a la información.',
-    'La seguridad es una prioridad en ImpulseData, con múltiples capas de protección para garantizar la integridad y confidencialidad de tu información empresarial.'
-  ],
-  'gracias': [
-    '¡De nada! Estoy aquí para ayudarte con cualquier duda sobre ImpulseData. ¿Hay algo más en lo que pueda asistirte?',
-    'Ha sido un placer ayudarte. Si necesitas más información sobre ImpulseData, no dudes en preguntar.',
-    '¡Encantado de haber sido útil! Estoy a tu disposición para cualquier otra consulta sobre la plataforma.'
-  ],
-  'default': [
-    'Gracias por tu pregunta sobre ImpulseData. Para obtener información más específica, puedes consultar la sección de ayuda en el menú principal o contactar con soporte técnico a través del formulario de contacto.',
-    'Tu consulta es interesante. Puedes encontrar más información en la documentación de la plataforma o contactando con nuestro equipo de soporte.',
-    'Entiendo tu pregunta. Te recomiendo revisar los tutoriales disponibles en la plataforma o consultar con el equipo de soporte para una respuesta más detallada.'
-  ]
-};
-
 // Instrucciones del sistema para la IA
 const SYSTEM_PROMPT = `
-Eres un asistente virtual para la plataforma ImpulseData, un sistema de gestión de datos para empresas.
-Responde de manera concisa y amigable preguntas relacionadas con la plataforma.
+Eres un asistente virtual para la plataforma ImpulseData, un sistema de gestión de datos para empresas. Tu objetivo es ayudar a los usuarios a entender y utilizar la plataforma de manera efectiva.
 
-Información sobre ImpulseData:
-- Es una plataforma para gestionar datos de empresas, departamentos, centros y formaciones.
-- Los usuarios pueden registrarse y crear una cuenta.
-- Permite añadir empresas con sus departamentos, centros y formaciones.
-- Se pueden generar informes en PDF con los datos de las empresas.
-- Ofrece visualización de estadísticas de los datos registrados.
-- Las empresas pueden tener múltiples departamentos y centros.
-- Los usuarios pueden editar y eliminar los datos.
+Funcionalidades principales de ImpulseData:
+1. Gestión de Empresas:
+   - Crear y gestionar empresas
+   - Añadir información detallada de la empresa
+   - Gestionar múltiples empresas desde un solo panel
 
-Limita tus respuestas SOLO a información relacionada con la plataforma ImpulseData.
-Si te preguntan sobre temas no relacionados, responde amablemente que solo puedes proporcionar información sobre ImpulseData.
-Tus respuestas deben ser claras, concisas y en español.
+2. Gestión de Departamentos:
+   - Crear y organizar departamentos
+   - Asignar empleados a departamentos
+   - Gestionar la estructura organizativa
+
+3. Gestión de Centros:
+   - Añadir y gestionar centros de trabajo
+   - Asignar departamentos a centros
+   - Gestionar ubicaciones y recursos
+
+4. Gestión de Formaciones:
+   - Registrar cursos y formaciones
+   - Asignar empleados a formaciones
+   - Seguimiento de la formación del personal
+
+5. Generación de Informes:
+   - Crear informes PDF automáticos
+   - Generar memorias corporativas anuales
+   - Exportar datos en diferentes formatos
+
+6. Estadísticas y Análisis:
+   - Visualizar datos en gráficos
+   - Analizar tendencias y métricas
+   - Generar informes personalizados
+
+7. Seguridad y Privacidad:
+   - Sistema de autenticación seguro
+   - Protección de datos personales
+   - Control de acceso por roles
+
+Instrucciones para tus respuestas:
+- Responde de manera concisa y amigable
+- Usa emojis apropiados para hacer las respuestas más amigables
+- Si no sabes algo, admítelo amablemente
+- Mantén el foco en ImpulseData y sus funcionalidades
+- Proporciona ejemplos prácticos cuando sea relevante
+- Si la pregunta no está relacionada con ImpulseData, indica amablemente que solo puedes responder sobre la plataforma y añade emojis en las respuestas.
 `;
 
 // Alternar la visibilidad del chat
@@ -459,162 +420,136 @@ const setTypingIndicator = (typing) => {
 };
 
 // Método para manejar el envío de mensajes
-const sendMessage = async () => {
-  if (!userInput.value.trim()) return;
-  
-  // Verificar si hay conexión a internet antes de continuar
-  if (!navigator.onLine) {
-    isOffline.value = true;
+const sendMessage = async (messageToRetry = null) => {
+  // Asegurarnos de que tenemos un string válido
+  let userMessage;
+  if (messageToRetry) {
+    userMessage = messageToRetry.toString().trim();
+  } else {
+    userMessage = userInput.value.toString().trim();
+  }
+
+  if (!userMessage || isTyping.value) return;
+
+  // Añadir el mensaje del usuario al chat
+  if (!messageToRetry) {
+    userInput.value = '';
     messages.value.push({
-      id: Date.now(),
-      text: 'No se puede enviar el mensaje porque no hay conexión a internet. Intentando reconectar...',
-      isUser: false,
-      timestamp: new Date().toLocaleTimeString(),
-      isSystemMessage: true
+      id: Date.now() + '_user',
+      text: userMessage,
+      isUser: true,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
-    scheduleNetworkRetry();
-    return;
+    scrollToBottom();
   }
-  
-  // Detectar si el usuario quiere crear una empresa
-  const userMessageLower = userInput.value.toLowerCase();
-  if ((userMessageLower.includes('crear') || userMessageLower.includes('nueva') || userMessageLower.includes('añadir')) 
-       && userMessageLower.includes('empresa')) {
-    // Si el usuario quiere crear una empresa, disparar la acción directamente
-    try {
-      handleCrearEmpresa();
-      // Agregar mensaje explicativo
-      messages.value.push({
-        id: Date.now(),
-        text: userInput.value,
-        isUser: true,
-        timestamp: new Date().toLocaleTimeString()
-      });
-      
-      // Mostrar indicador de escritura
-      setTypingIndicator(true);
-      
-      // Esperar 3 segundos para simular escritura
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Agregar mensaje vacío que se irá llenando
-      const botMessageId = Date.now() + 1;
-      const botMessageText = "Abriendo el formulario para crear una nueva empresa...";
-      
-      messages.value.push({
-        id: botMessageId,
-        text: "",
-        isUser: false,
-        timestamp: new Date().toLocaleTimeString()
-      });
-      
-      // Ocultar indicador de escritura
-      setTypingIndicator(false);
-      
-      // Simular escritura palabra por palabra
-      await typeMessageWordByWord(botMessageId, botMessageText);
-      
-      // Limpiar input y salir
-      userInput.value = '';
-    } catch (error) {
-      const errorMessage = handleError(error, 'crear-empresa');
-      messages.value.push({
-        id: Date.now(),
-        text: errorMessage,
-        isUser: false,
-        timestamp: new Date().toLocaleTimeString(),
-        isError: true
-      });
-    }
-    return;
-  }
-  
-  // Agregar mensaje del usuario
-  messages.value.push({
-    id: Date.now(),
-    text: userInput.value,
-    isUser: true,
-    timestamp: new Date().toLocaleTimeString()
-  });
-  
-  // Mostrar indicador de escritura
-  setTypingIndicator(true);
-  
-  // Guardar mensaje y limpiar entrada
-  const userMessage = userInput.value;
-  userInput.value = '';
-  
+
+  isTyping.value = true;
+
   try {
-    // Esperar exactamente 3 segundos para simular escritura
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Obtener respuesta del bot
-    const response = await getBotResponse(userMessage);
-    
-    // Agregar mensaje vacío que se irá llenando
-    const botMessageId = Date.now();
-    
+    // Construir el contexto de la conversación de manera más simple
+    const conversationContext = messages.value
+      .filter(msg => !msg.isSystemMessage && !msg.isError)
+      .slice(-4) // Tomar solo los últimos 4 mensajes para mantener el contexto relevante
+      .map(msg => `${msg.isUser ? 'Usuario' : 'Asistente'}: ${msg.text}`)
+      .join('\n');
+
+    const prompt = `${SYSTEM_PROMPT}\n\nConversación actual:\n${conversationContext}\n\nUsuario: ${userMessage}`;
+
+    const response = await fetch(GEMINI_CONFIG.apiUrl + '?key=' + GEMINI_CONFIG.apiKey, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          role: "user",
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1000,
+          topP: 0.8,
+          topK: 40
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const errorDetail = errorData.error?.message || response.statusText;
+      throw new Error(`API error: ${response.status} ${errorDetail}`);
+    }
+
+    const data = await response.json();
+    const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from AI';
+
+    // Añadir la respuesta del bot al chat
     messages.value.push({
-      id: botMessageId,
-      text: "",
+      id: Date.now() + '_bot',
+      text: botResponse,
       isUser: false,
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
-    
-    // Ocultar indicador de escritura
-    setTypingIndicator(false);
-    
-    // Simular escritura palabra por palabra
-    await typeMessageWordByWord(botMessageId, response);
-    
-    // Scroll al último mensaje
-    nextTick(() => {
-      scrollToBottom();
-    });
-    
-    // Si llegamos aquí sin errores, resetear el estado de error
+
+    // Forzar el scroll al final
+    await nextTick();
+    scrollToBottom();
     resetErrorState();
-    
+
   } catch (error) {
-    console.error('Error al procesar el mensaje:', error);
-    const errorMessage = handleError(error, 'enviar-mensaje');
-    
+    console.error('Error en sendMessage:', error);
+    handleApiError(error, userMessage);
+  } finally {
+    isTyping.value = false;
+    scrollToBottom();
+  }
+};
+
+const handleApiError = (error, userMessage) => {
+  console.error('Error comunicándose con la API de Gemini:', error);
+  let errorMessage = 'Error: No se pudo obtener respuesta de la IA.';
+
+  if (error.message && error.message.includes('503') && errorState.value.retryCount < errorState.value.maxRetries) {
+    errorState.value.retryCount++;
+    errorMessage = `Modelo sobrecargado. Reintentando... (${errorState.value.retryCount}/${errorState.value.maxRetries})`;
+    // Añadir o actualizar un mensaje de estado de reintento
+    const retryMessageIndex = messages.value.findIndex(msg => msg.isSystemMessage && msg.text.includes('Reintentando...'));
+    if (retryMessageIndex !== -1) {
+       messages.value[retryMessageIndex].text = errorMessage;
+       messages.value[retryMessageIndex].timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else {
+        messages.value.push({
+           id: Date.now() + '_retry',
+           text: errorMessage,
+           isUser: false,
+           isSystemMessage: true,
+           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+    }
+    // No hacemos scroll ni desactivamos typing aquí, se hace en el finally de sendMessage
+
+    const delay = errorState.value.retryCount * 2000; // Esperar 2s, 4s, 6s...
+    console.log(`Reintentando en ${delay / 1000} segundos...`);
+
+    setTimeout(() => {
+      // No activamos isTyping aquí, se activa al inicio de sendMessage
+      sendMessage(userMessage); // Reintentar con el mensaje original
+    }, delay);
+
+  } else {
+    // Si no es un error 503 reintentable o se superaron los reintentos
+    errorState.value.hasError = true;
+    if (errorState.value.retryCount >= errorState.value.maxRetries) {
+       errorMessage = 'Hemos tenido problemas para responder. Por favor, inténtalo más tarde.';
+    }
     messages.value.push({
-      id: Date.now(),
+      id: Date.now() + '_error',
       text: errorMessage,
       isUser: false,
-      timestamp: new Date().toLocaleTimeString(),
-      isError: true
+      isError: true,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
-    
-    // Programar reintento automático si es apropiado
-    if (errorState.value.retryCount <= errorState.value.maxRetries) {
-      setTimeout(() => {
-        if (isOpen.value && !isOffline.value) {
-          setTypingIndicator(true);
-          getBotResponse(userMessage)
-            .then(response => {
-              const botMessageId = Date.now();
-              messages.value.push({
-                id: botMessageId,
-                text: "",
-                isUser: false,
-                timestamp: new Date().toLocaleTimeString(),
-                isRecovered: true
-              });
-              setTypingIndicator(false);
-              typeMessageWordByWord(botMessageId, response);
-              resetErrorState();
-            })
-            .catch(retryError => {
-              handleError(retryError, 'reintento-mensaje');
-            });
-        }
-      }, 5000);
-    }
-  } finally {
-    // Ocultar indicador de escritura
-    setTypingIndicator(false);
+    // No hacemos scroll ni desactivamos typing aquí, se hace en el finally de sendMessage
   }
 };
 
@@ -705,19 +640,19 @@ const simulateResponse = (message) => {
   return possibleResponses[randomIndex];
 };
 
-// Hacer scroll al último mensaje
+// Asegurarse de que scrollToBottom se ejecuta correctamente
 const scrollToBottom = () => {
-  nextTick(() => {
-    if (chatContainer.value) {
-      chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
-    }
-  });
+  if (chatContainer.value) {
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+  }
 };
 
 // Observar cambios en los mensajes para hacer scroll
 watch(messages, () => {
-  scrollToBottom();
-});
+  nextTick(() => {
+    scrollToBottom();
+  });
+}, { deep: true });
 
 // Ajustar altura del textarea automáticamente
 watch(userInput, () => {
@@ -778,6 +713,14 @@ const handleOnlineStatus = () => {
       timestamp: new Date().toLocaleTimeString(),
       isSystemMessage: true
     });
+  }
+};
+
+// Modificar el template para manejar correctamente el evento de teclado
+const handleKeyPress = (event) => {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    sendMessage();
   }
 };
 </script>
@@ -892,7 +835,7 @@ const handleOnlineStatus = () => {
   position: fixed;
   bottom: 25px;
   right: 25px;
-  z-index: 1000;
+  z-index: 9999;
   font-family: 'Arial', sans-serif;
 }
 
@@ -900,6 +843,7 @@ const handleOnlineStatus = () => {
   position: relative;
   width: 140px;
   height: 48px;
+  z-index: 9999;
 }
 
 .chat-window {
@@ -920,6 +864,7 @@ const handleOnlineStatus = () => {
   transition: transform 0.3s ease;
   opacity: 0;
   border-top: 3px solid #9c27b0;
+  z-index: 9999;
 }
 
 .chat-window.chat-open {
@@ -934,6 +879,8 @@ const handleOnlineStatus = () => {
   display: flex;
   align-items: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 9999;
 }
 
 .assistant-avatar {
@@ -980,6 +927,8 @@ const handleOnlineStatus = () => {
   height: 30px;
   border-radius: 50%;
   transition: background-color 0.2s;
+  position: relative;
+  z-index: 9999;
 }
 
 .close-button:hover {
@@ -994,12 +943,16 @@ const handleOnlineStatus = () => {
   background-image: 
     radial-gradient(circle at 10% 20%, rgba(0, 195, 255, 0.05) 0%, transparent 50%),
     radial-gradient(circle at 90% 80%, rgba(0, 255, 140, 0.05) 0%, transparent 50%);
+  position: relative;
+  z-index: 9999;
 }
 
 .message-wrapper {
   display: flex;
   flex-direction: column;
   max-width: 85%;
+  position: relative;
+  z-index: 9999;
 }
 
 .user-message {
@@ -1051,6 +1004,8 @@ const handleOnlineStatus = () => {
   backdrop-filter: blur(5px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   color: var(--message-color, #333);
+  position: relative;
+  z-index: 9999;
 }
 
 .bot-message .message-bubble {
@@ -1083,6 +1038,8 @@ const handleOnlineStatus = () => {
   padding: 10px;
   border-top: 1px solid #e0e0e0;
   background-color: #fff;
+  position: relative;
+  z-index: 9999;
 }
 
 .chat-input input {
@@ -1115,6 +1072,8 @@ const handleOnlineStatus = () => {
   font-size: 16px;
   box-shadow: 0 2px 8px rgba(0, 195, 255, 0.4);
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 9999;
 }
 
 .send-button:hover {
@@ -1149,7 +1108,7 @@ const handleOnlineStatus = () => {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  z-index: 1;
+  z-index: 9999;
 }
 
 .question-button::after {
