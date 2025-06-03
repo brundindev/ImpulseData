@@ -284,24 +284,22 @@
       </div>
       </teleport>
     </div>
-    <AppFooter />
-  </div>
-  
-  <!-- Modal para previsualizar PDF -->
+    <!-- Modal para previsualizar PDF -->
 
-  <!-- Modal de confirmación de importación -->
-  <ImportConfirmationModal
-    :show="mostrarConfirmacionImportacion"
-    :resultado="resultadoImportacion"
-    @close="mostrarConfirmacionImportacion = false"
-  />
+    <!-- Modal de confirmación de importación -->
+    <ImportConfirmationModal
+      :show="mostrarConfirmacionImportacion"
+      :resultado="resultadoImportacion"
+      @close="mostrarConfirmacionImportacion = false"
+    />
 
-  <!-- Pantalla de carga durante la importación -->
-  <div v-if="importando" class="loading-overlay">
-    <div class="spinnerContainer">
-      <div class="spinner"></div>
-      <div class="loader">
-        <span class="words">Importando empresas...</span>
+    <!-- Pantalla de carga durante la importación -->
+    <div v-if="importando" class="loading-overlay">
+      <div class="spinnerContainer">
+        <div class="spinner"></div>
+        <div class="loader">
+          <span class="words">Importando empresas...</span>
+        </div>
       </div>
     </div>
   </div>
