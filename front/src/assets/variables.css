@@ -1,8 +1,8 @@
 :root {
-  --primary-gradient: linear-gradient(90deg, #ff69b4, #9370db);
-  --primary-color: #9370db;
-  --primary-hover: #8a2be2;
-  --secondary-color: #ba55d3;
+  --primary-gradient: linear-gradient(90deg, #ff4e9b, #a259e6);
+  --primary-color: #a259e6;
+  --primary-hover: #7c3fa0;
+  --secondary-color: #ff4e9b;
   --danger-color: #f44336;
   --success-color: #4CAF50;
   --border-color: #e0e0e0;
