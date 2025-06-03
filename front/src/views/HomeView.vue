@@ -11,7 +11,7 @@
         v-scroll-animate="'animate-left'"
       />
       <AlicanteBanner 
-        v-scroll-animate="'animate-zoom'"
+        
       />
       <!-- Contenido principal -->
       <div class="dashboard-content">
