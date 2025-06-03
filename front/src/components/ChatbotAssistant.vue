@@ -146,7 +146,7 @@
                 'isRecovered': message.isRecovered
               }"
             >
-              <p>{{ message.text }}</p>
+              <p v-html="message.renderedText"></p>
               <span class="message-time">{{ message.timestamp }}</span>
             </div>
           </div>
@@ -411,34 +411,86 @@ const setTypingIndicator = (typing) => {
   }
 };
 
+// Convertir sintaxis Markdown a HTML (solo negritas por ahora)
+const convertMarkdownToHtml = (text) => {
+  if (!text) return '';
+  // Reemplazar **texto** con <strong>texto</strong>
+  let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // También podemos manejar saltos de línea si la API los envía como \n
+  html = html.replace(/\n/g, '<br>');
+  return html;
+};
+
 // Función para simular escritura palabra por palabra
 const typeMessageWordByWord = async (messageId, fullText) => {
-  const words = fullText.split(' ');
-  let currentText = '';
-  
+  // Convertir el texto completo a HTML una vez para obtener la estructura final
+  const fullHtml = convertMarkdownToHtml(fullText);
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = fullHtml;
+  const wordsAndHtml = [];
+  // Iterar sobre los nodos para separar palabras y etiquetas HTML
+  tempDiv.childNodes.forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const words = node.textContent.split(/(\s+)/);
+      words.forEach(word => wordsAndHtml.push({ type: 'text', content: word }));
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      // Mantener la estructura de la etiqueta, pero sin contenido interno
+      const outerHtml = node.outerHTML;
+      const tagMatch = outerHtml.match(/^<(\w+)([^>]*)>(.*?)<\/\1>$/s); // Modificado para capturar contenido interno
+      if (tagMatch) {
+        // Empujar la etiqueta de apertura
+        wordsAndHtml.push({ type: 'open_tag', content: `<${tagMatch[1]}${tagMatch[2]}>` });
+        // Procesar el contenido interno recursivamente si es necesario, o tratarlo como un bloque de texto simple por ahora
+        // Para este caso simple de <strong>, podemos tratar el contenido como texto normal
+        const contentWords = tagMatch[3].split(/(\s+)/); // Dividir el contenido interno
+         contentWords.forEach(word => wordsAndHtml.push({ type: 'text', content: word, insideTag: true, tagName: tagMatch[1] }));
+        // Empujar la etiqueta de cierre
+        wordsAndHtml.push({ type: 'close_tag', content: `</${tagMatch[1]}>` });
+      } else { // Fallback para otros tipos de nodos o etiquetas inesperadas
+         wordsAndHtml.push({ type: 'text', content: node.outerHTML });
+      }
+    }
+  });
+
   // Encontrar el mensaje en el array
   const messageIndex = messages.value.findIndex(msg => msg.id === messageId);
   if (messageIndex === -1) return;
   
+  // Inicializar el texto mostrado como vacío HTML
+  messages.value[messageIndex].renderedText = '';
+
+  let currentHtml = '';
   // Escribir palabra por palabra con una velocidad más lenta y natural
-  for (let i = 0; i < words.length; i++) {
-    // Añadir la palabra
-    currentText += (i > 0 ? ' ' : '') + words[i];
+  for (let i = 0; i < wordsAndHtml.length; i++) {
+    const item = wordsAndHtml[i];
     
-    // Actualizar el mensaje
-    messages.value[messageIndex].text = currentText;
+    if (item.type === 'text') {
+      currentHtml += item.content;
+       // Actualizar el mensaje con el HTML parcial
+      messages.value[messageIndex].renderedText = currentHtml;
+       await nextTick();
     
-    // Hacer scroll a medida que se escribe
-    await nextTick();
-    scrollToBottom();
-    
-    // Pausa entre palabras (velocidad más lenta y variable)
-    const baseDelay = 100; // Tiempo base de 200ms
-    const randomDelay = Math.random() * 150; // Variación aleatoria de hasta 300ms
-    const punctuationDelay = /[.,!?]/.test(words[i]) ? 250 : 0; // Pausa extra para signos de puntuación
-    const pauseDuration = baseDelay + randomDelay + punctuationDelay;
-    
-    await new Promise(resolve => setTimeout(resolve, pauseDuration));
+      // Pausa entre palabras (velocidad más lenta y variable)
+      const baseDelay = 100; // Tiempo base de 100ms
+      const randomDelay = Math.random() * 150; // Variación aleatoria de hasta 150ms
+      const punctuationDelay = /[.,!?]/.test(item.content) ? 250 : 0; // Pausa extra para signos de puntuación
+      const pauseDuration = baseDelay + randomDelay + punctuationDelay;
+      
+      await new Promise(resolve => setTimeout(resolve, pauseDuration));
+
+    } else if (item.type === 'open_tag') {
+       currentHtml += item.content;
+       messages.value[messageIndex].renderedText = currentHtml;
+       await nextTick();
+       // No hay pausa después de abrir una etiqueta
+    } else if (item.type === 'close_tag') {
+       currentHtml += item.content;
+       messages.value[messageIndex].renderedText = currentHtml;
+       await nextTick();
+       // Pequeña pausa después de cerrar una etiqueta para la fluidez
+       await new Promise(resolve => setTimeout(resolve, 50));
+    }
+     scrollToBottom();
   }
 };
 
@@ -510,7 +562,8 @@ const sendMessage = async (messageToRetry = null) => {
     const messageId = Date.now() + '_bot';
     messages.value.push({
       id: messageId,
-      text: '',
+      text: '', // Mantener text vacío o con el texto sin procesar si es necesario
+      renderedText: '', // Nuevo campo para el HTML renderizado
       isUser: false,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
@@ -518,7 +571,7 @@ const sendMessage = async (messageToRetry = null) => {
     // Esperar a que el DOM se actualice
     await nextTick();
 
-    // Iniciar la animación de escritura
+    // Iniciar la animación de escritura usando el texto original y actualizando renderedText
     await typeMessageWordByWord(messageId, botResponse);
     resetErrorState();
 
