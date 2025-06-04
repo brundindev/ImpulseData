@@ -892,7 +892,7 @@ const handleKeyPress = (event) => {
   position: fixed;
   bottom: 25px;
   right: 25px;
-  z-index: 9999;
+  z-index: 999999;
   font-family: 'Arial', sans-serif;
 }
 
@@ -900,7 +900,7 @@ const handleKeyPress = (event) => {
   position: relative;
   width: 140px;
   height: 48px;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .chat-window {
@@ -921,7 +921,7 @@ const handleKeyPress = (event) => {
   transition: transform 0.3s ease;
   opacity: 0;
   border-top: 3px solid #9c27b0;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .chat-window.chat-open {
@@ -937,7 +937,7 @@ const handleKeyPress = (event) => {
   align-items: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   position: relative;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .assistant-avatar {
@@ -985,7 +985,7 @@ const handleKeyPress = (event) => {
   border-radius: 50%;
   transition: background-color 0.2s;
   position: relative;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .close-button:hover {
@@ -1001,7 +1001,7 @@ const handleKeyPress = (event) => {
     radial-gradient(circle at 10% 20%, rgba(0, 195, 255, 0.05) 0%, transparent 50%),
     radial-gradient(circle at 90% 80%, rgba(0, 255, 140, 0.05) 0%, transparent 50%);
   position: relative;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .message-wrapper {
@@ -1009,7 +1009,7 @@ const handleKeyPress = (event) => {
   flex-direction: column;
   max-width: 85%;
   position: relative;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .user-message {
@@ -1062,7 +1062,7 @@ const handleKeyPress = (event) => {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   color: var(--message-color, #333);
   position: relative;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .bot-message .message-bubble {
@@ -1096,7 +1096,7 @@ const handleKeyPress = (event) => {
   border-top: 1px solid #e0e0e0;
   background-color: #fff;
   position: relative;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .chat-input input {
@@ -1130,7 +1130,7 @@ const handleKeyPress = (event) => {
   box-shadow: 0 2px 8px rgba(0, 195, 255, 0.4);
   transition: all 0.3s ease;
   position: relative;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .send-button:hover {
@@ -1165,7 +1165,7 @@ const handleKeyPress = (event) => {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  z-index: 9999;
+  z-index: 999999;
 }
 
 .question-button::after {
