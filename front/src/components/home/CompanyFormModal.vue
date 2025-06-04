@@ -423,28 +423,6 @@ const eliminarFormacion = (index) => {
 };
 </script>
 
-<style scoped>
-/* Aquí van todos los estilos del modal que estaban en HomeView.vue */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-container {
-  background: white;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
+<style scoped src="../home/css/CompanyFormModal.css">
 
 </style> 
