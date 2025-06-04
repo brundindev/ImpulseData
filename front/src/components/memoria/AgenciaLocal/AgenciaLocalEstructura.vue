@@ -1,112 +1,135 @@
 <template>
   <div class="form-step">
-    <h3>Organigrama Jerárquico</h3>
-    
-    <!-- Nivel 1: Presidencia -->
-    <div class="nivel nivel-1">
-      <div class="nivel-header">
-        <h4>Nivel 1: Presidencia</h4>
-      </div>
-      <div class="nivel-content">
-        <div class="form-group">
-          <label>Concejala de Empleo y Fomento</label>
-          <input 
-            type="text" 
-            v-model="datos.presidencia" 
-            class="form-control"
-            placeholder="Nombre de la Concejala"
-          >
-        </div>
-      </div>
-    </div>
-
-    <!-- Nivel 2: Jefatura de Servicio -->
-    <div class="nivel nivel-2">
-      <div class="nivel-header">
-        <h4>Nivel 2: Jefatura de Servicio</h4>
-      </div>
-      <div class="nivel-content">
-        <div class="form-group">
-          <label>Jefatura de Servicio</label>
-          <input 
-            type="text" 
-            v-model="datos.jefaturaServicio" 
-            class="form-control"
-            placeholder="Título de la Jefatura de Servicio"
-            disabled
-          >
-        </div>
+    <!-- Navegación por pestañas -->
+    <div class="tabs-container">
+      <div class="tabs-nav">
+        <button 
+          class="tab-button"
+          :class="{ active: activeTab === 'configuracion' }"
+          @click="activeTab = 'configuracion'"
+          type="button"
+        >
+          <span class="tab-icon">⚙️</span>
+          Configuración
+        </button>
+        <button 
+          class="tab-button"
+          :class="{ active: activeTab === 'vista-previa' }"
+          @click="activeTab = 'vista-previa'"
+          type="button"
+        >
+          <span class="tab-icon">👁️</span>
+          Vista Previa
+        </button>
       </div>
     </div>
 
-    <!-- Nivel 3: Departamentos -->
-    <div class="nivel nivel-3">
-      <div class="nivel-header">
-        <h4>Nivel 3: Departamentos</h4>
-      </div>
-      <div class="nivel-content departamentos-container">
-        <div v-for="(departamento, index) in departamentosNormales" :key="index" class="departamento-item">
-          <div class="departamento-header">
-            <div class="departamento-tipo">
-              <select 
-                v-model="departamento.tipo" 
-                class="form-control"
-                @change="actualizarDepartamento(getDepartamentoIndex(departamento))"
-              >
-                <option value="marketing">Marketing y Comunicación</option>
-                <option value="observatorio">Observatorio Pacto Territorial por el Empleo</option>
-                <option value="juridico">Jurídico-Administrativo</option>
-                <option value="economico">Económico-Financiero</option>
-                <option value="empleoFormacion">Empleo y Formación</option>
-                <option value="promocionEconomica">Promoción Económica</option>
-              </select>
-            </div>
-            <div class="departamento-actions">
-              <button 
-                @click="eliminarDepartamento(getDepartamentoIndex(departamento))" 
-                class="btn btn-danger btn-sm"
-                type="button"
-                v-if="departamentosNormales.length > 1"
-              >
-                <span class="btn-icon">✕</span>
-              </button>
-            </div>
+    <!-- Contenido de la pestaña de Configuración -->
+    <div v-if="activeTab === 'configuracion'" class="tab-content">
+      <h3>Organigrama Jerárquico - Configuración</h3>
+      
+      <!-- Sección 1: Presidencia -->
+      <div class="section-card">
+        <div class="section-header">
+          <h4><span class="level-number">1</span> Presidencia</h4>
+        </div>
+        <div class="section-content">
+          <div class="input-group">
+            <label>Concejala de Empleo y Fomento</label>
+            <input 
+              type="text" 
+              v-model="datos.presidencia" 
+              class="form-input"
+              placeholder="Nombre de la Concejala"
+            >
           </div>
+        </div>
+      </div>
 
-          <!-- Nivel 4: Áreas internas (solo para ciertos departamentos) -->
-          <div v-if="tieneAreaInternas(departamento.tipo)" class="nivel nivel-4">
-            <div class="nivel-header subdepartamento-header">
-              <h5>Áreas internas de {{ getNombreDepartamento(departamento.tipo) }}</h5>
-              <button 
-                @click="agregarAreaInterna(getDepartamentoIndex(departamento))" 
-                class="btn btn-outline-secondary btn-sm"
-                type="button"
-              >
-                <span class="btn-icon">+</span> Añadir
-              </button>
-            </div>
-            <div class="nivel-content">
-              <div v-for="(area, areaIndex) in departamento.areasInternas" :key="areaIndex" class="subdepartamento-item">
-                <div class="subdepartamento-row">
-                  <div class="subdepartamento-content">
-                    <div class="form-group">
-                      <label>Nombre del Área</label>
-                      <input 
-                        type="text" 
-                        v-model="area.nombre" 
-                        class="form-control"
-                        placeholder="Nombre del área interna"
-                      >
-                    </div>
-                  </div>
-                  <div class="subdepartamento-actions">
+      <!-- Sección 2: Jefatura de Servicio -->
+      <div class="section-card">
+        <div class="section-header">
+          <h4><span class="level-number">2</span> Jefatura de Servicio</h4>
+        </div>
+        <div class="section-content">
+          <div class="input-group">
+            <label>Jefatura de Servicio</label>
+            <input 
+              type="text" 
+              v-model="datos.jefaturaServicio" 
+              class="form-input disabled"
+              placeholder="Título de la Jefatura de Servicio"
+              disabled
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección 3: Departamentos -->
+      <div class="section-card">
+        <div class="section-header">
+          <h4><span class="level-number">3</span> Departamentos</h4>
+          <button 
+            @click="agregarDepartamento" 
+            class="btn-add"
+            type="button"
+          >
+            <span class="btn-icon-departamentos">+</span> Agregar
+          </button>
+        </div>
+        <div class="section-content">
+          <div class="departments-grid">
+            <div v-for="(departamento, index) in departamentosNormales" :key="index" class="department-card">
+              <div class="department-header">
+                <select 
+                  v-model="departamento.tipo" 
+                  class="department-select"
+                  @change="actualizarDepartamento(getDepartamentoIndex(departamento))"
+                >
+                  <option value="marketing">Marketing y Comunicación</option>
+                  <option value="observatorio">Observatorio Pacto Territorial por el Empleo</option>
+                  <option value="juridico">Jurídico-Administrativo</option>
+                  <option value="economico">Económico-Financiero</option>
+                  <option value="empleoFormacion">Empleo y Formación</option>
+                  <option value="promocionEconomica">Promoción Económica</option>
+                </select>
+                <button 
+                  @click="eliminarDepartamento(getDepartamentoIndex(departamento))" 
+                  class="btn-remove"
+                  type="button"
+                  v-if="departamentosNormales.length > 1"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <!-- Áreas internas -->
+              <div v-if="tieneAreaInternas(departamento.tipo)" class="internal-areas">
+                <div class="internal-areas-header">
+                  <span class="areas-title">Áreas internas</span>
+                  <button 
+                    @click="agregarAreaInterna(getDepartamentoIndex(departamento))" 
+                    class="btn-add-small"
+                    type="button"
+                  >
+                    + Añadir
+                  </button>
+                </div>
+                <div class="areas-list">
+                  <div v-for="(area, areaIndex) in departamento.areasInternas" :key="areaIndex" class="area-item">
+                    <input 
+                      type="text" 
+                      v-model="area.nombre" 
+                      class="area-input"
+                      placeholder="Nombre del área"
+                    >
                     <button 
                       @click="eliminarAreaInterna(getDepartamentoIndex(departamento), areaIndex)" 
-                      class="btn btn-outline-danger btn-sm"
+                      class="btn-remove-small"
                       type="button"
                       v-if="departamento.areasInternas.length > 1"
                     >
-                      <span class="btn-icon">✕</span>
+                      ✕
                     </button>
                   </div>
                 </div>
@@ -114,134 +137,130 @@
             </div>
           </div>
         </div>
-        
-        <!-- Botón para agregar departamento -->
-        <div class="add-departamento">
+      </div>
+      
+      <!-- Sección 4: Proyectos Estratégicos -->
+      <div class="section-card proyectos-card">
+        <div class="section-header">
+          <h4><span class="level-number">4</span> Proyectos Estratégicos</h4>
           <button 
-            @click="agregarDepartamento" 
-            class="btn btn-secondary"
+            @click="agregarProyecto" 
+            class="btn-add-proyecto"
             type="button"
           >
-            <span class="btn-icon">+</span> Agregar Departamento
+            <span class="btn-icon-proyectos">+</span> Agregar
           </button>
         </div>
-      </div>
-    </div>
-    
-    <!-- Proyectos Estratégicos (Transversales) -->
-    <div class="nivel nivel-proyectos">
-      <div class="nivel-header">
-        <h4>Proyectos Estratégicos (Transversales)</h4>
-      </div>
-      <div class="nivel-content">
-        <div class="proyectos-container">
-          <div v-for="(proyecto, index) in datos.proyectosEstrategicos" :key="index" class="proyecto-item">
-            <div class="proyecto-header">
-              <div class="proyecto-content">
-                <div class="form-group">
-                  <label>Nombre del Proyecto</label>
-                  <input 
-                    type="text" 
-                    v-model="proyecto.nombre" 
-                    class="form-control"
-                    placeholder="Nombre del proyecto estratégico"
-                  >
-                </div>
-              </div>
-              <div class="proyecto-actions">
-                <button 
-                  @click="eliminarProyecto(index)" 
-                  class="btn btn-outline-danger btn-sm"
-                  type="button"
-                  v-if="datos.proyectosEstrategicos.length > 1"
-                >
-                  <span class="btn-icon">✕</span>
-                </button>
-              </div>
+        <div class="section-content">
+          <div class="projects-grid">
+            <div v-for="(proyecto, index) in datos.proyectosEstrategicos" :key="index" class="project-item">
+              <input 
+                type="text" 
+                v-model="proyecto.nombre" 
+                class="project-input"
+                placeholder="Nombre del proyecto"
+              >
+              <button 
+                @click="eliminarProyecto(index)" 
+                class="btn-remove"
+                type="button"
+                v-if="datos.proyectosEstrategicos.length > 1"
+              >
+                ✕
+              </button>
             </div>
-          </div>
-          
-          <!-- Botón para agregar proyecto -->
-          <div class="add-proyecto">
-            <button 
-              @click="agregarProyecto" 
-              class="btn btn-secondary"
-              type="button"
-            >
-              <span class="btn-icon">+</span> Agregar Proyecto
-            </button>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Vista Previa del Organigrama -->
-    <div class="nivel nivel-vista-previa">
-      <div class="nivel-header">
-        <h4>Vista Previa del Organigrama</h4>
-      </div>
-      <div class="nivel-content">
-        <div class="organigrama-preview" v-if="hayDatosSuficientes">
-          <!-- Nivel 1: Presidencia -->
-          <div class="org-box org-presidencia">
-            Concejala de Empleo y Fomento
-            <div class="org-subbox">{{ datos.presidencia }}</div>
+
+    <!-- Contenido de la pestaña de Vista Previa -->
+    <div v-if="activeTab === 'vista-previa'" class="tab-content">
+      <h3>Vista Previa del Organigrama</h3>
+      
+      <div class="organigrama-container" v-if="hayDatosSuficientes">
+        <!-- Header del organigrama -->
+        <div class="org-header">
+          <div class="org-version">1.3</div>
+          <div class="org-title">CÓMO ESTAMOS<br>ORGANIZADOS</div>
+        </div>
+
+        <!-- Nivel 1: Presidencia -->
+        <div class="org-level-1">
+          <div class="org-box presidencia">
+            <div class="box-title">Presidencia</div>
+            <div class="box-subtitle">Concejalía de Empleo<br>y Fomento</div>
           </div>
-          <div class="org-line"></div>
-          
-          <!-- Nivel 2: Jefatura de Servicio -->
-          <div class="org-box org-jefatura">
-            Jefatura de Servicio
+        </div>
+
+        <!-- Línea de conexión -->
+        <div class="connection-line vertical"></div>
+
+        <!-- Nivel 2: Jefatura de Servicio -->
+        <div class="org-level-2">
+          <div class="org-box jefatura">
+            <div class="box-content">Jefatura de servicio</div>
           </div>
-          <div class="org-line"></div>
-          <div class="org-branch-line"></div>
-          
-          <!-- Nivel 3: Departamentos (principales) -->
-          <div class="org-level">
-            <div v-for="(dept, index) in departamentosNormales" :key="index" class="org-dept-container">
-              <div class="org-box org-dept">
-                {{ getNombreDepartamento(dept.tipo) }}
-              </div>
-              
-              <!-- Nivel 4: Áreas internas -->
-              <div v-if="dept.areasInternas && dept.areasInternas.length > 0" class="org-subdepts">
-                <div class="org-line-vertical"></div>
-                <div class="org-sublevel">
-                  <div class="org-box org-subdept">
-                    <div v-for="(area, areaIndex) in dept.areasInternas" :key="areaIndex" class="org-area-item">
-                      {{ area.nombre }}
-                    </div>
-                  </div>
+        </div>
+
+        <!-- Líneas de ramificación -->
+        <div class="connection-line vertical short"></div>
+        <div class="connection-branches">
+          <div class="branch-line" v-for="n in departamentosNormales.length" :key="n"></div>
+        </div>
+
+        <!-- Nivel 3: Departamentos -->
+        <div class="org-level-3">
+          <div v-for="(dept, index) in departamentosNormales" :key="index" class="department-column">
+            <div class="org-box departamento">
+              <div class="box-content">{{ getNombreDepartamento(dept.tipo) }}</div>
+            </div>
+            
+            <!-- Áreas internas si existen -->
+            <div v-if="dept.areasInternas && dept.areasInternas.length > 0" class="areas-container">
+              <div class="connection-line vertical mini"></div>
+              <div class="org-box area-interna">
+                <div v-for="(area, areaIndex) in dept.areasInternas" :key="areaIndex" class="area-content">
+                  {{ area.nombre }}
                 </div>
               </div>
             </div>
           </div>
-          
-          <!-- Proyectos Estratégicos (al pie) -->
-          <div class="org-transversal-line"></div>
-          <div class="org-proyectos-header">Proyectos Estratégicos (Transversales)</div>
-          <div class="org-proyectos-container">
-            <div v-for="(proyecto, index) in datos.proyectosEstrategicos" :key="index" class="org-box org-proyecto">
-              {{ proyecto.nombre }}
-            </div>
+        </div>
+
+        <!-- Proyectos Estratégicos -->
+        <div class="proyectos-section">
+          <div class="proyectos-header">
+            <div class="proyectos-title">Proyectos Estratégicos:</div>
+            <div class="proyectos-subtitle">- Alicante Futura<br>- ALIA</div>
           </div>
         </div>
-        <div class="empty-preview" v-else>
-          Complete los campos principales para visualizar el organigrama
-        </div>
+      </div>
+
+      <div class="empty-state" v-else>
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">Complete los campos en la pestaña de Configuración para visualizar el organigrama</div>
       </div>
     </div>
+
+    <button 
+        @click="$emit('anterior')" 
+        class="btn btn-secondary"
+        type="button"
+      >
+      Anterior
+    </button>
     
+    <!-- Botones de navegación -->
     <div class="form-actions">
       <button 
         @click="$emit('siguiente')" 
-        class="btn btn-primary"
+        class="btn-primary"
         :disabled="!esValido"
       >
-        Siguiente
+        Continuar <span class="btn-arrow">→</span>
       </button>
     </div>
-
   </div>
 </template>
 
@@ -257,6 +276,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'siguiente']);
 
+// Estado de pestañas
+const activeTab = ref('configuracion');
 
 const datos = computed({
   get: () => props.modelValue,
@@ -326,8 +347,8 @@ const departamentosNormales = computed(() => {
 
 const getNombreDepartamento = (tipo) => {
   const nombres = {
-    'marketing': 'Marketing y Comunicación',
-    'observatorio': 'Observatorio Pacto Territorial por el Empleo',
+    'marketing': 'Marketing y\nComunicación',
+    'observatorio': 'Observatorio Pacto\nTerritorial por el Empleo',
     'juridico': 'Jurídico-Administrativo',
     'economico': 'Económico-Financiero',
     'empleoFormacion': 'Empleo y Formación',
@@ -440,243 +461,323 @@ const hayDatosSuficientes = computed(() => {
 
 <style scoped>
 .form-step {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 1rem;
 }
 
-/* Estilos de niveles jerárquicos */
-.nivel {
+/* Estilos de pestañas */
+.tabs-container {
   margin-bottom: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  border: 1px solid #eaeaea;
-  background: #fff;
 }
 
-.nivel-header {
-  padding: 0.75rem 1.25rem;
+.tabs-nav {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   background: #f8f9fa;
-  border-bottom: 1px solid #eaeaea;
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-.nivel-header h4, .nivel-header h5 {
-  margin: 0;
-  color: #004698;
+.tab-button {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: #6c757d;
   font-weight: 500;
-}
-
-.nivel-content {
-  padding: 1.5rem;
-  background: #fff;
-}
-
-/* Estilos específicos de nivel */
-.nivel-1 {
-  border-left: 5px solid #004698;
-}
-
-.nivel-2 {
-  border-left: 5px solid #0062cc;
-  margin-left: 1.5rem;
-}
-
-.nivel-3 {
-  border-left: 5px solid #0069d9;
-  margin-left: 3rem;
-}
-
-.nivel-4 {
-  border-left: 3px solid #4a90e2;
-  margin-left: 1rem;
-  margin-top: 1rem;
-  margin-bottom: 0;
-}
-
-.nivel-proyectos {
-  border-left: 5px solid #28a745;
-  margin-top: 1rem;
-}
-
-.nivel-vista-previa {
-  border-left: 5px solid #28a745;
-  margin-top: 3rem;
-}
-
-/* Estilos de departamentos y áreas internas */
-.departamentos-container, .proyectos-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.departamento-item, .proyecto-item {
-  background: #f8f9fa;
-  padding: 1.25rem;
   border-radius: 8px;
-  border: 1px solid #eee;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-.departamento-header, .proyecto-header {
+.tab-button.active {
+  background: #004698;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0,70,152,0.3);
+}
+
+.tab-button:hover:not(.active) {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.tab-icon {
+  font-size: 1.1rem;
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilos de secciones */
+.section-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+}
+
+.section-header {
+  background: linear-gradient(135deg, #004698 0%, #0062cc 100%);
+  color: white;
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
 }
 
-.departamento-tipo {
-  flex-grow: 1;
-  margin-right: 1rem;
-}
-
-.proyecto-content {
-  flex-grow: 1;
-  margin-right: 1rem;
-}
-
-.subdepartamento-item {
-  background: #ffffff;
-  padding: 1rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  border: 1px solid #eee;
-}
-
-.subdepartamento-row {
+.section-header h4 {
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
+  font-weight: 600;
+  color:white;
 }
 
-.subdepartamento-content {
-  flex-grow: 1;
-}
-
-.subdepartamento-header {
-  background: #f0f4f8;
-}
-
-.add-departamento, .add-proyecto {
+.level-number {
+  background: rgba(255,255,255,0.2);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.section-content {
+  padding: 1.5rem;
+}
+
+.proyectos-card .section-header {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
 }
 
 /* Estilos de formularios */
-.form-group {
-  margin-bottom: 1.5rem;
+.input-group {
+  margin-bottom: 1rem;
 }
 
-label {
+.input-group label {
   display: block;
   margin-bottom: 0.5rem;
   color: #495057;
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
-.form-control {
+.form-input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition: all 0.3s ease;
+  background: white;
 }
 
-.form-control:focus {
+.form-input:focus {
   outline: none;
   border-color: #004698;
-  box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.1);
+  box-shadow: 0 0 0 3px rgba(0,70,152,0.1);
 }
 
-.form-control:disabled {
-  background-color: #e9ecef;
+.form-input.disabled {
+  background: #f8f9fa;
+  color: #6c757d;
   cursor: not-allowed;
 }
 
-select.form-control {
-  appearance: auto;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 6l10 10 10-10'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 16px 12px;
+/* Estilos de departamentos */
+.departments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.department-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.department-header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.department-select {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: white;
+}
+
+.internal-areas {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.internal-areas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.areas-title {
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.areas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.area-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.area-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* Estilos de proyectos */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.project-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.project-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
 /* Estilos de botones */
-.btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.btn-icon-departmentos{
+    padding: .5rem .75rem;
+    font-size: .8rem;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s ease;
+    background-color: blue;
+    color: white;
+}
+.btn-icon-proyectos{
+  padding: .5rem .75rem;
+    font-size: .8rem;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s ease;
+    background-color: green;
+    color: white;
 }
 
-.btn-sm {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.875rem;
-}
 
-.btn-lg {
-  padding: 0.75rem 1.5rem;
-  font-size: 1.1rem;
-}
-
-.btn-icon {
-  margin-right: 0.25rem;
-}
-
-.btn-primary {
+.btn-add, .btn-primary {
   background: #004698;
   color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-add-proyecto{
+  background: #1aad3f;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.btn-secondary {
+.btn-add:hover, .btn-primary:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.btn-add-small {
   background: #6c757d;
   color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
 }
 
-.btn-danger {
+.btn-remove, .btn-remove-small {
   background: #dc3545;
   color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
-.btn-outline-secondary {
-  background: transparent;
-  border: 1px solid #6c757d;
-  color: #6c757d;
+.btn-remove:hover, .btn-remove-small:hover {
+  background: #c82333;
+  transform: scale(1.05);
 }
 
-.btn-outline-secondary:hover {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-outline-danger {
-  background: transparent;
-  border: 1px solid #dc3545;
-  color: #dc3545;
-}
-
-.btn-outline-danger:hover {
-  background: #dc3545;
-  color: white;
-}
-
-.btn:hover {
-  opacity: 0.9;
-}
-
-.btn:disabled {
+.btn-primary:disabled {
   background: #ccc;
   cursor: not-allowed;
+  transform: none;
 }
 
 .form-actions {
@@ -685,153 +786,218 @@ select.form-control {
   justify-content: center;
 }
 
-/* Estilos para la vista previa del organigrama */
-.organigrama-preview {
-  margin-top: 1rem;
+.btn-arrow {
+  font-size: 1.2rem;
+}
+
+/* Estilos del organigrama */
+.organigrama-container {
+  background: #0154A6;
   padding: 2rem;
+  color: white;
+  min-height: 600px;
+  position: relative;
+}
+
+.org-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+  margin-top: 1em;
+}
+
+.org-version {
+  background: #5d89bb;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  font-size: 1.5rem;
+  align-self:stretch;
+}
+
+.org-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.org-level-1, .org-level-2 {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.org-level-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.department-column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #f9f9f9;
-  border-radius: 8px;
-  overflow-x: auto;
-  width: 100%;
-  min-height: 400px;
-}
-
-.empty-preview {
-  padding: 2rem;
-  text-align: center;
-  background: #f8f9fa;
-  border-radius: 8px;
-  color: #6c757d;
 }
 
 .org-box {
-  padding: 0.75rem;
-  border-radius: 6px;
+  background: white;
+  color: #333;
+  padding: 1rem;
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  min-width: 150px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  min-width: 160px;
 }
 
-.org-presidencia {
-  background: #e6f0ff;
+.org-box.presidencia {
+  min-width: 200px;
+  background: white;
   border: 2px solid #004698;
-  font-weight: bold;
-  width: 200px;
 }
 
-.org-jefatura {
-  background: #e6f0ff;
-  border: 1px solid #004698;
-  font-weight: 500;
-  width: 180px;
+.org-box.jefatura {
+  min-width: 180px;
+  background: white;
 }
 
-.org-dept {
-  background: #f0f8ff;
-  border: 1px solid #4a90e2;
-  width: 160px;
-}
-
-.org-subdept {
-  background: #f8f8ff;
-  border: 1px solid #6c757d;
-  width: 160px;
+.org-box.departamento {
+  background: white;
   font-size: 0.9rem;
-  padding: 0.5rem;
 }
 
-.org-area-item {
+.org-box.area-interna {
+  background: #f0f8ff;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  min-width: 140px;
+}
+
+.box-title {
+  font-weight: bold;
+  color: #004698;
+  margin-bottom: 0.25rem;
+}
+
+.box-subtitle {
+  font-size: 0.9rem;
+  color: black;
+  line-height: 1.3;
+  font-weight: bolder;
+}
+
+.box-content {
+  font-weight: 500;
+  white-space: pre-line;
+  line-height: 1.3;
+}
+
+.area-content {
   padding: 0.25rem 0;
   border-bottom: 1px solid #e9ecef;
 }
 
-.org-area-item:last-child {
+.area-content:last-child {
   border-bottom: none;
 }
 
-.org-sublevel {
+.connection-line {
+  background: white;
+  margin: 0 auto;
+}
+
+.connection-line.vertical {
+  width: 3px;
+  height: 30px;
+}
+
+.connection-line.vertical.short {
+  height: 20px;
+}
+
+.connection-line.vertical.mini {
+  height: 15px;
+  margin-top:10px;
+}
+
+.connection-branches {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.org-proyecto {
-  background: #efffee;
-  border: 1px solid #28a745;
-  width: 160px;
+.branch-line {
+  width: 120px;
+  height: 3px;
+  background: white;
+  margin: 0 10px;
 }
 
-.org-subbox {
-  font-size: 0.85rem;
-  color: #555;
-  margin-top: 0.25rem;
-  font-style: italic;
+.areas-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.org-line {
-  width: 2px;
-  height: 25px;
-  background: #004698;
-  margin: 0.5rem 0;
+.proyectos-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 3px solid white;
 }
 
-.org-branch-line {
-  width: 80%;
-  height: 2px;
-  background: #004698;
+.proyectos-title {
+  font-weight: bold;
+  font-size: 1.1rem;
   margin-bottom: 0.5rem;
 }
 
-.org-line-vertical {
-  width: 2px;
-  height: 20px;
-  background: #6c757d;
-  margin: 0.25rem auto 0.5rem;
+.proyectos-subtitle {
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
-.org-level {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.org-dept-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.org-subdepts {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.org-transversal-line {
-  width: 80%;
-  height: 2px;
-  background: #28a745;
-  margin: 1rem 0;
-}
-
-.org-proyectos-header {
-  font-weight: bold;
-  color: #28a745;
-  margin: 0.75rem 0;
+.empty-state {
   text-align: center;
+  padding: 3rem;
+  color: #6c757d;
 }
 
-.org-proyectos-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-text {
+  font-size: 1.1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .tabs-nav {
+    flex-direction: column;
+  }
+  
+  .departments-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .org-level-3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .organigrama-container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .org-level-3 {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -593,6 +593,18 @@ textarea.form-control {
   gap:1rem;
   align-content:center;
   align-items:center;
+  text-align:center;
+}
+.departments-section-title{
+  background: #8bb4e21a;
+    color: #8db4e2;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    padding: 1rem 2rem;
+    display: inline-block;
+    border-radius: 8px;
+    letter-spacing: 7px;
 }
 
 .department-box {
