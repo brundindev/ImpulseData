@@ -19,6 +19,19 @@
           </div>
           
           <div class="form-group">
+
+            <div class="form-group center-image-upload">
+              <label>Imagen de la sede</label>
+              <img
+                :src="recurso.imageUrl || '/placeholder-image.png'"
+                :alt="'Imagen de ' + (recurso.nombre || 'Sede')"
+                class="image-placeholder clickable-image"
+                :data-image-id="'centro-image-' + index"
+                @click="openCloudinaryModal('sede', index, recurso.imageUrl)"
+                style="width: 100%; max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
+              />
+              <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto del centro.</p>
+            </div>
             <label>Nombre</label>
             <input 
               type="text" 
@@ -66,6 +79,18 @@
           </div>
           
           <div class="form-group">
+            <label>Imagen del territorio</label>
+            <div class="form-group center-image-upload">
+              <img
+                :src="recurso.imageUrl || '/placeholder-image.png'"
+                :alt="'Imagen de ' + (recurso.nombre || 'Territorio')"
+                class="image-placeholder clickable-image"
+                :data-image-id="'territorio-image-' + index"
+                @click="openCloudinaryModal('territorio', index, recurso.imageUrl)"
+                style="width: 100%; max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
+              />
+              <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto del territorio.</p>
+            </div>
             <label>Nombre</label>
             <input 
               type="text" 
@@ -114,11 +139,23 @@
         Guardar y Finalizar
       </button>
     </div>
+
+    <!-- Modal de selección de imágenes -->
+    <teleport to="body">
+      <ModalImagenesCloudinary
+        :is-visible="showImageModal"
+        :title="modalTitle"
+        @close="closeImageModal"
+        @select="handleImageSelect"
+        @upload="handleImageUpload"
+      />
+    </teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
+import ModalImagenesCloudinary from '../../ModalImagenesCloudinary.vue';
 
 const props = defineProps({
   modelValue: {
@@ -134,18 +171,27 @@ const datos = computed({
   set: (value) => emit('update:modelValue', value)
 });
 
+// Estado del modal de imágenes
+const showImageModal = ref(false);
+const modalTitle = ref('Seleccionar imagen');
+const currentImageId = ref(null);
+const currentIndex = ref(null);
+const currentType = ref(null); // 'sede' o 'territorio'
+
 // Inicializar datos si no existen
 if (!datos.value.recursosHumanos) {
   datos.value.recursosHumanos = [{
     nombre: '',
-    direccion: ''
+    direccion: '',
+    imageUrl: ''
   }];
 }
 
 if (!datos.value.recursosMateriales) {
   datos.value.recursosMateriales = [{
     nombre: '',
-    direccion: ''
+    direccion: '',
+    imageUrl: ''
   }];
 }
 
@@ -160,10 +206,49 @@ if (!datos.value.recursosFinancieros) {
   };
 }
 
+// Método para abrir el modal de imágenes
+const openCloudinaryModal = (type, index, currentImageUrl) => {
+  currentType.value = type;
+  currentIndex.value = index;
+  modalTitle.value = `Seleccionar imagen para ${type === 'sede' ? 'Sede' : 'Territorio'} ${index + 1}`;
+  showImageModal.value = true;
+};
+
+// Método para cerrar el modal
+const closeImageModal = () => {
+  showImageModal.value = false;
+  currentImageId.value = null;
+  currentIndex.value = null;
+  currentType.value = null;
+};
+
+// Método para manejar la selección de una imagen
+const handleImageSelect = (selectedImage) => {
+  if (currentIndex.value !== null) {
+    if (currentType.value === 'sede') {
+      datos.value.recursosHumanos[currentIndex.value].imageUrl = selectedImage.url;
+    } else {
+      datos.value.recursosMateriales[currentIndex.value].imageUrl = selectedImage.url;
+    }
+  }
+  closeImageModal();
+};
+
+// Método para manejar la subida de una nueva imagen
+const handleImageUpload = async () => {
+  try {
+    // Aquí implementaremos la lógica de subida de imágenes
+    closeImageModal();
+  } catch (error) {
+    console.error('Error al subir la imagen:', error);
+  }
+};
+
 const agregarSede = () => {
   datos.value.recursosHumanos.push({
     nombre: '',
-    direccion: ''
+    direccion: '',
+    imageUrl: ''
   });
 };
 
@@ -176,7 +261,8 @@ const eliminarSede = (index) => {
 const agregarTerritorio = () => {
   datos.value.recursosMateriales.push({
     nombre: '',
-    direccion: ''
+    direccion: '',
+    imageUrl: ''
   });
 };
 
@@ -316,5 +402,79 @@ textarea.form-control {
   margin-top: 2rem;
   display: flex;
   justify-content: space-between;
+}
+
+.center-image-upload {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.image-placeholder {
+    display: block;
+    margin: 0.5rem auto 0.8rem auto;
+    max-width: 100%;
+    height: auto;
+}
+
+.image-placeholder[src$="/placeholder-image.png"] {
+    background-color: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-style: italic;
+    min-height: 150px;
+    object-fit: contain;
+}
+
+.image-upload-hint {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+.clickable-image {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clickable-image:hover {
+    border-color: #004698;
+    box-shadow: 0 0 10px rgba(0, 70, 152, 0.2);
+    transform: scale(1.02);
+}
+
+:deep(.image-selector-overlay) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+}
+
+:deep(.image-selector-dialog) {
+    position: relative;
+    margin: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(0);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style> 
