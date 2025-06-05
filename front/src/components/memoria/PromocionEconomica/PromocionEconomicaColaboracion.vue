@@ -1,181 +1,104 @@
 <template>
   <div class="form-step">
-    <h3>Resultados</h3>
-    
+    <h3>Ayudas Económicas a Empresas de la Ciudad de Alicante</h3>
+
     <div class="form-group">
-      <label>Indicadores Económicos</label>
+      <label>Resumen Total</label>
       <div class="indicadores">
         <div class="form-group">
-          <label>Número de Empresas Atendidas</label>
-          <input 
-            type="number" 
-            v-model="datos.numeroEmpresas" 
+          <label>Importe Total Concedido (€)</label>
+          <input
+            type="number"
+            v-model="datos.importeTotalConcedido"
             class="form-control"
             min="0"
-            placeholder="Número total de empresas atendidas"
+            step="0.01"
+            placeholder="Importe total de ayudas concedidas"
           >
         </div>
-        
+
         <div class="form-group">
-          <label>Número de Emprendedores Atendidos</label>
-          <input 
-            type="number" 
-            v-model="datos.numeroEmprendedores" 
+          <label>Empresas Beneficiarias Totales</label>
+          <input
+            type="number"
+            v-model="datos.empresasBeneficiariasTotales"
             class="form-control"
             min="0"
-            placeholder="Número total de emprendedores atendidos"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Inversión Total Atraída</label>
-          <input 
-            type="number" 
-            v-model="datos.inversionTotal" 
-            class="form-control"
-            min="0"
-            placeholder="Inversión total atraída en euros"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label>Empleos Creados</label>
-          <input 
-            type="number" 
-            v-model="datos.empleosCreados" 
-            class="form-control"
-            min="0"
-            placeholder="Número de empleos creados"
+            placeholder="Número total de empresas beneficiarias"
           >
         </div>
       </div>
     </div>
 
     <div class="form-group">
-      <label>Resultados por Sector</label>
-      <div class="sectores">
-        <div v-for="(sector, index) in datos.sectores" :key="index" class="sector-item">
-          <div class="sector-header">
-            <h4>Sector {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarSector(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.sectores.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre del Sector</label>
-            <input 
-              type="text" 
-              v-model="sector.nombre" 
-              class="form-control"
-              placeholder="Nombre del sector"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Número de Empresas</label>
-            <input 
-              type="number" 
-              v-model="sector.numeroEmpresas" 
-              class="form-control"
-              min="0"
-              placeholder="Número de empresas en el sector"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Inversión</label>
-            <input 
-              type="number" 
-              v-model="sector.inversion" 
-              class="form-control"
-              min="0"
-              placeholder="Inversión en euros"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Empleos</label>
-            <input 
-              type="number" 
-              v-model="sector.empleos" 
-              class="form-control"
-              min="0"
-              placeholder="Número de empleos"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción de Resultados</label>
-            <textarea 
-              v-model="sector.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados específicos del sector"
-            ></textarea>
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarSector" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Sector
-        </button>
+      <label>Detalle por Ayuda/Subvención</label>
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <th>Nombre Ayuda/Subvención</th>
+              <th>Procedencia Fondos</th>
+              <th>Solicitadas</th>
+              <th>Aprobadas</th>
+              <th>Importe Concedido (€)</th>
+              <th>Denegadas</th>
+              <th>Renuncias</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(ayuda, index) in datos.ayudas" :key="index">
+              <td><input type="text" v-model="ayuda.nombre" class="form-control form-control-sm" placeholder="Nombre"></td>
+              <td><input type="text" v-model="ayuda.procedencia" class="form-control form-control-sm" placeholder="Procedencia"></td>
+              <td><input type="number" v-model="ayuda.solicitadas" class="form-control form-control-sm" min="0" placeholder="0"></td>
+              <td><input type="number" v-model="ayuda.aprobadas" class="form-control form-control-sm" min="0" placeholder="0"></td>
+              <td><input type="number" v-model="ayuda.importeConcedido" class="form-control form-control-sm" min="0" step="0.01" placeholder="0.00"></td>
+              <td><input type="number" v-model="ayuda.denegadas" class="form-control form-control-sm" min="0" placeholder="0"></td>
+              <td><input type="number" v-model="ayuda.renuncias" class="form-control form-control-sm" min="0" placeholder="0"></td>
+              <td>
+                <button
+                  @click="eliminarAyuda(index)"
+                  class="btn btn-danger btn-sm"
+                  type="button"
+                  v-if="datos.ayudas.length > 1"
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" class="text-end"><strong>Total:</strong></td>
+              <td><strong>{{ totalSolicitadas }}</strong></td>
+              <td><strong>{{ totalAprobadas }}</strong></td>
+              <td><strong>{{ totalImporteConcedido.toFixed(2) }} €</strong></td>
+              <td><strong>{{ totalDenegadas }}</strong></td>
+              <td><strong>{{ totalRenuncias }}</strong></td>
+              <td></td> <!-- Celda vacía para la columna de acciones -->
+            </tr>
+          </tfoot>
+        </table>
       </div>
-    </div>
-
-    <div class="form-group">
-      <label>Análisis de Resultados</label>
-      <div class="analisis">
-        <div class="form-group">
-          <label>Logros Principales</label>
-          <textarea 
-            v-model="datos.logros" 
-            class="form-control"
-            rows="4"
-            placeholder="Describa los principales logros alcanzados"
-          ></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label>Dificultades Encontradas</label>
-          <textarea 
-            v-model="datos.dificultades" 
-            class="form-control"
-            rows="4"
-            placeholder="Describa las principales dificultades encontradas"
-          ></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label>Lecciones Aprendidas</label>
-          <textarea 
-            v-model="datos.lecciones" 
-            class="form-control"
-            rows="4"
-            placeholder="Describa las principales lecciones aprendidas"
-          ></textarea>
-        </div>
-      </div>
+      <button
+        @click="agregarAyuda"
+        class="btn btn-secondary btn-sm mt-3"
+        type="button"
+      >
+        Agregar Ayuda/Subvención
+      </button>
     </div>
 
     <div class="form-actions">
-      <button 
-        @click="$emit('anterior')" 
+      <button
+        @click="$emit('anterior')"
         class="btn btn-secondary"
         type="button"
       >
         Anterior
       </button>
-      <button 
-        @click="$emit('siguiente')" 
+      <button
+        @click="$emit('siguiente')"
         class="btn btn-primary"
         :disabled="!esValido"
       >
@@ -202,58 +125,78 @@ const datos = computed({
   set: (value) => emit('update:modelValue', value)
 });
 
-// Inicializar datos si no existen
-if (!datos.value.numeroEmpresas) datos.value.numeroEmpresas = 0;
-if (!datos.value.numeroEmprendedores) datos.value.numeroEmprendedores = 0;
-if (!datos.value.inversionTotal) datos.value.inversionTotal = 0;
-if (!datos.value.empleosCreados) datos.value.empleosCreados = 0;
+// Inicializar datos
+if (!datos.value.importeTotalConcedido) datos.value.importeTotalConcedido = 0;
+if (!datos.value.empresasBeneficiariasTotales) datos.value.empresasBeneficiariasTotales = 0;
 
-if (!datos.value.sectores) {
-  datos.value.sectores = [{
+// Inicializar array de ayudas
+if (!datos.value.ayudas || datos.value.ayudas.length === 0) {
+  datos.value.ayudas = [{
     nombre: '',
-    numeroEmpresas: 0,
-    inversion: 0,
-    empleos: 0,
-    descripcion: ''
+    procedencia: '',
+    solicitadas: 0,
+    aprobadas: 0,
+    importeConcedido: 0,
+    denegadas: 0,
+    renuncias: 0,
   }];
 }
 
-if (!datos.value.logros) datos.value.logros = '';
-if (!datos.value.dificultades) datos.value.dificultades = '';
-if (!datos.value.lecciones) datos.value.lecciones = '';
-
-const agregarSector = () => {
-  datos.value.sectores.push({
+// Método para agregar una nueva ayuda
+const agregarAyuda = () => {
+  datos.value.ayudas.push({
     nombre: '',
-    numeroEmpresas: 0,
-    inversion: 0,
-    empleos: 0,
-    descripcion: ''
+    procedencia: '',
+    solicitadas: 0,
+    aprobadas: 0,
+    importeConcedido: 0,
+    denegadas: 0,
+    renuncias: 0,
   });
 };
 
-const eliminarSector = (index) => {
-  if (datos.value.sectores.length > 1) {
-    datos.value.sectores.splice(index, 1);
+// Método para eliminar una ayuda
+const eliminarAyuda = (index) => {
+  if (datos.value.ayudas.length > 1) {
+    datos.value.ayudas.splice(index, 1);
   }
 };
 
-const esValido = computed(() => {
-  return datos.value.numeroEmpresas >= 0 &&
-         datos.value.numeroEmprendedores >= 0 &&
-         datos.value.inversionTotal >= 0 &&
-         datos.value.empleosCreados >= 0 &&
-         datos.value.sectores.every(sector => 
-           sector.nombre && 
-           sector.numeroEmpresas >= 0 && 
-           sector.inversion >= 0 && 
-           sector.empleos >= 0 && 
-           sector.descripcion
-         ) &&
-         datos.value.logros &&
-         datos.value.dificultades &&
-         datos.value.lecciones;
+// Métodos computados para calcular los totales
+const totalSolicitadas = computed(() => {
+  return datos.value.ayudas.reduce((sum, ayuda) => sum + (Number(ayuda.solicitadas) || 0), 0);
 });
+
+const totalAprobadas = computed(() => {
+  return datos.value.ayudas.reduce((sum, ayuda) => sum + (Number(ayuda.aprobadas) || 0), 0);
+});
+
+const totalImporteConcedido = computed(() => {
+  return datos.value.ayudas.reduce((sum, ayuda) => sum + (Number(ayuda.importeConcedido) || 0), 0);
+});
+
+const totalDenegadas = computed(() => {
+  return datos.value.ayudas.reduce((sum, ayuda) => sum + (Number(ayuda.denegadas) || 0), 0);
+});
+
+const totalRenuncias = computed(() => {
+  return datos.value.ayudas.reduce((sum, ayuda) => sum + (Number(ayuda.renuncias) || 0), 0);
+});
+
+const esValido = computed(() => {
+  return datos.value.importeTotalConcedido >= 0 &&
+         datos.value.empresasBeneficiariasTotales >= 0 &&
+         datos.value.ayudas.every(ayuda =>
+           ayuda.nombre &&
+           ayuda.procedencia &&
+           ayuda.solicitadas >= 0 &&
+           ayuda.aprobadas >= 0 &&
+           ayuda.importeConcedido >= 0 &&
+           ayuda.denegadas >= 0 &&
+           ayuda.renuncias >= 0
+         );
+});
+
 </script>
 
 <style scoped>
@@ -266,83 +209,70 @@ const esValido = computed(() => {
   margin-bottom: 1.5rem;
 }
 
-.sector-item {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
+.indicadores {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 1.5rem;
 }
 
-.sector-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+.indicadores .form-group {
+    flex: 1;
+    margin-bottom: 0;
 }
 
-.sector-header h4 {
-  margin: 0;
-  color: #004698;
-  font-size: 1.2rem;
+/* Estilos para la tabla */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto; /* Permite scroll horizontal en pantallas pequeñas */
+    margin-top: 1rem;
 }
 
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #333;
-  font-weight: 500;
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem; /* Espacio antes del botón de agregar */
 }
 
-.form-control {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+.table th,
+.table td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd; /* Bordes de celda */
 }
 
-.form-control:focus {
-  outline: none;
-  border-color: #004698;
-  box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.1);
+.table th {
+    background-color: #f0803b; /* Naranja para las cabeceras */
+    font-weight: bold;
+    color: white; /* Texto blanco para contraste */
 }
 
-textarea.form-control {
-  resize: vertical;
-  min-height: 100px;
+.table-striped tbody tr:nth-child(odd) {
+    background-color: #fff3e0; /* Rayado de filas en naranja claro */
 }
 
-.btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid #f0803b; /* Bordes naranjas */
 }
 
-.btn-primary {
-  background: #004698;
-  color: white;
+.table tfoot tr {
+    background-color: #fcd7b0; /* Fondo naranja más claro para la fila de totales */
+    font-weight: bold;
+    color: #333; /* Texto oscuro para contraste */
 }
 
-.btn-secondary {
-  background: #6c757d;
-  color: white;
+.form-control-sm {
+    padding: 0.25rem 0.5rem; /* Padding reducido para inputs dentro de la tabla */
+    font-size: 0.875rem;
 }
 
-.btn-danger {
-  background: #dc3545;
-  color: white;
+.text-end {
+    text-align: right;
 }
 
-.btn:hover {
-  opacity: 0.9;
-}
-
-.btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+.btn-sm {
+    padding: 0.25rem 0.5rem; /* Padding reducido para botones pequeños */
+    font-size: 0.875rem;
 }
 
 .form-actions {
@@ -350,4 +280,22 @@ textarea.form-control {
   display: flex;
   justify-content: space-between;
 }
+
+@media (max-width: 768px) {
+    .indicadores {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .indicadores .form-group {
+        flex: none;
+    }
+    
+    .table th,
+    .table td {
+        /* Ajustes para pantallas pequeñas si es necesario */
+        white-space: nowrap; /* Evita que el texto se corte */
+    }
+}
+
 </style> 

@@ -1,222 +1,116 @@
 <template>
   <div class="form-step">
-    <h3>Programas y Proyectos</h3>
-    
-    <div class="form-group">
-      <label>Programas de Promoción Económica</label>
-      <div class="programas">
-        <div v-for="(programa, index) in datos.programas" :key="index" class="programa-item">
-          <div class="programa-header">
-            <h4>Programa {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarPrograma(index)" 
-              class="btn btn-danger"
+    <h3>PROGRAMAS DE FOMENTO DE EMPRENDIMIENTO</h3>
+
+    <div class="programas-list">
+      <div v-for="(programa, index) in datos.programas" :key="index" class="programa-item form-section">
+        <div class="program-header">
+          <h4>Programa {{ index + 1 }}</h4>
+          <button
+            @click="eliminarPrograma(index)"
+            class="btn btn-danger"
+            type="button"
+            v-if="datos.programas.length > 1"
+          >
+            Eliminar Programa
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label>Nombre del Programa</label>
+          <input
+            type="text"
+            v-model="programa.nombre"
+            class="form-control"
+            placeholder="Nombre del programa"
+          >
+        </div>
+
+        <!-- Imagen del Programa -->
+        <div class="form-group center-image-upload">
+          <label>Foto del Programa</label>
+          <img
+            :src="programa.imageUrl || '/placeholder-image.png'"
+            alt="Imagen del programa"
+            class="image-placeholder clickable-image"
+            @click="openCloudinaryModal(index)"
+            style="width: 100%; max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
+          />
+          <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto.</p>
+        </div>
+
+        <!-- Campos Adicionales del Programa -->
+        <div class="additional-fields">
+          <h5>Información Adicional</h5>
+          <div v-for="(campo, campoIndex) in programa.campos" :key="campoIndex" class="form-group additional-field-item">
+            <div class="field-inputs">
+              <input
+                type="text"
+                v-model="campo.nombre"
+                class="form-control field-name-input"
+                placeholder="Nombre del campo (Ej: Empleos creados)"
+              >
+              <input
+                type="text"
+                v-model="campo.valor"
+                class="form-control field-value-input"
+                placeholder="Valor del campo (Ej: 50)"
+              >
+            </div>
+            <button
+              @click="eliminarCampo(index, campoIndex)"
+              class="btn btn-danger btn-sm"
               type="button"
-              v-if="datos.programas.length > 1"
             >
-              Eliminar
+              Eliminar Campo
             </button>
           </div>
-          
-          <div class="form-group">
-            <label>Nombre del Programa</label>
-            <input 
-              type="text" 
-              v-model="programa.nombre" 
-              class="form-control"
-              placeholder="Nombre del programa"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="programa.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el programa y sus objetivos"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha de Inicio</label>
-            <input 
-              type="date" 
-              v-model="programa.fechaInicio" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha de Fin</label>
-            <input 
-              type="date" 
-              v-model="programa.fechaFin" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Presupuesto</label>
-            <input 
-              type="number" 
-              v-model="programa.presupuesto" 
-              class="form-control"
-              min="0"
-              placeholder="Presupuesto en euros"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="programa.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
-          </div>
+          <button
+            @click="agregarCampo(index)"
+            class="btn btn-secondary btn-sm"
+            type="button"
+          >
+            Agregar Campo Adicional
+          </button>
         </div>
-        
-        <button 
-          @click="agregarPrograma" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Programa
-        </button>
+
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Proyectos de Desarrollo Económico</label>
-      <div class="proyectos">
-        <div v-for="(proyecto, index) in datos.proyectos" :key="index" class="proyecto-item">
-          <div class="proyecto-header">
-            <h4>Proyecto {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarProyecto(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.proyectos.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre del Proyecto</label>
-            <input 
-              type="text" 
-              v-model="proyecto.nombre" 
-              class="form-control"
-              placeholder="Nombre del proyecto"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="proyecto.descripcion" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el proyecto y sus objetivos"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Tipo de Proyecto</label>
-            <select v-model="proyecto.tipo" class="form-control">
-              <option value="">Seleccione un tipo</option>
-              <option value="inversion">Inversión</option>
-              <option value="desarrollo">Desarrollo</option>
-              <option value="innovacion">Innovación</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha de Inicio</label>
-            <input 
-              type="date" 
-              v-model="proyecto.fechaInicio" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Fecha de Fin</label>
-            <input 
-              type="date" 
-              v-model="proyecto.fechaFin" 
-              class="form-control"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Presupuesto</label>
-            <input 
-              type="number" 
-              v-model="proyecto.presupuesto" 
-              class="form-control"
-              min="0"
-              placeholder="Presupuesto en euros"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Estado</label>
-            <select v-model="proyecto.estado" class="form-control">
-              <option value="">Seleccione un estado</option>
-              <option value="planificacion">Planificación</option>
-              <option value="ejecucion">En Ejecución</option>
-              <option value="finalizado">Finalizado</option>
-              <option value="suspendido">Suspendido</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Resultados</label>
-            <textarea 
-              v-model="proyecto.resultados" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa los resultados obtenidos"
-            ></textarea>
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarProyecto" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Proyecto
-        </button>
-      </div>
-    </div>
+    <button
+      @click="agregarPrograma"
+      class="btn btn-secondary mt-3"
+      type="button"
+    >
+      Agregar Programa
+    </button>
 
     <div class="form-actions">
-      <button 
-        @click="$emit('anterior')" 
-        class="btn btn-secondary"
-        type="button"
-      >
-        Anterior
-      </button>
-      <button 
-        @click="$emit('siguiente')" 
+      <button
+        @click="$emit('siguiente')"
         class="btn btn-primary"
         :disabled="!esValido"
       >
         Siguiente
       </button>
     </div>
+
+    <!-- Modal de selección de imágenes -->
+    <teleport to="body">
+      <ModalImagenesCloudinary
+        :is-visible="showImageModal"
+        title="Seleccionar imagen para el programa"
+        @close="closeImageModal"
+        @select="handleImageSelect"
+        @upload="handleImageUpload"
+      />
+    </teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
+import ModalImagenesCloudinary from '../../ModalImagenesCloudinary.vue';
 
 const props = defineProps({
   modelValue: {
@@ -225,90 +119,93 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:modelValue', 'siguiente', 'anterior']);
+const emit = defineEmits(['update:modelValue', 'siguiente']);
 
 const datos = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
 });
 
-// Inicializar datos si no existen
-if (!datos.value.programas) {
+// Estado del modal de imágenes
+const showImageModal = ref(false);
+const currentProgramIndex = ref(null);
+
+// Inicializar datos con un array de programas, con un programa por defecto
+if (!datos.value.programas || datos.value.programas.length === 0) {
   datos.value.programas = [{
     nombre: '',
-    descripcion: '',
-    fechaInicio: '',
-    fechaFin: '',
-    presupuesto: 0,
-    resultados: ''
+    imageUrl: '',
+    campos: []
   }];
 }
 
-if (!datos.value.proyectos) {
-  datos.value.proyectos = [{
-    nombre: '',
-    descripcion: '',
-    tipo: '',
-    fechaInicio: '',
-    fechaFin: '',
-    presupuesto: 0,
-    estado: '',
-    resultados: ''
-  }];
-}
-
+// Método para agregar un nuevo programa
 const agregarPrograma = () => {
   datos.value.programas.push({
     nombre: '',
-    descripcion: '',
-    fechaInicio: '',
-    fechaFin: '',
-    presupuesto: 0,
-    resultados: ''
+    imageUrl: '',
+    campos: []
   });
 };
 
+// Método para eliminar un programa
 const eliminarPrograma = (index) => {
   if (datos.value.programas.length > 1) {
     datos.value.programas.splice(index, 1);
   }
 };
 
-const agregarProyecto = () => {
-  datos.value.proyectos.push({
+// Método para agregar un campo adicional a un programa específico
+const agregarCampo = (programaIndex) => {
+  datos.value.programas[programaIndex].campos.push({
     nombre: '',
-    descripcion: '',
-    tipo: '',
-    fechaInicio: '',
-    fechaFin: '',
-    presupuesto: 0,
-    estado: '',
-    resultados: ''
+    valor: '',
   });
 };
 
-const eliminarProyecto = (index) => {
-  if (datos.value.proyectos.length > 1) {
-    datos.value.proyectos.splice(index, 1);
+// Método para eliminar un campo adicional de un programa específico
+const eliminarCampo = (programaIndex, campoIndex) => {
+  datos.value.programas[programaIndex].campos.splice(campoIndex, 1);
+};
+
+// Método para abrir el modal de imágenes
+const openCloudinaryModal = (index) => {
+  currentProgramIndex.value = index;
+  showImageModal.value = true;
+};
+
+// Método para cerrar el modal
+const closeImageModal = () => {
+  showImageModal.value = false;
+  currentProgramIndex.value = null;
+};
+
+// Método para manejar la selección de una imagen
+const handleImageSelect = (selectedImage) => {
+  if (currentProgramIndex.value !== null) {
+    datos.value.programas[currentProgramIndex.value].imageUrl = selectedImage.url;
+  }
+  closeImageModal();
+};
+
+// Método para manejar la subida de una nueva imagen
+const handleImageUpload = async () => {
+  try {
+    // Aquí implementaremos la lógica de subida de imágenes
+    // Por ahora, cerramos el modal
+    closeImageModal();
+  } catch (error) {
+    console.error('Error al subir la imagen:', error);
   }
 };
 
 const esValido = computed(() => {
-  return datos.value.programas.every(programa => 
-    programa.nombre && 
-    programa.descripcion && 
-    programa.fechaInicio && 
-    programa.fechaFin && 
-    programa.presupuesto >= 0
-  ) &&
-  datos.value.proyectos.every(proyecto => 
-    proyecto.nombre && 
-    proyecto.descripcion && 
-    proyecto.tipo && 
-    proyecto.fechaInicio && 
-    proyecto.fechaFin && 
-    proyecto.presupuesto >= 0 && 
-    proyecto.estado
+  // Validar que cada programa tenga nombre y foto
+  return datos.value.programas.every(programa =>
+    programa.nombre &&
+    programa.imageUrl &&
+    // Opcional: validar campos adicionales si es necesario
+    programa.campos.every(campo => campo.nombre && campo.valor)
   );
 });
 </script>
@@ -319,31 +216,29 @@ const esValido = computed(() => {
   margin: 0 auto;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.programa-item,
-.proyecto-item {
-  background: #f8f9fa;
+.form-section {
+  margin-bottom: 2rem;
   padding: 1.5rem;
+  background: #f8f9fa;
   border-radius: 8px;
-  margin-bottom: 1.5rem;
+  border-left: 5px solid #004698;
 }
 
-.programa-header,
-.proyecto-header {
+.program-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.programa-header h4,
-.proyecto-header h4 {
+.program-header h4 {
   margin: 0;
   color: #004698;
   font-size: 1.2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
 }
 
 label {
@@ -408,6 +303,66 @@ textarea.form-control {
 .form-actions {
   margin-top: 2rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+}
+
+.center-image-upload {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.image-placeholder {
+  display: block;
+  margin: 0.5rem auto 0.8rem auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.image-placeholder[src$="/placeholder-image.png"] {
+  background-color: #e9ecef;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+  min-height: 150px;
+  object-fit: contain;
+}
+
+.image-upload-hint {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+.clickable-image {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clickable-image:hover {
+  border-color: #004698;
+  box-shadow: 0 0 10px rgba(0, 70, 152, 0.2);
+  transform: scale(1.02);
+}
+
+.additional-field-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.additional-field-item .field-inputs {
+  flex-grow: 1;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.additional-field-item .field-name-input {
+  flex: 1;
+}
+
+.additional-field-item .field-value-input {
+  flex: 2;
 }
 </style> 
