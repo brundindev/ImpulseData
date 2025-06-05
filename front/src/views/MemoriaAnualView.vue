@@ -211,6 +211,7 @@ import PromocionEconomicaProgramas from '../components/memoria/PromocionEconomic
 import PromocionEconomicaViveros from '../components/memoria/PromocionEconomica/PromocionEconomicaViveros.vue';
 import PromocionEconomicaAyudasEconomicas from '../components/memoria/PromocionEconomica/PromocionEconomicaAyudasEconomicas.vue';
 import PromocionEconomicaColaboracion from '../components/memoria/PromocionEconomica/PromocionEconomicaColaboracion.vue';
+import PromocionEconomicaEmprendimiento from '../components/memoria/PromocionEconomica/PromocionEconomicaEmprendimiento.vue';
 
 // Importar componentes de Desarrollo Local
 import DesarrolloLocalPrograma from '../components/memoria/DesarrolloLocal/DesarrolloLocalPrograma.vue';
@@ -287,10 +288,11 @@ const pasosActuales = computed(() => {
       ];
     case 'promocionEconomica':
       return [
-        { titulo: 'Programas de Fomento de Emprendimiento', componente: PromocionEconomicaProgramas },
-        { titulo: 'Viveros Empresariales', componente: PromocionEconomicaViveros },
-        { titulo: 'Ayudas Económicas a Empresas de la ciudad de Alicante', componente: PromocionEconomicaAyudasEconomicas },
-        { titulo: 'Colaboración en eventos de emprendimiento y promoción empresarial', componente: PromocionEconomicaColaboracion }
+        { titulo: 'Datos Totales', componente: PromocionEconomicaProgramas },
+        { titulo: 'Programas de Fomento de Emprendimiento', componente: PromocionEconomicaViveros },
+        { titulo: 'Viveros Empresariales', componente: PromocionEconomicaAyudasEconomicas },
+        { titulo: ' Ayudas Económicas a Empresas de la ciudad de Alicante ', componente: PromocionEconomicaColaboracion },
+        { titulo: 'Colaboración en eventos de emprendimiento y promoción empresarial', componente: PromocionEconomicaEmprendimiento }
       ];
     case 'desarrolloLocal':
       return [
