@@ -1,176 +1,74 @@
 <template>
-  <div class="form-step">
-    <h3>Resultados e Indicadores</h3>
-    
+  <div class="form-step oficina-europeos-form">
+    <h3 class="oficina-europeos-header-title">OFICINA DE<br>PROYECTOS EUROPEOS</h3>
+
+    <!-- Descripción de las funciones -->
     <div class="form-group">
-      <label>Indicadores de Impacto</label>
-      <div class="indicadores">
-        <div v-for="(indicador, index) in datos.indicadores" :key="index" class="indicador-item">
-          <div class="indicador-header">
-            <h4>Indicador {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarIndicador(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.indicadores.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Nombre del Indicador</label>
-            <input 
-              type="text" 
-              v-model="indicador.nombre" 
-              class="form-control"
-              placeholder="Nombre del indicador"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Descripción</label>
-            <textarea 
-              v-model="indicador.descripcion" 
-              class="form-control"
-              rows="2"
-              placeholder="Describa el indicador"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Valor Inicial</label>
-            <input 
-              type="number" 
-              v-model="indicador.valorInicial" 
-              class="form-control"
-              min="0"
-              placeholder="Valor inicial"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Valor Final</label>
-            <input 
-              type="number" 
-              v-model="indicador.valorFinal" 
-              class="form-control"
-              min="0"
-              placeholder="Valor final"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Unidad de Medida</label>
-            <input 
-              type="text" 
-              v-model="indicador.unidad" 
-              class="form-control"
-              placeholder="Unidad de medida"
-            >
-          </div>
-          
-          <div class="form-group">
-            <label>Análisis</label>
-            <textarea 
-              v-model="indicador.analisis" 
-              class="form-control"
-              rows="3"
-              placeholder="Describa el análisis del indicador"
-            ></textarea>
-          </div>
-        </div>
-        
-        <button 
-          @click="agregarIndicador" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Indicador
-        </button>
-      </div>
+      <label>Funciones de la Oficina</label>
+      <textarea
+        v-model="datos.descripcionFunciones"
+        class="form-control"
+        rows="6"
+        placeholder="Describa las funciones de la Oficina de Proyectos Europeos"
+      ></textarea>
     </div>
 
-    <div class="form-group">
-      <label>Resultados Generales</label>
-      <div class="resultados">
-        <div class="form-group">
-          <label>Logros Alcanzados</label>
-          <textarea 
-            v-model="datos.logrosAlcanzados" 
-            class="form-control"
-            rows="4"
-            placeholder="Describa los logros alcanzados"
-          ></textarea>
+    <!-- Métricas Clave -->
+    <div class="form-section oficina-europeos-metrics">
+      <h4>Métricas Clave</h4>
+      <div class="metrics-list">
+        <div class="metric-item">
+          <i class="fas fa-file-alt metric-icon"></i>
+          <div class="metric-value">
+            <input
+              type="number"
+              v-model.number="datos.metricas.convocatoriasAnalizadas"
+              class="form-control form-control-sm text-center"
+              min="0"
+            >
+          </div>
+          <div class="metric-label">convocatorias analizadas</div>
         </div>
-        
-        <div class="form-group">
-          <label>Dificultades Encontradas</label>
-          <textarea 
-            v-model="datos.dificultades" 
-            class="form-control"
-            rows="3"
-            placeholder="Describa las dificultades encontradas"
-          ></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label>Lecciones Aprendidas</label>
-          <textarea 
-            v-model="datos.leccionesAprendidas" 
-            class="form-control"
-            rows="3"
-            placeholder="Describa las lecciones aprendidas"
-          ></textarea>
-        </div>
-      </div>
-    </div>
 
-    <div class="form-group">
-      <label>Evaluación de Impacto</label>
-      <div class="evaluacion">
-        <div class="form-group">
-          <label>Impacto Social</label>
-          <textarea 
-            v-model="datos.impactoSocial" 
-            class="form-control"
-            rows="3"
-            placeholder="Describa el impacto social"
-          ></textarea>
+        <div class="metric-item">
+           <i class="fas fa-building metric-icon"></i>
+           <div class="metric-value">
+            <input
+              type="number"
+              v-model.number="datos.metricas.empresasAsesoradas"
+              class="form-control form-control-sm text-center"
+              min="0"
+            >
+          </div>
+          <div class="metric-label">empresas asesoradas</div>
         </div>
-        
-        <div class="form-group">
-          <label>Impacto Económico</label>
-          <textarea 
-            v-model="datos.impactoEconomico" 
-            class="form-control"
-            rows="3"
-            placeholder="Describa el impacto económico"
-          ></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label>Impacto Ambiental</label>
-          <textarea 
-            v-model="datos.impactoAmbiental" 
-            class="form-control"
-            rows="3"
-            placeholder="Describa el impacto ambiental"
-          ></textarea>
+
+        <div class="metric-item">
+           <i class="fas fa-chalkboard-teacher metric-icon"></i>
+           <div class="metric-value">
+            <input
+              type="number"
+              v-model.number="datos.metricas.jornadasFormativas"
+              class="form-control form-control-sm text-center"
+              min="0"
+            >
+          </div>
+          <div class="metric-label">jornadas formativas para empresas</div>
         </div>
       </div>
     </div>
 
     <div class="form-actions">
-      <button 
-        @click="$emit('anterior')" 
+      <button
+        @click="$emit('anterior')"
         class="btn btn-secondary"
         type="button"
       >
         Anterior
       </button>
-      <button 
-        @click="$emit('siguiente')" 
+      <!-- Este es el último paso, el botón debe guardar -->
+      <button
+        @click="$emit('siguiente')"
         class="btn btn-primary"
         :disabled="!esValido"
       >
@@ -182,6 +80,8 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+// Importar Font Awesome si es necesario, o usar clases preexistentes si ya están configuradas
+// import '@fortawesome/fontawesome-free/css/all.css';
 
 const props = defineProps({
   modelValue: {
@@ -190,7 +90,8 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:modelValue', 'siguiente', 'anterior']);
+// Emitimos 'guardar' en el último paso (asumiendo que es el final de esta sección)
+const emit = defineEmits(['update:modelValue', 'anterior', 'siguiente']);
 
 const datos = computed({
   get: () => props.modelValue,
@@ -198,86 +99,39 @@ const datos = computed({
 });
 
 // Inicializar datos si no existen
-if (!datos.value.indicadores) {
-  datos.value.indicadores = [{
-    nombre: '',
-    descripcion: '',
-    valorInicial: 0,
-    valorFinal: 0,
-    unidad: '',
-    analisis: ''
-  }];
+if (!datos.value.descripcionFunciones) datos.value.descripcionFunciones = '';
+if (!datos.value.metricas) {
+  datos.value.metricas = {
+    convocatoriasAnalizadas: 0,
+    empresasAsesoradas: 0,
+    jornadasFormativas: 0,
+  };
 }
 
-if (!datos.value.logrosAlcanzados) datos.value.logrosAlcanzados = '';
-if (!datos.value.dificultades) datos.value.dificultades = '';
-if (!datos.value.leccionesAprendidas) datos.value.leccionesAprendidas = '';
-if (!datos.value.impactoSocial) datos.value.impactoSocial = '';
-if (!datos.value.impactoEconomico) datos.value.impactoEconomico = '';
-if (!datos.value.impactoAmbiental) datos.value.impactoAmbiental = '';
-
-const agregarIndicador = () => {
-  datos.value.indicadores.push({
-    nombre: '',
-    descripcion: '',
-    valorInicial: 0,
-    valorFinal: 0,
-    unidad: '',
-    analisis: ''
-  });
-};
-
-const eliminarIndicador = (index) => {
-  if (datos.value.indicadores.length > 1) {
-    datos.value.indicadores.splice(index, 1);
-  }
-};
-
+// Validación del formulario
 const esValido = computed(() => {
-  return datos.value.indicadores.every(indicador => 
-    indicador.nombre && 
-    indicador.descripcion && 
-    indicador.valorInicial >= 0 && 
-    indicador.valorFinal >= 0 && 
-    indicador.unidad
-  ) &&
-  datos.value.logrosAlcanzados &&
-  datos.value.dificultades &&
-  datos.value.leccionesAprendidas &&
-  datos.value.impactoSocial &&
-  datos.value.impactoEconomico &&
-  datos.value.impactoAmbiental;
+  return (
+    datos.value.descripcionFunciones !== '' &&
+    datos.value.metricas.convocatoriasAnalizadas >= 0 &&
+    datos.value.metricas.empresasAsesoradas >= 0 &&
+    datos.value.metricas.jornadasFormativas >= 0
+  );
 });
 </script>
 
 <style scoped>
+/* Reutilizar estilos generales del form-step */
 .form-step {
   max-width: 800px;
   margin: 0 auto;
+  padding: 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .form-group {
   margin-bottom: 1.5rem;
-}
-
-.indicador-item {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-}
-
-.indicador-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.indicador-header h4 {
-  margin: 0;
-  color: #004698;
-  font-size: 1.2rem;
 }
 
 label {
@@ -293,6 +147,8 @@ label {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  color: #333;
+  background-color: #fff;
 }
 
 .form-control:focus {
@@ -344,4 +200,74 @@ textarea.form-control {
   display: flex;
   justify-content: space-between;
 }
+
+/* Estilos específicos para este formulario */
+.oficina-europeos-form h3.oficina-europeos-header-title {
+    color: #8a2146; /* Color similar al de la imagen */
+    border-bottom: 3px solid #8a2146; /* Línea debajo del título */
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    display: inline-block; /* Para que la línea solo abarque el texto */
+}
+
+.oficina-europeos-metrics {
+    /* Reutilizar estilos de form-section */
+    margin-top: 2rem; /* Espacio superior */
+}
+
+.metrics-list {
+    display: flex;
+    justify-content: space-around; /* Espacio equitativo entre métricas */
+    flex-wrap: wrap; /* Permitir que se envuelvan */
+    gap: 1.5rem; /* Espacio entre ítems */
+    text-align: center; /* Centrar contenido */
+}
+
+.metric-item {
+    flex: 1; /* Cada ítem ocupa espacio equitativo */
+    min-width: 120px; /* Ancho mínimo */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.metric-icon {
+    font-size: 2rem; /* Tamaño del icono */
+    color: #8a2146; /* Color granate */
+    margin-bottom: 0.5rem;
+}
+
+.metric-value .form-control {
+    width: 80px; /* Ancho fijo para el input del número */
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white; /* Texto blanco */
+    background-color: #8a2146; /* Fondo granate */
+    border: none;
+    padding: 0.375rem 0.75rem; /* Ajustar padding */
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: #333;
+    margin-top: 0.5rem;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .metrics-list {
+    flex-direction: column; /* Apilar métricas en pantallas pequeñas */
+    gap: 1rem;
+  }
+
+  .metric-item {
+    width: 100%; /* Ancho completo */
+    min-width: 0;
+  }
+  
+  .metric-value .form-control {
+      width: 100px; /* Ajustar ancho del input */
+  }
+}
+
 </style> 
