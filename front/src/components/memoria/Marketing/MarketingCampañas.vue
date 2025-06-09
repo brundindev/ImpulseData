@@ -207,6 +207,7 @@ function guardarYFinalizar() {
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   overflow: hidden;
+  padding: 2rem;
 }
 
 .report-header {
@@ -245,7 +246,6 @@ function guardarYFinalizar() {
 
 .report-content {
   padding: 2rem;
-  background: #f5f5f5;
 }
 
 .campaigns-display {

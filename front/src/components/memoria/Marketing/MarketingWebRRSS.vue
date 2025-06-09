@@ -506,7 +506,6 @@ label {
   font-size: 1.5rem;
   font-weight: 700;
   padding: 1rem 1.2rem;
-  border-radius: 4px;
 }
 
 .preview-main-title {
@@ -556,6 +555,7 @@ label {
   font-size: 2rem;
   font-weight: bold;
   background: #8a6d57;
+  width: 4rem;
 }
 
 .stat-text {
@@ -604,18 +604,19 @@ label {
   background: #f8f9fa;
   /* padding: 0.75rem; */
   /* font-weight: 600; */
-  color: #495057;
+  color: black;
   border-right: 1px solid #dee2e6;
   display: flex;
   align-items: center;
   font-size: small;
+  font-weight: bold;
+  justify-content: center;
 }
 
 .social-value {
   padding: 0.75rem 0.5rem;
   text-align: center;
   border-right: 1px solid #dee2e6;
-  font-weight: 500;
   color: black;
 }
 
