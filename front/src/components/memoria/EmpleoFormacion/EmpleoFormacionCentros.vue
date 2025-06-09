@@ -2,134 +2,211 @@
   <div class="form-step">
     <h3>Nuestros Centros</h3>
 
-    <!-- Descripción General -->
-    <div class="form-section">
-      <h4>Descripción General del Departamento</h4>
-      <div class="form-group">
-        <label for="descripcionGeneral">Descripción</label>
-        <textarea
-          id="descripcionGeneral"
-          v-model="datos.descripcionGeneral"
-          class="form-control"
-          rows="4"
-          placeholder="Breve descripción del departamento de empleo y formación y sus centros."
-        ></textarea>
-      </div>
+    <!-- Pestañas -->
+    <div class="tabs-container">
+      <button
+        @click="activeTab = 'edit'"
+        :class="['tab-button', { active: activeTab === 'edit' }]"
+        type="button"
+      >
+        Editar
+      </button>
+      <button
+        @click="activeTab = 'preview'"
+        :class="['tab-button', { active: activeTab === 'preview' }]"
+        type="button"
+      >
+        Vista Previa
+      </button>
     </div>
 
-    <!-- Lista de Centros -->
-    <div class="centros-list">
-      <div v-for="(centro, centroIndex) in datos.centros" :key="centroIndex" class="centro-item form-section">
-        <div class="centro-header">
-          <h4>Centro {{ centroIndex + 1 }}: {{ centro.nombre || 'Nuevo Centro' }}</h4>
-          <button
-            @click="eliminarCentro(centroIndex)"
-            class="btn btn-danger btn-sm"
-            type="button"
-            v-if="datos.centros.length > 1"
-          >
-            Eliminar Centro
-          </button>
-        </div>
-
-        <!-- Imagen del Centro -->
-        <div class="form-group center-image-upload">
-            <label>Imagen del Centro</label>
-            <img
-                :src="centro.imageUrl || '/placeholder-image.png'"
-                :alt="'Imagen de ' + (centro.nombre || 'Centro')"
-                class="image-placeholder clickable-image"
-                :data-image-id="'centro-image-' + centroIndex"
-                @click="openCloudinaryModal('centro-image-' + centroIndex, centro.imageUrl)"
-                style="width: 100%; max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
-            />
-            <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto del centro.</p>
-        </div>
-
+    <!-- Contenido de Edición -->
+    <div v-show="activeTab === 'edit'" class="tab-content">
+      <!-- Descripción General -->
+      <div class="form-section">
+        <h4>Descripción General del Departamento</h4>
         <div class="form-group">
-          <label :for="'nombreCentro-' + centroIndex">Nombre del Centro</label>
-          <input
-            type="text"
-            :id="'nombreCentro-' + centroIndex"
-            v-model="centro.nombre"
+          <label for="descripcionGeneral">Descripción</label>
+          <textarea
+            id="descripcionGeneral"
+            v-model="datos.descripcionGeneral"
             class="form-control"
-            placeholder="Ej: Sede Central 'Puerta Ferrisa'"
-          >
+            rows="4"
+            placeholder="Breve descripción del departamento de empleo y formación y sus centros."
+          ></textarea>
         </div>
+      </div>
 
-        <!-- Servicios del Centro -->
-        <div class="form-group">
-          <label>Servicios</label>
-          <div v-for="(servicio, servicioIndex) in centro.servicios" :key="servicioIndex" class="input-group mb-2">
+      <!-- Lista de Centros -->
+      <div class="centros-list">
+        <div v-for="(centro, centroIndex) in datos.centros" :key="centroIndex" class="centro-item form-section">
+          <div class="centro-header">
+            <h4>Centro {{ centroIndex + 1 }}: {{ centro.nombre || 'Nuevo Centro' }}</h4>
+            <button
+              @click="eliminarCentro(centroIndex)"
+              class="btn btn-danger btn-sm"
+              type="button"
+              v-if="datos.centros.length > 1"
+            >
+              Eliminar Centro
+            </button>
+          </div>
+
+          <!-- Imagen del Centro -->
+          <div class="form-group center-image-upload">
+              <label>Imagen del Centro</label>
+              <img
+                  :src="centro.imageUrl || '/placeholder-image.png'"
+                  :alt="'Imagen de ' + (centro.nombre || 'Centro')"
+                  class="image-placeholder clickable-image"
+                  :data-image-id="'centro-image-' + centroIndex"
+                  @click="openCloudinaryModal('centro-image-' + centroIndex, centro.imageUrl)"
+                  style="width: 100%; max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
+              />
+              <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto del centro.</p>
+          </div>
+
+          <div class="form-group">
+            <label :for="'nombreCentro-' + centroIndex">Nombre del Centro</label>
             <input
               type="text"
-              v-model="centro.servicios[servicioIndex]"
+              :id="'nombreCentro-' + centroIndex"
+              v-model="centro.nombre"
               class="form-control"
-              placeholder="Ej: Orientación laboral"
+              placeholder="Ej: Sede Central 'Puerta Ferrisa'"
             >
+          </div>
+
+          <!-- Servicios del Centro -->
+          <div class="form-group">
+            <label>Servicios</label>
+            <div v-for="(servicio, servicioIndex) in centro.servicios" :key="servicioIndex" class="input-group mb-2">
+              <input
+                type="text"
+                v-model="centro.servicios[servicioIndex]"
+                class="form-control"
+                placeholder="Ej: Orientación laboral"
+              >
+              <button
+                @click="eliminarServicio(centroIndex, servicioIndex)"
+                class="btn btn-outline-danger btn-sm"
+                type="button"
+                v-if="centro.servicios.length > 1"
+              >
+                -
+              </button>
+            </div>
             <button
-              @click="eliminarServicio(centroIndex, servicioIndex)"
-              class="btn btn-outline-danger btn-sm"
+              @click="agregarServicio(centroIndex)"
+              class="btn btn-outline-secondary btn-sm"
               type="button"
-              v-if="centro.servicios.length > 1"
             >
-              -
+              + Agregar Servicio
             </button>
           </div>
-          <button
-            @click="agregarServicio(centroIndex)"
-            class="btn btn-outline-secondary btn-sm"
-            type="button"
-          >
-            + Agregar Servicio
-          </button>
+
+          <!-- Indicadores Numéricos del Centro -->
+          <div class="form-group">
+            <label>Indicadores Numéricos</label>
+            <div v-for="(indicador, indicadorIndex) in centro.indicadores" :key="indicadorIndex" class="indicator-group mb-2">
+              <input
+                type="text"
+                v-model="indicador.label"
+                class="form-control indicator-label"
+                placeholder="Etiqueta (Ej: Personas atendidas)"
+              >
+              <input
+                type="number"
+                v-model.number="indicador.value"
+                class="form-control indicator-value"
+                min="0"
+                placeholder="Valor numérico"
+              >
+              <button
+                @click="eliminarIndicador(centroIndex, indicadorIndex)"
+                class="btn btn-outline-danger btn-sm"
+                type="button"
+                v-if="centro.indicadores.length > 1"
+              >
+                -
+              </button>
+            </div>
+            <button
+              @click="agregarIndicador(centroIndex)"
+              class="btn btn-outline-secondary btn-sm"
+              type="button"
+            >
+              + Agregar Indicador
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón para añadir Centro -->
+      <button
+        @click="agregarCentro"
+        class="btn btn-secondary mt-3"
+        type="button"
+      >
+        Agregar Otro Centro
+      </button>
+    </div>
+
+    <!-- Contenido de Vista Previa -->
+    <div v-show="activeTab === 'preview'" class="tab-content">
+      <div class="preview-section">
+        <div class="preview-header">
+          <div class="preview-number">2.2</div>
+          <div class="preview-title">NUESTROS CENTROS</div>
         </div>
 
-        <!-- Indicadores Numéricos del Centro -->
-        <div class="form-group">
-          <label>Indicadores Numéricos</label>
-          <div v-for="(indicador, indicadorIndex) in centro.indicadores" :key="indicadorIndex" class="indicator-group mb-2">
-            <input
-              type="text"
-              v-model="indicador.label"
-              class="form-control indicator-label"
-              placeholder="Etiqueta (Ej: Personas atendidas)"
-            >
-            <input
-              type="number"
-              v-model.number="indicador.value"
-              class="form-control indicator-value"
-              min="0"
-              placeholder="Valor numérico"
-            >
-            <button
-              @click="eliminarIndicador(centroIndex, indicadorIndex)"
-              class="btn btn-outline-danger btn-sm"
-              type="button"
-              v-if="centro.indicadores.length > 1"
-            >
-              -
-            </button>
+        <div class="preview-description" v-if="datos.descripcionGeneral">
+          {{ datos.descripcionGeneral }}
+        </div>
+
+        <div 
+          v-for="(centro, index) in datos.centros.filter(c => c.nombre)" 
+          :key="index" 
+          class="preview-center"
+        >
+          <div class="preview-center-header">
+            <div class="center-number">2.2.{{ index + 1 }}</div>
+            <div class="center-title">{{ centro.nombre }}</div>
           </div>
-          <button
-            @click="agregarIndicador(centroIndex)"
-            class="btn btn-outline-secondary btn-sm"
-            type="button"
-          >
-            + Agregar Indicador
-          </button>
+
+          <div class="preview-center-content">
+            <div class="services-section">
+              <h4>Servicios</h4>
+              <ul v-if="centro.servicios.filter(s => s.trim()).length">
+                <li v-for="servicio in centro.servicios.filter(s => s.trim())" :key="servicio">
+                  • {{ servicio }}
+                </li>
+              </ul>
+            </div>
+
+            <div class="indicators-grid">
+              <div 
+                v-for="(indicador, idx) in centro.indicadores.filter(i => i.label && i.value >= 0)" 
+                :key="idx"
+                class="indicator-card"
+                :class="{ 'small-indicator': idx >= 2 }"
+              >
+                <div class="indicator-label">{{ indicador.label }}:</div>
+                <div class="indicator-value">{{ indicador.value.toLocaleString() }}</div>
+              </div>
+            </div>
+
+            <div class="center-image" v-if="centro.imageUrl">
+              <img :src="centro.imageUrl" :alt="centro.nombre" />
+            </div>
+          </div>
+        </div>
+
+        <div v-if="!datos.centros.filter(c => c.nombre).length" class="preview-empty">
+          <p>No hay centros configurados para mostrar en la vista previa.</p>
         </div>
       </div>
     </div>
-
-    <!-- Botón para añadir Centro -->
-    <button
-      @click="agregarCentro"
-      class="btn btn-secondary mt-3"
-      type="button"
-    >
-      Agregar Otro Centro
-    </button>
 
     <div class="form-actions">
       <button
@@ -179,6 +256,9 @@ const datos = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
 });
+
+// Estado de las pestañas
+const activeTab = ref('edit');
 
 // Estado del modal de imágenes
 const showImageModal = ref(false);
@@ -319,6 +399,48 @@ const esValido = computed(() => {
   margin: 0 auto;
 }
 
+/* Estilos de las pestañas */
+.tabs-container {
+  display: flex;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 2rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 1rem 2rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #6c757d;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  color: #004698;
+  background-color: #f8f9fa;
+}
+
+.tab-button.active {
+  color: #004698;
+  border-bottom-color: #004698;
+  background-color: #f8f9fa;
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .form-section {
     margin-bottom: 2rem;
     padding: 1.5rem;
@@ -414,6 +536,7 @@ textarea.form-control {
     display: flex;
     gap: 10px; /* Espacio entre etiqueta, valor y botón */
     align-items: center;
+    margin-bottom: 0.5rem;
 }
 
 .indicator-group .form-control {
@@ -537,5 +660,208 @@ textarea.form-control {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Estilos para la Vista Previa */
+.preview-section {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  font-family: 'Arial', sans-serif;
+}
+
+.preview-header {
+  color: white;
+  padding: 2rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.preview-number {
+  background: #86D4C8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color:white;
+  padding: 0.5rem;
+}
+
+.preview-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #00b4a6
+}
+
+.preview-description {
+  padding: 1.5rem 2rem;
+  color: #333;
+  line-height: 1.6;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.preview-center {
+  border-bottom: 1px solid #e9ecef;
+  background: white;
+}
+
+.preview-center:last-child {
+  border-bottom: none;
+}
+
+.preview-center-header {
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.center-number {
+  background: black;
+  color: white;
+  padding: 0.5rem 0.7rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  min-width: 60px;
+  text-align: center;
+}
+
+.center-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #00b4a6;
+  flex-grow: 1;
+  border-bottom: 1.5px solid black;
+}
+
+.preview-center-content {
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.services-section {
+  background: #00b4a61a;
+  padding: 1.5rem;
+}
+
+.services-section h4 {
+  color: #1e8981;
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.services-section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.services-section li {
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.indicator-card {
+  background: #00b4a6;
+    color: #fff;
+    padding: 0.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.indicator-card.small-indicator {
+  background: #20c997;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.indicator-label {
+  font-size: 1.1rem;
+    opacity: .9;
+    line-height: 1.2;
+}
+
+.indicator-value {
+  font-size: 2rem;
+    font-weight: 700;
+    padding: 0.5rem;
+    line-height: 1;
+}
+
+.small-indicator .indicator-value {
+  font-size: 1.5rem;
+}
+
+.center-image {
+  grid-column: 1 / -1;
+  margin-top: 2rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.center-image img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  display: block;
+}
+
+.preview-empty {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .preview-center-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .indicators-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .preview-header {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .preview-number {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .preview-title {
+    font-size: 1.4rem;
+  }
+  
+  .center-number {
+    min-width: 50px;
+    font-size: 1rem;
+  }
+  
+  .center-title {
+    font-size: 1.1rem;
+  }
 }
 </style>
