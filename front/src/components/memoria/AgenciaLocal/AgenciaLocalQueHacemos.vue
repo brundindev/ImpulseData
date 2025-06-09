@@ -155,7 +155,7 @@
         <div class="department">
           <!-- Título Líneas Estratégicas -->
           <div class="departments-section-title">
-            <h2>{{ datos?.departamentos?.length || 0 }} áreas</h2>
+            <h2 style="color: #8db4e2;">{{ datos?.departamentos?.length || 0 }} áreas</h2>
           </div>
 
         <!-- Departamentos -->
@@ -428,7 +428,7 @@ textarea.form-control {
 
 /* Vista Previa Styles */
 .preview-content {
-  background: white;
+  background: #f8f9fa;
   padding: 2rem;
   border-radius: 8px;
 }
@@ -450,7 +450,7 @@ textarea.form-control {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 2rem;
+  padding: 2rem;
 }
 
 .header-number {
@@ -476,10 +476,10 @@ textarea.form-control {
 }
 
 .description-section {
-  margin-bottom: 2rem;
   font-size: 0.95rem;
   line-height: 1.6;
   color: #333;
+  padding: 0 2rem;  
 }
 
 .description-section p {
@@ -493,12 +493,11 @@ textarea.form-control {
 
 .strategic-lines-title {
   text-align: center;
-  margin: 3rem 0 2rem 0;
+  margin: 1rem 0 2rem;
   position: relative;
 }
 
 .strategic-lines-title h2 {
-  background: rgba(139, 180, 226, 0.1);
   color: #8DB4E2;
   font-size: 2.5rem;
   font-weight: bold;
@@ -512,9 +511,9 @@ textarea.form-control {
 .strategic-lines-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-  margin-bottom: 3rem;
+  gap: 0.5rem;
   margin-top:-1.5rem;
+  padding: 2rem;
 }
 
 .strategic-line {
@@ -589,22 +588,21 @@ textarea.form-control {
 .departments-section {
   justify-content: center;
   display:grid;
-  grid-template-columns: repeat(5,1fr);
-  gap:1rem;
+  grid-template-columns: repeat(5,8.5rem);
+  gap:0.5rem;
   align-content:center;
   align-items:center;
   text-align:center;
+  margin-bottom: 2rem;
 }
 .departments-section-title{
-  background: #8bb4e21a;
     color: #8db4e2;
     font-size: 2.5rem;
     font-weight: 700;
     margin: 0;
-    padding: 1rem 2rem;
-    display: inline-block;
-    border-radius: 8px;
     letter-spacing: 7px;
+    text-align: center;
+    position: relative;
 }
 
 .department-box {
@@ -620,6 +618,7 @@ textarea.form-control {
   display: flex;
   align-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .department-content {

@@ -243,6 +243,7 @@
       </div>
     </div>
 
+    <!-- Botones de navegación -->
     <button 
         @click="$emit('anterior')" 
         class="btn btn-secondary"
@@ -250,17 +251,13 @@
       >
       Anterior
     </button>
-    
-    <!-- Botones de navegación -->
-    <div class="form-actions">
-      <button 
+    <button 
         @click="$emit('siguiente')" 
-        class="btn-primary"
-        :disabled="!esValido"
+        class="btn btn-primary"
+        
       >
-        Continuar <span class="btn-arrow">→</span>
-      </button>
-    </div>
+        Siguiente
+    </button>
   </div>
 </template>
 

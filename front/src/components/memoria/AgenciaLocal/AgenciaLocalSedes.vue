@@ -1,143 +1,228 @@
 <template>
-  <div class="form-step">
-    <h3>Dónde Estamos</h3>
-    
-    <div class="form-group">
-      <label>Sedes</label>
-      <div class="recursos-humanos">
-        <div v-for="(recurso, index) in datos.recursosHumanos" :key="index" class="recurso-item">
-          <div class="recurso-header">
-            <h4>Sede {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarSede(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.recursosHumanos.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
+  <div class="vista-previa-container">
+    <!-- Tabs de navegación -->
+    <div class="tabs-container">
+      <button 
+        :class="['tab-button', { active: activeTab === 'formulario' }]"
+        @click="activeTab = 'formulario'"
+      >
+        Formulario
+      </button>
+      <button 
+        :class="['tab-button', { active: activeTab === 'preview' }]"
+        @click="activeTab = 'preview'"
+      >
+        Vista Previa
+      </button>
+    </div>
 
-            <div class="form-group center-image-upload">
-              <label>Imagen de la sede</label>
-              <img
-                :src="recurso.imageUrl || '/placeholder-image.png'"
-                :alt="'Imagen de ' + (recurso.nombre || 'Sede')"
-                class="image-placeholder clickable-image"
-                :data-image-id="'centro-image-' + index"
-                @click="openCloudinaryModal('sede', index, recurso.imageUrl)"
-                style="width: 100%; max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
-              />
-              <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto del centro.</p>
+    <!-- Contenido del formulario -->
+    <div v-if="activeTab === 'formulario'" class="form-step">
+      <h3>Dónde Estamos</h3>
+      
+      <div class="form-group">
+        <label>Sedes</label>
+        <div class="recursos-humanos">
+          <div v-for="(sede, sedeIndex) in datos.recursosHumanos" :key="sedeIndex" class="recurso-item">
+            <div class="recurso-header">
+              <h4>Sede {{ sedeIndex + 1 }}</h4>
+              <button 
+                @click="eliminarSede(sedeIndex)" 
+                class="btn btn-danger"
+                type="button"
+                v-if="datos.recursosHumanos.length > 1"
+              >
+                Eliminar
+              </button>
             </div>
-            <label>Nombre</label>
-            <input 
-              type="text" 
-              v-model="recurso.nombre" 
-              class="form-control"
-              placeholder="Nombre de la sede"
-            >
+            
+            <div class="form-group">
+              <label>Imagen de la Sede</label>
+              <div class="form-group center-image-upload">
+                <img
+                  :src="sede.imageUrl || '/placeholder-image.png'"
+                  :alt="'Imagen de ' + (sede.nombre || 'Sede')"
+                  class="image-placeholder clickable-image"
+                  :data-image-id="'sede-image-' + sedeIndex"
+                  @click="openCloudinaryModal('sede', sedeIndex, sede.imageUrl)"
+                  style="width: 100%;height: 10rem ;max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
+                />
+                <p class="image-upload-hint" style="color: black;">Haz clic en la imagen para subir o cambiar la foto de la sede.</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Nombre</label>
+              <input 
+                type="text" 
+                v-model="sede.nombre" 
+                class="form-control"
+                placeholder="Nombre de la sede"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label>Dirección</label>
+              <input 
+                type="text" 
+                v-model="sede.direccion" 
+                class="form-control"
+                placeholder="Dirección de la sede"
+              >
+            </div>
           </div>
           
-          <div class="form-group">
-            <label>Dirección</label>
-            <input 
-              type="text" 
-              v-model="recurso.direccion" 
-              class="form-control"
-              placeholder="Dirección de la sede"
-            >
-          </div>
+          <button 
+            @click="agregarSede" 
+            class="btn btn-secondary"
+            type="button"
+          >
+            Agregar Sede
+          </button>
         </div>
-        
+      </div>
+
+      <div class="form-group">
+        <label>Red de territorios</label>
+        <div class="recursos-materiales">
+          <div v-for="(territorio, territorioIndex) in datos.recursosMateriales" :key="territorioIndex" class="recurso-item">
+            <div class="recurso-header">
+              <h4>Territorio {{ territorioIndex + 1 }}</h4>
+              <button 
+                @click="eliminarTerritorio(territorioIndex)" 
+                class="btn btn-danger"
+                type="button"
+                v-if="datos.recursosMateriales.length > 1"
+              >
+                Eliminar
+              </button>
+            </div>
+            
+            <div class="form-group">
+              <label>Imagen del Territorio</label>
+              <div class="form-group center-image-upload">
+                <img
+                  :src="territorio.imageUrl || '/placeholder-image.png'"
+                  :alt="'Imagen de ' + (territorio.nombre || 'Territorio')"
+                  class="image-placeholder clickable-image"
+                  :data-image-id="'territorio-image-' + territorioIndex"
+                  @click="openCloudinaryModal('territorio', territorioIndex, territorio.imageUrl)"
+                  style="width: 100%;height: 10rem ;max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
+                />
+                <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto del territorio.</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Nombre</label>
+              <input 
+                type="text" 
+                v-model="territorio.nombre" 
+                class="form-control"
+                placeholder="Nombre del territorio"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label>Dirección</label>
+              <input 
+                type="text" 
+                v-model="territorio.direccion" 
+                class="form-control"
+                placeholder="Dirección del territorio"
+              >
+            </div>
+          </div>
+          
+          <button 
+            @click="agregarTerritorio" 
+            class="btn btn-secondary"
+            type="button"
+          >
+            Agregar Territorio
+          </button>
+        </div>
+      </div>
+
+      <div class="form-actions">
         <button 
-          @click="agregarSede" 
+          @click="$emit('anterior')" 
           class="btn btn-secondary"
           type="button"
         >
-          Agregar Sede
+          Anterior
+        </button>
+        <button 
+          @click="guardarYFinalizar" 
+          class="btn btn-primary"
+          :disabled="!esValido"
+        >
+          Guardar y Finalizar
         </button>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Red de territorios</label>
-      <div class="recursos-materiales">
-        <div v-for="(recurso, index) in datos.recursosMateriales" :key="index" class="recurso-item">
-          <div class="recurso-header">
-            <h4>Territorio {{ index + 1 }}</h4>
-            <button 
-              @click="eliminarTerritorio(index)" 
-              class="btn btn-danger"
-              type="button"
-              v-if="datos.recursosMateriales.length > 1"
-            >
-              Eliminar
-            </button>
-          </div>
-          
-          <div class="form-group">
-            <label>Imagen del territorio</label>
-            <div class="form-group center-image-upload">
-              <img
-                :src="recurso.imageUrl || '/placeholder-image.png'"
-                :alt="'Imagen de ' + (recurso.nombre || 'Territorio')"
-                class="image-placeholder clickable-image"
-                :data-image-id="'territorio-image-' + index"
-                @click="openCloudinaryModal('territorio', index, recurso.imageUrl)"
-                style="width: 100%; max-height: 250px; object-fit: cover; cursor: pointer; border: 1px dashed #ccc; border-radius: 8px;"
-              />
-              <p class="image-upload-hint">Haz clic en la imagen para subir o cambiar la foto del territorio.</p>
-            </div>
-            <label>Nombre</label>
-            <input 
-              type="text" 
-              v-model="recurso.nombre" 
-              class="form-control"
-              placeholder="Nombre del territorio"
-            >
-          </div>
-        
-          <div class="form-group">
-            <label>Dirección</label>
-            <input 
-              type="text" 
-              v-model="recurso.direccion" 
-              class="form-control"
-              placeholder="Dirección del territorio"
-            >
-          </div>
-
+    <!-- Vista Previa -->
+    <div v-if="activeTab === 'preview'" class="preview-content">
+      <div class="preview-container">
+        <!-- Header con número de versión -->
+        <div class="preview-header">
+          <div class="version-badge">1.4</div>
+          <h2 class="preview-title">DÓNDE<br>ESTAMOS</h2>
         </div>
-        
-        <button 
-          @click="agregarTerritorio" 
-          class="btn btn-secondary"
-          type="button"
-        >
-          Agregar Territorio
-        </button>
-      </div>
-    </div>
 
+        <!-- Sección de Sedes -->
+          <div class="section-header">
+            <div class="section-title-preview">
+              <h3 class="section-title-black">sedes</h3>
+            </div>
+          </div>
+          <div class="cards-grid">
+            <div 
+              v-for="(sede, index) in datos.recursosHumanos" 
+              :key="'sede-' + index"
+              class="location-card"
+            >
+              <div class="card-image">
+                <img 
+                  :src="sede.imageUrl || '/placeholder-image.png'" 
+                  :alt="sede.nombre"
+                  class="card-img"
+                />
+              </div>
+              <div class="card-content">
+                <h4 class="card-title">{{ sede.nombre || 'Sede ' + (index + 1) }}</h4>
+                <p class="card-address">{{ sede.direccion || 'Dirección no especificada' }}</p>
+              </div>
+            </div>
+          </div>
 
-    <div class="form-actions">
-      <button 
-        @click="$emit('anterior')" 
-        class="btn btn-secondary"
-        type="button"
-      >
-        Anterior
-      </button>
-      <button 
-        @click="guardarYFinalizar" 
-        class="btn btn-primary"
-        :disabled="!esValido"
-      >
-        Guardar y Finalizar
-      </button>
+        <!-- Sección de Red de Territorios -->
+          <div class="section-header">
+            <div class="section-title-preview">
+              <h3 class="section-title-black">red de territorios</h3>
+            </div>
+          </div>
+          <div class="cards-grid">
+            <div 
+              v-for="(territorio, index) in datos.recursosMateriales" 
+              :key="'territorio-' + index"
+              class="location-card"
+            >
+              <div class="card-image">
+                <img 
+                  :src="territorio.imageUrl || '/placeholder-image.png'" 
+                  :alt="territorio.nombre"
+                  class="card-img"
+                />
+              </div>
+              <div class="card-content">
+                <h4 class="card-title">{{ territorio.nombre || 'Territorio ' + (index + 1) }}</h4>
+                <p class="card-address">{{ territorio.direccion || 'Dirección no especificada' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
 
     <!-- Modal de selección de imágenes -->
@@ -166,6 +251,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'siguiente', 'anterior', 'guardar']);
 
+// Estado para las pestañas
+const activeTab = ref('formulario');
+
 const datos = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
@@ -176,7 +264,7 @@ const showImageModal = ref(false);
 const modalTitle = ref('Seleccionar imagen');
 const currentImageId = ref(null);
 const currentIndex = ref(null);
-const currentType = ref(null); // 'sede' o 'territorio'
+const currentType = ref(null);
 
 // Inicializar datos si no existen
 if (!datos.value.recursosHumanos) {
@@ -206,7 +294,7 @@ if (!datos.value.recursosFinancieros) {
   };
 }
 
-// Método para abrir el modal de imágenes
+// Métodos del modal
 const openCloudinaryModal = (type, index, currentImageUrl) => {
   currentType.value = type;
   currentIndex.value = index;
@@ -214,7 +302,6 @@ const openCloudinaryModal = (type, index, currentImageUrl) => {
   showImageModal.value = true;
 };
 
-// Método para cerrar el modal
 const closeImageModal = () => {
   showImageModal.value = false;
   currentImageId.value = null;
@@ -222,7 +309,6 @@ const closeImageModal = () => {
   currentType.value = null;
 };
 
-// Método para manejar la selección de una imagen
 const handleImageSelect = (selectedImage) => {
   if (currentIndex.value !== null) {
     if (currentType.value === 'sede') {
@@ -234,16 +320,15 @@ const handleImageSelect = (selectedImage) => {
   closeImageModal();
 };
 
-// Método para manejar la subida de una nueva imagen
 const handleImageUpload = async () => {
   try {
-    // Aquí implementaremos la lógica de subida de imágenes
     closeImageModal();
   } catch (error) {
     console.error('Error al subir la imagen:', error);
   }
 };
 
+// Métodos para gestionar sedes
 const agregarSede = () => {
   datos.value.recursosHumanos.push({
     nombre: '',
@@ -258,6 +343,7 @@ const eliminarSede = (index) => {
   }
 };
 
+// Métodos para gestionar territorios
 const agregarTerritorio = () => {
   datos.value.recursosMateriales.push({
     nombre: '',
@@ -272,20 +358,7 @@ const eliminarTerritorio = (index) => {
   }
 };
 
-const agregarFuente = () => {
-  datos.value.recursosFinancieros.fuentes.push({
-    nombre: '',
-    importe: 0,
-    descripcion: ''
-  });
-};
-
-const eliminarFuente = (index) => {
-  if (datos.value.recursosFinancieros.fuentes.length > 1) {
-    datos.value.recursosFinancieros.fuentes.splice(index, 1);
-  }
-};
-
+// Validación
 const esValido = computed(() => {
   return datos.value.recursosHumanos.every(sede => 
     sede.nombre && sede.direccion
@@ -296,10 +369,8 @@ const esValido = computed(() => {
 });
 
 const guardarYFinalizar = () => {
-  // Guardar los datos
   emit('guardar', datos.value);
   
-  // Si todo está completo, cerrar el formulario
   if (esValido.value) {
     emit('siguiente');
   }
@@ -307,6 +378,42 @@ const guardarYFinalizar = () => {
 </script>
 
 <style scoped>
+.vista-previa-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Estilos para las pestañas */
+.tabs-container {
+  display: flex;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 2rem;
+}
+
+.tab-button {
+  padding: 1rem 2rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #6c757d;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  color: #004698;
+  background-color: #f8f9fa;
+}
+
+.tab-button.active {
+  color: #004698;
+  border-bottom-color: #004698;
+  background-color: #f8f9fa;
+}
+
+/* Estilos del formulario (mantener los originales) */
 .form-step {
   max-width: 800px;
   margin: 0 auto;
@@ -316,24 +423,21 @@ const guardarYFinalizar = () => {
   margin-bottom: 1.5rem;
 }
 
-.recurso-item,
-.fuente-item {
+.recurso-item {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
 
-.recurso-header,
-.fuente-header {
+.recurso-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.recurso-header h4,
-.fuente-header h4 {
+.recurso-header h4 {
   margin: 0;
   color: #004698;
   font-size: 1.2rem;
@@ -358,11 +462,6 @@ label {
   outline: none;
   border-color: #004698;
   box-shadow: 0 0 0 2px rgba(0, 70, 152, 0.1);
-}
-
-textarea.form-control {
-  resize: vertical;
-  min-height: 100px;
 }
 
 .btn {
@@ -405,76 +504,242 @@ textarea.form-control {
 }
 
 .center-image-upload {
-    text-align: center;
-    margin-bottom: 1.5rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
 .image-placeholder {
-    display: block;
-    margin: 0.5rem auto 0.8rem auto;
-    max-width: 100%;
-    height: auto;
-}
-
-.image-placeholder[src$="/placeholder-image.png"] {
-    background-color: #e9ecef;
-    color: #6c757d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-style: italic;
-    min-height: 150px;
-    object-fit: contain;
+  display: block;
+  margin: 0.5rem auto 0.8rem auto;
+  max-width: 100%;
+  height: auto;
 }
 
 .image-upload-hint {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
 }
 
 .clickable-image {
-    cursor: pointer;
-    transition: all 0.3s ease;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .clickable-image:hover {
-    border-color: #004698;
-    box-shadow: 0 0 10px rgba(0, 70, 152, 0.2);
-    transform: scale(1.02);
+  border-color: #004698;
+  box-shadow: 0 0 10px rgba(0, 70, 152, 0.2);
+  transform: scale(1.02);
 }
 
-:deep(.image-selector-overlay) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+/* Estilos para la vista previa */
+.preview-content {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.preview-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 3rem;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.version-badge {
+  background: #7ba7d9;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.preview-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #7ba7d9;
+  margin: 0;
+  line-height: 1.1;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgb(119, 155, 209);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  margin: -3rem 0px 0rem;
+  position: relative;
+  justify-content: center;
+}
+
+
+.section-title-preview {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title-black {
+  color: #7aa7db82;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 1rem 2rem;
+  display: inline-block;
+  border-radius: 8px;
+  letter-spacing: 2px;
+}
+
+.section-title-blue {
+  color: #779BD1;
+  font-weight: bold;
+  margin: 0;
+  font-size: 1.8rem;
+  border-bottom: 1px solid #779BD1;
+}
+
+.cards-grid {
+  padding: 1.8rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+}
+
+.location-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.location-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-image {
+  height: 200px;
+  overflow: hidden;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.location-card:hover .card-img {
+  transform: scale(1.05);
+}
+
+.card-content {
+  padding: 0.5rem;
+  text-align: center;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    background-color: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(5px);
+    flex-direction: column;
 }
 
-:deep(.image-selector-dialog) {
-    position: relative;
-    margin: auto;
-    max-height: 90vh;
-    overflow-y: auto;
-    transform: translateY(0);
-    animation: modalFadeIn 0.3s ease;
+.card-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+    color: #004698;
+    margin: 0 0 0.5rem;
+    line-height: 1.3;
+    text-align: center;
 }
 
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.card-address {
+  color: #666;
+  font-size: 0.7rem;
+  margin: 0;
+  line-height: 1.4;
 }
-</style> 
+
+.brand-symbol {
+  background: #00b8a9;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.brand-text {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  line-height: 1.2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .preview-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .preview-title {
+    font-size: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .tabs-container {
+    flex-direction: column;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .tab-button.active {
+    border-bottom: 1px solid #004698;
+  }
+}
+
+@media (max-width: 480px) {
+  .preview-container {
+    padding: 1rem;
+  }
+  
+  .brand-logo {
+    padding: 0.75rem 1.5rem;
+    gap: 0.75rem;
+  }
+  
+  .brand-symbol {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  
+  .brand-text {
+    font-size: 1rem;
+  }
+}
+</style>
