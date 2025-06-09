@@ -556,6 +556,7 @@ label {
   font-weight: bold;
   background: #8a6d57;
   width: 4rem;
+  text-align: center;
 }
 
 .stat-text {

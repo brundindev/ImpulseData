@@ -762,6 +762,8 @@ label {
   font-size: 1.8rem;
   font-weight: bold;
   background-color: #8B5CA5;
+  width: 5rem;
+  text-align: center;
 }
 
 .contracts-label {
@@ -780,16 +782,18 @@ label {
 
 .preview-contracts-table {
   background: white;
+  padding: 0 2rem 2rem;
 }
 
 .contracts-table-header {
-  background: #8C5CA6;
+  background: #c696c4;
   color: white;
   display: grid;
   grid-template-columns: 2fr 1fr 2fr;
   padding: 1rem 1.5rem;
   font-weight: 600;
   font-size: 0.9rem;
+  justify-items: center;
 }
 
 .contracts-table-row {
@@ -799,6 +803,7 @@ label {
   border-bottom: 1px solid #eee;
   font-size: 0.9rem;
   color: #333;
+  justify-items: center;
 }
 
 .contracts-table-total {
@@ -809,6 +814,7 @@ label {
   grid-template-columns: 2fr 1fr 2fr;
   padding: 0.75rem 1.5rem;
   font-size: 0.9rem;
+  justify-items: center;
 }
 
 .header-col-tipo, .row-col-tipo {
