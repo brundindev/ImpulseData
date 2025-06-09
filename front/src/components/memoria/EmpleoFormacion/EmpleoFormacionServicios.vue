@@ -309,6 +309,32 @@
             </div>
           </div>
         </div>
+
+        <!-- Subsección 2.3.2 -->
+        <div class="subsection-232">
+          <div class="subsection-header">
+            <span class="subsection-number">2.3.2</span>
+            <span class="subsection-title">Asesoramiento empresarial y al autoempleo</span>
+          </div>
+
+          <div class="asesoramiento-stats">
+            <div class="asesoramiento-item">
+              <div class="asesoramiento-icon">📋</div>
+              <div class="asesoramiento-content">
+                <div class="asesoramiento-label">Sesiones de<br>asesoramiento:</div>
+                <div class="asesoramiento-value">{{ formatNumber(datos.asesoramiento.personasAtendidas) }}</div>
+              </div>
+            </div>
+
+            <div class="asesoramiento-item">
+              <div class="asesoramiento-icon">🏢</div>
+              <div class="asesoramiento-content">
+                <div class="asesoramiento-label">Nuevas empresas y<br>altas de autónomo:</div>
+                <div class="asesoramiento-value">{{ formatNumber(datos.asesoramiento.empresasCreadas) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -535,6 +561,7 @@ const esValido = computed(() => {
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #e9ecef;
+  margin-top:1rem;
 }
 
 .subsection-number {
@@ -584,6 +611,8 @@ const esValido = computed(() => {
 .stat-value {
   font-size: 2.5rem;
   font-weight: bold;
+  -webkit-text-fill-color: white !important;
+  opacity: 1;
 }
 
 .stats-right {
@@ -923,6 +952,78 @@ const esValido = computed(() => {
   
   .form-actions {
     flex-direction: column;
+  }
+}
+
+/* Subsección 2.3.2 */
+.subsection-232 {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.asesoramiento-stats {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.asesoramiento-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  min-width: 300px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.asesoramiento-icon {
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1.5rem;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.asesoramiento-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.asesoramiento-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.asesoramiento-value {
+  font-size: 2.0rem;
+  font-weight: 700;
+  color: white;
+  background: #3ecbcd;
+  padding: 0 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .asesoramiento-stats {
+    flex-direction: column;
+  }
+  
+  .asesoramiento-item {
+    min-width: auto;
   }
 }
 </style>
