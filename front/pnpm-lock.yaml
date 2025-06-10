@@ -26,9 +26,15 @@ importers:
       firebase:
         specifier: ^11.6.0
         version: 11.7.1
+      html2canvas:
+        specifier: ^1.4.1
+        version: 1.4.1
       html2pdf.js:
         specifier: ^0.10.3
         version: 0.10.3
+      jspdf:
+        specifier: ^3.0.1
+        version: 3.0.1
       pinia:
         specifier: ^3.0.1
         version: 3.0.1(vue@3.5.13)
@@ -962,8 +968,8 @@ packages:
   caniuse-lite@1.0.30001703:
     resolution: {integrity: sha512-kRlAGTRWgPsOj7oARC9m1okJEXdL/8fekFVcxA8Hl7GH4r/sN4OJn/i6Flde373T50KS7Y37oFbMwlE8+F42kQ==}
 
-  canvg@3.0.10:
-    resolution: {integrity: sha512-qwR2FRNO9NlzTeKIPIKpnTY6fqwuYSequ8Ru8c0YkYU7U0oW+hLUvWadLvAu1Rl72OMNiFhoLu4f8eUjQ7l/+Q==}
+  canvg@3.0.11:
+    resolution: {integrity: sha512-5ON+q7jCTgMp9cjpu4Jo6XbvfYwSB2Ow3kzHKfIyJfaCAOHLbdKPQqGKgfED/R5B+3TFFfe8pegYA+b423SRyA==}
     engines: {node: '>=10.0.0'}
 
   chart.js@4.4.8:
@@ -1349,8 +1355,8 @@ packages:
   jsonfile@6.1.0:
     resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
 
-  jspdf@3.0.0:
-    resolution: {integrity: sha512-QvuQZvOI8CjfjVgtajdL0ihrDYif1cN5gXiF9lb9Pd9JOpmocvnNyFO9sdiJ/8RA5Bu8zyGOUjJLj5kiku16ug==}
+  jspdf@3.0.1:
+    resolution: {integrity: sha512-qaGIxqxetdoNnFQQXxTKUD9/Z7AloLaw94fFsOiJMxbfYdBbrBuhWmbzI8TVjrw7s3jBY1PFHofBKMV/wZPapg==}
 
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
@@ -2810,7 +2816,7 @@ snapshots:
 
   caniuse-lite@1.0.30001703: {}
 
-  canvg@3.0.10:
+  canvg@3.0.11:
     dependencies:
       '@babel/runtime': 7.26.10
       '@types/raf': 3.4.3
@@ -3159,7 +3165,7 @@ snapshots:
     dependencies:
       es6-promise: 4.2.8
       html2canvas: 1.4.1
-      jspdf: 3.0.0
+      jspdf: 3.0.1
 
   http-parser-js@0.5.9: {}
 
@@ -3235,14 +3241,14 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  jspdf@3.0.0:
+  jspdf@3.0.1:
     dependencies:
       '@babel/runtime': 7.26.10
       atob: 2.1.2
       btoa: 1.2.1
       fflate: 0.8.2
     optionalDependencies:
-      canvg: 3.0.10
+      canvg: 3.0.11
       core-js: 3.41.0
       dompurify: 3.2.4
       html2canvas: 1.4.1

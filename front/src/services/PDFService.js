@@ -1,6 +1,6 @@
 import { crearPlantillaPDF } from '../utils/PlantillaPDF';
 import html2pdf from 'html2pdf.js';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import CloudinaryService from './CloudinaryService';
 
@@ -1000,6 +1000,201 @@ class PDFService {
       return new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
     } catch (error) {
       console.error('Error al generar el PDF con imágenes:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Genera un PDF con todas las vistas previas de la memoria anual
+   */
+  async generarPDFMemoriaAnual() {
+    try {
+      const doc = new jsPDF('p', 'mm', 'a4');
+      
+      // Abrir todos los formularios
+      const botonesRellenar = document.querySelectorAll('.btn-llenar');
+      console.log('Botones de rellenar encontrados:', botonesRellenar.length);
+      
+      // Array para almacenar las promesas de apertura de formularios
+      const promesasApertura = [];
+      
+      // Hacer clic en cada botón de rellenar
+      botonesRellenar.forEach((boton, index) => {
+        console.log(`Abriendo formulario ${index + 1}`);
+        promesasApertura.push(new Promise(resolve => {
+          setTimeout(() => {
+            boton.click();
+            resolve();
+          }, index * 500); // Esperar 500ms entre cada clic
+        }));
+      });
+      
+      // Esperar a que todos los formularios se abran
+      await Promise.all(promesasApertura);
+      
+      // Esperar a que los formularios se rendericen
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Activar todas las pestañas de vista previa
+      const tabs = document.querySelectorAll('.tab');
+      console.log('Tabs encontrados:', tabs.length);
+      
+      // Array para almacenar las promesas de activación de pestañas
+      const promesasTabs = [];
+      
+      tabs.forEach((tab, index) => {
+        if (tab.textContent.includes('Vista Previa')) {
+          console.log('Activando tab de vista previa:', index);
+          promesasTabs.push(new Promise(resolve => {
+            setTimeout(() => {
+              tab.click();
+              resolve();
+            }, index * 200); // Esperar 200ms entre cada clic
+          }));
+        }
+      });
+      
+      // Esperar a que todas las pestañas se activen
+      await Promise.all(promesasTabs);
+      
+      // Esperar a que las vistas previas se rendericen
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Obtener todas las secciones de vista previa usando múltiples selectores
+      const secciones = [
+        ...document.querySelectorAll('.form-step > div:not(.tabs-container)'),
+        ...document.querySelectorAll('.preview-content'),
+        ...document.querySelectorAll('.vista-previa'),
+        ...document.querySelectorAll('[class*="preview"]')
+      ];
+      
+      // Filtrar secciones duplicadas y vacías
+      const seccionesUnicas = secciones.filter((seccion, index, self) => 
+        seccion && 
+        seccion.offsetParent !== null && // Solo elementos visibles
+        self.indexOf(seccion) === index // Eliminar duplicados
+      );
+      
+      console.log('Secciones encontradas:', seccionesUnicas.length);
+      seccionesUnicas.forEach((seccion, index) => {
+        console.log(`Sección ${index + 1}:`, {
+          className: seccion.className,
+          id: seccion.id,
+          visible: seccion.offsetParent !== null,
+          display: window.getComputedStyle(seccion).display,
+          visibility: window.getComputedStyle(seccion).visibility,
+          opacity: window.getComputedStyle(seccion).opacity
+        });
+      });
+      
+      if (!seccionesUnicas || seccionesUnicas.length === 0) {
+        console.error('No se encontraron secciones para generar el PDF');
+        throw new Error('No se encontraron secciones');
+      }
+      
+      for (let i = 0; i < seccionesUnicas.length; i++) {
+        const seccion = seccionesUnicas[i];
+        console.log(`Procesando sección ${i + 1} de ${seccionesUnicas.length}:`, seccion.className);
+        
+        // Guardar el estado original
+        const originalStyles = {
+          display: seccion.style.display,
+          visibility: seccion.style.visibility,
+          opacity: seccion.style.opacity,
+          position: seccion.style.position,
+          zIndex: seccion.style.zIndex,
+          width: seccion.style.width,
+          height: seccion.style.height,
+          margin: seccion.style.margin,
+          padding: seccion.style.padding,
+          boxSizing: seccion.style.boxSizing,
+          backgroundColor: seccion.style.backgroundColor
+        };
+        
+        // Configurar estilos para la captura
+        seccion.style.display = 'block';
+        seccion.style.visibility = 'visible';
+        seccion.style.opacity = '1';
+        seccion.style.position = 'relative';
+        seccion.style.zIndex = '9999';
+        seccion.style.width = '210mm';
+        seccion.style.height = 'auto';
+        seccion.style.margin = '0';
+        seccion.style.padding = '20mm';
+        seccion.style.boxSizing = 'border-box';
+        seccion.style.backgroundColor = 'white';
+        
+        // Esperar a que la sección se renderice
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Capturar el contenido con html2canvas
+        const canvas = await html2canvas(seccion, {
+          scale: 2,
+          useCORS: true,
+          logging: true,
+          backgroundColor: '#ffffff',
+          windowWidth: 210 * 2,
+          windowHeight: seccion.scrollHeight * 2,
+          onclone: (clonedDoc) => {
+            const style = clonedDoc.createElement('style');
+            style.textContent = `
+              .form-step, .preview-content, .vista-previa, [class*="preview"] {
+                background: white !important;
+                font-family: Arial, sans-serif !important;
+                width: 210mm !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 20mm !important;
+                box-sizing: border-box !important;
+              }
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+            `;
+            clonedDoc.head.appendChild(style);
+          }
+        });
+
+        // Convertir el canvas a imagen
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        
+        // Calcular dimensiones para mantener la proporción
+        const imgWidth = 210; // Ancho A4 en mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // Añadir nueva página si no es la primera
+        if (i > 0) {
+          doc.addPage();
+        }
+        
+        // Añadir la imagen al PDF
+        doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+        
+        // Restaurar el estado original
+        seccion.style.display = originalStyles.display;
+        seccion.style.visibility = originalStyles.visibility;
+        seccion.style.opacity = originalStyles.opacity;
+        seccion.style.position = originalStyles.position;
+        seccion.style.zIndex = originalStyles.zIndex;
+        seccion.style.width = originalStyles.width;
+        seccion.style.height = originalStyles.height;
+        seccion.style.margin = originalStyles.margin;
+        seccion.style.padding = originalStyles.padding;
+        seccion.style.boxSizing = originalStyles.boxSizing;
+        seccion.style.backgroundColor = originalStyles.backgroundColor;
+      }
+      
+      // Cerrar todos los modales
+      const botonesCerrar = document.querySelectorAll('.btn-close');
+      botonesCerrar.forEach(boton => boton.click());
+      
+      // Guardar el PDF
+      doc.save('memoria-anual.pdf');
+      
+      return true;
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
       throw error;
     }
   }

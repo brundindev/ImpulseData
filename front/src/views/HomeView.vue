@@ -346,7 +346,6 @@ import { crearPortadaSeccion } from '../services/pdfUtils';
 
 import { usePdfNavigator } from '../services/usePdfNavigator';
 import { useEmpresaViewer } from '../services/useEmpresaViewer';
-import { useWordDownloader } from '../services/useWordDownloader';
 const router = useRouter();
 const auth = getAuth();
 const usuario = ref(null);

@@ -7,6 +7,16 @@
           <h1 class="welcome-title">Memoria Anual</h1>
           <p class="welcome-subtitle">Gestión y seguimiento de la memoria anual</p>
         </div>
+        <div class="header-actions">
+          <button 
+            @click="descargarPDF" 
+            class="btn btn-primary"
+            :disabled="generandoPDF"
+          >
+            <span v-if="generandoPDF">Generando PDF...</span>
+            <span v-else>Descargar PDF</span>
+          </button>
+        </div>
       </div>
 
       <div class="secciones-grid">
@@ -187,6 +197,7 @@ import { doc, collection, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import AnimatedBackground from '../components/AnimatedBackground.vue';
 import ScrollAnimation from '../components/ScrollAnimation.vue';
+import PDFService from '../services/PDFService';
 
 // Importar estilos
 import '../assets/variables.css';
@@ -252,6 +263,9 @@ const seccionActual = ref('');
 const pasoActual = ref(0);
 const datosFormulario = ref({});
 const mostrarConfirmacion = ref(false);
+
+// Estado para controlar la generación del PDF
+const generandoPDF = ref(false);
 
 // Título del formulario actual
 const tituloFormulario = computed(() => {
@@ -492,6 +506,19 @@ const descartarFormulario = () => {
   datosFormulario.value = {};
 };
 
+// Función para descargar el PDF
+const descargarPDF = async () => {
+  try {
+    generandoPDF.value = true;
+    await PDFService.generarPDFMemoriaAnual();
+  } catch (error) {
+    console.error('Error al generar el PDF:', error);
+    alert('Error al generar el PDF. Por favor, inténtalo de nuevo.');
+  } finally {
+    generandoPDF.value = false;
+  }
+};
+
 // Agregar evento para detectar cierre del navegador
 window.addEventListener('beforeunload', (e) => {
   if (mostrarFormulario.value && Object.keys(datosFormulario.value).length > 0) {
@@ -569,6 +596,40 @@ window.addEventListener('beforeunload', (e) => {
 .welcome-subtitle {
   color: rgba(255, 255, 255, 0.9);
   font-size: 1.1rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+}
+
+.btn-primary {
+  background: #004698;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #003366;
+}
+
+.btn-primary:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
 }
 
 .secciones-grid {
