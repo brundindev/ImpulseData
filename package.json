@@ -16,7 +16,7 @@
     "cloudinary-core": "^2.13.1",
     "crypto-browserify": "^3.12.1",
     "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.1",
+    "jspdf": "^4.2.0",
     "openai": "^4.90.0",
     "uuid": "^11.1.0"
   }
